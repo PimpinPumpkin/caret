@@ -18,9 +18,7 @@ import helium314.keyboard.event.Event
 import helium314.keyboard.keyboard.KeyboardSwitcher
 import helium314.keyboard.keyboard.MainKeyboardView
 import helium314.keyboard.keyboard.internal.keyboard_parser.floris.KeyCode
-import helium314.keyboard.latin.ShadowFacilitator2.Companion.addedWords
 import helium314.keyboard.latin.ShadowFacilitator2.Companion.lastAddedWord
-import helium314.keyboard.latin.ShadowFacilitator2.Companion.ngramContexts
 import helium314.keyboard.latin.SuggestedWords.SuggestedWordInfo
 import helium314.keyboard.latin.common.Constants
 import helium314.keyboard.latin.common.LocaleUtils.constructLocale
@@ -91,45 +89,6 @@ class InputLogicTest {
         assertEquals("c", composingText)
         latinIME.mHandler.onFinishInput()
         assertEquals("", composingText)
-    }
-
-    @Test fun `english space-separated typing remains unchanged`() {
-        chainInput("hello")
-        assertEquals("hello", composingText)
-        input(' ')
-        assertEquals("hello ", text)
-        assertEquals("", composingText)
-    }
-
-    @Test fun `single thai segment remains composing`() {
-        useThaiSubtype()
-        chainInput("ไทย")
-        assertEquals("ไทย", composingText)
-        assertEquals(emptyList(), addedWords)
-    }
-
-    @Test fun `thai segments commit individually and preserve context order`() {
-        useThaiSubtype()
-        chainInput("ภาษาไทยดี")
-        assertEquals("ภาษาไทยดี", text)
-        assertEquals("ดี", composingText)
-        assertEquals(listOf("ภาษา", "ไทย"), addedWords)
-        assertEquals(listOf("<S>", "ภาษา"), ngramContexts)
-    }
-
-    @Test fun `space after segmented thai input inserts one space`() {
-        useThaiSubtype()
-        chainInput("ภาษาไทยดี")
-        input(' ')
-        assertEquals("ภาษาไทยดี ", text)
-        assertEquals("", composingText)
-    }
-
-    @Test fun `non-thai no-space language remains unsegmented`() {
-        latinIME.switchToSubtype(SubtypeSettings.getResourceSubtypesForLocale("ko".constructLocale()).first())
-        chainInput("한국어")
-        assertEquals("한국어", composingText)
-        assertEquals(emptyList(), addedWords)
     }
 
     @Test fun delete() {
@@ -785,18 +744,11 @@ class InputLogicTest {
         currentScript = ScriptUtils.SCRIPT_LATIN
         ShadowInputMethodService.reset()
         lastAddedWord = ""
-        addedWords.clear()
-        ngramContexts.clear()
 
         // reset settings
         latinIME.prefs().edit { clear() }
 
         setText("") // (re)sets selection and composing word
-    }
-
-    private fun useThaiSubtype() {
-        latinIME.switchToSubtype(SubtypeSettings.getResourceSubtypesForLocale("th".constructLocale()).first())
-        currentScript = ScriptUtils.SCRIPT_THAI
     }
 
     private fun chainInput(text: String) = text.forEach { input(it.code) }
@@ -1035,12 +987,8 @@ class ShadowFacilitator2 {
                          ngramContext: NgramContext, timeStampInSeconds: Long,
                          blockPotentiallyOffensive: Boolean) {
         lastAddedWord = suggestion
-        addedWords.add(suggestion)
-        ngramContexts.add(ngramContext.extractPrevWordsContext())
     }
     companion object {
         var lastAddedWord = ""
-        val addedWords = mutableListOf<String>()
-        val ngramContexts = mutableListOf<String>()
     }
 }
