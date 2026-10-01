@@ -58,6 +58,17 @@ well, and hands dictation to Alyo through the microphone key.
 - Models: encoder (layout agnostic), English QWERTY decoder, English context model. Other
   languages run encoder-only.
 
+## Swipe status
+
+- Works on the emulator: `scripts/build-swipe.sh`, `scripts/swipe-models.sh install`, then swipe.
+- Benchmark: `scripts/swipe-benchmark.sh` replays real swipes from FUTO's test split with Caret's
+  own word list. First result: top-1 92.3%, top-4 94.9% on 1936 swipes. The baseline is in
+  `swipe/benchmark-baseline.txt`.
+- Open: models reach the app by adb only (needs an import or download screen); the word list is
+  written and the models are loaded on the first swipe, which blocks for a few seconds; only the
+  main dictionary is used, not personal words or typing history; no setting to pick the engine yet;
+  only arm64 is built.
+
 ## Testing system
 
 1. Logic tests on the JVM (extend `InputLogicTest.kt`, `InputTest.kt`, `SuggestTest.kt`): scripted

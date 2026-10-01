@@ -19,3 +19,5 @@ tools/*.txt
 !swipe/*.patch
 app/src/main/jniLibs/
 swipe/library/
+swipe/models/
+swipe/data/
