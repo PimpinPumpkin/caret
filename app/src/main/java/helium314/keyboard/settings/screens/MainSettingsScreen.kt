@@ -16,6 +16,10 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
+import helium314.keyboard.settings.preferences.PreferenceGroup
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.height
+import androidx.compose.ui.unit.dp
 import helium314.keyboard.latin.swipe.FutoSwipe
 import helium314.keyboard.latin.R
 import helium314.keyboard.latin.utils.prefs
@@ -57,66 +61,34 @@ fun MainSettingsScreen(
             Column(
                 Modifier.verticalScroll(rememberScrollState()).then(Modifier.padding(innerPadding))
             ) {
-                Preference(
-                    name = stringResource(R.string.language_and_layouts_title),
-                    description = enabledSubtypes.joinToString(", ") { it.displayName() },
-                    onClick = onClickLanguage,
-                    icon = R.drawable.ic_settings_languages
-                ) { NextScreenIcon() }
-                Preference(
-                    name = stringResource(R.string.settings_screen_preferences),
-                    onClick = onClickPreferences,
-                    icon = R.drawable.ic_settings_preferences
-                ) { NextScreenIcon() }
-                Preference(
-                    name = stringResource(R.string.settings_screen_appearance),
-                    onClick = onClickAppearance,
-                    icon = R.drawable.ic_settings_appearance
-                ) { NextScreenIcon() }
-                Preference(
-                    name = stringResource(R.string.settings_screen_toolbar),
-                    onClick = onClickToolbar,
-                    icon = R.drawable.ic_settings_toolbar
-                ) { NextScreenIcon() }
-                if (JniUtils.sHaveGestureLib || FutoSwipe.hasLibrary())
-                    Preference(
-                        name = stringResource(R.string.settings_screen_gesture),
-                        onClick = onClickGestureTyping,
-                        icon = R.drawable.ic_settings_gesture
-                    ) { NextScreenIcon() }
+                val showGesture = JniUtils.sHaveGestureLib || FutoSwipe.hasLibrary()
                 // we don't even show the menu if data gathering phase ended more than 2 weeks ago
-                if (JniUtils.sHaveGestureLib && GestureDataGatheringSettings.isContributionEnabled(LocalContext.current.prefs())
-                    && System.currentTimeMillis() < END_DATE_EPOCH_MILLIS + TWO_WEEKS_IN_MILLIS)
-                    Preference(
-                        name = stringResource(R.string.gesture_data_screen),
-                        onClick = onClickDataGathering,
-                        icon = R.drawable.ic_settings_gesture
-                    ) { NextScreenIcon() }
-                Preference(
-                    name = stringResource(R.string.settings_screen_correction),
-                    onClick = onClickTextCorrection,
-                    icon = R.drawable.ic_settings_correction
-                ) { NextScreenIcon() }
-                Preference(
-                    name = stringResource(R.string.settings_screen_secondary_layouts),
-                    onClick = onClickLayouts,
-                    icon = R.drawable.ic_settings_layout
-                ) { NextScreenIcon() }
-                Preference(
-                    name = stringResource(R.string.dictionary_settings_category),
-                    onClick = onClickDictionaries,
-                    icon = R.drawable.ic_dictionary
-                ) { NextScreenIcon() }
-                Preference(
-                    name = stringResource(R.string.settings_screen_advanced),
-                    onClick = onClickAdvanced,
-                    icon = R.drawable.ic_settings_advanced
-                ) { NextScreenIcon() }
-                Preference(
-                    name = stringResource(R.string.settings_screen_about),
-                    onClick = onClickAbout,
-                    icon = R.drawable.ic_settings_about
-                ) { NextScreenIcon() }
+                val showDataGathering = JniUtils.sHaveGestureLib && GestureDataGatheringSettings.isContributionEnabled(LocalContext.current.prefs())
+                    && System.currentTimeMillis() < END_DATE_EPOCH_MILLIS + TWO_WEEKS_IN_MILLIS
+                @Composable
+                fun Entry(name: Int, icon: Int, description: String? = null, onClick: () -> Unit) =
+                    Preference(name = stringResource(name), description = description, onClick = onClick, icon = icon) { NextScreenIcon() }
+                Spacer(Modifier.height(8.dp))
+                PreferenceGroup(
+                    { Entry(R.string.language_and_layouts_title, R.drawable.ic_settings_languages,
+                        enabledSubtypes.joinToString(", ") { it.displayName() }, onClickLanguage) },
+                    { Entry(R.string.settings_screen_secondary_layouts, R.drawable.ic_settings_layout, onClick = onClickLayouts) },
+                    { Entry(R.string.dictionary_settings_category, R.drawable.ic_dictionary, onClick = onClickDictionaries) },
+                )
+                PreferenceGroup(
+                    { Entry(R.string.settings_screen_appearance, R.drawable.ic_settings_appearance, onClick = onClickAppearance) },
+                    { Entry(R.string.settings_screen_toolbar, R.drawable.ic_settings_toolbar, onClick = onClickToolbar) },
+                    { Entry(R.string.settings_screen_preferences, R.drawable.ic_settings_preferences, onClick = onClickPreferences) },
+                )
+                PreferenceGroup(
+                    { Entry(R.string.settings_screen_correction, R.drawable.ic_settings_correction, onClick = onClickTextCorrection) },
+                    if (showGesture) { { Entry(R.string.settings_screen_gesture, R.drawable.ic_settings_gesture, onClick = onClickGestureTyping) } } else null,
+                    if (showDataGathering) { { Entry(R.string.gesture_data_screen, R.drawable.ic_settings_gesture, onClick = onClickDataGathering) } } else null,
+                )
+                PreferenceGroup(
+                    { Entry(R.string.settings_screen_advanced, R.drawable.ic_settings_advanced, onClick = onClickAdvanced) },
+                    { Entry(R.string.settings_screen_about, R.drawable.ic_settings_about, onClick = onClickAbout) },
+                )
             }
         }
     }

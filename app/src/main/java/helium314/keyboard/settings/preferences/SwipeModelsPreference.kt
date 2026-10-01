@@ -6,6 +6,7 @@ import android.text.format.Formatter
 import androidx.compose.foundation.layout.Column
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -64,7 +65,9 @@ fun SwipeModelsPreference(onChanged: () -> Unit) {
         installed -> stringResource(R.string.swipe_models_installed)
         else -> stringResource(R.string.swipe_models_download_summary, size)
     }
+    val (upper, lower) = LocalRowPosition.current.split()
     Column {
+        CompositionLocalProvider(LocalRowPosition provides upper) {
         Preference(
             name = stringResource(if (installed) R.string.swipe_models_title_installed else R.string.swipe_models_download),
             description = status,
@@ -73,6 +76,8 @@ fun SwipeModelsPreference(onChanged: () -> Unit) {
                 else run { SwipeModels.download(ctx) { progress = it } }
             },
         )
+        }
+        CompositionLocalProvider(LocalRowPosition provides lower) {
         Preference(
             name = stringResource(R.string.swipe_models_import),
             description = stringResource(R.string.swipe_models_import_summary),
@@ -82,6 +87,7 @@ fun SwipeModelsPreference(onChanged: () -> Unit) {
                 picker.launch(intent)
             },
         )
+        }
     }
     if (confirmRemove) {
         ConfirmationDialog(

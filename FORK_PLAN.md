@@ -82,8 +82,17 @@ well, and hands dictation to Alyo through the microphone key.
   height, side handles set side padding, bottom handle sets bottom padding, with Reset and Done.
   It writes the same per-orientation preferences as the sliders in Appearance settings. The Rounded
   style now honors side padding (it ignored it upstream).
-- Open: toolbar opener icon and strip spacing, key press popup, emoji and clipboard panels,
+- The toolbar opener is a tonal button with a grid icon. Resize mode ends when the keyboard hides.
+- Open: key press popup, emoji and clipboard panels,
   symbol layouts, the settings app.
+
+## Settings status
+
+- Material 3 Expressive: Compose BOM 2026.09.00 and material3 1.5.0-alpha29 (same as Alyo), Google
+  Sans Flex type, system colors, rows drawn as grouped cards (`RowPosition`, `PreferenceGroup` in
+  `Preference.kt`), tonal icon badges on the main screen, check marks in switches.
+- Open: screens with their own lists (languages, dictionaries, colors, about) and the dialogs still
+  use stock components; expressive motion and the large collapsing title are not done.
 
 ## Testing system
 

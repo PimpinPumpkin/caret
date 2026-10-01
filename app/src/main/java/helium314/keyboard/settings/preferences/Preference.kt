@@ -1,6 +1,13 @@
 // SPDX-License-Identifier: GPL-3.0-only
 package helium314.keyboard.settings.preferences
 
+import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.runtime.compositionLocalOf
+import androidx.compose.ui.draw.clip
 import androidx.annotation.DrawableRes
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -39,15 +46,58 @@ fun PreferenceCategory(
     title: String,
     modifier: Modifier = Modifier,
 ) {
-    Column {
-        HorizontalDivider()
-        Text(
-            text = title,
-            modifier = modifier.padding(top = 12.dp, start = 16.dp, end = 8.dp, bottom = 8.dp),
-            color = MaterialTheme.colorScheme.secondary,
-            style = MaterialTheme.typography.titleSmall
-        )
+    Text(
+        text = title,
+        modifier = modifier.padding(top = 20.dp, start = 32.dp, end = 16.dp, bottom = 8.dp),
+        color = MaterialTheme.colorScheme.primary,
+        style = MaterialTheme.typography.labelLarge
+    )
+}
+
+/** Where a row sits in a block of rows, which decides its corners. */
+enum class RowPosition {
+    SINGLE, FIRST, MIDDLE, LAST;
+
+    fun shape(): RoundedCornerShape {
+        val outer = 20.dp
+        val inner = 4.dp
+        return when (this) {
+            SINGLE -> RoundedCornerShape(outer)
+            FIRST -> RoundedCornerShape(outer, outer, inner, inner)
+            MIDDLE -> RoundedCornerShape(inner)
+            LAST -> RoundedCornerShape(inner, inner, outer, outer)
+        }
     }
+
+    companion object {
+        fun of(index: Int, count: Int) = when {
+            count <= 1 -> SINGLE
+            index == 0 -> FIRST
+            index == count - 1 -> LAST
+            else -> MIDDLE
+        }
+    }
+}
+
+val LocalRowPosition = compositionLocalOf { RowPosition.SINGLE }
+
+/** Lays out rows as one block. Null entries are left out. */
+@Composable
+fun PreferenceGroup(vararg rows: (@Composable () -> Unit)?) {
+    val shown = rows.filterNotNull()
+    Column(Modifier.padding(bottom = 12.dp)) {
+        shown.forEachIndexed { index, row ->
+            CompositionLocalProvider(LocalRowPosition provides RowPosition.of(index, shown.size)) { row() }
+        }
+    }
+}
+
+/** For a setting that draws two rows itself: the positions of the upper and lower one. */
+fun RowPosition.split(): Pair<RowPosition, RowPosition> = when (this) {
+    RowPosition.SINGLE -> RowPosition.FIRST to RowPosition.LAST
+    RowPosition.FIRST -> RowPosition.FIRST to RowPosition.MIDDLE
+    RowPosition.MIDDLE -> RowPosition.MIDDLE to RowPosition.MIDDLE
+    RowPosition.LAST -> RowPosition.MIDDLE to RowPosition.LAST
 }
 
 @Composable
@@ -59,17 +109,30 @@ fun Preference(
     @DrawableRes icon: Int? = null,
     value: @Composable (RowScope.() -> Unit)? = null,
 ) {
+    // Caret: every row is a card. Rows that follow each other form one block with large outer
+    // corners and small inner ones, as in Material 3 Expressive settings.
+    val shape = LocalRowPosition.current.shape()
     Row(
         modifier = modifier
             .fillMaxWidth()
+            .padding(horizontal = 16.dp, vertical = 1.dp)
+            .clip(shape)
+            .background(MaterialTheme.colorScheme.surfaceBright)
             .clickable { onClick() }
-            .heightIn(min = 44.dp)
-            .padding(vertical = 10.dp, horizontal = 12.dp),
-        horizontalArrangement = Arrangement.spacedBy(12.dp),
+            .heightIn(min = 56.dp)
+            .padding(vertical = 12.dp, horizontal = 16.dp),
+        horizontalArrangement = Arrangement.spacedBy(16.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
         if (icon != null)
-            IconOrImage(icon, name, 32)
+            Box(
+                Modifier.size(40.dp).clip(CircleShape).background(MaterialTheme.colorScheme.secondaryContainer),
+                contentAlignment = Alignment.Center
+            ) {
+                CompositionLocalProvider(LocalContentColor provides MaterialTheme.colorScheme.onSecondaryContainer) {
+                    IconOrImage(icon, name, 24)
+                }
+            }
         Column(modifier = Modifier.weight(1f)) {
             Text(text = name, style = MaterialTheme.typography.bodyLarge)
             if (description != null) {

@@ -32,6 +32,7 @@ import androidx.compose.material3.TextField
 import androidx.compose.material3.TextFieldColors
 import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.material3.TopAppBar
+import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
@@ -53,6 +54,10 @@ import helium314.keyboard.latin.utils.BackButton
 import helium314.keyboard.latin.utils.CloseIcon
 import helium314.keyboard.latin.utils.SearchIcon
 import helium314.keyboard.settings.preferences.PreferenceCategory
+import helium314.keyboard.settings.preferences.LocalRowPosition
+import helium314.keyboard.settings.preferences.RowPosition
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.height
 
 @Composable
 fun SearchSettingsScreen(
@@ -73,18 +78,27 @@ fun SearchSettingsScreen(
                     Column(
                         Modifier.verticalScroll(rememberScrollState()).then(Modifier.padding(innerPadding))
                     ) {
-                        settings.forEach {
+                        Spacer(Modifier.height(8.dp))
+                        // Caret: rows between two category titles form one block of cards
+                        val shown = settings.filterNotNull()
+                        shown.forEachIndexed { index, it ->
                             if (it is Int) {
                                 PreferenceCategory(stringResource(it))
                             } else {
-                                // this only animates appearing prefs
-                                // a solution would be using a list(visible to key)
-                                AnimatedVisibility(visible = it != null) {
-                                    if (it != null)
-                                        SettingsActivity.settingsContainer[it]?.Preference()
+                                val first = index == 0 || shown[index - 1] is Int
+                                val last = index == shown.lastIndex || shown[index + 1] is Int
+                                val position = when {
+                                    first && last -> RowPosition.SINGLE
+                                    first -> RowPosition.FIRST
+                                    last -> RowPosition.LAST
+                                    else -> RowPosition.MIDDLE
+                                }
+                                CompositionLocalProvider(LocalRowPosition provides position) {
+                                    SettingsActivity.settingsContainer[it]?.Preference()
                                 }
                             }
                         }
+                        Spacer(Modifier.height(16.dp))
                     }
                     // lazyColumn has janky scroll for a while (not sure why compose gets smoother after a while)
                     // maybe related to unnecessary recompositions? but even for just displaying text it's there
@@ -143,7 +157,10 @@ fun <T: Any?> SearchScreen(
             ) {
                 Column {
                     TopAppBar(
-                        title = title,
+                        title = {
+                            CompositionLocalProvider(LocalTextStyle provides MaterialTheme.typography.headlineSmall) { title() }
+                        },
+                        colors = TopAppBarDefaults.topAppBarColors(containerColor = MaterialTheme.colorScheme.surfaceContainer),
                         windowInsets = WindowInsets(0),
                         navigationIcon = {
                             BackButton {

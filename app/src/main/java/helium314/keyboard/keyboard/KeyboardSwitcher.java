@@ -362,6 +362,10 @@ public final class KeyboardSwitcher {
         if (mKeyboardViewWrapper != null) mKeyboardViewWrapper.setResizeMode(true);
     }
 
+    public void stopResizeMode() {
+        if (mKeyboardViewWrapper != null) mKeyboardViewWrapper.setResizeMode(false);
+    }
+
     public void reloadKeyboard() {
         if (mCurrentInputView == null)
             return;

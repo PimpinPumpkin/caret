@@ -15,3 +15,7 @@
 
 # FUTO Swipe library: native code creates and reads these by name
 -keep class org.futo.ml.inference.** { *; }
+
+# optional classes that androidx.window looks up at runtime
+-dontwarn androidx.window.extensions.**
+-dontwarn androidx.window.sidecar.**
