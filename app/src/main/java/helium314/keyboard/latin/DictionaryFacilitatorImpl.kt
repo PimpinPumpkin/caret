@@ -535,7 +535,8 @@ class DictionaryFacilitatorImpl : DictionaryFacilitator {
                 } ?: emptyList()
             }
         }
-        val suggestions = FutoSwipe.getSuggestions(userWords, composedData, ngramContext, keyboard, group.locale, sourceDict)
+        val mainDict = group.getDict(Dictionary.TYPE_MAIN)
+        val suggestions = FutoSwipe.getSuggestions(userWords, { mainDict?.isInDictionary(it) == true }, composedData, ngramContext, keyboard, group.locale, sourceDict)
             ?: return null
         val results = SuggestionResults(SuggestedWords.MAX_SUGGESTIONS, ngramContext.isBeginningOfSentenceContext, false)
         suggestions.forEach {

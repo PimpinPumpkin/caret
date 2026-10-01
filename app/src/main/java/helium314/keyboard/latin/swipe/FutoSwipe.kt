@@ -136,6 +136,7 @@ object FutoSwipe {
     @Synchronized
     fun getSuggestions(
         userWords: () -> List<Pair<String, Int>>,
+        isMainWord: (String) -> Boolean,
         composedData: ComposedData, ngramContext: NgramContext,
         keyboard: Keyboard, locale: Locale, sourceDict: Dictionary
     ): List<SuggestedWordInfo>? {
@@ -146,7 +147,7 @@ object FutoSwipe {
         if (size < 2) return emptyList()
         val swipeLayout = prepare(context, keyboard, locale) ?: return emptyList()
         val engine = decoder ?: return emptyList()
-        refreshUserWords(context, engine, swipeLayout, locale, userWords)
+        refreshUserWords(context, engine, swipeLayout, locale, userWords, isMainWord)
 
         val xs = pointers.xCoordinates
         val ys = pointers.yCoordinates
@@ -183,7 +184,7 @@ object FutoSwipe {
      */
     private fun refreshUserWords(
         context: Context, engine: SwipeDecoder, swipeLayout: SwipeLayout, locale: Locale,
-        userWords: () -> List<Pair<String, Int>>
+        userWords: () -> List<Pair<String, Int>>, isMainWord: (String) -> Boolean
     ) {
         val now = System.currentTimeMillis()
         if (userTrieTime != 0L && now - userTrieTime < USER_WORDS_REFRESH_MILLIS) return
@@ -206,7 +207,9 @@ object FutoSwipe {
             userSurfaceForms = HashMap<String, String>().apply {
                 words.forEach { (word, _) ->
                     val alpha = buildString { word.lowercase().forEach { if (it in swipeLayout.letters) append(it) } }
-                    if (alpha != word && alpha.isNotEmpty()) put(alpha, word)
+                    // "Something" in the history must not turn every swiped "something" into a capital:
+                    // only spell a result the personal way when the plain letters are not a word themselves
+                    if (alpha != word && alpha.isNotEmpty() && !isMainWord(alpha)) put(alpha, word)
                 }
             }
         } catch (e: Exception) {
