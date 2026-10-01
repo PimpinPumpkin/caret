@@ -17,7 +17,7 @@ import kotlin.test.assertEquals
 @RunWith(RobolectricTestRunner::class)
 class XLinkTest { // Without the X, SubtypeTests fail with ClassCastException. WTF?
     @Test fun knownDictionaries() {
-        if (BuildConfig.BUILD_TYPE == "runTests") return // don't spam requests to Codeberg on every PR update
+        if (System.getenv("CARET_LINK_TESTS") == null) return // needs network, and upstream links can go stale
         val context = ApplicationProvider.getApplicationContext<App>()
         val urls = mutableSetOf<String>()
         context.assets.open("dictionaries_in_dict_repo.csv").reader().readLines().forEach { line ->
@@ -34,6 +34,7 @@ class XLinkTest { // Without the X, SubtypeTests fail with ClassCastException. W
     }
 
     @Test fun readmeLinks() {
+        if (System.getenv("CARET_LINK_TESTS") == null) return // needs network, and upstream links can go stale
         val file = File("../README.md")
         val linkRegex = "(?:https?:\\/\\/.)?(?:www\\.)?[-a-zA-Z0-9@%._\\+~#=]{2,256}\\.[a-z]{2,6}\\b(?:[-a-zA-Z0-9@:%_\\+.~#?&\\/\\/=]*)".toRegex()
         val links = linkRegex.findAll(file.readText())
@@ -44,6 +45,7 @@ class XLinkTest { // Without the X, SubtypeTests fail with ClassCastException. W
     }
 
     @Test fun layoutsLinks() {
+        if (System.getenv("CARET_LINK_TESTS") == null) return // needs network, and upstream links can go stale
         val file = File("../layouts.md")
         val linkRegex = "(?:https?:\\/\\/.)?(?:www\\.)?[-a-zA-Z0-9@%._\\+~#=]{2,256}\\.[a-z]{2,6}\\b(?:[-a-zA-Z0-9@:%_\\+.~#?&\\/\\/=]*)".toRegex()
         val links = linkRegex.findAll(file.readText())

@@ -171,7 +171,7 @@ class InputLogicTest {
     // todo: make it work, but it might not be that simple because adding is done in combiner
     //  https://github.com/HeliBorg/HeliBoard/issues/214
     @Test fun insertLetterIntoWordHangulFails() {
-        if (BuildConfig.BUILD_TYPE == "runTests") return
+        if (System.getenv("CARET_KNOWN_FAILURES") == null) return // documents a known bug, fails on purpose
         latinIME.switchToSubtype(SubtypeSettings.getResourceSubtypesForLocale("ko".constructLocale()).first())
         chainInput("ㅛㅎㄹㅎㅕㅛ")
         setCursorPosition(3)

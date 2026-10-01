@@ -51,7 +51,13 @@ object GestureDataGatheringSettings {
     fun isInActiveGatheringMode(editorInfo: EditorInfo) =
         dictTestImeOption == editorInfo.privateImeOptions && gestureDataActiveFacilitator != null
 
+    // Caret: master switch for contributing to HeliBoard's gesture data project, off by default
+    const val PREF_CONTRIBUTION_ENABLED = "gesture_data_contribution_enabled"
+
+    fun isContributionEnabled(prefs: SharedPreferences) = prefs.getBoolean(PREF_CONTRIBUTION_ENABLED, false)
+
     fun isBackgroundGatheringEnabled(prefs: SharedPreferences): Boolean {
+        if (!isContributionEnabled(prefs)) return false
         if (!prefs.getBoolean(PREF_BACKGROUND_GATHERING_ENABLED, false)) return false
         val disabledBefore = prefs.getLong(PREF_BACKGROUND_DISABLED_BEFORE_TIME_MILLIS, 0L)
         if (disabledBefore > SystemClock.elapsedRealtime() + 5 * 60 * 1000L) {
@@ -226,6 +232,7 @@ object GestureDataGatheringSettings {
 
     /** shows a toast notification if we're close to the end of the data gathering phase (at most once per 24 hours, only if there is non-exported data) */
     fun showEndNotificationIfNecessary(context: Context) {
+        if (!isContributionEnabled(context.prefs())) return
         val now = System.currentTimeMillis()
         if (now < END_DATE_EPOCH_MILLIS - TWO_WEEKS_IN_MILLIS) return
         val lastShown = context.prefs().getLong(PREF_END_NOTIFICATION_LAST_SHOWN, 0)

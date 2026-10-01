@@ -992,6 +992,8 @@ New dictionary:
 
     <!-- Title for screen to provide gesture data for library development
      string will probably be removed once data gathering is finished (end of 2026 latest) -->
+    <string name="gesture_data_contribution">Contribute gesture data to HeliBoard</string>
+    <string name="gesture_data_contribution_summary">Shows the gesture data gathering screen, where you can share swipes with HeliBoard\'s open gesture typing project. Needs a gesture typing library.</string>
     <string name="gesture_data_screen">Gesture data gathering</string>
     <!-- Descriptive text about gesture data gathering (parsed as HTML)
     string will probably be removed once data gathering is finished (end of 2026 latest) -->
