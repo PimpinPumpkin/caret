@@ -1137,9 +1137,8 @@ public class LatinIME extends InputMethodService implements
     @Override
     public void hideWindow() {
         Log.i(TAG, "hideWindow");
-        // keep the toolbar expand/collapse state across closing and reopening the keyboard; the
-        // "auto show"/"auto hide toolbar" settings still control it while typing, but closing the
-        // window no longer forces it back to the suggestion strip
+        if (hasSuggestionStripView() && mSettings.getCurrent().mToolbarMode == ToolbarMode.EXPANDABLE)
+            mSuggestionStripView.setToolbarVisibility(false);
         mKeyboardSwitcher.onHideWindow();
 
         if (TRACE) Debug.stopMethodTracing();
