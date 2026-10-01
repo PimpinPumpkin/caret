@@ -45,6 +45,15 @@
              We just need to ignore the system's audio and haptic feedback settings. -->
         <!-- todo: sth is fishy with that maxwidth
                check what is going on in the layout helper? -->
+        <!-- Caret: keys pinned to the start of the strip, used for the microphone on the left -->
+        <LinearLayout
+            android:id="@+id/pinned_keys_start"
+            android:orientation="horizontal"
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:minWidth="0dp"
+            style="?attr/suggestionWordStyle">
+        </LinearLayout>
         <LinearLayout
             android:id="@+id/suggestions_strip"
             android:orientation="horizontal"

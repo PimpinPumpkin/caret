@@ -12,6 +12,8 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
+import helium314.keyboard.settings.preferences.SliderPreference
+import helium314.keyboard.latin.suggestions.SuggestionStripView
 import helium314.keyboard.keyboard.KeyboardSwitcher
 import helium314.keyboard.latin.R
 import helium314.keyboard.latin.settings.Defaults
@@ -57,6 +59,8 @@ fun ToolbarScreen(
             ToolbarMode.EXPANDABLE, ToolbarMode.SUGGESTION_STRIP -> Settings.PREF_PINNED_TOOLBAR_KEYS
             else -> null
         },
+        if (toolbarMode == ToolbarMode.EXPANDABLE || toolbarMode == ToolbarMode.SUGGESTION_STRIP) SuggestionStripView.PREF_MIC_ON_LEFT else null,
+        if (toolbarMode == ToolbarMode.EXPANDABLE || toolbarMode == ToolbarMode.SUGGESTION_STRIP) SuggestionStripView.PREF_MIC_SIZE else null,
         if (clipboardToolbarVisible) Settings.PREF_CLIPBOARD_TOOLBAR_KEYS else null,
         if (clipboardToolbarVisible) Settings.PREF_TOOLBAR_CUSTOM_KEY_CODES else null,
         if (toolbarMode == ToolbarMode.EXPANDABLE) Settings.PREF_QUICK_PIN_TOOLBAR_KEYS else null,
@@ -73,6 +77,18 @@ fun ToolbarScreen(
 }
 
 fun createToolbarSettings(context: Context) = listOf(
+    Setting(context, SuggestionStripView.PREF_MIC_ON_LEFT, R.string.mic_on_left, R.string.mic_on_left_summary) {
+        SwitchPreference(it, false) { KeyboardSwitcher.getInstance().setThemeNeedsReload() }
+    },
+    Setting(context, SuggestionStripView.PREF_MIC_SIZE, R.string.mic_size) { def ->
+        SliderPreference(
+            name = def.title,
+            key = def.key,
+            default = SuggestionStripView.DEFAULT_MIC_SIZE,
+            range = 0.8f..1.6f,
+            description = { "${(it * 100).toInt()}%" },
+        ) { KeyboardSwitcher.getInstance().setThemeNeedsReload() }
+    },
     Setting(context, Settings.PREF_TOOLBAR_MODE, R.string.toolbar_mode) { setting ->
         val ctx = LocalContext.current
         val items =

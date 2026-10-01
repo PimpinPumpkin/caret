@@ -992,6 +992,9 @@ New dictionary:
 
     <!-- Title for screen to provide gesture data for library development
      string will probably be removed once data gathering is finished (end of 2026 latest) -->
+    <string name="mic_on_left">Microphone on the left</string>
+    <string name="mic_on_left_summary">Puts the pinned microphone key at the left end of the suggestion strip</string>
+    <string name="mic_size">Microphone size</string>
     <string name="swipe_models_download">Download swipe typing models</string>
     <string name="swipe_models_download_summary">Not installed. %s from huggingface.co. Swipe typing needs them.</string>
     <string name="swipe_models_title_installed">Swipe typing models</string>

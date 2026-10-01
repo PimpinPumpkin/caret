@@ -117,6 +117,7 @@ class SuggestionStripView(context: Context, attrs: AttributeSet?, defStyle: Int)
     private val toolbar: ViewGroup = findViewById(R.id.toolbar)
     private val toolbarContainer: View = findViewById(R.id.toolbar_container)
     private val pinnedKeys: ViewGroup = findViewById(R.id.pinned_keys)
+    private val pinnedKeysStart: ViewGroup = findViewById(R.id.pinned_keys_start)
     private val suggestionsStrip: ViewGroup = findViewById(R.id.suggestions_strip)
     private val toolbarExpandKey = findViewById<ImageButton>(R.id.suggestions_strip_toolbar_key)
     private val incognitoIcon = KeyboardIconsSet.instance.getNewDrawable(ToolbarKey.INCOGNITO.name, context)
@@ -163,9 +164,23 @@ class SuggestionStripView(context: Context, attrs: AttributeSet?, defStyle: Int)
         }
         for (pinnedKey in getPinnedToolbarKeys(context.prefs())) {
             val button = createToolbarKey(context, pinnedKey)
-            button.layoutParams = toolbarKeyLayoutParams
-            setupKey(button, colors)
-            pinnedKeys.addView(button)
+            if (pinnedKey == ToolbarKey.VOICE) {
+                // Caret: the microphone can sit at either end of the strip and has its own size
+                val scale = context.prefs().getFloat(PREF_MIC_SIZE, DEFAULT_MIC_SIZE)
+                button.layoutParams = LinearLayout.LayoutParams(
+                    (toolbarKeyLayoutParams.width * scale).toInt(), LinearLayout.LayoutParams.MATCH_PARENT
+                )
+                button.scaleX = scale
+                button.scaleY = scale
+                setupKey(button, colors)
+                (button.layoutParams as LinearLayout.LayoutParams).weight = 0f
+                if (context.prefs().getBoolean(PREF_MIC_ON_LEFT, false)) pinnedKeysStart.addView(button)
+                else pinnedKeys.addView(button)
+            } else {
+                button.layoutParams = toolbarKeyLayoutParams
+                setupKey(button, colors)
+                pinnedKeys.addView(button, pinnedKeys.childCount - if (pinnedKeys.findViewWithTag<View>(ToolbarKey.VOICE) != null) 1 else 0)
+            }
             val pinnedKeyInToolbar = toolbar.findViewWithTag<View>(pinnedKey)
             if (pinnedKeyInToolbar != null && Settings.getValues().mQuickPinToolbarKeys)
                 pinnedKeyInToolbar.background = enabledToolKeyBackground
@@ -229,6 +244,7 @@ class SuggestionStripView(context: Context, attrs: AttributeSet?, defStyle: Int)
 
     fun setToolbarVisibility(toolbarVisible: Boolean) {
         pinnedKeys.isVisible = !toolbarVisible
+        pinnedKeysStart.isVisible = !toolbarVisible
         suggestionsStrip.isVisible = !toolbarVisible
         toolbarContainer.isVisible = toolbarVisible
 
@@ -370,7 +386,7 @@ class SuggestionStripView(context: Context, attrs: AttributeSet?, defStyle: Int)
             onLongClickToolbarKey(view) { code, isRepeat -> listener.onCodeInput(code, Constants.SUGGESTION_STRIP_COORDINATE, Constants.SUGGESTION_STRIP_COORDINATE, isRepeat) }
         } else if (view.parent === toolbar) {
             AudioAndHapticFeedbackManager.getInstance().performHapticFeedback(this, HapticEvent.KEY_LONG_PRESS)
-            val pinnedKeyView = pinnedKeys.findViewWithTag<View>(tag)
+            val pinnedKeyView = pinnedKeys.findViewWithTag<View>(tag) ?: pinnedKeysStart.findViewWithTag(tag)
             if (pinnedKeyView == null) {
                 addKeyToPinnedKeys(tag)
                 toolbar.findViewWithTag<View>(tag).background = enabledToolKeyBackground
@@ -378,7 +394,7 @@ class SuggestionStripView(context: Context, attrs: AttributeSet?, defStyle: Int)
             } else {
                 removePinnedKey(context.prefs(), tag)
                 toolbar.findViewWithTag<View>(tag).background = defaultToolbarBackground.constantState?.newDrawable(resources)
-                pinnedKeys.removeView(pinnedKeyView)
+                (pinnedKeyView.parent as? ViewGroup)?.removeView(pinnedKeyView)
             }
         }
     }
@@ -504,6 +520,7 @@ class SuggestionStripView(context: Context, attrs: AttributeSet?, defStyle: Int)
         val show = Settings.getValues().mShowsVoiceInputKey
         toolbar.findViewWithTag<View>(ToolbarKey.VOICE)?.isVisible = show
         pinnedKeys.findViewWithTag<View>(ToolbarKey.VOICE)?.isVisible = show
+        pinnedKeysStart.findViewWithTag<View>(ToolbarKey.VOICE)?.isVisible = show
     }
 
     private fun updateKeys() {
@@ -521,6 +538,7 @@ class SuggestionStripView(context: Context, attrs: AttributeSet?, defStyle: Int)
 
         toolbarExpandKey.setOnClickListener(if (!toolbarIsExpandable) null else this)
         pinnedKeys.visibility = suggestionsStrip.visibility
+        pinnedKeysStart.visibility = suggestionsStrip.visibility
         isExternalSuggestionVisible = false
     }
 
@@ -552,6 +570,9 @@ class SuggestionStripView(context: Context, attrs: AttributeSet?, defStyle: Int)
         @JvmField
         var DEBUG_SUGGESTIONS = false
         private const val DEBUG_INFO_TEXT_SIZE_IN_DIP = 6.5f
+        const val PREF_MIC_ON_LEFT = "mic_on_left"
+        const val PREF_MIC_SIZE = "mic_size_scale"
+        const val DEFAULT_MIC_SIZE = 1f
         private val TAG = SuggestionStripView::class.java.simpleName
     }
 }

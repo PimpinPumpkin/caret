@@ -71,6 +71,16 @@ well, and hands dictation to Alyo through the microphone key.
   built; no unit test yet for the key position mapping; non-English runs on the encoder alone and
   is untested.
 
+## Look status
+
+- Default look is the Rounded style reshaped toward Gboard: flat 8dp keys, tinted function keys,
+  pill enter key, outlined shift arrow, emoji key, system colors on Android 12+, Google Sans Flex
+  (OFL) as the built-in font. Light and dark checked on the emulator.
+- Microphone: pinned to the strip by default, with "Microphone on the left" and "Microphone size"
+  in Toolbar settings. It only shows when a voice keyboard such as Alyo is enabled.
+- Open: toolbar opener icon and strip spacing, key press popup, emoji and clipboard panels,
+  symbol layouts, the settings app.
+
 ## Testing system
 
 1. Logic tests on the JVM (extend `InputLogicTest.kt`, `InputTest.kt`, `SuggestTest.kt`): scripted

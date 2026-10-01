@@ -227,7 +227,7 @@ class KeyboardIconsSet private constructor() {
 
         private val keyboardIconsRounded by lazy { hashMapOf(
             NAME_SHIFT_KEY to                   R.drawable.sym_keyboard_shift_rounded,
-            NAME_SHIFT_KEY_SHIFTED to           R.drawable.sym_keyboard_shift_rounded,
+            NAME_SHIFT_KEY_SHIFTED to           R.drawable.sym_keyboard_shifted_rounded,
             NAME_SHIFT_KEY_LOCKED to            R.drawable.sym_keyboard_shift_lock_rounded,
             NAME_DELETE_KEY to                  R.drawable.sym_keyboard_delete_rounded,
 //            NAME_SPACE_KEY to                   null,

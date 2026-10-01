@@ -6,6 +6,8 @@ import android.content.Context
 import android.graphics.Typeface
 import android.widget.TextView
 import androidx.compose.ui.text.font.FontFamily
+import androidx.core.content.res.ResourcesCompat
+import helium314.keyboard.latin.R
 import helium314.keyboard.latin.common.isEmoji
 import helium314.keyboard.latin.settings.Settings
 
@@ -24,6 +26,9 @@ object KeyboardTypeface {
     private fun loadCustomTypeface(context: Context): Typeface? {
         return runCatching {
             Typeface.createFromFile(Settings.getCustomFontFile(context))
+        }.getOrNull() ?: runCatching {
+            // Caret: Google Sans Flex is the font when the user has not set one
+            ResourcesCompat.getFont(context, R.font.google_sans_flex)
         }.getOrNull()
     }
 
