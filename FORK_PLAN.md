@@ -98,13 +98,17 @@ well, and hands dictation to Alyo through the microphone key.
 - Emoji: "Get emoji font from a link" in Appearance downloads a font from a link the user enters.
   Caret ships no emoji font and names no source. Not tested on a device yet.
 - List screens (languages, dictionaries, colors, personal dictionaries) use the same cards.
-- Open: the dialogs still use stock components; expressive motion and the large collapsing title are not done.
+- Dialogs: large corners, raised tone, filled main button (`ThreeButtonAlertDialog`).
+- Open: expressive motion and the large collapsing title are not done.
 
 ## Actions status
 
 - "Key next to the spacebar" in Toolbar settings: any toolbar action (default emoji). Hidden with
   the existing "Emoji key" switch.
-- Open: FUTO's favorites and overflow split; today there is the toolbar, pinned keys and this key.
+- Favorites and overflow: the toolbar holds a short list of favorites and ends with "All actions"
+  (three dots), which opens a grid of every action over the keys (`ActionsPanelView`).
+- Offensive words are not blocked by default. The switch in Text correction still exists, and the
+  swipe word list follows it.
 
 ## Testing system
 

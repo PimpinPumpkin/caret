@@ -10,6 +10,7 @@ import helium314.keyboard.latin.common.ComposedData
 import helium314.keyboard.latin.dictionary.Dictionary
 import helium314.keyboard.latin.dictionary.DictionaryFactory
 import helium314.keyboard.latin.utils.DictionaryInfoUtils
+import helium314.keyboard.latin.settings.Settings
 import helium314.keyboard.latin.utils.JniUtils
 import helium314.keyboard.latin.utils.Log
 import helium314.keyboard.latin.utils.prefs
@@ -365,7 +366,8 @@ class WordList private constructor(val file: File) {
         fun forLocale(context: Context, locale: Locale): WordList? {
             val dictFile = mainDictionaryFile(context, locale) ?: return null
             val dir = File(context.cacheDir, "swipe_words").apply { mkdirs() }
-            val out = File(dir, "${locale.toLanguageTag()}_${dictFile.length()}_${dictFile.lastModified()}.combined")
+            val blockOffensive = Settings.getValues().mBlockPotentiallyOffensive
+            val out = File(dir, "${locale.toLanguageTag()}_${dictFile.length()}_${dictFile.lastModified()}${if (blockOffensive) "_clean" else ""}.combined")
             if (out.isFile && out.length() > 0) return WordList(out)
             dir.listFiles()?.filter { it.name.startsWith("${locale.toLanguageTag()}_") }?.forEach { it.delete() }
             val dict = BinaryDictionary(dictFile.path, 0, dictFile.length(), false, locale, Dictionary.TYPE_MAIN, false)
@@ -381,7 +383,7 @@ class WordList private constructor(val file: File) {
                         val property = result.mWordProperty
                         token = result.mNextToken
                         if (property != null && property.isValid && !property.mIsNotAWord
-                            && !property.mIsBeginningOfSentence && !property.mIsPossiblyOffensive
+                            && !property.mIsBeginningOfSentence && !(blockOffensive && property.mIsPossiblyOffensive)
                             && property.mWord.none { it == ',' || it == '\n' }
                         ) {
                             writer.write(" word=${property.mWord},f=${property.mProbabilityInfo.mProbability}\n")

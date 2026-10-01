@@ -363,7 +363,15 @@ public final class KeyboardSwitcher {
     }
 
     public void stopResizeMode() {
-        if (mKeyboardViewWrapper != null) mKeyboardViewWrapper.setResizeMode(false);
+        if (mKeyboardViewWrapper != null) {
+            mKeyboardViewWrapper.setResizeMode(false);
+            mKeyboardViewWrapper.setActionsPanelShown(false);
+        }
+    }
+
+    /** Caret: shows the grid with every action over the keys. */
+    public void showActionsPanel() {
+        if (mKeyboardViewWrapper != null) mKeyboardViewWrapper.setActionsPanelShown(true);
     }
 
     public void reloadKeyboard() {

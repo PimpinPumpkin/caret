@@ -20,6 +20,7 @@ import helium314.keyboard.latin.common.Constants
 import helium314.keyboard.latin.settings.Settings
 import helium314.keyboard.latin.utils.FoldableUtils
 import helium314.keyboard.latin.utils.prefs
+import helium314.keyboard.latin.utils.onClickToolbarKey
 import kotlin.math.abs
 
 class KeyboardWrapperView @JvmOverloads constructor(
@@ -52,6 +53,27 @@ class KeyboardWrapperView @JvmOverloads constructor(
             resizeOverlay = null
             if (enabled) {
                 resizeOverlay = ResizeOverlayView(context) { resizeMode = false }.also {
+                    addView(it, LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.MATCH_PARENT))
+                }
+            }
+        }
+
+    private var actionsPanel: ActionsPanelView? = null
+
+    /** Caret: the grid of all actions, shown over the keys. */
+    var actionsPanelShown = false
+        set(shown) {
+            if (field == shown) return
+            field = shown
+            actionsPanel?.let { removeView(it) }
+            actionsPanel = null
+            if (shown) {
+                actionsPanel = ActionsPanelView(context, onAction = { view ->
+                    actionsPanelShown = false
+                    onClickToolbarKey(view) { code ->
+                        keyboardActionListener?.onCodeInput(code, Constants.SUGGESTION_STRIP_COORDINATE, Constants.SUGGESTION_STRIP_COORDINATE, false)
+                    }
+                }, onClose = { actionsPanelShown = false }).also {
                     addView(it, LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.MATCH_PARENT))
                 }
             }
@@ -179,5 +201,6 @@ class KeyboardWrapperView @JvmOverloads constructor(
         switchOneHandedModeBtn.setLayout((keyboardView.measuredHeight * 0.5f).toInt())
         resizeOneHandedModeBtn.setLayout((keyboardView.measuredHeight * 0.8f).toInt())
         resizeOverlay?.layout(0, 0, width, bottom - top)
+        actionsPanel?.layout(0, 0, width, bottom - top)
     }
 }

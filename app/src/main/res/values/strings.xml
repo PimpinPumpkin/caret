@@ -359,6 +359,8 @@
     <string name="select_word" tools:keep="@string/select_word">Select word</string>
     <string name="one_handed" tools:keep="@string/one_handed">One-handed mode</string>
     <string name="resize" tools:keep="@string/resize">Resize keyboard</string>
+    <string name="more" tools:keep="@string/more">All actions</string>
+    <string name="actions_panel_close">Close</string>
     <string name="resize_reset">Reset</string>
     <string name="resize_done">Done</string>
     <string name="split" tools:keep="@string/split">Split keyboard</string>
