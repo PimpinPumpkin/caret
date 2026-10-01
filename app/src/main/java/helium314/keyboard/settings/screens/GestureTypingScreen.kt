@@ -17,6 +17,9 @@ import helium314.keyboard.latin.utils.Log
 import helium314.keyboard.latin.utils.getActivity
 import helium314.keyboard.latin.utils.prefs
 import helium314.keyboard.settings.Setting
+import helium314.keyboard.settings.SettingsWithoutKey
+import helium314.keyboard.settings.preferences.SwipeModelsPreference
+import helium314.keyboard.latin.swipe.FutoSwipe
 import helium314.keyboard.settings.SearchSettingsScreen
 import helium314.keyboard.settings.SettingsActivity
 import helium314.keyboard.settings.preferences.SliderPreference
@@ -36,7 +39,12 @@ fun GestureTypingScreen(
         Log.v("irrelevant", "stupid way to trigger recomposition on preference change")
     val gestureFloatingPreviewEnabled = prefs.getBoolean(Settings.PREF_GESTURE_FLOATING_PREVIEW_TEXT, Defaults.PREF_GESTURE_FLOATING_PREVIEW_TEXT)
     val gestureEnabled = prefs.getBoolean(Settings.PREF_GESTURE_INPUT, Defaults.PREF_GESTURE_INPUT)
+    val ctx = LocalContext.current
+    val haveGestures = JniUtils.sHaveGestureLib
     val items = listOf(
+        if (FutoSwipe.hasLibrary()) SettingsWithoutKey.SWIPE_MODELS else null,
+        if (FutoSwipe.isInstalled(ctx) && FutoSwipe.hasOtherLibrary) FutoSwipe.PREF_ENABLED else null,
+    ) + if (!haveGestures) emptyList() else listOf(
         Settings.PREF_GESTURE_INPUT,
         if (gestureEnabled)
             Settings.PREF_GESTURE_PREVIEW_TRAIL else null,
@@ -60,6 +68,13 @@ fun GestureTypingScreen(
 }
 
 fun createGestureTypingSettings(context: Context) = listOf(
+    Setting(context, SettingsWithoutKey.SWIPE_MODELS, R.string.swipe_models_download, R.string.swipe_models_import_summary) {
+        SwipeModelsPreference { }
+    },
+    Setting(context, FutoSwipe.PREF_ENABLED, R.string.swipe_engine_futo, R.string.swipe_engine_futo_summary) {
+        val ctx = LocalContext.current
+        SwitchPreference(it, true) { FutoSwipe.refreshAvailability(ctx) }
+    },
     Setting(context, Settings.PREF_GESTURE_INPUT, R.string.gesture_input, R.string.gesture_input_summary) {
         SwitchPreference(it, Defaults.PREF_GESTURE_INPUT)
     },

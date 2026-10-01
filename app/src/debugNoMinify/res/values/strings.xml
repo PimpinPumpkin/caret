@@ -4,6 +4,6 @@
 -->
 <resources>
     <string name="english_ime_name" translatable="false">Caret debug</string>
-    <string name="spell_checker_service_name" translatable="false">HeliBoard debug Spell Checker</string>
-    <string name="ime_settings" translatable="false">HeliBoard debug Settings</string>
+    <string name="spell_checker_service_name" translatable="false">Caret debug Spell Checker</string>
+    <string name="ime_settings" translatable="false">Caret debug Settings</string>
 </resources>

@@ -16,6 +16,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
+import helium314.keyboard.latin.swipe.FutoSwipe
 import helium314.keyboard.latin.R
 import helium314.keyboard.latin.utils.prefs
 import helium314.keyboard.latin.utils.GestureDataGatheringSettings
@@ -77,7 +78,7 @@ fun MainSettingsScreen(
                     onClick = onClickToolbar,
                     icon = R.drawable.ic_settings_toolbar
                 ) { NextScreenIcon() }
-                if (JniUtils.sHaveGestureLib)
+                if (JniUtils.sHaveGestureLib || FutoSwipe.hasLibrary())
                     Preference(
                         name = stringResource(R.string.settings_screen_gesture),
                         onClick = onClickGestureTyping,

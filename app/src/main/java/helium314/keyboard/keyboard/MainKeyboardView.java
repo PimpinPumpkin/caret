@@ -306,6 +306,7 @@ public final class MainKeyboardView extends KeyboardView implements DrawingProxy
         // Remove any pending messages, except dismissing preview and key repeat.
         mTimerHandler.cancelLongPressTimers();
         super.setKeyboard(keyboard);
+        helium314.keyboard.latin.swipe.FutoSwipe.INSTANCE.warmUp(keyboard);
         mKeyDetector.setKeyboard(
                 keyboard, -getPaddingLeft(), -getPaddingTop() + getVerticalCorrection());
         PointerTracker.setKeyDetector(mKeyDetector);

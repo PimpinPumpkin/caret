@@ -27,6 +27,7 @@ import java.util.Locale
 object FutoSwipe {
     private const val TAG = "FutoSwipe"
     const val PREF_ENABLED = "futo_swipe_enabled"
+    private const val PREF_MODELS_CHANGED = "futo_swipe_models_changed"
     const val ENCODER = "honorable_sturgeon"
     const val DECODER_EN_QWERTY = "magic_macaw"
     const val CONTEXT_LM_EN = "hungry_jellyfish"
@@ -36,19 +37,56 @@ object FutoSwipe {
 
     private var libraryLoaded: Boolean? = null
     private var decoder: SwipeDecoder? = null
-    private var layoutKey: LayoutKey? = null
+    private var loadedLocale: Locale? = null
     private var layout: SwipeLayout? = null
     private var trie = 0L
     private var surfaceForms: Map<String, String> = emptyMap()
 
-    private data class LayoutKey(val keyboardHash: Int, val locale: Locale)
-
     private var appContext: Context? = null
 
-    /** Called once at app start. Swipe input is offered when the engine is installed. */
+    /** True when a gesture typing library other than this engine was loaded at app start. */
+    @JvmStatic
+    var hasOtherLibrary = false
+        private set
+
+    /** Called once at app start. */
     fun init(context: Context) {
         appContext = context.applicationContext
-        if (isInstalled(context)) JniUtils.sHaveGestureLib = true
+        hasOtherLibrary = JniUtils.sHaveGestureLib
+        refreshAvailability(context)
+    }
+
+    /** Swipe input is offered when this engine is in use or another gesture typing library is loaded. */
+    fun refreshAvailability(context: Context) {
+        JniUtils.sHaveGestureLib = hasOtherLibrary || isActive(context)
+    }
+
+    /** Call after the models were installed or removed. Drops what is loaded and reloads settings. */
+    @Synchronized
+    fun onModelsChanged(context: Context) {
+        decoder?.close()
+        decoder = null
+        if (trie != 0L) SwipeDecoder.nativeFreeTrie(trie)
+        trie = 0L
+        loadedLocale = null
+        layout = null
+        refreshAvailability(context)
+        // settings cache whether swipe input is on, a changed preference makes them reload
+        context.prefs().edit().putLong(PREF_MODELS_CHANGED, System.currentTimeMillis()).apply()
+    }
+
+    /** Loads models and dictionary for this keyboard ahead of the first swipe. */
+    fun warmUp(keyboard: Keyboard) {
+        val context = appContext ?: return
+        if (!isActive(context)) return
+        if (decoder != null && keyboard.mId.locale == loadedLocale) return // only the slow first load needs a thread
+        Thread({
+            try {
+                synchronized(this) { prepare(context, keyboard, keyboard.mId.locale) }
+            } catch (e: Throwable) {
+                Log.w(TAG, "warm up failed", e)
+            }
+        }, "FutoSwipeWarmUp").start()
     }
 
     fun modelDir(context: Context) = File(context.filesDir, "swipe_models")
@@ -64,7 +102,9 @@ object FutoSwipe {
     fun isActive(context: Context): Boolean =
         isInstalled(context) && context.prefs().getBoolean(PREF_ENABLED, true)
 
-    private fun hasLibrary(): Boolean {
+    /** True when the native library is part of this build. */
+    @JvmStatic
+    fun hasLibrary(): Boolean {
         libraryLoaded?.let { return it }
         val loaded = try {
             System.loadLibrary("swipe_jni")
@@ -127,11 +167,14 @@ object FutoSwipe {
         return words
     }
 
-    /** Loads the models and sets layout and dictionary for this keyboard. Cached per keyboard and locale. */
+    /**
+     * Loads the models and sets layout and dictionary for this keyboard. The dictionary is only
+     * reloaded when the language or the set of letters changes, the layout whenever keys moved.
+     */
     private fun prepare(context: Context, keyboard: Keyboard, locale: Locale): SwipeLayout? {
-        val key = LayoutKey(System.identityHashCode(keyboard), locale)
-        if (key == layoutKey && decoder != null) return layout
         val swipeLayout = SwipeLayout.fromKeyboard(keyboard, MAX_LETTERS) ?: return null
+        val current = layout
+        if (decoder != null && current != null && locale == loadedLocale && swipeLayout.sameAs(current)) return current
 
         val models = modelDir(context)
         val english = locale.language == "en"
@@ -149,16 +192,20 @@ object FutoSwipe {
         }
         decoder = engine
 
-        val wordList = WordList.forLocale(context, locale) ?: return null
-        if (trie != 0L) {
-            // drop the trie from the engine before freeing it
-            engine.setMode(tries = LongArray(0))
-            SwipeDecoder.nativeFreeTrie(trie)
-            trie = 0L
+        val newDictionary = trie == 0L || locale != loadedLocale || swipeLayout.letters != current?.letters
+        if (newDictionary) {
+            val wordList = WordList.forLocale(context, locale) ?: return null
+            layout = null
+            if (trie != 0L) {
+                // drop the trie from the engine before freeing it
+                engine.setMode(tries = LongArray(0))
+                SwipeDecoder.nativeFreeTrie(trie)
+                trie = 0L
+            }
+            trie = SwipeDecoder.nativeLoadTrie(wordList.file.path, swipeLayout.letters)
+            if (trie == 0L) return null
+            surfaceForms = wordList.surfaceForms(swipeLayout.letters)
         }
-        trie = SwipeDecoder.nativeLoadTrie(wordList.file.path, swipeLayout.letters)
-        if (trie == 0L) return null
-        surfaceForms = wordList.surfaceForms(swipeLayout.letters)
 
         val ok = engine.setMode(
             letters = swipeLayout.letters, cx = swipeLayout.cx, cy = swipeLayout.cy,
@@ -171,8 +218,9 @@ object FutoSwipe {
             Log.w(TAG, "setMode failed for $locale")
             return null
         }
-        Log.i(TAG, "ready for $locale, ${swipeLayout.letters.length} letters, decoder=${decoderPath.isNotEmpty()}, lm=$useLm")
-        layoutKey = key
+        if (newDictionary)
+            Log.i(TAG, "ready for $locale, ${swipeLayout.letters.length} letters, decoder=${decoderPath.isNotEmpty()}, lm=$useLm")
+        loadedLocale = locale
         layout = swipeLayout
         return swipeLayout
     }
@@ -182,6 +230,9 @@ object FutoSwipe {
 class SwipeLayout(val letters: String, val cx: FloatArray, val cy: FloatArray,
                   private val width: Float, private val top: Float, private val height: Float) {
     val isQwerty get() = letters.startsWith("qwertyuiop") && letters.length == 26
+
+    fun sameAs(other: SwipeLayout) = letters == other.letters && width == other.width && top == other.top
+        && height == other.height && cx.contentEquals(other.cx) && cy.contentEquals(other.cy)
 
     fun normalizeX(x: Int) = x / width
     fun normalizeY(y: Int) = (y - top) / height

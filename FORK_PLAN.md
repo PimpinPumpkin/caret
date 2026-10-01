@@ -64,10 +64,12 @@ well, and hands dictation to Alyo through the microphone key.
 - Benchmark: `scripts/swipe-benchmark.sh` replays real swipes from FUTO's test split with Caret's
   own word list. First result: top-1 92.3%, top-4 94.9% on 1936 swipes. The baseline is in
   `swipe/benchmark-baseline.txt`.
-- Open: models reach the app by adb only (needs an import or download screen); the word list is
-  written and the models are loaded on the first swipe, which blocks for a few seconds; only the
-  main dictionary is used, not personal words or typing history; no setting to pick the engine yet;
-  only arm64 is built.
+- Models: Gesture Typing settings has a download (from huggingface.co, checksums pinned) and a
+  zip import. Caret has the internet permission for this download only.
+- Models and dictionary load in the background when a keyboard is shown, not on the first swipe.
+- Open: only the main dictionary is used, not personal words or typing history; only arm64 is
+  built; no unit test yet for the key position mapping; non-English runs on the encoder alone and
+  is untested.
 
 ## Testing system
 

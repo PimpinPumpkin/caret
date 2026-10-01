@@ -489,6 +489,9 @@ class DictionaryFacilitatorImpl : DictionaryFacilitator {
     ): SuggestionResults {
         if (composedData.mIsBatchMode) {
             getFutoSwipeResults(composedData, ngramContext, keyboard)?.let { return it }
+            // the native code crashes on swipe input when no gesture typing library is loaded
+            if (!FutoSwipe.hasOtherLibrary)
+                return SuggestionResults(SuggestedWords.MAX_SUGGESTIONS, ngramContext.isBeginningOfSentenceContext, false)
         }
         val proximityInfoHandle = keyboard.proximityInfo.nativeProximityInfo
         val weightOfLangModelVsSpatialModel = floatArrayOf(Dictionary.NOT_A_WEIGHT_OF_LANG_MODEL_VS_SPATIAL_MODEL)
