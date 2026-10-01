@@ -527,7 +527,15 @@ class DictionaryFacilitatorImpl : DictionaryFacilitator {
     private fun getFutoSwipeResults(composedData: ComposedData, ngramContext: NgramContext, keyboard: Keyboard): SuggestionResults? {
         val group = dictionaryGroups[0]
         val sourceDict = group.getDict(Dictionary.TYPE_MAIN) ?: Dictionary.DICTIONARY_USER_TYPED
-        val suggestions = FutoSwipe.getSuggestions(composedData, ngramContext, keyboard, group.locale, sourceDict)
+        val userWords = {
+            listOf(Dictionary.TYPE_USER, Dictionary.TYPE_USER_HISTORY, Dictionary.TYPE_CONTACTS).flatMap { type ->
+                group.getSubDict(type)?.wordPropertiesForSyncing?.mapNotNull { property ->
+                    if (property == null || property.mIsNotAWord || property.mIsBeginningOfSentence) null
+                    else property.mWord to property.mProbabilityInfo.mProbability
+                } ?: emptyList()
+            }
+        }
+        val suggestions = FutoSwipe.getSuggestions(userWords, composedData, ngramContext, keyboard, group.locale, sourceDict)
             ?: return null
         val results = SuggestionResults(SuggestedWords.MAX_SUGGESTIONS, ngramContext.isBeginningOfSentenceContext, false)
         suggestions.forEach {

@@ -67,9 +67,10 @@ well, and hands dictation to Alyo through the microphone key.
 - Models: Gesture Typing settings has a download (from huggingface.co, checksums pinned) and a
   zip import. Caret has the internet permission for this download only.
 - Models and dictionary load in the background when a keyboard is shown, not on the first swipe.
-- Open: only the main dictionary is used, not personal words or typing history; only arm64 is
-  built; no unit test yet for the key position mapping; non-English runs on the encoder alone and
-  is untested.
+- Personal dictionary, typing history and contacts are a second trie, rebuilt every five minutes.
+- `SwipeLayoutTest` covers the key position mapping.
+- Open: only arm64 is built; non-English runs on the encoder alone and is untested; a made-up
+  personal word has not been swiped end to end yet.
 
 ## Look status
 
@@ -91,6 +92,8 @@ well, and hands dictation to Alyo through the microphone key.
 - Material 3 Expressive: Compose BOM 2026.09.00 and material3 1.5.0-alpha29 (same as Alyo), Google
   Sans Flex type, system colors, rows drawn as grouped cards (`RowPosition`, `PreferenceGroup` in
   `Preference.kt`), tonal icon badges on the main screen, check marks in switches.
+- Emoji: "Get emoji font from a link" in Appearance downloads a font from a link the user enters.
+  Caret ships no emoji font and names no source. Not tested on a device yet.
 - Open: screens with their own lists (languages, dictionaries, colors, about) and the dialogs still
   use stock components; expressive motion and the large collapsing title are not done.
 

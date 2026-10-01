@@ -34,12 +34,17 @@ object FutoSwipe {
     private const val MAX_LETTERS = 48 // limit of the library's trie
     private const val MAX_CONTEXT_WORDS = 8
     private const val TOP_SCORE = 1_000_000
+    private const val USER_WORDS_REFRESH_MILLIS = 5 * 60 * 1000L
+    private const val USER_WORD_MIN_FREQUENCY = 120
 
     private var libraryLoaded: Boolean? = null
     private var decoder: SwipeDecoder? = null
     private var loadedLocale: Locale? = null
     private var layout: SwipeLayout? = null
     private var trie = 0L
+    private var userTrie = 0L
+    private var userTrieTime = 0L
+    private var userSurfaceForms: Map<String, String> = emptyMap()
     private var surfaceForms: Map<String, String> = emptyMap()
 
     private var appContext: Context? = null
@@ -68,6 +73,9 @@ object FutoSwipe {
         decoder = null
         if (trie != 0L) SwipeDecoder.nativeFreeTrie(trie)
         trie = 0L
+        if (userTrie != 0L) SwipeDecoder.nativeFreeTrie(userTrie)
+        userTrie = 0L
+        userTrieTime = 0L
         loadedLocale = null
         layout = null
         refreshAvailability(context)
@@ -124,6 +132,7 @@ object FutoSwipe {
      */
     @Synchronized
     fun getSuggestions(
+        userWords: () -> List<Pair<String, Int>>,
         composedData: ComposedData, ngramContext: NgramContext,
         keyboard: Keyboard, locale: Locale, sourceDict: Dictionary
     ): List<SuggestedWordInfo>? {
@@ -134,6 +143,7 @@ object FutoSwipe {
         if (size < 2) return emptyList()
         val swipeLayout = prepare(context, keyboard, locale) ?: return emptyList()
         val engine = decoder ?: return emptyList()
+        refreshUserWords(context, engine, swipeLayout, locale, userWords)
 
         val xs = pointers.xCoordinates
         val ys = pointers.yCoordinates
@@ -151,10 +161,47 @@ object FutoSwipe {
         }
         return results.mapIndexed { index, result ->
             SuggestedWordInfo(
-                surfaceForms[result.word] ?: result.word, "", TOP_SCORE - index * 1000,
+                surfaceForms[result.word] ?: userSurfaceForms[result.word] ?: result.word, "", TOP_SCORE - index * 1000,
                 SuggestedWordInfo.KIND_CORRECTION, sourceDict,
                 SuggestedWordInfo.NOT_AN_INDEX, SuggestedWordInfo.NOT_A_CONFIDENCE
             )
+        }
+    }
+
+    /**
+     * Personal dictionary, typing history and contacts as a second, small trie. Rebuilt when the
+     * main dictionary was reloaded and otherwise every few minutes, so new words become swipeable.
+     */
+    private fun refreshUserWords(
+        context: Context, engine: SwipeDecoder, swipeLayout: SwipeLayout, locale: Locale,
+        userWords: () -> List<Pair<String, Int>>
+    ) {
+        val now = System.currentTimeMillis()
+        if (userTrieTime != 0L && now - userTrieTime < USER_WORDS_REFRESH_MILLIS) return
+        userTrieTime = now
+        try {
+            val words = userWords().filter { (word, _) -> word.length > 1 && word.none { it == ',' || it == '\n' || it == ' ' } }
+            val file = File(File(context.cacheDir, "swipe_words").apply { mkdirs() }, "user_${locale.toLanguageTag()}.combined")
+            file.bufferedWriter().use { writer ->
+                writer.write("dictionary=user:${locale.toLanguageTag()}\n")
+                // personal words should win over rare main dictionary words
+                words.forEach { (word, frequency) -> writer.write(" word=$word,f=${frequency.coerceIn(USER_WORD_MIN_FREQUENCY, 255)}\n") }
+            }
+            val newTrie = if (words.isEmpty()) 0L else SwipeDecoder.nativeLoadTrie(file.path, swipeLayout.letters)
+            val tries = if (newTrie == 0L) longArrayOf(SwipeDecoder.nativeTrieInterface(trie))
+                else longArrayOf(SwipeDecoder.nativeTrieInterface(trie), SwipeDecoder.nativeTrieInterface(newTrie))
+            engine.setMode(tries = tries)
+            if (userTrie != 0L) SwipeDecoder.nativeFreeTrie(userTrie)
+            userTrie = newTrie
+            Log.i(TAG, "personal words for swipe: ${words.size}")
+            userSurfaceForms = HashMap<String, String>().apply {
+                words.forEach { (word, _) ->
+                    val alpha = buildString { word.lowercase().forEach { if (it in swipeLayout.letters) append(it) } }
+                    if (alpha != word && alpha.isNotEmpty()) put(alpha, word)
+                }
+            }
+        } catch (e: Exception) {
+            Log.w(TAG, "could not load personal words for swipe", e)
         }
     }
 
@@ -202,6 +249,11 @@ object FutoSwipe {
                 SwipeDecoder.nativeFreeTrie(trie)
                 trie = 0L
             }
+            if (userTrie != 0L) {
+                SwipeDecoder.nativeFreeTrie(userTrie)
+                userTrie = 0L
+            }
+            userTrieTime = 0L
             trie = SwipeDecoder.nativeLoadTrie(wordList.file.path, swipeLayout.letters)
             if (trie == 0L) return null
             surfaceForms = wordList.surfaceForms(swipeLayout.letters)
@@ -209,7 +261,8 @@ object FutoSwipe {
 
         val ok = engine.setMode(
             letters = swipeLayout.letters, cx = swipeLayout.cx, cy = swipeLayout.cy,
-            tries = longArrayOf(SwipeDecoder.nativeTrieInterface(trie)),
+            tries = if (userTrie == 0L) longArrayOf(SwipeDecoder.nativeTrieInterface(trie))
+                else longArrayOf(SwipeDecoder.nativeTrieInterface(trie), SwipeDecoder.nativeTrieInterface(userTrie)),
             decoderPath = decoderPath,
             lmModelPath = if (useLm) lmFile.path else "",
             lmVocabPath = if (useLm) lmVocab.path else "",
@@ -238,17 +291,24 @@ class SwipeLayout(val letters: String, val cx: FloatArray, val cy: FloatArray,
     fun normalizeY(y: Int) = (y - top) / height
 
     companion object {
-        fun fromKeyboard(keyboard: Keyboard, maxLetters: Int): SwipeLayout? {
+        fun fromKeyboard(keyboard: Keyboard, maxLetters: Int): SwipeLayout? =
+            fromKeys(keyboard.sortedKeys.map { KeyBox(it.code, it.x, it.y, it.width, it.height) }, keyboard.mOccupiedWidth, maxLetters)
+
+        /**
+         * Letters in reading order with their centers. x runs 0..1 over the keyboard width, y runs
+         * 0..1 from the top of the first letter row to the bottom of the last one, so a number row
+         * above or a bottom row below does not shift the letters.
+         */
+        fun fromKeys(all: List<KeyBox>, keyboardWidth: Int, maxLetters: Int): SwipeLayout? {
             val seen = HashSet<Int>()
-            val keys = keyboard.sortedKeys.filter {
-                val code = it.code
-                code > 0 && Character.isLetter(code) && Character.charCount(code) == 1
-                    && seen.add(Character.toLowerCase(code))
+            val keys = all.filter {
+                it.code > 0 && Character.isLetter(it.code) && Character.charCount(it.code) == 1
+                    && seen.add(Character.toLowerCase(it.code))
             }.sortedWith(compareBy({ it.y }, { it.x }))
             if (keys.size < 2 || keys.size > maxLetters) return null
             val top = keys.minOf { it.y }.toFloat()
             val bottom = keys.maxOf { it.y + it.height }.toFloat()
-            val width = keyboard.mOccupiedWidth.toFloat()
+            val width = keyboardWidth.toFloat()
             val height = bottom - top
             if (width <= 0f || height <= 0f) return null
             val letters = String(CharArray(keys.size) { Character.toLowerCase(keys[it].code).toChar() })
@@ -261,6 +321,9 @@ class SwipeLayout(val letters: String, val cx: FloatArray, val cy: FloatArray,
         }
     }
 }
+
+/** Position and code of one key, all that [SwipeLayout] needs from a keyboard. */
+data class KeyBox(val code: Int, val x: Int, val y: Int, val width: Int, val height: Int)
 
 /** The main dictionary of a locale as a .combined word list, which is what the library's trie reads. */
 class WordList private constructor(val file: File) {

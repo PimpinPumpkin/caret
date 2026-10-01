@@ -995,6 +995,11 @@ New dictionary:
 
     <!-- Title for screen to provide gesture data for library development
      string will probably be removed once data gathering is finished (end of 2026 latest) -->
+    <string name="emoji_font_link">Get emoji font from a link</string>
+    <string name="emoji_font_link_summary">Downloads a font file from an https link you enter and uses it for the keyboard\'s emoji</string>
+    <string name="emoji_font_link_working">Downloading…</string>
+    <string name="emoji_font_link_done">Emoji font installed</string>
+    <string name="emoji_font_link_failed">Could not use that link: %s</string>
     <string name="mic_on_left">Microphone on the left</string>
     <string name="mic_on_left_summary">Puts the pinned microphone key at the left end of the suggestion strip</string>
     <string name="mic_size">Microphone size</string>

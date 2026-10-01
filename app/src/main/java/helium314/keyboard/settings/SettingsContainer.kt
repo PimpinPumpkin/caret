@@ -82,6 +82,7 @@ object SettingsWithoutKey {
     const val DEBUG_SETTINGS = "screen_debug"
     const val LOAD_GESTURE_LIB = "load_gesture_library"
     const val SWIPE_MODELS = "swipe_models"
+    const val EMOJI_FONT_LINK = "emoji_font_link"
     const val BACKGROUND_IMAGE = "background_image"
     const val BACKGROUND_IMAGE_LANDSCAPE = "background_image_landscape"
     const val CUSTOM_FONT = "custom_font"
