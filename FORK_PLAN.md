@@ -78,6 +78,10 @@ well, and hands dictation to Alyo through the microphone key.
   (OFL) as the built-in font. Light and dark checked on the emulator.
 - Microphone: pinned to the strip by default, with "Microphone on the left" and "Microphone size"
   in Toolbar settings. It only shows when a voice keyboard such as Alyo is enabled.
+- Resize: a "Resize keyboard" toolbar action puts drag handles over the keys. Top handle sets
+  height, side handles set side padding, bottom handle sets bottom padding, with Reset and Done.
+  It writes the same per-orientation preferences as the sliders in Appearance settings. The Rounded
+  style now honors side padding (it ignored it upstream).
 - Open: toolbar opener icon and strip spacing, key press popup, emoji and clipboard panels,
   symbol layouts, the settings app.
 

@@ -357,6 +357,11 @@ public final class KeyboardSwitcher {
         reloadKeyboard();
     }
 
+    /** Caret: shows the drag handles for resizing the keyboard. */
+    public void startResizeMode() {
+        if (mKeyboardViewWrapper != null) mKeyboardViewWrapper.setResizeMode(true);
+    }
+
     public void reloadKeyboard() {
         if (mCurrentInputView == null)
             return;

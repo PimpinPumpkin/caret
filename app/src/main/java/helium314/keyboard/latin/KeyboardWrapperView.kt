@@ -41,6 +41,22 @@ class KeyboardWrapperView @JvmOverloads constructor(
             requestLayout()
         }
 
+    private var resizeOverlay: ResizeOverlayView? = null
+
+    /** Caret: drag handles over the keyboard for height and padding. */
+    var resizeMode = false
+        set(enabled) {
+            if (field == enabled) return
+            field = enabled
+            resizeOverlay?.let { removeView(it) }
+            resizeOverlay = null
+            if (enabled) {
+                resizeOverlay = ResizeOverlayView(context) { resizeMode = false }.also {
+                    addView(it, LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.MATCH_PARENT))
+                }
+            }
+        }
+
     var oneHandedGravity = Gravity.NO_GRAVITY
         set(value) {
             field = value
@@ -162,5 +178,6 @@ class KeyboardWrapperView @JvmOverloads constructor(
         stopOneHandedModeBtn.setLayout((keyboardView.measuredHeight * 0.2f).toInt())
         switchOneHandedModeBtn.setLayout((keyboardView.measuredHeight * 0.5f).toInt())
         resizeOneHandedModeBtn.setLayout((keyboardView.measuredHeight * 0.8f).toInt())
+        resizeOverlay?.layout(0, 0, width, bottom - top)
     }
 }

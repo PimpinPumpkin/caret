@@ -46,8 +46,8 @@ object Defaults {
     private const val DEFAULT_SIZE_SCALE = 1.0f // 100%
     const val PREF_THEME_STYLE = KeyboardTheme.STYLE_ROUNDED
     fun PREF_ICON_STYLE(prefs: SharedPreferences) = prefs.getString(Settings.PREF_THEME_STYLE, PREF_THEME_STYLE)!!
-    val PREF_THEME_COLORS = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) KeyboardTheme.THEME_DYNAMIC else KeyboardTheme.THEME_LIGHT
-    val PREF_THEME_COLORS_NIGHT = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) KeyboardTheme.THEME_DYNAMIC else KeyboardTheme.THEME_DARK
+    val PREF_THEME_COLORS get() = systemColorsOr(KeyboardTheme.THEME_LIGHT)
+    val PREF_THEME_COLORS_NIGHT get() = systemColorsOr(KeyboardTheme.THEME_DARK)
     const val PREF_THEME_KEY_BORDERS = true
     @JvmField
     val PREF_THEME_DAY_NIGHT = Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q
@@ -194,3 +194,8 @@ object Defaults {
     const val PREF_SPELLCHECK_SUGGEST = true
     const val PREF_SHOW_ONLY_TOOLBAR_WITH_HARDWARE_KEYBOARD = false
 }
+
+// Caret: system (Material You) colors are the default where they exist.
+// Kept out of the object's initializer, where Robolectric's rewriting of SDK_INT broke class verification.
+private fun systemColorsOr(fallback: String) =
+    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) KeyboardTheme.THEME_DYNAMIC else fallback
