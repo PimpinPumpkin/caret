@@ -147,9 +147,11 @@ class DynamicColors(context: Context, override val themeStyle: String, override 
     private val spaceBarStateList: ColorStateList
     private val adjustedBackgroundStateList: ColorStateList
     private val stripBackgroundList: ColorStateList
-    // enabled toolbar toggles use the accent (same as the selected emoji category, EMOJI_CATEGORY_SELECTED
-    // -> doubleAdjustedAccent), everything else the plain key color
-    private val toolbarKeyStateList = activatedStateList(darken(darken(accent)), keyText)
+    private val toolbarKeyStateList = activatedStateList(
+        keyText,
+        if (isBrightColor(keyText)) darken(darken(keyText))
+        else brighten(brighten(keyText))
+    )
 
     /** darkened variant of [accent] because the accent color is always light for dynamic colors */
     private val adjustedAccent: Int = darken(accent)
@@ -399,9 +401,11 @@ class DefaultColors (
     private val spaceBarStateList: ColorStateList
     private val adjustedBackgroundStateList: ColorStateList
     private val stripBackgroundList: ColorStateList
-    // enabled toolbar toggles use the accent (same as the selected emoji category,
-    // EMOJI_CATEGORY_SELECTED -> accent), everything else the plain suggestion color
-    private val toolbarKeyStateList = activatedStateList(accent, suggestionText)
+    private val toolbarKeyStateList = activatedStateList(
+        suggestionText,
+        if (isBrightColor(suggestionText)) darken(darken(suggestionText))
+        else brighten(brighten(suggestionText))
+    )
     private var backgroundSetupDone = false
 
     init {

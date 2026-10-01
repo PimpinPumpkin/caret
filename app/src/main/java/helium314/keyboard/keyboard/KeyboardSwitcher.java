@@ -793,11 +793,6 @@ public final class KeyboardSwitcher {
                 && (currentSettingsValues.mInlineEmojiSearch || currentSettingsValues.mSuggestEmojis)) {
                 EmojiParserKt.loadEmojiDefaultVersionsAndPopupSpecs(mThemeContext);
             }
-
-            // the mode changed (e.g. numpad/dpad), so refresh the toolbar toggle highlights
-            if (mSuggestionStripView != null) {
-                mSuggestionStripView.updateToolbarButtonStates();
-            }
         }
     }
 }
