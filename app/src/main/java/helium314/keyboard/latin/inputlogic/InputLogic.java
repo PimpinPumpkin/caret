@@ -1503,7 +1503,6 @@ public final class InputLogic {
             } else if (inputTransaction.getSettingsValues().needsToLookupSuggestions()
                     && inputTransaction.getSettingsValues().mSpacingAndPunctuations.mCurrentLanguageHasSpaces) {
                 restartSuggestionsOnWordTouchedByCursor(inputTransaction.getSettingsValues(), currentKeyboardScript);
-                mWordComposer.setResumed(false);
             }
         }
     }
@@ -2875,9 +2874,5 @@ public final class InputLogic {
             mEmojiDictionaryFacilitator.closeDictionaries();
             mEmojiDictionaryFacilitator = null;
         }
-    }
-
-    public boolean isResumed() {
-        return mWordComposer.isResumed();
     }
 }

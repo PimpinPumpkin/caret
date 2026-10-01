@@ -137,7 +137,6 @@ public final class WordComposer {
         // should not be necessary after setting mCursorPositionWithinWord at the end of reset, but still better not crash
         if (mCursorPositionWithinWord < 0) mCursorPositionWithinWord = 0;
         else if (mCursorPositionWithinWord > mCodePointSize) mCursorPositionWithinWord = mCodePointSize;
-        mIsResumed = false;
     }
 
     /**
@@ -424,10 +423,6 @@ public final class WordComposer {
      */
     public SuggestedWordInfo getAutoCorrectionOrNull() {
         return mAutoCorrection;
-    }
-
-    public void setResumed(boolean isResumed) {
-        mIsResumed = isResumed;
     }
 
     /**
