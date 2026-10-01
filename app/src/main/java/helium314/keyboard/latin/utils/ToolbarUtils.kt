@@ -15,7 +15,6 @@ import androidx.core.view.forEach
 import helium314.keyboard.keyboard.KeyboardSwitcher
 import helium314.keyboard.event.HapticEvent
 import helium314.keyboard.keyboard.KeyboardElement
-import helium314.keyboard.keyboard.KeyboardSwitcher
 import helium314.keyboard.keyboard.internal.KeyboardIconsSet
 import helium314.keyboard.keyboard.internal.keyboard_parser.floris.KeyCode
 import helium314.keyboard.latin.AudioAndHapticFeedbackManager
