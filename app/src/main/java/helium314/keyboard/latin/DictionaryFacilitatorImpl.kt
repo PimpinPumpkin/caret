@@ -13,6 +13,7 @@ import helium314.keyboard.keyboard.Keyboard
 import helium314.keyboard.keyboard.emoji.SupportedEmojis
 import helium314.keyboard.latin.DictionaryFacilitator.DictionaryInitializationListener
 import helium314.keyboard.latin.NgramContext.WordInfo
+import helium314.keyboard.latin.swipe.FutoSwipe
 import helium314.keyboard.latin.SuggestedWords.SuggestedWordInfo
 import helium314.keyboard.latin.common.ComposedData
 import helium314.keyboard.latin.common.Constants
@@ -486,6 +487,9 @@ class DictionaryFacilitatorImpl : DictionaryFacilitator {
         composedData: ComposedData, ngramContext: NgramContext, keyboard: Keyboard,
         settingsValuesForSuggestion: SettingsValuesForSuggestion, sessionId: Int, inputStyle: Int
     ): SuggestionResults {
+        if (composedData.mIsBatchMode) {
+            getFutoSwipeResults(composedData, ngramContext, keyboard)?.let { return it }
+        }
         val proximityInfoHandle = keyboard.proximityInfo.nativeProximityInfo
         val weightOfLangModelVsSpatialModel = floatArrayOf(Dictionary.NOT_A_WEIGHT_OF_LANG_MODEL_VS_SPATIAL_MODEL)
 
@@ -514,6 +518,21 @@ class DictionaryFacilitatorImpl : DictionaryFacilitator {
         includeAtLeastTwoWordSuggestions(suggestionResults, suggestionsArray, composedData.mTypedWord)
 
         return suggestionResults
+    }
+
+    /** Swipe suggestions from the FUTO Swipe engine, or null when it is not in use. */
+    private fun getFutoSwipeResults(composedData: ComposedData, ngramContext: NgramContext, keyboard: Keyboard): SuggestionResults? {
+        val group = dictionaryGroups[0]
+        val sourceDict = group.getDict(Dictionary.TYPE_MAIN) ?: Dictionary.DICTIONARY_USER_TYPED
+        val suggestions = FutoSwipe.getSuggestions(composedData, ngramContext, keyboard, group.locale, sourceDict)
+            ?: return null
+        val results = SuggestionResults(SuggestedWords.MAX_SUGGESTIONS, ngramContext.isBeginningOfSentenceContext, false)
+        suggestions.forEach {
+            if (isBlacklisted(it.word)) return@forEach
+            results.add(it)
+            results.mRawSuggestions?.add(it)
+        }
+        return results
     }
 
     private fun getSuggestions(

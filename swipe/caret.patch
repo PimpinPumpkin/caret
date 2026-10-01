@@ -1,0 +1,106 @@
+diff --git a/Makefile b/Makefile
+index 559a2bf..ad202ec 100644
+--- a/Makefile
++++ b/Makefile
+@@ -43,6 +43,9 @@ VENV_CMAKE    := $(VENV)/bin/cmake
+ TORCH_VERSION := 2.10.0
+ TORCHGEN_PYTHON = $(VENV_PYTHON)
+ 
++# NDK prebuilt directory for the build machine
++HOST_TAG      := $(if $(filter Darwin,$(shell uname -s)),darwin-x86_64,linux-x86_64)
++
+ # --- NDK detection ---
+ NDK           := $(or $(ANDROID_NDK_HOME),$(NDK_HOME),$(shell ls -d ~/Android/Sdk/ndk/*/ 2>/dev/null | sort -V | tail -1 | sed 's:/*$$::'))
+ TOOLCHAIN     := $(NDK)/build/cmake/android.toolchain.cmake
+@@ -134,7 +137,7 @@ patch-et: $(ET_ROOT)/CMakeLists.txt
+ 			exit 1; \
+ 		fi; \
+ 	done
+-	sed -i "s/static char hexdigits\\[16\\] = \"0123456789ABCDEF\";/static char hexdigits[17] = \"0123456789ABCDEF\";/" third_party/executorch/third-party/flatcc/include/flatcc/portable/grisu3_print.h
++	sed -i.bak "s/static char hexdigits\\[16\\] = \"0123456789ABCDEF\";/static char hexdigits[17] = \"0123456789ABCDEF\";/" third_party/executorch/third-party/flatcc/include/flatcc/portable/grisu3_print.h
+ 
+ unpatch-et:
+ 	@for p in $(ET_PATCHES); do \
+@@ -143,7 +146,7 @@ unpatch-et:
+ 			git -C $(ET_ROOT) apply --reverse "../../$$p"; \
+ 		fi; \
+ 	done
+-	sed -i "s/static char hexdigits\\[17\\] = \"0123456789ABCDEF\";/static char hexdigits[16] = \"0123456789ABCDEF\";/" third_party/executorch/third-party/flatcc/include/flatcc/portable/grisu3_print.h
++	sed -i.bak "s/static char hexdigits\\[17\\] = \"0123456789ABCDEF\";/static char hexdigits[16] = \"0123456789ABCDEF\";/" third_party/executorch/third-party/flatcc/include/flatcc/portable/grisu3_print.h
+ 
+ # ===========================================================================
+ # Python venv (auto-created for ET codegen)
+@@ -363,7 +366,7 @@ lint:
+ # Android (multi-ABI: arm64-v8a, armeabi-v7a, x86_64, x86)
+ # ===========================================================================
+ 
+-LLVM_STRIP := $(NDK)/toolchains/llvm/prebuilt/linux-x86_64/bin/llvm-strip
++LLVM_STRIP := $(NDK)/toolchains/llvm/prebuilt/$(HOST_TAG)/bin/llvm-strip
+ 
+ # Common Android cmake flags
+ ANDROID_CMAKE_FLAGS = \
+@@ -443,7 +446,7 @@ push: android-$(ABI)
+ 		adb push models/$(DECODER)/$(DECODER_FILE) $(DEVICE_DIR)/$(DECODER)/; \
+ 		adb push models/$(DECODER)/metadata.json $(DEVICE_DIR)/$(DECODER)/ 2>/dev/null || true; \
+ 	fi
+-	@LIBCXX="$(NDK)/toolchains/llvm/prebuilt/linux-x86_64/sysroot/usr/lib/$(LIBCXX_DIR_$(ABI))/libc++_shared.so"; \
++	@LIBCXX="$(NDK)/toolchains/llvm/prebuilt/$(HOST_TAG)/sysroot/usr/lib/$(LIBCXX_DIR_$(ABI))/libc++_shared.so"; \
+ 		if [ -f "$$LIBCXX" ]; then adb push "$$LIBCXX" $(DEVICE_DIR)/; fi
+ 	adb shell "chmod +x $(DEVICE_DIR)/benchmark_e2e"
+ 
+diff --git a/jni/swipe_jni.cpp b/jni/swipe_jni.cpp
+index f2c968d..fcc4fa0 100644
+--- a/jni/swipe_jni.cpp
++++ b/jni/swipe_jni.cpp
+@@ -4,6 +4,7 @@
+ 
+ #include "swipe_decoder/engine.hpp"
+ #include "swipe_decoder/unicode_case.hpp"
++#include "swipe_decoder/trie.hpp"
+ 
+ #include <jni.h>
+ #include <android/log.h>
+@@ -392,6 +393,43 @@ Java_org_futo_ml_inference_SwipeDecoder_nativeSetCaseMapping(
+     if (to)   env->ReleaseIntArrayElements(toArray,   to,   JNI_ABORT);
+ }
+ 
++// --- Caret additions: build the library's own trie from a .combined word list ---
++
++// Returns a Trie* (0 on failure). The letters must match the layout passed to setMode.
++JNIEXPORT jlong JNICALL
++Java_org_futo_ml_inference_SwipeDecoder_nativeLoadTrie(
++    JNIEnv* env, jclass /* clazz */, jstring path, jstring letters
++) {
++    const std::string p = jstr_or_empty(env, path);
++    const std::string l = jstr_or_empty(env, letters);
++    ParsedCombined combined;
++    if (!parse_combined_vocab(p, "f", combined)) {
++        LOGE("nativeLoadTrie: cannot read %s", p.c_str());
++        return 0;
++    }
++    Trie* trie = l.empty() ? new Trie() : new Trie(l);
++    apply_parsed_to_trie(combined, *trie);
++    LOGI("nativeLoadTrie: %zu words from %s", trie->size(), p.c_str());
++    return static_cast<jlong>(reinterpret_cast<uintptr_t>(trie));
++}
++
++// Returns the ITrie* to pass in setMode's tries array. Valid until nativeFreeTrie.
++JNIEXPORT jlong JNICALL
++Java_org_futo_ml_inference_SwipeDecoder_nativeTrieInterface(
++    JNIEnv* /* env */, jclass /* clazz */, jlong handle
++) {
++    auto* trie = reinterpret_cast<Trie*>(static_cast<uintptr_t>(handle));
++    if (!trie) return 0;
++    return static_cast<jlong>(reinterpret_cast<uintptr_t>(trie->itrie()));
++}
++
++JNIEXPORT void JNICALL
++Java_org_futo_ml_inference_SwipeDecoder_nativeFreeTrie(
++    JNIEnv* /* env */, jclass /* clazz */, jlong handle
++) {
++    delete reinterpret_cast<Trie*>(static_cast<uintptr_t>(handle));
++}
++
+ JNIEXPORT void JNICALL
+ Java_org_futo_ml_inference_SwipeDecoder_nativeDestroy(
+     JNIEnv* /* env */, jobject /* obj */, jlong handle

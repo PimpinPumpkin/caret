@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: Apache-2.0 AND GPL-3.0-only
 package helium314.keyboard.latin
 
+import helium314.keyboard.latin.swipe.FutoSwipe
 import android.app.Application
 import android.os.Build
 import helium314.keyboard.keyboard.emoji.SupportedEmojis
@@ -44,6 +45,7 @@ class App : Application() {
             upgradeToolbarPrefs(prefs())
         transferOldPinnedClips(this) // todo: remove in a few months, maybe end 2026
         app = this
+        FutoSwipe.init(this) // after app is set, because this loads JniUtils, which reads app once
         Defaults.initDynamicDefaults(this)
     }
 
