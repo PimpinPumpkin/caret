@@ -43,6 +43,12 @@ well, and hands dictation to Alyo through the microphone key.
 ## Swipe integration
 
 - Entry point for gesture suggestions: `getSuggestedWordsForBatchInput` in `Suggest.kt`.
+- Shape of the adapter: a `Dictionary` subclass that only answers batch (swipe) input. It turns
+  `InputPointers` plus the key centers of the current `Keyboard` into normalized points, calls the
+  library's `SwipeDecoder`, and returns `SuggestedWordInfo` items. Registered next to the other
+  dictionaries in the facilitator, so capitalization, next-word handling and the strip stay as is.
+- Building the library on macOS needs cmake 3.29+, the ExecuTorch submodule, and Makefile paths
+  changed from `linux-x86_64` to the host NDK prebuilt directory.
 - Engine choice setting: FUTO library (default), user-imported Google library, off. Leave room for
   HeliBoard's own NLnet-funded library when it ships.
 - The library wants normalized 0..1 coordinates with millisecond timestamps, a layout description
