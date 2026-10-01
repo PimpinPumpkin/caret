@@ -69,7 +69,10 @@ well, and hands dictation to Alyo through the microphone key.
 - Models and dictionary load in the background when a keyboard is shown, not on the first swipe.
 - Personal dictionary, typing history and contacts are a second trie, rebuilt every five minutes.
 - `SwipeLayoutTest` covers the key position mapping.
-- Open: only arm64 is built; non-English runs on the encoder alone and is untested; a made-up
+- Built for arm64, 32-bit ARM and x86_64 (`scripts/build-swipe.sh arm64-v8a armeabi-v7a x86_64`).
+- Candidate scores keep the engine's gaps, so Suggest's "prefer a word typed before in this
+  context" rule cannot promote a clearly worse candidate.
+- Open: non-English runs on the encoder alone and is untested; a made-up
   personal word has not been swiped end to end yet.
 
 ## Look status
@@ -94,10 +97,20 @@ well, and hands dictation to Alyo through the microphone key.
   `Preference.kt`), tonal icon badges on the main screen, check marks in switches.
 - Emoji: "Get emoji font from a link" in Appearance downloads a font from a link the user enters.
   Caret ships no emoji font and names no source. Not tested on a device yet.
-- Open: screens with their own lists (languages, dictionaries, colors, about) and the dialogs still
-  use stock components; expressive motion and the large collapsing title are not done.
+- List screens (languages, dictionaries, colors, personal dictionaries) use the same cards.
+- Open: the dialogs still use stock components; expressive motion and the large collapsing title are not done.
+
+## Actions status
+
+- "Key next to the spacebar" in Toolbar settings: any toolbar action (default emoji). Hidden with
+  the existing "Emoji key" switch.
+- Open: FUTO's favorites and overflow split; today there is the toolbar, pinned keys and this key.
 
 ## Testing system
+
+- `scripts/smoke.sh`: installs on the caret_phone emulator, taps and swipes words, compares the
+  text field, checks the log for crashes. `scripts/keys.py` holds the key positions.
+
 
 1. Logic tests on the JVM (extend `InputLogicTest.kt`, `InputTest.kt`, `SuggestTest.kt`): scripted
    key and swipe events against a fake text field, including fields that misbehave (slow replies,

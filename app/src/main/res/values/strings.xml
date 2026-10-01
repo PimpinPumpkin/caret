@@ -1000,6 +1000,8 @@ New dictionary:
     <string name="emoji_font_link_working">Downloading…</string>
     <string name="emoji_font_link_done">Emoji font installed</string>
     <string name="emoji_font_link_failed">Could not use that link: %s</string>
+    <string name="action_key">Key next to the spacebar</string>
+    <string name="action_key_summary">Any toolbar action. Hide it with "Emoji key" in Preferences.</string>
     <string name="mic_on_left">Microphone on the left</string>
     <string name="mic_on_left_summary">Puts the pinned microphone key at the left end of the suggestion strip</string>
     <string name="mic_size">Microphone size</string>

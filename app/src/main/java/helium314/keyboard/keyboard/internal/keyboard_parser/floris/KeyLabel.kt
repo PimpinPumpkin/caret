@@ -1,6 +1,7 @@
 package helium314.keyboard.keyboard.internal.keyboard_parser.floris
 
 import android.view.inputmethod.EditorInfo
+import helium314.keyboard.latin.utils.prefs
 import helium314.keyboard.keyboard.KeyboardElement
 import helium314.keyboard.keyboard.internal.KeyboardCodesSet
 import helium314.keyboard.keyboard.internal.KeyboardIconsSet
@@ -46,7 +47,18 @@ object KeyLabel {
 
     /** to make sure a FlorisBoard label works when reading a JSON layout */
     // resulting special labels should be names of FunctionalKey enum, case insensitive
+    /** Caret: the key next to the spacebar. Which toolbar action it is comes from a preference. */
+    const val ACTION_KEY = "caret_action"
+    const val PREF_ACTION_KEY = "action_key"
+    const val DEFAULT_ACTION_KEY = "emoji"
+
+    private fun actionKeyLabel(): String {
+        val chosen = Settings.getCurrentContext()?.prefs()?.getString(PREF_ACTION_KEY, DEFAULT_ACTION_KEY) ?: DEFAULT_ACTION_KEY
+        return if (chosen in toolbarKeyStrings.values) chosen else DEFAULT_ACTION_KEY
+    }
+
     fun String.convertFlorisLabel(): String = when (this) {
+        ACTION_KEY -> actionKeyLabel()
         "view_characters" -> ALPHA
         "view_symbols" -> SYMBOL
         "view_numeric_advanced" -> NUMPAD

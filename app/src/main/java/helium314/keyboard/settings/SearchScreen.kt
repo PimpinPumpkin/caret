@@ -1,6 +1,9 @@
 // SPDX-License-Identifier: GPL-3.0-only
 package helium314.keyboard.settings
 
+import androidx.compose.foundation.background
+import androidx.compose.foundation.lazy.itemsIndexed
+import androidx.compose.ui.draw.clip
 import androidx.activity.compose.BackHandler
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.layout.Box
@@ -120,7 +123,8 @@ fun SearchSettingsScreen(
             }
         },
         filteredItems = { SettingsActivity.settingsContainer.filter(it) },
-        itemContent = { it.Preference() }
+        itemContent = { it.Preference() },
+        cardItems = false
     )
 }
 
@@ -133,6 +137,7 @@ fun <T: Any?> SearchScreen(
     itemContent: @Composable (T) -> Unit,
     icon: @Composable (() -> Unit)? = null,
     menu: List<Pair<String, () -> Unit>>? = null,
+    cardItems: Boolean = true, // false when the items draw their own cards
     content: @Composable (ColumnScope.() -> Unit)? = null,
 ) {
     // searchText and showSearch should have the same remember or rememberSaveable
@@ -217,10 +222,21 @@ fun <T: Any?> SearchScreen(
                     Scaffold(
                         contentWindowInsets = WindowInsets.safeDrawing.only(WindowInsetsSides.Bottom)
                     ) { innerPadding ->
+                        // Caret: list rows are cards in one block, like the setting rows
                         LazyColumn(contentPadding = innerPadding) {
-                            items(items) {
-                                itemContent(it)
+                            item { Spacer(Modifier.height(8.dp)) }
+                            itemsIndexed(items) { index, item ->
+                                val position = RowPosition.of(index, items.size)
+                                if (cardItems) {
+                                    Box(
+                                        Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 1.dp)
+                                            .clip(position.shape()).background(MaterialTheme.colorScheme.surfaceBright)
+                                    ) { itemContent(item) }
+                                } else {
+                                    CompositionLocalProvider(LocalRowPosition provides position) { itemContent(item) }
+                                }
                             }
+                            item { Spacer(Modifier.height(16.dp)) }
                         }
                     }
                 }

@@ -12,6 +12,10 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
+import helium314.keyboard.latin.utils.getCodeForToolbarKey
+import helium314.keyboard.latin.utils.ToolbarKey
+import helium314.keyboard.keyboard.internal.keyboard_parser.floris.KeyCode
+import helium314.keyboard.keyboard.internal.keyboard_parser.floris.KeyLabel
 import helium314.keyboard.settings.preferences.SliderPreference
 import helium314.keyboard.latin.suggestions.SuggestionStripView
 import helium314.keyboard.keyboard.KeyboardSwitcher
@@ -48,6 +52,7 @@ fun ToolbarScreen(
     val clipboardToolbarVisible = toolbarMode != ToolbarMode.HIDDEN
         || !prefs.getBoolean(Settings.PREF_TOOLBAR_HIDING_GLOBAL, Defaults.PREF_TOOLBAR_HIDING_GLOBAL)
     val items = listOf(
+        KeyLabel.PREF_ACTION_KEY,
         Settings.PREF_TOOLBAR_MODE,
         if (toolbarMode == ToolbarMode.HIDDEN) Settings.PREF_TOOLBAR_HIDING_GLOBAL else null,
         if (toolbarMode != ToolbarMode.HIDDEN) Settings.PREF_TOOLBAR_SWIPE_DOWN_TO_HIDE else null,
@@ -77,6 +82,16 @@ fun ToolbarScreen(
 }
 
 fun createToolbarSettings(context: Context) = listOf(
+    Setting(context, KeyLabel.PREF_ACTION_KEY, R.string.action_key, R.string.action_key_summary) { setting ->
+        val ctx = LocalContext.current
+        // every toolbar action that works as a key
+        val items = ToolbarKey.entries
+            .filter { getCodeForToolbarKey(it) != KeyCode.UNSPECIFIED && it != ToolbarKey.CLOSE_HISTORY && it != ToolbarKey.BACKGROUND_GATHERING }
+            .map { it.name.lowercase().getStringResourceOrName("", ctx) to it.name.lowercase() }
+        ListPreference(setting, items, KeyLabel.DEFAULT_ACTION_KEY) {
+            KeyboardSwitcher.getInstance().setThemeNeedsReload()
+        }
+    },
     Setting(context, SuggestionStripView.PREF_MIC_ON_LEFT, R.string.mic_on_left, R.string.mic_on_left_summary) {
         SwitchPreference(it, false) { KeyboardSwitcher.getInstance().setThemeNeedsReload() }
     },

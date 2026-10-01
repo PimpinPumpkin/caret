@@ -34,6 +34,8 @@ object FutoSwipe {
     private const val MAX_LETTERS = 48 // limit of the library's trie
     private const val MAX_CONTEXT_WORDS = 8
     private const val TOP_SCORE = 1_000_000
+    // half a point of engine score is about as far as "close enough to prefer a known word" goes
+    private const val SCORE_PER_UNIT = 140_000f
     private const val USER_WORDS_REFRESH_MILLIS = 5 * 60 * 1000L
     private const val USER_WORD_MIN_FREQUENCY = 120
 
@@ -159,9 +161,15 @@ object FutoSwipe {
             Log.w(TAG, "recognize failed", e)
             return emptyList()
         }
+        // Scores keep the engine's gaps. Suggest prefers a candidate that was typed before in this
+        // context when it is within 7% of the best score, so a clearly worse candidate must also
+        // be clearly lower here, or one bad swipe keeps coming back.
+        val best = results.firstOrNull()?.score ?: 0f
         return results.mapIndexed { index, result ->
+            val gap = ((best - result.score) * SCORE_PER_UNIT).toInt().coerceIn(0, TOP_SCORE - 1000)
             SuggestedWordInfo(
-                surfaceForms[result.word] ?: userSurfaceForms[result.word] ?: result.word, "", TOP_SCORE - index * 1000,
+                surfaceForms[result.word] ?: userSurfaceForms[result.word] ?: result.word, "",
+                TOP_SCORE - gap - index,
                 SuggestedWordInfo.KIND_CORRECTION, sourceDict,
                 SuggestedWordInfo.NOT_AN_INDEX, SuggestedWordInfo.NOT_A_CONFIDENCE
             )
