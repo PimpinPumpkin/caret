@@ -96,7 +96,6 @@ class KeyboardIconsSet private constructor() {
             "start_onehanded_mode_key" to ToolbarKey.ONE_HANDED.name.lowercase(Locale.US),
         )
 
-        // todo: incognito and force incognito should not be the same? or not the same as toolbar key?
         private val keyboardIconsHolo by lazy { hashMapOf(
             NAME_SHIFT_KEY to                   R.drawable.sym_keyboard_shift_holo,
             NAME_SHIFT_KEY_SHIFTED to           R.drawable.sym_keyboard_shifted_holo,
@@ -140,7 +139,7 @@ class KeyboardIconsSet private constructor() {
                     ToolbarKey.RESIZE -> R.drawable.ic_resize_keyboard
                     ToolbarKey.MORE -> R.drawable.ic_more_actions
                     ToolbarKey.FLOATING -> R.drawable.ic_drag_indicator
-                    ToolbarKey.INCOGNITO -> R.drawable.sym_keyboard_incognito_holo
+                    ToolbarKey.INCOGNITO -> R.drawable.ic_incognito
                     ToolbarKey.AUTOCORRECT -> R.drawable.ic_autocorrect
                     ToolbarKey.CLEAR_CLIPBOARD -> R.drawable.sym_keyboard_clear_clipboard_holo
                     ToolbarKey.CLOSE_HISTORY -> R.drawable.ic_close
@@ -206,7 +205,7 @@ class KeyboardIconsSet private constructor() {
                     ToolbarKey.RESIZE -> R.drawable.ic_resize_keyboard
                     ToolbarKey.MORE -> R.drawable.ic_more_actions
                     ToolbarKey.FLOATING -> R.drawable.ic_drag_indicator
-                    ToolbarKey.INCOGNITO -> R.drawable.sym_keyboard_incognito_lxx
+                    ToolbarKey.INCOGNITO -> R.drawable.ic_incognito
                     ToolbarKey.AUTOCORRECT -> R.drawable.ic_autocorrect
                     ToolbarKey.CLEAR_CLIPBOARD -> R.drawable.sym_keyboard_clear_clipboard_lxx
                     ToolbarKey.CLOSE_HISTORY -> R.drawable.ic_close
@@ -272,7 +271,7 @@ class KeyboardIconsSet private constructor() {
                     ToolbarKey.RESIZE -> R.drawable.ic_resize_keyboard
                     ToolbarKey.MORE -> R.drawable.ic_more_actions
                     ToolbarKey.FLOATING -> R.drawable.ic_drag_indicator
-                    ToolbarKey.INCOGNITO -> R.drawable.sym_keyboard_incognito_lxx
+                    ToolbarKey.INCOGNITO -> R.drawable.ic_incognito
                     ToolbarKey.AUTOCORRECT -> R.drawable.ic_autocorrect_rounded
                     ToolbarKey.CLEAR_CLIPBOARD -> R.drawable.sym_keyboard_clear_clipboard_rounded
                     ToolbarKey.CLOSE_HISTORY -> R.drawable.ic_close_rounded
