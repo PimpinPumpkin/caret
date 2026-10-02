@@ -396,12 +396,12 @@ data class PointerData(val id: Int, val x: Int, val y: Int, val millis: Int) {
     companion object {
         fun fromPointers(pointers: InputPointers): List<PointerData> {
             val result = mutableListOf<PointerData>()
-            for (i in 0..<pointers.pointerSize) {
+            for (i in 0..<pointers.getPointerSize()) {
                 result.add(PointerData(
-                    pointers.pointerIds[i],
-                    pointers.xCoordinates[i],
-                    pointers.yCoordinates[i],
-                    pointers.times[i]
+                    pointers.getPointerIds()[i],
+                    pointers.getXCoordinates()[i],
+                    pointers.getYCoordinates()[i],
+                    pointers.getTimes()[i]
                 ))
             }
             return result

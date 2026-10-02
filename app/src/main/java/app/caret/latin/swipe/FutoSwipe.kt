@@ -143,15 +143,15 @@ object FutoSwipe {
         val context = appContext ?: return null
         if (!isActive(context)) return null
         val pointers = composedData.mInputPointers
-        val size = pointers.pointerSize
+        val size = pointers.getPointerSize()
         if (size < 2) return emptyList()
         val swipeLayout = prepare(context, keyboard, locale) ?: return emptyList()
         val engine = decoder ?: return emptyList()
         refreshUserWords(context, engine, swipeLayout, locale, userWords, isMainWord)
 
-        val xs = pointers.xCoordinates
-        val ys = pointers.yCoordinates
-        val times = pointers.times
+        val xs = pointers.getXCoordinates()
+        val ys = pointers.getYCoordinates()
+        val times = pointers.getTimes()
         val x = FloatArray(size) { swipeLayout.normalizeX(xs[it]) }
         val y = FloatArray(size) { swipeLayout.normalizeY(ys[it]) }
         val t = FloatArray(size) { (times[it] - times[0]).toFloat() }
