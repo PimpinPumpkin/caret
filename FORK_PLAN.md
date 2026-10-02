@@ -171,7 +171,14 @@ Done:
 `InputLogic` is through its first pass: 33 Caret tests were added to the 78 that existed, and no
 method but the function-key switch is longer than about 75 lines.
 
+- `RichInputConnection`: its methods were already short, so it got tests, not a split. Six cases
+  for apps that change the field under the keyboard, all passing.
+- `LatinIME`: three tests for starting and restarting input, then `onStartInputViewInternal`
+  (150 lines) split into two steps. Nothing else in it is long.
+- `PointerTracker`: no method over 76 lines, left as is. It has no unit tests; touch handling is
+  covered only by the smoke test.
+
 Next, in this order:
-1. `RichInputConnection`: the cached picture of the text field.
-2. `LatinIME` and `PointerTracker`.
-3. Kotlin conversion of `InputLogic`.
+1. Kotlin conversion of `InputLogic`, one commit, no other change in it.
+2. Tests for `PointerTracker` (taps, sliding between keys, long press, the start of a swipe).
+3. Kotlin conversion of `RichInputConnection`, `LatinIME`, `PointerTracker`.
