@@ -385,7 +385,7 @@ class WordList private constructor(val file: File) {
                         val result = dict.getNextWordProperty(token)
                         val property = result.mWordProperty
                         token = result.mNextToken
-                        if (property != null && property.isValid && !property.mIsNotAWord
+                        if (property != null && property.isValid() && !property.mIsNotAWord
                             && !property.mIsBeginningOfSentence && !(blockOffensive && property.mIsPossiblyOffensive)
                             && property.mWord.none { it == ',' || it == '\n' }
                         ) {

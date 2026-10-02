@@ -702,10 +702,10 @@ private fun BinaryDictionary.addWords(words: MutableList<WeightedWord>) {
         if (!result.mWordProperty.mIsNotAWord
                 && length > 1
                 && !(result.mWordProperty.mIsPossiblyOffensive && Settings.getValues().mBlockPotentiallyOffensive)
-                && result.mWordProperty.probability > 2 // some minimum value, as there are too many unknown / rare words down there
+                && result.mWordProperty.getProbability() > 2 // some minimum value, as there are too many unknown / rare words down there
                 && (!hasCases || word.uppercase() != word)
             ) {
-            val frequency = result.mWordProperty.probability
+            val frequency = result.mWordProperty.getProbability()
             cumulativeWeight += calculateWordWeight(frequency, length)
             if (added && words.isEmpty())
                 return // crappy workaround for having 2 merged dictionaries when switching dicts while one is still loading
