@@ -750,6 +750,81 @@ class InputLogicTest {
         setText("") // (re)sets selection and composing word
     }
 
+    // ------- text fields that do not behave (Caret) -------
+    // These type without the consistency checks of input(), because here the field and the
+    // keyboard's picture of it are expected to drift apart. What matters is what the user ends up with.
+
+    private fun rawType(text: String) = text.forEach {
+        latinIME.onEvent(Event.createEventForCodePointFromUnknownSource(it.code))
+        handleMessages()
+    }
+
+    private fun rawKey(keyCode: Int) {
+        latinIME.onEvent(Event.createSoftwareKeypressEvent(Event.NOT_A_CODE_POINT, keyCode, 0,
+            Constants.NOT_A_COORDINATE, Constants.NOT_A_COORDINATE, false))
+        handleMessages()
+    }
+
+    @Test fun `typing works when the field hides its text`() {
+        ShadowInputMethodService.hidesText = true
+        rawType("hello there")
+        assertEquals("hello there", text)
+    }
+
+    @Test fun `backspace deletes when the field hides its text`() {
+        ShadowInputMethodService.hidesText = true
+        rawType("hello")
+        rawKey(KeyCode.DELETE)
+        assertEquals("hell", text)
+    }
+
+    // An address bar that completes what was typed: after each edit it puts a completion after
+    // the cursor. HeliBoard issue 2465 reports backspace repeating text in such fields.
+    private fun completeLikeAnAddressBar(full: String) {
+        ShadowInputMethodService.afterEdit = {
+            val typed = ShadowInputMethodService.textBeforeCursor
+            if (typed.isNotEmpty() && full.startsWith(typed) && ShadowInputMethodService.selectionStart == ShadowInputMethodService.selectionEnd)
+                ShadowInputMethodService.text = typed + full.substring(typed.length)
+        }
+    }
+
+    @Test fun `typing into a completing address bar does not double letters`() {
+        setInputType(InputType.TYPE_CLASS_TEXT or InputType.TYPE_TEXT_VARIATION_URI)
+        completeLikeAnAddressBar("example.com")
+        rawType("exa")
+        assertEquals("exa", textBeforeCursor)
+        assertEquals("example.com", text)
+    }
+
+    @Test fun `backspace in a completing address bar removes one letter`() {
+        setInputType(InputType.TYPE_CLASS_TEXT or InputType.TYPE_TEXT_VARIATION_URI)
+        completeLikeAnAddressBar("example.com")
+        rawType("exam")
+        rawKey(KeyCode.DELETE)
+        assertEquals("exa", textBeforeCursor)
+        assert(!text.contains("exaexa") && !text.contains("examexam")) { "text was repeated: $text" }
+    }
+
+    // A chat app empties its field when a message is sent and tells the keyboard the cursor moved.
+    @Test fun `typing after the app cleared the field does not bring the old word back`() {
+        rawType("hello")
+        ShadowInputMethodService.reset()
+        latinIME.onUpdateSelection(5, 5, 0, 0, -1, -1)
+        handleMessages()
+        rawType("yo")
+        assertEquals("yo", text)
+    }
+
+    // The same, but the app never tells the keyboard. The keyboard still believes "hello" is being
+    // composed and writes it back. No keyboard can know better here; this documents the limit.
+    @Test fun `known limit - a field cleared without notice gets the old word back`() {
+        if (System.getenv("CARET_KNOWN_FAILURES") == null) return
+        rawType("hello")
+        ShadowInputMethodService.reset()
+        rawType("yo")
+        assertEquals("yo", text)
+    }
+
     private fun chainInput(text: String) = text.forEach { input(it.code) }
 
     private fun input(char: Char) = input(char.code)

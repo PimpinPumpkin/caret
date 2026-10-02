@@ -348,6 +348,30 @@ fun moveWordStepsToCharCount(text: CharSequence, steps: Int): Int {
     }
 }
 
+/**
+ * How many characters to delete to remove the word before the cursor: the separators and spaces
+ * right before the cursor, then the word in front of them. Uses the keyboard's own idea of a word
+ * separator, so it follows the current language.
+ */
+fun lengthOfWordBeforeCursor(before: CharSequence, spacingAndPunctuations: SpacingAndPunctuations): Int =
+    lengthOfWordBeforeCursor(before) { spacingAndPunctuations.isWordSeparator(it) }
+
+fun lengthOfWordBeforeCursor(before: CharSequence, isSeparator: (Int) -> Boolean): Int {
+    var index = before.length
+    fun isGap(codePoint: Int) = Character.isWhitespace(codePoint) || isSeparator(codePoint)
+    while (index > 0) {
+        val codePoint = Character.codePointBefore(before, index)
+        if (!isGap(codePoint)) break
+        index -= Character.charCount(codePoint)
+    }
+    while (index > 0) {
+        val codePoint = Character.codePointBefore(before, index)
+        if (isGap(codePoint)) break
+        index -= Character.charCount(codePoint)
+    }
+    return before.length - index
+}
+
 fun String.splitOnWhitespace() = SpacedTokens(this).toList()
 
 fun stripTrailingSeparatorsAndConnectors(word: String, spacingAndPunctuations: SpacingAndPunctuations): String {

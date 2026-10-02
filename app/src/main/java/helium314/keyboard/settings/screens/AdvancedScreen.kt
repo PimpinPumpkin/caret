@@ -71,6 +71,7 @@ fun AdvancedSettingsScreen(
             Settings.PREF_TOUCHPAD_SENSITIVITY else null,
         if (Settings.readVerticalSpaceSwipe(prefs) == KeyboardActionListener.SwipeAction.TOUCHPAD_MODE)
             Settings.PREF_TOUCHPAD_EDGE_SCROLL else null,
+        Settings.PREF_HOLD_DELETE_BY_WORD,
         Settings.PREF_DELETE_SWIPE,
         if (prefs.getBoolean(Settings.PREF_DELETE_SWIPE, Defaults.PREF_DELETE_SWIPE))
             Settings.PREF_SWIPE_DELETE_BY_WORD else null,
@@ -162,6 +163,9 @@ fun createAdvancedSettings(context: Context) = listOf(
     },
     Setting(context, Settings.PREF_DELETE_SWIPE, R.string.delete_swipe, R.string.delete_swipe_summary) {
         SwitchPreference(it, Defaults.PREF_DELETE_SWIPE)
+    },
+    Setting(context, Settings.PREF_HOLD_DELETE_BY_WORD, R.string.hold_delete_by_word, R.string.hold_delete_by_word_summary) {
+        SwitchPreference(it, Defaults.PREF_HOLD_DELETE_BY_WORD)
     },
     Setting(context, Settings.PREF_SWIPE_DELETE_BY_WORD, R.string.swipe_delete_by_word, R.string.swipe_delete_by_word_summary) {
         SwitchPreference(it, Defaults.PREF_SWIPE_DELETE_BY_WORD)

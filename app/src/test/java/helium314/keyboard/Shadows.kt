@@ -134,6 +134,12 @@ class ShadowInputMethodService {
         var composingEnd = -1
         var currentInputType = InputType.TYPE_CLASS_TEXT
 
+        // Caret: ways a real app's text field misbehaves, for MisbehavingFieldTest
+        /** the app answers null when asked for the text around the cursor */
+        var hidesText = false
+        /** runs after every edit, like an app that rewrites its field (address bar completion, formatting) */
+        var afterEdit: (() -> Unit)? = null
+
         // convenience for access
         val textBeforeCursor get() = text.substring(0, selectionStart)
         val textAfterCursor get() = text.substring(selectionEnd)
@@ -152,6 +158,8 @@ class ShadowInputMethodService {
             composingStart = -1
             composingEnd = -1
             currentInputType = InputType.TYPE_CLASS_TEXT
+            hidesText = false
+            afterEdit = null
         }
     }
 
@@ -169,9 +177,9 @@ class ShadowInputMethodService {
     private val ic = object : InputConnection {
         // pretty clear (though this may be slow depending on the editor)
         // bad return value here is likely the cause for that weird bug improved/fixed by fixIncorrectLength
-        override fun getTextBeforeCursor(p0: Int, p1: Int): CharSequence = textBeforeCursor.take(p0)
+        override fun getTextBeforeCursor(p0: Int, p1: Int): CharSequence? = if (hidesText) null else textBeforeCursor.takeLast(p0)
         // pretty clear (though this may be slow depending on the editor)
-        override fun getTextAfterCursor(p0: Int, p1: Int): CharSequence = textAfterCursor.take(p0)
+        override fun getTextAfterCursor(p0: Int, p1: Int): CharSequence? = if (hidesText) null else textAfterCursor.take(p0)
         // pretty clear
         override fun getSelectedText(p0: Int): CharSequence? = if (selectionStart == selectionEnd) null
         else text.substring(selectionStart, selectionEnd)
@@ -203,6 +211,7 @@ class ShadowInputMethodService {
             //  but only after batch edit has ended
             //  this is not used in RichInputMethodManager, but probably ends up in LatinIME.onUpdateSelection
             //  -> DO IT (though it will likely only trigger that belatedSelectionUpdate thing, it might be relevant)
+            afterEdit?.invoke()
             return true
         }
         override fun setComposingRegion(p0: Int, p1: Int): Boolean {
@@ -273,6 +282,7 @@ class ShadowInputMethodService {
             // update selection
             selectionStart -= beforeLength
             selectionEnd -= beforeLength
+            afterEdit?.invoke()
             return true
         }
         override fun sendKeyEvent(p0: KeyEvent): Boolean {

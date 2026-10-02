@@ -1468,9 +1468,25 @@ public final class InputLogic {
                         return;
                     }
                     int lengthToDelete = mConnection.getCharCountToDeleteBeforeCursor();
+                    // Caret: holding backspace deletes characters first, then whole words
+                    final boolean deleteWords = event.isKeyRepeat()
+                            && inputTransaction.getSettingsValues().mHoldDeleteByWord
+                            && mDeleteCount > Constants.DELETE_WORDS_AT;
+                    if (deleteWords) {
+                        // one word every few repeats, or a paragraph is gone before the finger lifts
+                        if (mDeleteCount % Constants.DELETE_WORDS_EVERY != 0) return;
+                        final CharSequence before = mConnection.getTextBeforeCursor(Constants.DELETE_WORDS_LOOKBACK, 0);
+                        final int wordLength = before == null ? 0 : StringUtilsKt.lengthOfWordBeforeCursor(
+                                before, inputTransaction.getSettingsValues().mSpacingAndPunctuations);
+                        if (wordLength > lengthToDelete) {
+                            hasUnlearnedWordBeingDeleted |= unlearnWordBeingDeleted(
+                                    inputTransaction.getSettingsValues(), currentKeyboardScript);
+                            lengthToDelete = wordLength;
+                        }
+                    }
                     mConnection.deleteTextBeforeCursor(lengthToDelete);
                     int totalDeletedLength = lengthToDelete;
-                    if (mDeleteCount > Constants.DELETE_ACCELERATE_AT) {
+                    if (!deleteWords && mDeleteCount > Constants.DELETE_ACCELERATE_AT) {
                         // If this is an accelerated (i.e., double) deletion, then we need to
                         // consider unlearning here because we may have already reached
                         // the previous word, and will lose it after next deletion.

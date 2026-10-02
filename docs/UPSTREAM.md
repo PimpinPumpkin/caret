@@ -47,7 +47,10 @@ These passed the tests and were merged in a first pass, then removed after readi
 | #2491 | Clipboard masking. Does not fit the current clipboard code, and hides any text that contains words like "password". Worth redoing with narrower rules. |
 | #2743 | In-keyboard dictation through the system speech service. Unfinished draft, but the idea fits Alyo, which is a speech service. |
 | #2773, #2329, #2556 | Other takes on deleting whole words. #2773 is a draft whose author says the tests were generated and unchecked. Long-press to delete words (issue #535) is still open. |
-| #2696, #2620, #2175, #2125 | Conflict with later upstream changes. Not reviewed in depth yet: recents refresh, emoji tabs, vibration strength, external keyboard fix. |
+| #2696 | Fixes for an unmerged upstream branch (`remove_recents`), not for the code Caret has. |
+| #2620 | Emoji tabs always visible. Draft for discussion; another contributor explained the current design and the default could simply be changed. Does not affect Caret, whose toolbar is not hidden. |
+| #2175 | Vibration strength. Six rounds of review open, and the maintainer saw no reason for its extra mode setting. A plain strength slider would be the way to do it. |
+| #2125 | Control by TV remote or external device. The maintainer said it breaks normal hardware keyboards and that much is left to do. The idea matters for Android TV boxes, so it is worth doing properly later. |
 | #2351 | Java swipe fallback. Caret has the FUTO engine. |
 | #2775, #2512, #1886, #999, #2681 | Languages and layouts nobody asked Caret for yet. |
 
@@ -63,4 +66,4 @@ These passed the tests and were merged in a first pass, then removed after readi
 | #2465 backspace repeats text | Firefox bug, also happens with other keyboards. Kept as a case for the misbehaving text field tests. |
 | #2635 spacebar duplicates the last word | No way to reproduce yet. |
 | #2639 uppercase not working with the "No language" layout | Not looked into yet. |
-| #535 long-press backspace deletes words | Open. |
+| #535 long-press backspace deletes words | Done in Caret (not from a pull request): characters first, then whole words, using the keyboard's own word separators. On by default, switch in Advanced. |

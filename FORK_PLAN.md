@@ -112,6 +112,9 @@ well, and hands dictation to Alyo through the microphone key.
 
 ## Testing system
 
+- Misbehaving text fields: the fake field in `Shadows.kt` can hide its text (`hidesText`) or
+  rewrite itself after every edit (`afterEdit`). `InputLogicTest` has cases for a field that hides
+  text, an address bar that completes what is typed, and an app that clears its field.
 - `scripts/smoke.sh`: installs on the caret_phone emulator, taps and swipes words, compares the
   text field, checks the log for crashes. `scripts/keys.py` holds the key positions.
 

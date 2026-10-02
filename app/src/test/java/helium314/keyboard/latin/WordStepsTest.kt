@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: GPL-3.0-only
 package helium314.keyboard.latin
 
+import helium314.keyboard.latin.common.lengthOfWordBeforeCursor
 import helium314.keyboard.latin.common.moveWordStepsToCharCount
 import kotlin.test.Test
 import kotlin.test.assertEquals
@@ -29,6 +30,32 @@ class WordStepsTest {
 
     @Test fun apostrophesStayInsideAWord() {
         assertEquals(-5, moveWordStepsToCharCount("I don't", -1))
+    }
+
+    // holding backspace: the word before the cursor, by the keyboard's separators
+    private fun wordLength(text: String) = lengthOfWordBeforeCursor(text) { it == ','.code || it == '.'.code || it == '?'.code || it == '!'.code }
+
+    @Test fun holdDeletesTheLastWord() {
+        assertEquals(5, wordLength("hello world"))
+    }
+
+    @Test fun holdTakesTrailingSpacesAndPunctuationWithTheWord() {
+        assertEquals(6, wordLength("hello world "))
+        assertEquals(7, wordLength("wait, what?! ")) // "what?! "
+    }
+
+    @Test fun holdKeepsApostrophesAndDigitsInTheWord() {
+        assertEquals(5, wordLength("I don't"))
+        assertEquals(4, wordLength("flight ab12"))
+    }
+
+    @Test fun holdOnOnlySpacesDeletesThem() {
+        assertEquals(3, wordLength("   "))
+        assertEquals(0, wordLength(""))
+    }
+
+    @Test fun holdHandlesEmojiAsAWord() {
+        assertEquals("\uD83D\uDE00".length, wordLength("hi \uD83D\uDE00"))
     }
 
     @Test fun zeroStepsMoveNothing() {
