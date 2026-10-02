@@ -866,6 +866,54 @@ class InputLogicTest {
         assertEquals("", composingText)
     }
 
+    // ------- swipe input from its start, which had no test (Caret) -------
+
+    /** A whole swipe: the start, which commits what was being typed, then the recognized word. */
+    private fun swipe(word: String) {
+        latinIME.mInputLogic.onStartBatchInput(settingsValues, KeyboardSwitcher.getInstance(), latinIME.mHandler)
+        handleMessages()
+        glideTypingInput(word)
+        handleMessages()
+    }
+
+    @Test fun `a swipe after a typed word keeps the typed word and adds a space`() {
+        chainInput("hello")
+        swipe("there")
+        assertEquals("hello there", text)
+    }
+
+    @Test fun `two swipes in a row get a space between them`() {
+        swipe("hello")
+        swipe("there")
+        assertEquals("hello there", text)
+    }
+
+    @Test fun `a swipe after a period gets a space`() {
+        setText("Hello.")
+        swipe("there")
+        assertEquals("Hello. there", text)
+    }
+
+    @Test fun `no space before a swipe when autospace before swiping is off`() {
+        latinIME.prefs().edit { putBoolean(Settings.PREF_AUTOSPACE_BEFORE_GESTURE_TYPING, false) }
+        chainInput("hello")
+        swipe("there")
+        assertEquals("hellothere", text)
+    }
+
+    @Test fun `a swipe over a selection replaces it`() {
+        setText("hello there")
+        setCursorPosition(6, 11)
+        swipe("world")
+        assertEquals("hello world", text)
+    }
+
+    @Test fun `a swipe after a space adds no second space`() {
+        setText("hello ")
+        swipe("there")
+        assertEquals("hello there", text)
+    }
+
     // ------- separators, branches that had no test (Caret) -------
 
     private fun pickPunctuation(mark: String) {
