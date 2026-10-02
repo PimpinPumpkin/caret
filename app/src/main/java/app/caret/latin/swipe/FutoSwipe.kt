@@ -179,6 +179,30 @@ object FutoSwipe {
     }
 
     /**
+     * The words most likely to come next after the text in [ngramContext], best first, from the
+     * context language model that ships with the swipe models. Null when that model is not loaded:
+     * models not installed, engine switched off, another language than English, no keyboard
+     * shown yet, or the cursor is at the start of a sentence.
+     */
+    @Synchronized
+    fun predictNext(ngramContext: NgramContext, locale: Locale, count: Int): List<String>? {
+        val context = appContext ?: return null
+        if (locale.language != "en" || loadedLocale?.language != "en" || !isActive(context)) return null
+        val engine = decoder ?: return null
+        return try {
+            if (!engine.hasLm()) return null
+            // with nothing to go on the model's guesses are worse than the dictionary's sentence starters
+            val words = contextWords(ngramContext)
+            if (words.isEmpty() || ngramContext.isBeginningOfSentenceContext) return null
+            engine.setContext(words)
+            engine.predictNext(count).map { it.word }
+        } catch (e: Exception) {
+            Log.w(TAG, "predictNext failed", e)
+            null
+        }
+    }
+
+    /**
      * Personal dictionary, typing history and contacts as a second, small trie. Rebuilt when the
      * main dictionary was reloaded and otherwise every few minutes, so new words become swipeable.
      */

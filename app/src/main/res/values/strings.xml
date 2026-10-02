@@ -170,6 +170,9 @@
     <string name="bigram_prediction">Next-word suggestions</string>
     <!-- Description for "next word suggestion" option. This displays suggestions even when there is no input, based on the previous word. -->
     <string name="bigram_prediction_summary">Use the previous word in making suggestions</string>
+    <!-- Caret: next-word suggestions ranked by the language model that comes with the swipe typing models -->
+    <string name="lm_next_word">Smarter next-word suggestions</string>
+    <string name="lm_next_word_summary">Uses the language model of the swipe typing models to guess the next word from the sentence so far. English only, needs the swipe typing models.</string>
     <!-- Option to enable using punctuation suggestions. -->
     <string name="suggest_punctuation">Punctuation suggestions</string>
     <!-- Description for "suggest_punctuation" option. -->
@@ -1014,7 +1017,7 @@ New dictionary:
     <string name="emoji_font_link_done">Emoji font installed</string>
     <string name="emoji_font_link_failed">Could not use that link: %s</string>
     <string name="action_key">Key next to the spacebar</string>
-    <string name="action_key_summary">Any toolbar action. Hide it with "Emoji key" in Preferences.</string>
+    <string name="action_key_summary">Any toolbar action. Hide it with \"Emoji key\" in Preferences.</string>
     <string name="hold_delete_by_word">Hold backspace to delete words</string>
     <string name="hold_delete_by_word_summary">Holding backspace deletes a few characters, then whole words</string>
     <string name="mic_on_left">Microphone on the left</string>

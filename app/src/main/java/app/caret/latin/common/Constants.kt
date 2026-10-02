@@ -273,7 +273,7 @@ object Links {
     const val GITHUB = "https://github.com/PimpinPumpkin/caret"
     /** HeliBoard, which Caret is forked from. Its wiki and discussions still describe most of the app. */
     const val UPSTREAM = "https://github.com/HeliBorg/HeliBoard"
-    const val LICENSE = "$GITHUB/blob/main/LICENSE"
+    const val LICENSE = "https://www.gnu.org/licenses/gpl-3.0.html"
     const val WIKI_URL = "$UPSTREAM/wiki"
     const val LAYOUT_WIKI_URL = "$WIKI_URL/2.-Layouts"
     const val CUSTOM_LAYOUTS = "$UPSTREAM/discussions/categories/custom-layout"

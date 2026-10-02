@@ -303,6 +303,8 @@ class Settings : SharedPreferences.OnSharedPreferenceChangeListener {
         const val PREF_SHIFT_REMOVES_AUTOSPACE = "shift_removes_autospace"
         const val PREF_ALWAYS_INCOGNITO_MODE = "always_incognito_mode"
         const val PREF_BIGRAM_PREDICTIONS = "next_word_prediction"
+        // Caret: rank next-word suggestions with the swipe models' language model
+        const val PREF_LM_NEXT_WORD = "lm_next_word"
         const val PREF_SUGGEST_PUNCTUATION = "suggest_punctuation"
         const val PREF_PUNCTUATION_SUGGESTIONS = "punctuation_suggestions"
         const val PREF_SUGGEST_CLIPBOARD_CONTENT = "suggest_clipboard_content"

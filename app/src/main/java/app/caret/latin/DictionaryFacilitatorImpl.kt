@@ -520,7 +520,31 @@ class DictionaryFacilitatorImpl : DictionaryFacilitator {
 
         includeAtLeastTwoWordSuggestions(suggestionResults, suggestionsArray, composedData.typedWord)
 
+        if (composedData.typedWord.isEmpty() && Settings.values.lmNextWordEnabled)
+            return withLanguageModelPredictions(suggestionResults, ngramContext)
         return suggestionResults
+    }
+
+    /**
+     * Next-word suggestions with the swipe models' language model in the ranking: first what the
+     * user's own history, personal dictionary or contacts predict here (at most two), then the
+     * model's words, then whatever else the dictionaries had. Returns [results] unchanged when
+     * the model is not available.
+     */
+    private fun withLanguageModelPredictions(results: SuggestionResults, ngramContext: NgramContext): SuggestionResults {
+        val group = dictionaryGroups[0]
+        val modelWords = FutoSwipe.predictNext(ngramContext, group.locale, LM_PREDICTIONS) ?: return results
+        if (modelWords.isEmpty()) return results
+        val sourceDict = group.getDict(Dictionary.TYPE_MAIN) ?: Dictionary.DICTIONARY_USER_TYPED
+        val ordered = orderPredictions(results.toList(), modelWords.filterNot { isBlacklisted(it) }, group.locale, sourceDict)
+        val merged = SuggestionResults(SuggestedWords.MAX_SUGGESTIONS, results.isBeginningOfSentence, false)
+        ordered.take(SuggestedWords.MAX_SUGGESTIONS).forEachIndexed { index, info ->
+            // the set sorts by score, so the order is written into the scores
+            merged.add(SuggestedWordInfo(info.word, info.prevWordsContext, LM_PREDICTION_TOP_SCORE - index * 1000,
+                info.kindAndFlags, info.sourceDict, info.indexOfTouchPointOfSecondWord, info.autoCommitFirstWordConfidence))
+        }
+        merged.rawSuggestions?.addAll(merged)
+        return merged
     }
 
     /** Swipe suggestions from the FUTO Swipe engine, or null when it is not in use. */
@@ -651,6 +675,34 @@ class DictionaryFacilitatorImpl : DictionaryFacilitator {
 
         // HACK: This threshold is being used when adding a capitalized entry in the User History dictionary.
         private const val CAPITALIZED_FORM_MAX_PROBABILITY_FOR_INSERT = 140
+
+        // next-word suggestions from the swipe models' language model
+        private const val LM_PREDICTIONS = 8
+        private const val MAX_PERSONAL_PREDICTIONS_BEFORE_MODEL = 2
+        private const val LM_PREDICTION_TOP_SCORE = 1_000_000
+        private val PERSONAL_DICTIONARY_TYPES = setOf(Dictionary.TYPE_USER_HISTORY, Dictionary.TYPE_USER, Dictionary.TYPE_CONTACTS)
+
+        /**
+         * The order of next-word suggestions when the language model has an opinion: up to two
+         * predictions from the user's own dictionaries, then the model's words, then the rest.
+         * A word appears once, at its first position.
+         */
+        fun orderPredictions(
+            existing: List<SuggestedWordInfo>, modelWords: List<String>, locale: Locale, modelSource: Dictionary
+        ): List<SuggestedWordInfo> {
+            val (personal, others) = existing.partition { it.sourceDict?.dictType in PERSONAL_DICTIONARY_TYPES }
+            val ordered = ArrayList<SuggestedWordInfo>()
+            val seen = HashSet<String>()
+            fun add(info: SuggestedWordInfo) { if (seen.add(info.word.lowercase(locale))) ordered.add(info) }
+            personal.take(MAX_PERSONAL_PREDICTIONS_BEFORE_MODEL).forEach(::add)
+            modelWords.forEach { word ->
+                add(SuggestedWordInfo(word, "", 0, SuggestedWordInfo.KIND_PREDICTION, modelSource,
+                    SuggestedWordInfo.NOT_AN_INDEX, SuggestedWordInfo.NOT_A_CONFIDENCE))
+            }
+            personal.drop(MAX_PERSONAL_PREDICTIONS_BEFORE_MODEL).forEach(::add)
+            others.forEach(::add)
+            return ordered
+        }
 
         private fun createSubDict(
             dictType: String, context: Context, locale: Locale, dictFile: File?, dictNamePrefix: String
