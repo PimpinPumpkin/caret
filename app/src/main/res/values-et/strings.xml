@@ -65,9 +65,6 @@
     <string name="prefs_enable_emoji_alt_physical_key_summary">"Füüsiline klahv Alt kuvab emotikonide paleti"</string>
     <string name="button_default">"Vaikeväärtus"</string>
     <string name="setup_welcome_title">"Tere tulemast rakendusse %s"</string>
-    <string name="setup_welcome_additional_description">"joonistusega sisestamisega"</string>
-    <string name="setup_start_action">Alusta siit</string>
-    <string name="setup_steps_title">"Rakenduse %s seadistamine"</string>
     <string name="setup_step1_title">Võta %s kasutusele</string>
     <string name="setup_step1_instruction">Palun märgi nutiseadme keele- ja sisendiseadetes „%s“ lubatuks. See võimaldab rakenduse kasutamist sinu nutiseadmes.</string>
     <string name="setup_step1_action">"Luba seadetes"</string>
@@ -75,7 +72,6 @@
     <string name="setup_step2_instruction">Järgmisena vali aktiivseks tekstisisestusmeetodiks rakendus „%s“.</string>
     <string name="setup_step2_action">"Vaheta sisestusmeetodeid"</string>
     <string name="setup_step3_title">"Õnnitleme. Kõik on valmis!"</string>
-    <string name="setup_step3_instruction">Nüüd saad rakendusega %s sisestada kõikides oma lemmikrakendustes.</string>
     <string name="setup_finish_action">"Lõpetatud"</string>
     <string name="show_setup_wizard_icon">"Kuva rakenduse ikoon"</string>
     <string name="show_setup_wizard_icon_summary">"Rakenduse ikooni kuvamine käivitajas"</string>

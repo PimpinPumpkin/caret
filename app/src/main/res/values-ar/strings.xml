@@ -65,9 +65,6 @@
     <string name="prefs_enable_emoji_alt_physical_key_summary">"‏مفتاح Alt الفعلي يعرض لوحة الرموز التعبيرية"</string>
     <string name="button_default">"التلقائية"</string>
     <string name="setup_welcome_title">مرحبًا بك في %s</string>
-    <string name="setup_welcome_additional_description">مع الكتابة بالإيماءة</string>
-    <string name="setup_start_action">"بدء الاستخدام"</string>
-    <string name="setup_steps_title">قيد الإعداد %s</string>
     <string name="setup_step1_title">مكِّن %s</string>
     <string name="setup_step1_instruction">يُرجى التحقق من \"%s\" في إعدادات الإدخال واللغات. سيؤدي ذلك إلى تمكين لوحة المفاتيح على جهازك.</string>
     <string name="setup_step1_action">"تفعيل في الإعدادات"</string>
@@ -75,7 +72,6 @@
     <string name="setup_step2_instruction">بعد ذلك، اختر \"%s” كطريقة إدخال النص النشط.</string>
     <string name="setup_step2_action">"تبديل أساليب الإدخال"</string>
     <string name="setup_step3_title">تهانينا، لقد انتهيت من الإعداد!</string>
-    <string name="setup_step3_instruction">الآن أصبح بإمكانك الكتابة في جميع تطبيقاتك المفضلة باستخدام %s.</string>
     <string name="setup_finish_action">"إنهاء العملية"</string>
     <string name="show_setup_wizard_icon">اعرض رمز التطبيق</string>
     <string name="show_setup_wizard_icon_summary">اعرض رمز التطبيق في المشغل</string>

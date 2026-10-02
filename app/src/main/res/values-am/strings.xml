@@ -65,9 +65,6 @@
     <string name="prefs_enable_emoji_alt_physical_key_summary">"አካላዊ Alt ቁልፍ የስሜት ገላጭ ቤተ-ስዕልን ያሳያል"</string>
     <string name="button_default">"ነባሪ"</string>
     <string name="setup_welcome_title">"እንኳን ወደ %s በደህና መጡ"</string>
-    <string name="setup_welcome_additional_description">"በጣት ምልክት መተየብ"</string>
-    <string name="setup_start_action">"ጀምር"</string>
-    <string name="setup_steps_title">%sን በማዋቀር ላይ\"</string>
     <string name="setup_step1_title">%sን ያንቁ\"</string>
     <string name="setup_step1_instruction">እባክዎ %s»ን በእርስዎ የቋንቋ እና ግቤት ቅንብሮች ውስጥ መኖሩን ያረጋግጡት። ይሄ እሱ በመሣሪያዎ ላይ እንዲሄድ ይፈቅድለታል።\"</string>
     <string name="setup_step1_action">"በቅንብሮች ውስጥ ያንቁ"</string>
@@ -75,7 +72,6 @@
     <string name="setup_step2_instruction">በመቀጠል %s»ን እንደ የጽሑፍ ግቤት ስልትዎ ይምረጡት።\"</string>
     <string name="setup_step2_action">"የግቤት ስልቶችን ቀያይር"</string>
     <string name="setup_step3_title">"እንኳን ደስ አለዎት፣ በቃ ጨርሰዋል!"</string>
-    <string name="setup_step3_instruction">"አሁን በሁሉም ተወዳጅ መተግበሪያዎችዎ ላይ በ%s መተየብ ይችላሉ።"</string>
     <string name="setup_finish_action">"ጨርሷል"</string>
     <string name="show_setup_wizard_icon">"የመተግበሪያ አዶ አሳይ"</string>
     <string name="show_setup_wizard_icon_summary">"የመተግበሪያ አዶውን በማስጀመሪያው ውስጥ አሳይ"</string>

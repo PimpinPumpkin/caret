@@ -65,9 +65,6 @@
     <string name="prefs_enable_emoji_alt_physical_key_summary">"భౌతిక Alt కీ ఎమోజి ఫలకాన్ని చూపుతుంది"</string>
     <string name="button_default">"డిఫాల్ట్"</string>
     <string name="setup_welcome_title">%sకు స్వాగతం\"</string>
-    <string name="setup_welcome_additional_description">"సంజ్ఞ టైపింగ్‌తో"</string>
-    <string name="setup_start_action">"ప్రారంభించండి"</string>
-    <string name="setup_steps_title">%sని సెటప్ చేయడం\"</string>
     <string name="setup_step1_title">%sని ప్రారంభించండి\"</string>
     <string name="setup_step1_instruction">"దయచేసి మీ భాషలు &amp; ఇన్‌పుట్ సెట్టింగ్‌ల్లో \"%s\" తనిఖీ చేయండి. ఇది మీ పరికరంలో అమలు కావడానికి దీన్ని ప్రామాణీకరిస్తుంది."</string>
     <string name="setup_step1_action">"సెట్టింగ్‌ల్లో ప్రారంభించండి"</string>
@@ -75,7 +72,6 @@
     <string name="setup_step2_instruction">"తర్వాత, \"%s\"ని మీ సక్రియ వచన-ఇన్‌పుట్ పద్ధతిగా ఎంచుకోండి."</string>
     <string name="setup_step2_action">"ఇన్‌పుట్ పద్ధతులను మార్చు"</string>
     <string name="setup_step3_title">"అభినందనలు, మీరు అంతా పూర్తి చేసారు!"</string>
-    <string name="setup_step3_instruction">"ఇప్పుడు మీరు %sతో మీకు ఇష్టమైన అన్ని అనువర్తనాల్లో టైప్ చేయవచ్చు."</string>
     <string name="setup_finish_action">"పూర్తయింది"</string>
     <string name="show_setup_wizard_icon">"యాప్‌ చిహ్నాన్ని చూపు"</string>
     <string name="show_setup_wizard_icon_summary">"లాంచర్‌లో యాప్‌ చిహ్నాన్ని ప్రదర్శించు"</string>

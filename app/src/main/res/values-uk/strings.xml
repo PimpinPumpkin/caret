@@ -66,9 +66,6 @@
     <string name="prefs_enable_emoji_alt_physical_key_summary">Фізична клавіша Alt показує усі доступні емоджі</string>
     <string name="button_default">Типово</string>
     <string name="setup_welcome_title">Вітаємо в%s</string>
-    <string name="setup_welcome_additional_description">з функцією «Ввід жестами»</string>
-    <string name="setup_start_action">Розпочати</string>
-    <string name="setup_steps_title">Налаштування%s</string>
     <string name="setup_step1_title">Увімкнути%s</string>
     <string name="setup_step1_instruction">Перевірте застосунок \"%s\" у налаштуваннях «Мова та введення». Це дозволить йому працювати на вашому пристрої.</string>
     <string name="setup_step1_action">Увімкнути в налаштуваннях</string>
@@ -76,7 +73,6 @@
     <string name="setup_step2_instruction">Виберіть %s поточним методом введення.</string>
     <string name="setup_step2_action">Змінити метод введення</string>
     <string name="setup_step3_title">Вітаємо, налаштування завершено!</string>
-    <string name="setup_step3_instruction">Тепер ви можете писати в усіх улюблених застосунках за допомогою %s.</string>
     <string name="setup_finish_action">Завершено</string>
     <string name="show_setup_wizard_icon">Показувати піктограму програми</string>
     <string name="show_setup_wizard_icon_summary">Відображати піктограму програми нв лаунчері</string>

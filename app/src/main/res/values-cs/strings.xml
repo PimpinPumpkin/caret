@@ -66,9 +66,6 @@
     <string name="prefs_enable_emoji_alt_physical_key_summary">Paletu emodži zobrazíte stisknutím fyzické klávesy Alt</string>
     <string name="button_default">"Výchozí"</string>
     <string name="setup_welcome_title">"Vítá vás %s"</string>
-    <string name="setup_welcome_additional_description">"s psaním gesty"</string>
-    <string name="setup_start_action">"Začínáme"</string>
-    <string name="setup_steps_title">"Nastavení aplikace %s"</string>
     <string name="setup_step1_title">"Zapnutí aplikace %s"</string>
     <string name="setup_step1_instruction">Povolte aplikaci „%s“ v nastavení Jazyky a zadávání. Tím povolíte její spuštění ve vašem zařízení.</string>
     <string name="setup_step1_action">"Aktivovat v nastavení"</string>
@@ -76,7 +73,6 @@
     <string name="setup_step2_instruction">Poté vyberte jako aktivní metodu zadávání textu možnost „%s“.</string>
     <string name="setup_step2_action">"Přepnout metody zadávání"</string>
     <string name="setup_step3_title">Gratulujeme, vše je připraveno!</string>
-    <string name="setup_step3_instruction">Nyní můžete ve všech svých oblíbených aplikacích psát pomocí aplikace %s.</string>
     <string name="setup_finish_action">"Hotovo"</string>
     <string name="show_setup_wizard_icon">"Zobrazit ikonu aplikace"</string>
     <string name="show_setup_wizard_icon_summary">"Zobrazí ikonu aplikace ve spouštěči"</string>

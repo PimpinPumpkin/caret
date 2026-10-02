@@ -48,7 +48,6 @@
     <string name="layout_number" tools:keep="@string/layout_number">אעדאד</string>
     <string name="day_or_night_night">שאם</string>
     <string name="button_default">פישפֿרץֿ</string>
-    <string name="setup_start_action">שרוע בה כאר</string>
     <string name="setup_finish_action">תמאם שוד</string>
     <string name="dictionary_settings_category">לגֿאת</string>
     <string name="user_dict_settings_add_weight_value">וזן:‏</string>

@@ -65,9 +65,6 @@
     <string name="prefs_enable_emoji_alt_physical_key_summary">"При натискане на клавиша „Alt“ се показва панелът за емотикони"</string>
     <string name="button_default">"Стандартно"</string>
     <string name="setup_welcome_title">"Добре дошли в/ъв %s"</string>
-    <string name="setup_welcome_additional_description">"с въвеждане чрез жест"</string>
-    <string name="setup_start_action">"Първи стъпки"</string>
-    <string name="setup_steps_title">"Настройване на %s"</string>
     <string name="setup_step1_title">"Активирайте %s"</string>
     <string name="setup_step1_instruction">Моля, проверете \"%s\" на вашите Езици &amp; входни настройки. Това ще го разреши да работи на вашето устройство.</string>
     <string name="setup_step1_action">"Активиране в настройките"</string>
@@ -75,7 +72,6 @@
     <string name="setup_step2_instruction">След това изберете \"%s\" като активен метод за въвеждане на текст.</string>
     <string name="setup_step2_action">"Превключване на методите на въвеждане"</string>
     <string name="setup_step3_title">"Поздравления! Вече сте готови!"</string>
-    <string name="setup_step3_instruction">Вече можете да пишете във всичките си любими приложения с %s.</string>
     <string name="setup_finish_action">Завършено</string>
     <string name="show_setup_wizard_icon">Показване на иконата на приложението</string>
     <string name="show_setup_wizard_icon_summary">"Показване на иконата на приложението в стартовия панел"</string>

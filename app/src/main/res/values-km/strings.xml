@@ -66,9 +66,6 @@
     <string name="prefs_enable_emoji_alt_physical_key_summary">"គ្រាប់ចុច Alt បង្ហាញផ្ទាំងសញ្ញាអារម្មណ៍"</string>
     <string name="button_default">"លំនាំដើម"</string>
     <string name="setup_welcome_title">"សូម​ស្វាគមន៍​មក​កាន់ %s"</string>
-    <string name="setup_welcome_additional_description">"ជាមួយ​​​ការ​វាយ​បញ្ចូល​ដោយ​ប្រើ​​​កាយវិការ"</string>
-    <string name="setup_start_action">"បាន​ចាប់ផ្ដើម"</string>
-    <string name="setup_steps_title">"រៀបចំ %s"</string>
     <string name="setup_step1_title">"បើក %s"</string>
     <string name="setup_step1_instruction">"សូមពិនិត្យ \"%s\" ក្នុងការកំណត់ភាសា និងបញ្ចូលរបស់អ្នក។ វានឹងផ្តល់សិទ្ធិឲ្យកម្មវិធីនេះដំណើរការនៅលើឧបករណ៍របស់អ្នក។"</string>
     <string name="setup_step1_action">"បើក​នៅ​ក្នុង​ការ​កំណត់"</string>
@@ -76,7 +73,6 @@
     <string name="setup_step2_instruction">"បន្ទាប់ ជ្រើស \"%s\" ជា​វិធី​សាស្ត្រ​បញ្ចូល​អត្ថបទ​សកម្ម​របស់​អ្នក។"</string>
     <string name="setup_step2_action">"ប្ដូរ​វិធីសាស្ត្រ​បញ្ចូល"</string>
     <string name="setup_step3_title">"សូម​អបអរ​សាទរ,​ អ្នក​​បាន​កំណត់​​រួចរាល់​ហើយ!"</string>
-    <string name="setup_step3_instruction">"ឥឡូវ​​អ្នក​អាច​​វាយ​បញ្ចូល​នៅ​ក្នុង​​កម្មវិធី​​ពេញ​ចិត្ត​របស់​អ្នក​ទាំងអស់​ជាមួយ %s ។"</string>
     <string name="setup_finish_action">"បាន​បញ្ចប់"</string>
     <string name="show_setup_wizard_icon">"បង្ហាញ​រូប​កម្មវិធី"</string>
     <string name="show_setup_wizard_icon_summary">"បង្ហាញ​រូប​កម្មវិធី​នៅ​ក្នុង​កម្ម​​វិធី​ចាប់ផ្ដើម"</string>

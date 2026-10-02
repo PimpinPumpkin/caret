@@ -65,9 +65,6 @@
     <string name="prefs_enable_emoji_alt_physical_key_summary">"Alt пернесі арқылы эмодзилерді ашуға болады"</string>
     <string name="button_default">"Әдепкі"</string>
     <string name="setup_welcome_title">%s қолданбасына қош келдіңіз\"</string>
-    <string name="setup_welcome_additional_description">"Қимылмен теру арқылы"</string>
-    <string name="setup_start_action">"Іске қосылды"</string>
-    <string name="setup_steps_title">%s орнату\"</string>
     <string name="setup_step1_title">%s қосу\"</string>
     <string name="setup_step1_instruction">"\"Тілдер және енгізу\" параметрлерінде %s қолданбасына құсбелгі қойыңыз. Сонда оны құрылғыңызда қолдануға рұқсат беріледі."</string>
     <string name="setup_step1_action">"Параметрлер ішінде қосу"</string>
@@ -75,7 +72,6 @@
     <string name="setup_step2_instruction">"Одан кейін \"%s\" қолданбасын белсенді мәтінді енгізу әдісі ретінде таңдаңыз."</string>
     <string name="setup_step2_action">"Енгізу әдістерін ауыстыру"</string>
     <string name="setup_step3_title">"Құттықтаймыз, барлығы дайын!"</string>
-    <string name="setup_step3_instruction">"Қазір барлық таңдаулы қолданбаларда %s арқылы теруге болады."</string>
     <string name="setup_finish_action">"Аяқталған"</string>
     <string name="show_setup_wizard_icon">"Қолданба белгішесін көрсету"</string>
     <string name="show_setup_wizard_icon_summary">"Іске қосу құралында қолданба белгішесін көрсету"</string>

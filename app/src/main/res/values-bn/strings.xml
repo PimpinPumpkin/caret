@@ -119,9 +119,6 @@
     <string name="prefs_enable_emoji_alt_physical_key_summary">ভৌত Alt বোতামে ইমোজি প্যালেট প্রদর্শন</string>
     <string name="button_default">ডিফল্ট</string>
     <string name="setup_welcome_title">%s এ স্বাগত</string>
-    <string name="setup_welcome_additional_description">অঙ্গুলিহেলন টাইপিংয়ের সাথে</string>
-    <string name="setup_start_action">শুরু করা যাক</string>
-    <string name="setup_steps_title">%s সন্নিবেশিত হচ্ছে</string>
     <string name="setup_step1_title">%s সক্ষম করুন</string>
     <string name="setup_step1_instruction">ভাষা ও ইনপুট সেটিংসে \"%s\" সক্রিয় করুন। ফলে এটি আপনার ডিভাইসে চলার অনুমোদন পাবে।</string>
     <string name="setup_step1_action">সেটিংসে সক্ষম করুন</string>
@@ -129,7 +126,6 @@
     <string name="setup_step2_instruction">এখন সক্রিয় লিখন-ইনপুট পদ্ধতি হিসেবে \"%s\" বেছে নিন।</string>
     <string name="setup_step2_action">ইনপুট পদ্ধতি পরিবর্তন</string>
     <string name="setup_step3_title">"অভিনন্দন, আপনি পুরোপুরি প্রস্তুত!"</string>
-    <string name="setup_step3_instruction">এখন %s দিয়ে আপনার সব পছন্দের অ্যাপে টাইপ করতে পারবেন।</string>
     <string name="setup_step3_action">কিবোর্ড সংস্থাপন</string>
     <string name="setup_finish_action">সম্পন্ন</string>
     <string name="show_setup_wizard_icon">অ্যাপ আইকন প্রদর্শন</string>

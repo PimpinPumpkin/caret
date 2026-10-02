@@ -65,9 +65,6 @@
     <string name="prefs_enable_emoji_alt_physical_key_summary">"वास्तविक Alt की इमोजी पॅलेट दर्शविते"</string>
     <string name="button_default">"डीफॉल्ट"</string>
     <string name="setup_welcome_title">%s वर स्वागत आहे\"</string>
-    <string name="setup_welcome_additional_description">"जेश्चर टायपिंग करून"</string>
-    <string name="setup_start_action">"सुरू करा"</string>
-    <string name="setup_steps_title">%s सेट अप करत आहे\"</string>
     <string name="setup_step1_title">%s सुरू करा\"</string>
     <string name="setup_step1_instruction">"कृपया आपल्या भाषांमध्ये आणि इनपुट सेटिंग्जमध्ये \"%s\" तपासा. आपल्या डिव्हाइसवर चालण्यासाठी त्यास हे अधिकृत करेल."</string>
     <string name="setup_step1_action">"सेटिंग्जमध्ये सुरू करा"</string>
@@ -75,7 +72,6 @@
     <string name="setup_step2_instruction">"पुढे, तुमची सक्रिय मजकूर-इनपुट पद्धत म्हणून \"%s\" निवडा."</string>
     <string name="setup_step2_action">"इनपुट पद्धती स्विच करा"</string>
     <string name="setup_step3_title">"अभिनंदन, आता तुम्ही तयार आहात!"</string>
-    <string name="setup_step3_instruction">"आता तुम्ही %s सह आपल्या सर्व आवडत्या अॅप्समध्ये टाइप करू शकता."</string>
     <string name="setup_finish_action">"समाप्त"</string>
     <string name="show_setup_wizard_icon">"अ‍ॅप आयकन दर्शवा"</string>
     <string name="show_setup_wizard_icon_summary">"लाँचर मध्ये ॲप्लिकेशन आयकन दाखवा"</string>

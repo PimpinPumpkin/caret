@@ -68,9 +68,6 @@
     <string name="prefs_enable_emoji_alt_physical_key_summary">Физическая клавиша \"Alt\" показывает все доступные эмодзи</string>
     <string name="button_default">По умолчанию</string>
     <string name="setup_welcome_title">Добро пожаловать в %s</string>
-    <string name="setup_welcome_additional_description">с непрерывным вводом</string>
-    <string name="setup_start_action">Начать работу</string>
-    <string name="setup_steps_title">Настроить %s</string>
     <string name="setup_step1_title">Включить %s</string>
     <string name="setup_step1_instruction">Убедитесь, что приложение \"%s\" включено в настройках языка и ввода. Это позволит ему работать на вашем устройстве.</string>
     <string name="setup_step1_action">Включить в настройках</string>
@@ -78,7 +75,6 @@
     <string name="setup_step2_instruction">Далее выберите \"%s\" в качестве активного метода ввода текста.</string>
     <string name="setup_step2_action">Переключить способ ввода</string>
     <string name="setup_step3_title">Поздравляем, всё готово!</string>
-    <string name="setup_step3_instruction">Теперь вы можете использовать приложение %s для набора текста.</string>
     <string name="setup_finish_action">Готово</string>
     <string name="show_setup_wizard_icon">Показать значок приложения</string>
     <string name="show_setup_wizard_icon_summary">Показать значок приложения в панели запуска</string>

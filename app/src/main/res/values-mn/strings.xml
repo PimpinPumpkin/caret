@@ -65,9 +65,6 @@
     <string name="prefs_enable_emoji_alt_physical_key_summary">"Бодит Alt товчлуур нь эможи палитрыг харуулдаг"</string>
     <string name="button_default">"Үндсэн"</string>
     <string name="setup_welcome_title">"Та %s-д тавтай морилно уу"</string>
-    <string name="setup_welcome_additional_description">"Зангаагаар бичихээр"</string>
-    <string name="setup_start_action">"Эхлэх"</string>
-    <string name="setup_steps_title">%s-г тохируулж байна\"</string>
     <string name="setup_step1_title">%s-г идэвхжүүлэх\"</string>
     <string name="setup_step1_instruction">"Хэл, оролтын тохиргоо хэсгээс \"%s\"-г сонгоно уу. Ингэснээр үүнийг таны төхөөрөмжид ажиллах зөвшөөрлийг өгөх болно."</string>
     <string name="setup_step1_action">"Тохиргоо дотроос идэвхжүүлэх"</string>
@@ -75,7 +72,6 @@
     <string name="setup_step2_instruction">"Дараа нь \"%s\"-г өөрийн идэвхтэй текст-оруулах аргаар сонгоно уу."</string>
     <string name="setup_step2_action">"Оруулах аргыг солих"</string>
     <string name="setup_step3_title">"Баяр хүргэе, та бүгдийг нь тохируулчихлаа!"</string>
-    <string name="setup_step3_instruction">"Та одоо өөрийн дуртай апп-ууд дотроо %s ашиглан бичих болохоор боллоо."</string>
     <string name="setup_finish_action">"Дууссан"</string>
     <string name="show_setup_wizard_icon">"Апп дүрсийг харуулах"</string>
     <string name="show_setup_wizard_icon_summary">"Эхлүүлэгч дээр аппликейшний дүрсийг харуулах"</string>

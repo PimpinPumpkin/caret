@@ -66,9 +66,6 @@
     <string name="prefs_enable_emoji_alt_physical_key_summary">"A tecla Alt física mostra a paleta de emoji"</string>
     <string name="button_default">"Predefinido"</string>
     <string name="setup_welcome_title">Bem-vindo ao %s</string>
-    <string name="setup_welcome_additional_description">com a Escrita ao deslizar</string>
-    <string name="setup_start_action">"Começar"</string>
-    <string name="setup_steps_title">A configurar %s</string>
     <string name="setup_step1_title">Ative o %s</string>
     <string name="setup_step1_instruction">Assinale \"%s\" na área \'Idioma e entrada\' das definições para autorizar a execução no seu dispositivo.</string>
     <string name="setup_step1_action">Ativar nas definições</string>
@@ -76,7 +73,6 @@
     <string name="setup_step2_instruction">De seguida, selecione \"%s\" como método de entrada ativo.</string>
     <string name="setup_step2_action">Alterar métodos de entrada</string>
     <string name="setup_step3_title">Parabéns, configuração terminada!</string>
-    <string name="setup_step3_instruction">Agora pode usar o %s para escrever em qualquer app.</string>
     <string name="setup_finish_action">"Concluído"</string>
     <string name="show_setup_wizard_icon">Mostrar ícone da app</string>
     <string name="show_setup_wizard_icon_summary">Mostrar ícone da app no iniciador</string>

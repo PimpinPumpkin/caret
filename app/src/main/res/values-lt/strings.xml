@@ -65,9 +65,6 @@
     <string name="prefs_enable_emoji_alt_physical_key_summary">"Paspaudus fizinį klavišą „Alt“ rodoma jaustukų paletė"</string>
     <string name="button_default">"Numatytieji"</string>
     <string name="setup_welcome_title">"Sveiki! Tai „%s“"</string>
-    <string name="setup_welcome_additional_description">"naudojant įvestį gestais"</string>
-    <string name="setup_start_action">"Pradėti"</string>
-    <string name="setup_steps_title">"„%s“ sąranka"</string>
     <string name="setup_step1_title">"Įgalinkite „%s“"</string>
     <string name="setup_step1_instruction">Patikrinkite \"%s\" savo kalbos ir įvesties nustatymuose. Tada leiskite vykdyti savo įrenginyje.</string>
     <string name="setup_step1_action">"Įgalinti nustatymuose"</string>
@@ -75,7 +72,6 @@
     <string name="setup_step2_instruction">Toliau pasirinkite \"%s“ kaip aktyvų teksto įvesties metodą.</string>
     <string name="setup_step2_action">"Perjungti įvesties metodus"</string>
     <string name="setup_step3_title">"Sveikiname, viską nustatėte!"</string>
-    <string name="setup_step3_instruction">Dabar galite rašyti visose mėgstamose programose naudodami „%s“.</string>
     <string name="setup_finish_action">"Baigta"</string>
     <string name="show_setup_wizard_icon">"Rodyti programos piktogramą"</string>
     <string name="show_setup_wizard_icon_summary">"Pateikti programos piktogramą paleidimo priemonėje"</string>

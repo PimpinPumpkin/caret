@@ -66,9 +66,6 @@
     <string name="prefs_enable_emoji_alt_physical_key_summary">"Το φυσικό πλήκτρο Alt εμφανίζει την παλέτα emoji"</string>
     <string name="button_default">"Προεπιλογή"</string>
     <string name="setup_welcome_title">"Καλώς ορίσατε στο %s"</string>
-    <string name="setup_welcome_additional_description">"με Πληκτρολόγηση με κίνηση"</string>
-    <string name="setup_start_action">"Έναρξη"</string>
-    <string name="setup_steps_title">"Ρύθμιση της εφαρμογής %s"</string>
     <string name="setup_step1_title">"Ενεργοποιήστε την εφαρμογή %s"</string>
     <string name="setup_step1_instruction">"Επιλέξτε \"%s\" στις Ρυθμίσεις γλώσσας και εισαγωγής, για να το εξουσιοδοτήσετε να εκτελείται στη συσκευή σας."</string>
     <string name="setup_step1_action">"Ενεργοποίηση στις Ρυθμίσεις"</string>
@@ -76,7 +73,6 @@
     <string name="setup_step2_instruction">"Στη συνέχεια, επιλέξτε \"%s\" ως την ενεργή μέθοδο εισαγωγής κειμένου."</string>
     <string name="setup_step2_action">"Εναλλαγή μεθόδων εισαγωγής"</string>
     <string name="setup_step3_title">"Συγχαρητήρια, είστε έτοιμοι!"</string>
-    <string name="setup_step3_instruction">"Πλέον μπορείτε να πληκτρολογήσετε όλες τις αγαπημένες σας εφαρμογές με το %s."</string>
     <string name="setup_finish_action">"Ολοκληρώθηκε"</string>
     <string name="show_setup_wizard_icon">"Εμφάνιση εικονιδίου εφαρμογής"</string>
     <string name="show_setup_wizard_icon_summary">"Εμφάνιση εικονιδίου εφαρμογής στο πρόγραμμα εκκίνησης"</string>

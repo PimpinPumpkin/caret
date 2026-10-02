@@ -65,9 +65,6 @@
     <string name="prefs_enable_emoji_alt_physical_key_summary">"ஈமோஜி பலகத்தைக் காட்டும் கைமுறை Alt விசை"</string>
     <string name="button_default">"இயல்புநிலை"</string>
     <string name="setup_welcome_title">%s பயன்பாட்டிற்கு வரவேற்கிறோம்\"</string>
-    <string name="setup_welcome_additional_description">"ஸ்வைப் உள்ளீடு மூலம்"</string>
-    <string name="setup_start_action">"தொடங்குக"</string>
-    <string name="setup_steps_title">%s ஆப்ஸை அமைக்கிறது\"</string>
     <string name="setup_step1_title">%s ஆப்ஸை இயக்கவும்\"</string>
     <string name="setup_step1_instruction">"மொழி &amp; உள்ளீட்டு அமைப்புகளில் \"%s\" ஆப்ஸைத் தேர்வு செய்யவும். இதனால், சாதனத்தில் ஆப்ஸை இயக்கலாம்."</string>
     <string name="setup_step1_action">"அமைப்புகளில் இயக்கு"</string>
@@ -75,7 +72,6 @@
     <string name="setup_step2_instruction">"அடுத்து, உங்கள் செயலில் உள்ள உரை உள்ளீட்டு முறையாக \"%s\" பயன்பாட்டைத் தேர்ந்தெடுக்கவும்."</string>
     <string name="setup_step2_action">"உள்ளீட்டு முறைகளை மாற்றவும்"</string>
     <string name="setup_step3_title">"வாழ்த்துகள், தயாராகிவிட்டீர்கள்!"</string>
-    <string name="setup_step3_instruction">"%s ஆப்ஸ் மூலம் உங்களுக்கு விருப்பமான எல்லா ஆப்ஸ்களிலும் நீங்கள் உள்ளிடலாம்."</string>
     <string name="setup_finish_action">"முடிந்தது"</string>
     <string name="show_setup_wizard_icon">"ஆப்ஸ் ஐகானைக் காட்டு"</string>
     <string name="show_setup_wizard_icon_summary">"துவக்கியில் ஆப்ஸ் ஐகானைக் காட்டும்"</string>

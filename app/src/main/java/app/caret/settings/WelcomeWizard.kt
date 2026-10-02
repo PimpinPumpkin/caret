@@ -4,57 +4,76 @@ package app.caret.settings
 import android.content.Context
 import android.content.Intent
 import android.provider.Settings
+import android.text.format.Formatter
 import android.view.inputmethod.InputMethodManager
-import androidx.activity.compose.rememberLauncherForActivityResult
-import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.animateColorAsState
+import androidx.compose.animation.animateContentSize
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.safeDrawing
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.widthIn
+import androidx.compose.foundation.layout.windowInsetsPadding
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.verticalScroll
+import androidx.compose.material3.Button
+import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
+import androidx.compose.material3.FilledTonalButton
 import androidx.compose.material3.Icon
-import androidx.compose.material3.LocalContentColor
-import androidx.compose.material3.LocalTextStyle
+import androidx.compose.material3.LinearWavyProgressIndicator
+import androidx.compose.material3.MaterialShapes
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
+import androidx.compose.material3.toShape
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableIntStateOf
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.painter.Painter
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import androidx.core.content.ContextCompat
 import app.caret.latin.R
-import app.caret.latin.utils.JniUtils
+import app.caret.latin.swipe.FutoSwipe
+import app.caret.latin.swipe.SwipeModels
+import app.caret.latin.utils.Log
 import app.caret.latin.utils.Theme
 import app.caret.latin.utils.UncachedInputMethodManagerUtils
 import app.caret.latin.utils.previewDark
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 
+/**
+ * First-run setup on one screen: enable the keyboard, switch to it, and optionally get the swipe
+ * typing models. Each step shows as done as soon as the system reports it.
+ */
 @Composable
 fun WelcomeWizard(
     close: () -> Unit,
@@ -62,185 +81,222 @@ fun WelcomeWizard(
 ) {
     val ctx = LocalContext.current
     val imm = ctx.getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
-    fun determineStep(): Int = when {
-        !UncachedInputMethodManagerUtils.isThisImeEnabled(ctx, imm) -> 0
-        !UncachedInputMethodManagerUtils.isThisImeCurrent(ctx, imm) -> 2
-        else -> 3
-    }
-    var step by rememberSaveable { mutableIntStateOf(determineStep()) }
-    val scope = rememberCoroutineScope { Dispatchers.IO }
-    LaunchedEffect(step) {
-        if (step == 2)
-            scope.launch {
-                while (step == 2 && !UncachedInputMethodManagerUtils.isThisImeCurrent(ctx, imm)) {
-                    delay(50)
-                }
-                step = 3
+    var enabled by remember { mutableStateOf(UncachedInputMethodManagerUtils.isThisImeEnabled(ctx, imm)) }
+    var current by remember { mutableStateOf(UncachedInputMethodManagerUtils.isThisImeCurrent(ctx, imm)) }
+    var swipeInstalled by remember { mutableStateOf(FutoSwipe.isInstalled(ctx)) }
+    var swipeSkipped by rememberSaveable { mutableStateOf(false) }
+    var swipeProgress: Float? by remember { mutableStateOf(null) }
+    var swipeError: String? by remember { mutableStateOf(null) }
+    val scope = rememberCoroutineScope()
+
+    // the system does not tell us when the user enables or picks the keyboard, so ask
+    LaunchedEffect(Unit) {
+        while (true) {
+            val (isEnabled, isCurrent) = withContext(Dispatchers.IO) {
+                UncachedInputMethodManagerUtils.isThisImeEnabled(ctx, imm) to
+                    UncachedInputMethodManagerUtils.isThisImeCurrent(ctx, imm)
             }
+            enabled = isEnabled
+            current = isEnabled && isCurrent
+            delay(300)
+        }
     }
-    val useWideLayout = isWideScreen()
-    val stepBackgroundColor = Color(ContextCompat.getColor(ctx, R.color.setup_step_background))
-    val textColor = Color(ContextCompat.getColor(ctx, R.color.setup_text_action))
-    val textColorDim = textColor.copy(alpha = 0.5f)
-    val titleColor = Color(ContextCompat.getColor(ctx, R.color.setup_text_title))
+
     val appName = stringResource(ctx.applicationInfo.labelRes)
-    @Composable fun bigText() {
-        val resource = if (step == 0) R.string.setup_welcome_title else R.string.setup_steps_title
-        Column(Modifier.padding(bottom = 36.dp)) {
+    val swipeDone = swipeInstalled || swipeSkipped
+    val activeStep = when {
+        !enabled -> 1
+        !current -> 2
+        !swipeDone -> 3
+        else -> 0
+    }
+
+    @Composable fun header() {
+        Column(horizontalAlignment = Alignment.CenterHorizontally, modifier = Modifier.fillMaxWidth()) {
+            AppBadge()
+            Spacer(Modifier.height(20.dp))
             Text(
-                stringResource(resource, appName),
-                style = MaterialTheme.typography.displayMedium,
+                stringResource(R.string.setup_welcome_title, appName),
+                style = MaterialTheme.typography.displaySmall,
                 textAlign = TextAlign.Center,
-                color = titleColor,
             )
-            if (JniUtils.sHaveGestureLib)
-                Text(
-                    stringResource(R.string.setup_welcome_additional_description),
-                    style = MaterialTheme.typography.bodyLarge,
-                    textAlign = TextAlign.End,
-                    color = titleColor,
-                    modifier = Modifier.fillMaxWidth()
-                )
+            Spacer(Modifier.height(8.dp))
+            Text(
+                stringResource(R.string.setup_subtitle),
+                style = MaterialTheme.typography.bodyLarge,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                textAlign = TextAlign.Center,
+            )
         }
     }
-    @Composable
-    fun ColumnScope.Step(step: Int, title: String, instruction: String, actionText: String, icon: Painter, action: () -> Unit) {
-        Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
-            Text("1", color = if (step == 1) titleColor else textColorDim)
-            Text("2", color = if (step == 2) titleColor else textColorDim)
-            Text("3", color = if (step == 3) titleColor else textColorDim)
-        }
-        Column(Modifier
-            .background(color = stepBackgroundColor)
-            .padding(16.dp)
-        ) {
-            Text(title)
-            Text(instruction, style = MaterialTheme.typography.bodyLarge.merge(color = textColor))
-        }
-        Spacer(Modifier.height(4.dp))
-        Row(
-            Modifier.clickable { action() }
-                .background(color = stepBackgroundColor)
-                .padding(16.dp),
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            Icon(icon, null, Modifier.padding(end = 6.dp).size(32.dp), tint = textColor)
-            Text(actionText, Modifier.weight(1f))
-        }
-    }
+
     @Composable fun steps() {
-        if (step == 0)
-            Step0 { step = 1 }
-        else
-            Column {
-                val launcher = rememberLauncherForActivityResult(ActivityResultContracts.StartActivityForResult()) {
-                    step = determineStep()
-                }
-                if (step == 1) {
-                    Step(
-                        step,
-                        stringResource(R.string.setup_step1_title, appName),
-                        stringResource(R.string.setup_step1_instruction, appName),
-                        stringResource(R.string.setup_step1_action),
-                        painterResource(R.drawable.ic_setup_key)
-                    ) {
-                        val intent = Intent()
-                        intent.action = Settings.ACTION_INPUT_METHOD_SETTINGS
-                        intent.addCategory(Intent.CATEGORY_DEFAULT)
-                        launcher.launch(intent)
-                    }
-                } else if (step == 2) {
-                    Step(
-                        step,
-                        stringResource(R.string.setup_step2_title, appName),
-                        stringResource(R.string.setup_step2_instruction, appName),
-                        stringResource(R.string.setup_step2_action),
-                        painterResource(R.drawable.ic_setup_select),
-                        imm::showInputMethodPicker
+        Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+            StepCard(
+                number = 1,
+                title = stringResource(R.string.setup_step1_title, appName),
+                instruction = stringResource(R.string.setup_step1_instruction, appName),
+                done = enabled,
+                active = activeStep == 1,
+            ) {
+                Button(onClick = {
+                    val intent = Intent(Settings.ACTION_INPUT_METHOD_SETTINGS)
+                    intent.addCategory(Intent.CATEGORY_DEFAULT)
+                    ctx.startActivity(intent)
+                }) { Text(stringResource(R.string.setup_step1_action)) }
+            }
+            StepCard(
+                number = 2,
+                title = stringResource(R.string.setup_step2_title, appName),
+                instruction = stringResource(R.string.setup_step2_instruction, appName),
+                done = current,
+                active = activeStep == 2,
+            ) {
+                Button(onClick = imm::showInputMethodPicker) { Text(stringResource(R.string.setup_step2_action)) }
+            }
+            StepCard(
+                number = 3,
+                title = stringResource(R.string.setup_swipe_title),
+                instruction = when {
+                    swipeError != null -> stringResource(R.string.swipe_models_failed, swipeError ?: "")
+                    else -> stringResource(
+                        R.string.setup_swipe_instruction,
+                        Formatter.formatShortFileSize(ctx, SwipeModels.totalSize)
                     )
-                    Spacer(Modifier.height(4.dp))
-                    Row(
-                        Modifier.clickable { close() }
-                            .background(color = stepBackgroundColor)
-                            .padding(16.dp),
-                        verticalAlignment = Alignment.CenterVertically
-                    ) {
-                        Icon(
-                            painterResource(R.drawable.sym_keyboard_language_switch),
-                            null,
-                            Modifier.padding(end = 6.dp).size(32.dp),
-                            tint = textColor
-                        )
-                        Text(stringResource(R.string.setup_step3_action), Modifier.weight(1f))
-                    }
-                } else { // step 3
-                    Step(
-                        step,
-                        stringResource(R.string.setup_step3_title),
-                        stringResource(R.string.setup_step3_instruction, appName),
-                        stringResource(R.string.setup_step3_action),
-                        painterResource(R.drawable.sym_keyboard_language_switch),
-                        close
-                    )
-                    Spacer(Modifier.height(4.dp))
-                    Row(
-                        Modifier.clickable { finish() }
-                            .background(color = stepBackgroundColor)
-                            .padding(16.dp),
-                        verticalAlignment = Alignment.CenterVertically
-                    ) {
-                        Icon(
-                            painterResource(R.drawable.ic_setup_check),
-                            null,
-                            Modifier.padding(end = 6.dp).size(32.dp),
-                            tint = textColor
-                        )
-                        Text(stringResource(R.string.setup_finish_action), Modifier.weight(1f))
+                },
+                done = swipeInstalled,
+                active = activeStep == 3,
+            ) {
+                val progress = swipeProgress
+                if (progress != null) {
+                    @OptIn(ExperimentalMaterial3ExpressiveApi::class)
+                    LinearWavyProgressIndicator(progress = { progress }, modifier = Modifier.fillMaxWidth())
+                } else {
+                    Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                        Button(onClick = {
+                            swipeProgress = 0f
+                            swipeError = null
+                            scope.launch {
+                                swipeError = withContext(Dispatchers.IO) {
+                                    try {
+                                        SwipeModels.download(ctx) { swipeProgress = it }
+                                        null
+                                    } catch (e: Exception) {
+                                        Log.w("WelcomeWizard", "could not get swipe models", e)
+                                        e.message ?: e.javaClass.simpleName
+                                    }
+                                }
+                                swipeProgress = null
+                                swipeInstalled = FutoSwipe.isInstalled(ctx)
+                            }
+                        }) { Text(stringResource(R.string.setup_swipe_download)) }
+                        TextButton(onClick = { swipeSkipped = true }) { Text(stringResource(R.string.setup_swipe_skip)) }
                     }
                 }
             }
-    }
-    Surface {
-        CompositionLocalProvider(
-            LocalContentColor provides textColor,
-            LocalTextStyle provides MaterialTheme.typography.titleLarge.merge(color = textColor),
-        ) {
-            Box(
-                modifier = Modifier.fillMaxSize().padding(32.dp),
-                contentAlignment = Alignment.Center
-            ) {
-                if (useWideLayout)
-                    Row {
-                        Box(Modifier.weight(0.4f)) {
-                            bigText()
-                        }
-                        Box(Modifier.weight(0.6f)) {
-                            steps()
-                        }
+            AnimatedVisibility(activeStep == 0) {
+                Column(Modifier.padding(top = 16.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
+                    Text(
+                        stringResource(R.string.setup_step3_title),
+                        style = MaterialTheme.typography.headlineSmall,
+                    )
+                    var sample by rememberSaveable { mutableStateOf("") }
+                    OutlinedTextField(
+                        value = sample,
+                        onValueChange = { sample = it },
+                        label = { Text(stringResource(R.string.setup_try_hint)) },
+                        shape = RoundedCornerShape(16.dp),
+                        modifier = Modifier.fillMaxWidth(),
+                    )
+                    Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                        Button(onClick = close) { Text(stringResource(R.string.setup_step3_action)) }
+                        FilledTonalButton(onClick = finish) { Text(stringResource(R.string.setup_finish_action)) }
                     }
-                else
-                    Column {
-                        bigText()
-                        steps()
-                    }
+                }
             }
         }
+    }
+
+    Surface(Modifier.fillMaxSize()) {
+        if (isWideScreen())
+            Row(
+                Modifier.windowInsetsPadding(WindowInsets.safeDrawing).padding(24.dp),
+                horizontalArrangement = Arrangement.spacedBy(32.dp),
+                verticalAlignment = Alignment.CenterVertically,
+            ) {
+                Box(Modifier.weight(0.4f)) { header() }
+                Box(Modifier.weight(0.6f).verticalScroll(rememberScrollState())) { steps() }
+            }
+        else
+            Box(
+                Modifier.windowInsetsPadding(WindowInsets.safeDrawing).verticalScroll(rememberScrollState()),
+                contentAlignment = Alignment.TopCenter,
+            ) {
+                Column(Modifier.widthIn(max = 560.dp).padding(horizontal = 20.dp, vertical = 32.dp)) {
+                    header()
+                    Spacer(Modifier.height(32.dp))
+                    steps()
+                }
+            }
     }
 }
 
+/** The carrot on a soft Material shape. */
+@OptIn(ExperimentalMaterial3ExpressiveApi::class)
 @Composable
-fun Step0(onClick: () -> Unit) {
-    Column(horizontalAlignment = Alignment.CenterHorizontally) {
-        Image(painterResource(R.drawable.setup_welcome_image), null)
-        Row(Modifier.clickable { onClick() }
-            .padding(top = 4.dp, start = 4.dp, end = 4.dp)
-            //.background(color = MaterialTheme.colorScheme.primary)
-        ) {
-            Spacer(Modifier.weight(1f))
-            Text(
-                stringResource(R.string.setup_start_action),
-                modifier = Modifier.padding(horizontal = 16.dp)
-            )
+private fun AppBadge() {
+    Box(
+        Modifier.size(128.dp)
+            .clip(MaterialShapes.Cookie9Sided.toShape())
+            .background(MaterialTheme.colorScheme.primaryContainer),
+        contentAlignment = Alignment.Center,
+    ) {
+        Image(painterResource(R.drawable.ic_launcher_foreground), null, Modifier.size(216.dp))
+    }
+}
+
+/** One setup step. The active one is larger and tinted and shows its [action]; done ones show a check. */
+@Composable
+private fun StepCard(
+    number: Int,
+    title: String,
+    instruction: String,
+    done: Boolean,
+    active: Boolean,
+    action: @Composable () -> Unit,
+) {
+    val colors = MaterialTheme.colorScheme
+    val container by animateColorAsState(if (active) colors.primaryContainer else colors.surfaceContainerHighest)
+    val content = when {
+        active -> colors.onPrimaryContainer
+        done -> colors.onSurface
+        else -> colors.onSurfaceVariant.copy(alpha = 0.6f)
+    }
+    Surface(
+        color = container,
+        contentColor = content,
+        shape = RoundedCornerShape(if (active) 28.dp else 20.dp),
+        modifier = Modifier.fillMaxWidth().animateContentSize(),
+    ) {
+        Row(Modifier.padding(16.dp), horizontalArrangement = Arrangement.spacedBy(16.dp)) {
+            Box(
+                Modifier.size(36.dp)
+                    .clip(CircleShape)
+                    .background(if (done) colors.primary else if (active) colors.onPrimaryContainer.copy(alpha = 0.12f) else colors.surfaceContainerLow),
+                contentAlignment = Alignment.Center,
+            ) {
+                if (done)
+                    Icon(painterResource(R.drawable.ic_setup_check), null, Modifier.size(20.dp), tint = colors.onPrimary)
+                else
+                    Text(number.toString(), style = MaterialTheme.typography.titleMedium)
+            }
+            Column(Modifier.weight(1f).padding(top = 6.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                Text(title, style = MaterialTheme.typography.titleMedium)
+                if (active) {
+                    Text(instruction, style = MaterialTheme.typography.bodyMedium)
+                    action()
+                }
+            }
         }
     }
 }
@@ -255,10 +311,7 @@ private fun Preview() {
     }
 }
 
-@Preview(
-    // content cut off on real device, but not here... great?
-    device = "spec:orientation=landscape,width=400dp,height=780dp"
-)
+@Preview(device = "spec:orientation=landscape,width=400dp,height=780dp")
 @Composable
 private fun WidePreview() {
     Theme(previewDark) {

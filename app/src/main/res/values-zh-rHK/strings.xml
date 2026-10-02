@@ -66,9 +66,6 @@
     <string name="prefs_enable_emoji_alt_physical_key_summary">"以實體 Alt 鍵顯示表情圖案選項"</string>
     <string name="button_default">"預設"</string>
     <string name="setup_welcome_title">"歡迎使用「%s」"</string>
-    <string name="setup_welcome_additional_description">"配備手勢輸入功能"</string>
-    <string name="setup_start_action">"開始"</string>
-    <string name="setup_steps_title">"設定「%s」"</string>
     <string name="setup_step1_title">"啟用「%s」"</string>
     <string name="setup_step1_instruction">"請在「語言和輸入」設定中勾選「%s」。這將允許裝置執行此應用程式。"</string>
     <string name="setup_step1_action">"在設定中啟用"</string>
@@ -76,7 +73,6 @@
     <string name="setup_step2_instruction">"接著，請選取「%s」作為目前使用的文字輸入方法。"</string>
     <string name="setup_step2_action">"切換輸入方法"</string>
     <string name="setup_step3_title">"恭喜，一切就緒！"</string>
-    <string name="setup_step3_instruction">"現在，您可以在所有最愛的應用程式中使用「%s」輸入文字。"</string>
     <string name="setup_finish_action">"完成"</string>
     <string name="show_setup_wizard_icon">"顯示應用程式圖示"</string>
     <string name="show_setup_wizard_icon_summary">"在啟動器中顯示圖示"</string>

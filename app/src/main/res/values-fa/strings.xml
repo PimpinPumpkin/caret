@@ -65,9 +65,6 @@
     <string name="prefs_enable_emoji_alt_physical_key_summary">کلید فیزیکی Alt پالت ایموجی‌ها را نمایش می‌دهد</string>
     <string name="button_default">"پیش‌فرض"</string>
     <string name="setup_welcome_title">به %s خوش آمدید</string>
-    <string name="setup_welcome_additional_description">همراه با تایپ اشاره‌ای</string>
-    <string name="setup_start_action">شروع</string>
-    <string name="setup_steps_title">راه‌اندازی %s</string>
     <string name="setup_step1_title">فعال‌سازی %s</string>
     <string name="setup_step1_instruction">لطفاً \"%s\" را در تنظیمات زبان و ورودی خود علامت بزنید. این کار مجوز اجرای آن را در دستگاه شما صادر می‌کند.</string>
     <string name="setup_step1_action">"فعال‌سازی در تنظیمات"</string>
@@ -75,7 +72,6 @@
     <string name="setup_step2_instruction">اکنون، \"%s\" را به عنوان روش ورودی متنی فعال خود انتخاب کنید.</string>
     <string name="setup_step2_action">تغییر روش ورودی</string>
     <string name="setup_step3_title">تبریک، همه‌چیز آماده است!</string>
-    <string name="setup_step3_instruction">اکنون می‌توانید در تمام برنامه‌های موردعلاقه خود با %s تایپ کنید.</string>
     <string name="setup_finish_action">پایان</string>
     <string name="show_setup_wizard_icon">نمایش آیکون برنامه</string>
     <string name="show_setup_wizard_icon_summary">نمایش آیکون برنامه در لیست برنامه‌ها</string>

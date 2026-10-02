@@ -65,9 +65,6 @@
     <string name="prefs_enable_emoji_alt_physical_key_summary">"Teklatu fisikoko Alt tekla sakatuta emojiak agertzen dira"</string>
     <string name="button_default">"Lehenetsia"</string>
     <string name="setup_welcome_title">Ongi etorri %s aplikaziora</string>
-    <string name="setup_welcome_additional_description">Keinu-idazketarekin</string>
-    <string name="setup_start_action">"Hasi erabiltzen"</string>
-    <string name="setup_steps_title">%s konfiguratzen</string>
     <string name="setup_step1_title">%s gaitu</string>
     <string name="setup_step1_instruction">Hautatu \"%s\" Hizkuntza eta idazketa ataleko ezarpenetan &amp;. Horrek gailuan exekutatzea baimenduko dio.</string>
     <string name="setup_step1_action">Gaitu Ezarpenetan</string>
@@ -75,7 +72,6 @@
     <string name="setup_step2_instruction">Ondoren, hautatu \"%s\" idazketa-metodo aktibo gisa.</string>
     <string name="setup_step2_action">"Aldatu idazketa-metodoak"</string>
     <string name="setup_step3_title">"Dena prest duzu!"</string>
-    <string name="setup_step3_instruction">Gogokoen dituzun aplikazioetan idatz dezakezu dagoeneko %s erabilita.</string>
     <string name="setup_finish_action">"Amaituta"</string>
     <string name="show_setup_wizard_icon">"Erakutsi aplikazioaren ikonoa"</string>
     <string name="show_setup_wizard_icon_summary">Bistaratu aplikazioaren ikonoa panelean</string>

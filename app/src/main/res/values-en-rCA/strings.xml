@@ -66,9 +66,6 @@
     <string name="prefs_enable_emoji_alt_physical_key_summary">"Physical Alt key shows the emoji palette"</string>
     <string name="button_default">"Default"</string>
     <string name="setup_welcome_title">"Welcome to %s"</string>
-    <string name="setup_welcome_additional_description">"with Gesture Typing"</string>
-    <string name="setup_start_action">"Get started"</string>
-    <string name="setup_steps_title">"Setting up %s"</string>
     <string name="setup_step1_title">"Enable %s"</string>
     <string name="setup_step1_instruction">"Please tick \"%s\" in your Languages &amp; input settings. This will authorise it to run on your device."</string>
     <string name="setup_step1_action">"Enable in Settings"</string>
@@ -76,7 +73,6 @@
     <string name="setup_step2_instruction">"Next, select \"%s\" as your active text-input method."</string>
     <string name="setup_step2_action">"Switch input methods"</string>
     <string name="setup_step3_title">"Congratulations, you\'re all set!"</string>
-    <string name="setup_step3_instruction">"Now you can type in all your favourite apps with %s."</string>
     <string name="setup_finish_action">"Finished"</string>
     <string name="show_setup_wizard_icon">"Show app icon"</string>
     <string name="show_setup_wizard_icon_summary">"Display application icon in the launcher"</string>

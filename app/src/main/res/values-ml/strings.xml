@@ -65,9 +65,6 @@
     <string name="prefs_enable_emoji_alt_physical_key_summary">"പ്രത്യക്ഷ Alt കീ ഇമോജി പാലറ്റിനെ കാണിക്കുന്നു"</string>
     <string name="button_default">"സ്ഥിരമായത്"</string>
     <string name="setup_welcome_title">%s എന്നതിലേക്ക് സ്വാഗതം</string>
-    <string name="setup_welcome_additional_description">"വിരൽചലിത ടൈപ്പിംഗിനൊപ്പം"</string>
-    <string name="setup_start_action">"ആരംഭിക്കുക"</string>
-    <string name="setup_steps_title">%s സജ്ജമാക്കുന്നു</string>
     <string name="setup_step1_title">%s പ്രവർത്തനക്ഷമമാക്കുക</string>
     <string name="setup_step1_instruction">ഭാഷയും ഇൻപുട്ടും ക്രമീകരണത്തിൽ \"%s\" ചെക്കുചെയ്യുക. ചെക്കുചെയ്യുന്നത് ഉപകരണത്തിൽ പ്രവർത്തിക്കാൻ ഇതിന് അംഗീകാരം നൽകും.</string>
     <string name="setup_step1_action">"ക്രമീകരണങ്ങളിൽ പ്രവർത്തനക്ഷമമാകുക"</string>
@@ -75,7 +72,6 @@
     <string name="setup_step2_instruction">അടുത്തത്, \"%s\" എന്നതിനെ നിങ്ങളുടെ സജീവ വാചക-ടൈപ്പുചെയ്യൽ രീതിയായി തിരഞ്ഞെടുക്കുക.</string>
     <string name="setup_step2_action">"ടൈപ്പുചെയ്യൽ രീതികൾ മാറുക"</string>
     <string name="setup_step3_title">"അഭിനന്ദനങ്ങൾ, നിങ്ങൾ എല്ലാം പൂർത്തിയാക്കി!"</string>
-    <string name="setup_step3_instruction">%s ഉപയോഗിച്ച് നിങ്ങളുടെ പ്രിയപ്പെട്ട എല്ലാ അപ്ലിക്കേഷനുകളിലും ഇപ്പോൾ ടൈപ്പുചെയ്യാനാകും.</string>
     <string name="setup_finish_action">"പൂർത്തിയായി"</string>
     <string name="show_setup_wizard_icon">"അപ്ലിക്കേഷൻ ഐക്കൺ കാണിക്കുക"</string>
     <string name="show_setup_wizard_icon_summary">"ലോഞ്ചറിൽ അപ്ലിക്കേഷൻ ഐക്കൺ പ്രദർശിപ്പിക്കുക"</string>

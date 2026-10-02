@@ -65,9 +65,6 @@
     <string name="prefs_enable_emoji_alt_physical_key_summary">"ਭੌਤਿਕ Alt ਕੁੰਜੀ ਇਮੋਜੀ ਪੈਲੇਟ ਦਿਖਾਉਂਦੀ ਹੈ"</string>
     <string name="button_default">"ਪੂਰਵ-ਨਿਰਧਾਰਤ"</string>
     <string name="setup_welcome_title">%s ਤੇ ਸੁਆਗਤ ਹੈ\"</string>
-    <string name="setup_welcome_additional_description">"ਸੰਕੇਤ ਟਾਈਪਿੰਗ ਨਾਲ"</string>
-    <string name="setup_start_action">"ਸ਼ੁਰੂਆਤ ਕਰੋ"</string>
-    <string name="setup_steps_title">%s ਸੈਟ ਅਪ ਕਰ ਰਿਹਾ ਹੈ\"</string>
     <string name="setup_step1_title">%s ਨੂੰ ਸਮਰੱਥ ਬਣਾਓ\"</string>
     <string name="setup_step1_instruction">"ਕਿਰਪਾ ਕਰਕੇ ਆਪਣੀਆਂ ਭਾਸ਼ਾਵਾਂ ਅਤੇ ਇਨਪੁੱਟ ਸੈਟਿੰਗਾਂ ਵਿੱਚ \"%s\" \'ਤੇ ਸਹੀ ਦਾ ਨਿਸ਼ਾਨ ਲਗਾਓ। ਇਹ ਉਸ ਨੂੰ ਤੁਹਾਡੇ ਡੀਵਾਈਸ \'ਤੇ ਚੱਲਣ ਲਈ ਅਧਿਕਾਰਿਤ ਕਰੇਗਾ।"</string>
     <string name="setup_step1_action">"ਸੈਟਿੰਗਾਂ ਵਿੱਚ ਚਾਲੂ ਕਰੋ"</string>
@@ -75,7 +72,6 @@
     <string name="setup_step2_instruction">"ਫਿਰ, \"%s\" ਨੂੰ ਆਪਣੀ ਕਿਰਿਆਸ਼ੀਲ ਲਿਖਤ-ਇਨਪੁੱਟ ਵਿਧੀ ਦੇ ਤੌਰ ਤੇ ਚੁਣੋ।"</string>
     <string name="setup_step2_action">"ਇਨਪੁੱਟ ਵਿਧੀਆਂ ਸਵਿੱਚ ਕਰੋ"</string>
     <string name="setup_step3_title">"ਵਧਾਈ ਹੋਵੇ, ਤੁਸੀਂ ਸਾਰਾ ਸੈਟ ਕਰ ਲਿਆ ਹੈ!"</string>
-    <string name="setup_step3_instruction">"ਹੁਣ ਤੁਸੀਂ %s ਨਾਲ ਆਪਣੇ ਸਾਰੇ ਮਨਪਸੰਦ ਐਪਸ ਨੂੰ ਟਾਈਪ ਕਰ ਸਕਦੇ ਹੋ।"</string>
     <string name="setup_finish_action">"ਪੂਰਾ ਹੋਇਆ"</string>
     <string name="show_setup_wizard_icon">"ਐਪ ਪ੍ਰਤੀਕ ਦਿਖਾਓ"</string>
     <string name="show_setup_wizard_icon_summary">"ਲਾਂਚਰ ਵਿੱਚ ਐਪਲੀਕੇਸ਼ਨ ਪ੍ਰਤੀਕ ਪ੍ਰਦਰਸ਼ਿਤ ਕਰੋ"</string>

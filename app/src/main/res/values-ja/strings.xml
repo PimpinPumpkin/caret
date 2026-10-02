@@ -65,9 +65,6 @@
     <string name="prefs_enable_emoji_alt_physical_key_summary">"物理Altキーによって絵文字パレットが表示されます"</string>
     <string name="button_default">"デフォルト"</string>
     <string name="setup_welcome_title">%sへようこそ\"</string>
-    <string name="setup_welcome_additional_description">"新しいジェスチャー入力をお試しください"</string>
-    <string name="setup_start_action">"開始"</string>
-    <string name="setup_steps_title">%sの設定\"</string>
     <string name="setup_step1_title">%sの有効化\"</string>
     <string name="setup_step1_instruction">[言語と入力] 設定で%s」のチェックボックスをオンにしてください。これで、このデバイスで利用できるようになります。</string>
     <string name="setup_step1_action">"設定での有効化"</string>
@@ -75,7 +72,6 @@
     <string name="setup_step2_instruction">次に、有効なテキスト入力方法として%s」を選択します。</string>
     <string name="setup_step2_action">"入力方法を切り替える"</string>
     <string name="setup_step3_title">設定完了！</string>
-    <string name="setup_step3_instruction">"これで、お気に入りのすべてのアプリで%sを使用して入力できます。"</string>
     <string name="setup_finish_action">"完了"</string>
     <string name="show_setup_wizard_icon">"アプリアイコンを表示"</string>
     <string name="show_setup_wizard_icon_summary">"ランチャーにアプリアイコンを表示します"</string>

@@ -65,9 +65,6 @@
     <string name="prefs_enable_emoji_alt_physical_key_summary">"Физички тастер Alt показује палету емоџија"</string>
     <string name="button_default">"Подразумевано"</string>
     <string name="setup_welcome_title">Добро дошли у %s</string>
-    <string name="setup_welcome_additional_description">"помоћу Куцања покретима"</string>
-    <string name="setup_start_action">"Започнимо"</string>
-    <string name="setup_steps_title">Подешавање апликације %s</string>
     <string name="setup_step1_title">Омогућите апликацију %s</string>
     <string name="setup_step1_instruction">Потврдите апликацију %s“ у Подешавањима језика и уноса. Тако јој одобравате покретање на уређају.\"</string>
     <string name="setup_step1_action">"Омогући у Подешавањима"</string>
@@ -75,7 +72,6 @@
     <string name="setup_step2_instruction">Затим изаберите %s“ као активни метод уноса текста.\"</string>
     <string name="setup_step2_action">"Пребаци методе уноса"</string>
     <string name="setup_step3_title">"Честитамо, све је спремно!"</string>
-    <string name="setup_step3_instruction">"Сада можете да куцате у свим омиљеним апликацијама помоћу %s."</string>
     <string name="setup_finish_action">"Завршено"</string>
     <string name="show_setup_wizard_icon">"Прикажи икону апликације"</string>
     <string name="show_setup_wizard_icon_summary">"Икона апликације се приказује у покретачу"</string>

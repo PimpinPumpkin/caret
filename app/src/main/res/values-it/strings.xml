@@ -65,9 +65,6 @@
     <string name="prefs_enable_emoji_alt_physical_key_summary">Il tasto Alt di una tastiera collegata apre il pannello emoji</string>
     <string name="button_default">"Predefinito"</string>
     <string name="setup_welcome_title">Benvenuto in %s</string>
-    <string name="setup_welcome_additional_description">con digitazione gestuale</string>
-    <string name="setup_start_action">"Inizia"</string>
-    <string name="setup_steps_title">Configura %s</string>
     <string name="setup_step1_title">Attiva %s</string>
     <string name="setup_step1_instruction">Scegli %s nelle impostazioni \'Lingua e immissione\' per autorizzare l\'app.</string>
     <string name="setup_step1_action">Attiva nelle impostazioni</string>
@@ -75,7 +72,6 @@
     <string name="setup_step2_instruction">Infine, attiva %s come metodo di immissione di testo.</string>
     <string name="setup_step2_action">"Cambia metodo di immissione"</string>
     <string name="setup_step3_title">Tutto pronto!</string>
-    <string name="setup_step3_instruction">Puoi usare %s per digitare in qualsiasi app.</string>
     <string name="setup_finish_action">Fine</string>
     <string name="show_setup_wizard_icon">Mostra l\'icona dell\'app</string>
     <string name="show_setup_wizard_icon_summary">Mostra Caret tra le app di Android</string>

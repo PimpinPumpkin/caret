@@ -65,9 +65,6 @@
     <string name="prefs_enable_emoji_alt_physical_key_summary">"भौतिक Alt कुंजी इमोजी पैलेट दिखाती है"</string>
     <string name="button_default">"सामान्य"</string>
     <string name="setup_welcome_title">%s में आपका स्वागत है\"</string>
-    <string name="setup_welcome_additional_description">"जेस्चर टाइपिंग के साथ"</string>
-    <string name="setup_start_action">"आरंभ करें"</string>
-    <string name="setup_steps_title">%s सेट करना\"</string>
     <string name="setup_step1_title">%s को चालू करें\"</string>
     <string name="setup_step1_instruction">"कृपया अपनी भाषा और इनपुट सेटिंग में \"%s\" को सही का निशान लगाकर चुनें. इससे उसे आपके डिवाइस पर चलने की अनुमति मिल जाएगी."</string>
     <string name="setup_step1_action">"सेटिंग में चालू करें"</string>
@@ -75,7 +72,6 @@
     <string name="setup_step2_instruction">"इसके बाद, \"%s\" को अपने सक्रिय पाठ-इनपुट के तरीके के तौर पर चुनें."</string>
     <string name="setup_step2_action">"इनपुट पद्धतियां स्विच करें"</string>
     <string name="setup_step3_title">"बधाई हो, आप बिल्कुल तैयार हैं!"</string>
-    <string name="setup_step3_instruction">"अब आप %s के साथ अपने सभी पसंदीदा ऐप्स  में लिख सकते हैं."</string>
     <string name="setup_finish_action">"खत्म"</string>
     <string name="show_setup_wizard_icon">"ऐप्लिकेशन का आइकॉन दिखाएं"</string>
     <string name="show_setup_wizard_icon_summary">"लॉन्चर में ऐप आइकॉन दिखाएं"</string>

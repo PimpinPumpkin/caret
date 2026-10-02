@@ -65,9 +65,6 @@
     <string name="prefs_enable_emoji_alt_physical_key_summary">"භෞතික Alt යතුර ඉමොජි පෙන්වයි"</string>
     <string name="button_default">"සුපුරුදු"</string>
     <string name="setup_welcome_title">%s වෙත සාදරයෙන් පිළිගනිමු\"</string>
-    <string name="setup_welcome_additional_description">"ඉංගිත ටයිප් කිරීම් සමග"</string>
-    <string name="setup_start_action">"අරඹන්න"</string>
-    <string name="setup_steps_title">%s සැකසෙමින් පවතී\"</string>
     <string name="setup_step1_title">%s සබල කරන්න\"</string>
     <string name="setup_step1_instruction">"කරණාකර ඔබගේ භාෂාව සහ ආදාන සැකසීම් තුළ \"%s\" පරීක්ෂා කරන්න. මෙය ඔබගේ උපාංගය මත එයට ධාවනය වීමට අනුමැතිය දෙනු ඇත."</string>
     <string name="setup_step1_action">"සැකසීම් තුළ සබල කරන්න"</string>
@@ -75,7 +72,6 @@
     <string name="setup_step2_instruction">"ඊළඟට, ඔබගේ සක්‍රිය පෙළ-ආදාන ක්‍රමය ලෙස \"%s\" තෝරන්න."</string>
     <string name="setup_step2_action">"ආදාන ක්‍රම මාරු කරන්න"</string>
     <string name="setup_step3_title">"සුබපැතුම්, ඔබ සියල්ල පිහිටුවා ඇත!"</string>
-    <string name="setup_step3_instruction">"දැන් ඔබට %s සමගින් ඔබගේ  සියළුම ප්‍රියතම යෙදුම් වලින් ටයිප් කළ හැක."</string>
     <string name="setup_finish_action">"අවසන්"</string>
     <string name="show_setup_wizard_icon">"යෙදුම් නිරූපකය පෙන්වන්න"</string>
     <string name="show_setup_wizard_icon_summary">"දියත්කරනය තුළ යෙදුම් නිරූපකය දර්ශනය කරන්න"</string>

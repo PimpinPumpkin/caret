@@ -86,9 +86,6 @@
     <string name="prefs_enable_emoji_alt_physical_key_summary">"La touche Alt physique permet d\'afficher la palette d\'emoji"</string>
     <string name="button_default">"Par défaut"</string>
     <string name="setup_welcome_title">Bienvenue sur %s</string>
-    <string name="setup_welcome_additional_description">"avec la saisie gestuelle"</string>
-    <string name="setup_start_action">"Commencer"</string>
-    <string name="setup_steps_title">Configurer %s</string>
     <string name="setup_step1_title">Activer %s</string>
     <string name="setup_step1_instruction">Veuillez vérifier que %s est activé dans vos paramètres de langue et de saisie. Cela autorisera son fonctionnement sur votre appareil.</string>
     <string name="setup_step1_action">"Activer le clavier dans les paramètres"</string>
@@ -96,7 +93,6 @@
     <string name="setup_step2_instruction">Sélectionnez ensuite « %s » comme méthode de saisie active.</string>
     <string name="setup_step2_action">"Changer de mode de saisie"</string>
     <string name="setup_step3_title">Félicitations, l\'opération est terminée !</string>
-    <string name="setup_step3_instruction">Avec %s, vous pouvez saisir du texte dans toutes vos applications préférées.</string>
     <string name="setup_step3_action">Configurer le clavier</string>
     <string name="setup_finish_action">Terminé</string>
     <string name="show_setup_wizard_icon">"Afficher l\'icône de l\'application"</string>

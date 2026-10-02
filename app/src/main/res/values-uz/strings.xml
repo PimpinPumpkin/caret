@@ -65,9 +65,6 @@
     <string name="prefs_enable_emoji_alt_physical_key_summary">"Jismoniy klaviaturadagi Alt tugmasi emojilarni ochadi"</string>
     <string name="button_default">"Standart"</string>
     <string name="setup_welcome_title">%s ilovasiga xush kelibsiz!</string>
-    <string name="setup_welcome_additional_description">"qo‘l uzmasdan yozish"</string>
-    <string name="setup_start_action">"Boshladik"</string>
-    <string name="setup_steps_title">%s sozlanmoqda</string>
     <string name="setup_step1_title">Yoqish %s</string>
     <string name="setup_step1_instruction">Matn kiritishda foydalanish uchun “Tillar va matn kiritish” sozlamalarida “%s” bandiga belgi qo‘ying.</string>
     <string name="setup_step1_action">"Sozlamalardan yoqish"</string>
@@ -75,7 +72,6 @@
     <string name="setup_step2_instruction">Endi, joriy matn kiritish usuli sifatida “%s” ilovasini tanlang.</string>
     <string name="setup_step2_action">"Matn kiritish usulini o‘zgartirish"</string>
     <string name="setup_step3_title">"Tabriklaymiz, hammasi tayyor!"</string>
-    <string name="setup_step3_instruction">Endi, matn kiritish uchun %s ilovasidan foydalanishingiz mumkin.</string>
     <string name="setup_finish_action">"Tugallandi"</string>
     <string name="show_setup_wizard_icon">"Ilova ikonkasini chiqarish"</string>
     <string name="show_setup_wizard_icon_summary">"Launcherga ilova ikonkasini chiqarish"</string>

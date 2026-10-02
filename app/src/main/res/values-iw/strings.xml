@@ -65,9 +65,6 @@
     <string name="prefs_enable_emoji_alt_physical_key_summary">"‏מקש Alt הפיזי מציג את לוח סמלי האמוג\'י"</string>
     <string name="button_default">"ברירת מחדל"</string>
     <string name="setup_welcome_title">"ברוכים הבאים אל %s"</string>
-    <string name="setup_welcome_additional_description">"עם הקלדה רציפה"</string>
-    <string name="setup_start_action">"תחילת העבודה"</string>
-    <string name="setup_steps_title">"הגדרת %s"</string>
     <string name="setup_step1_title">"הפעל את %s"</string>
     <string name="setup_step1_instruction">"סמן את \"%s\" בהגדרות השפה והקלט שלך. פעולה זו תאפשר לה לפעול במכשיר."</string>
     <string name="setup_step1_action">"הפעל בהגדרות"</string>
@@ -75,7 +72,6 @@
     <string name="setup_step2_instruction">בשלב הבא, יש לבחור ב-\"%s\" כשיטת ההזנה הפעילה להזנת מלל.</string>
     <string name="setup_step2_action">החלפת שיטת הזנה</string>
     <string name="setup_step3_title">"ברכותינו, הכל מוכן!"</string>
-    <string name="setup_step3_instruction">"כעת תוכל להקליד בכל האפליקציות המועדפות עליך באמצעות %s."</string>
     <string name="setup_finish_action">"סיום"</string>
     <string name="show_setup_wizard_icon">"הצג את סמל האפליקציה"</string>
     <string name="show_setup_wizard_icon_summary">"הצג את סמל האפליקציה במפעיל"</string>

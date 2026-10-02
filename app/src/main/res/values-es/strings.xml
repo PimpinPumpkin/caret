@@ -65,9 +65,6 @@
     <string name="prefs_enable_emoji_alt_physical_key_summary">"La tecla Alt física muestra la lista de emojis"</string>
     <string name="button_default">"Predeterminado"</string>
     <string name="setup_welcome_title">Bienvenido a %s</string>
-    <string name="setup_welcome_additional_description">"con escritura gestual"</string>
-    <string name="setup_start_action">"Empezar"</string>
-    <string name="setup_steps_title">Configurando %s</string>
     <string name="setup_step1_title">Activar %s</string>
     <string name="setup_step1_instruction">Activa «%s» en los ajustes de Idioma y Entrada. Esto permitirá que la aplicación se ejecute en tu dispositivo.</string>
     <string name="setup_step1_action">"Habilitar en Ajustes"</string>
@@ -75,7 +72,6 @@
     <string name="setup_step2_instruction">A continuación, selecciona «%s» como tu método de entrada de texto activo.</string>
     <string name="setup_step2_action">Cambiar métodos de entrada</string>
     <string name="setup_step3_title">"¡Enhorabuena, has terminado!"</string>
-    <string name="setup_step3_instruction">Ahora puedes escribir en todas tus aplicaciones favoritas con %s.</string>
     <string name="setup_finish_action">"Listo"</string>
     <string name="show_setup_wizard_icon">"Mostrar icono de aplicación"</string>
     <string name="show_setup_wizard_icon_summary">"Mostrar icono de aplicación en menú de aplicaciones"</string>

@@ -66,9 +66,6 @@
     <string name="prefs_enable_emoji_alt_physical_key_summary">"Naciśnięcie klawisza Alt przywołuje okienko wyboru emotikonów"</string>
     <string name="button_default">"Domyślne"</string>
     <string name="setup_welcome_title">Witamy w aplikacji %s</string>
-    <string name="setup_welcome_additional_description">"z pisaniem gestami"</string>
-    <string name="setup_start_action">"Rozpocznij"</string>
-    <string name="setup_steps_title">Konfigurowanie aplikacji %s</string>
     <string name="setup_step1_title">Włącz aplikację %s</string>
     <string name="setup_step1_instruction">Zaznacz aplikację %s w ustawieniach Język i wprowadzanie tekstu. Umożliwi to jej uruchamianie na urządzeniu.</string>
     <string name="setup_step1_action">"Włącz w Ustawieniach"</string>
@@ -76,7 +73,6 @@
     <string name="setup_step2_instruction">Następnie wybierz %s jako aktywną metodę wprowadzania tekstu.</string>
     <string name="setup_step2_action">"Przełącz metody wprowadzania"</string>
     <string name="setup_step3_title">Gratulacje, wszystko gotowe!</string>
-    <string name="setup_step3_instruction">Teraz możesz pisać we wszystkich swoich ulubionych aplikacjach, używając aplikacji %s.</string>
     <string name="setup_finish_action">Zakończ</string>
     <string name="show_setup_wizard_icon">"Pokaż ikonę aplikacji"</string>
     <string name="show_setup_wizard_icon_summary">"Wyświetlaj ikonę aplikacji w programie uruchamiającym"</string>

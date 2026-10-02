@@ -66,9 +66,6 @@
     <string name="prefs_enable_emoji_alt_physical_key_summary">"Ukhiye we-Alt woqobo ubonisa i-emoji palette"</string>
     <string name="button_default">"Okuzenzakalelayo"</string>
     <string name="setup_welcome_title">"Siyakwamukela ku-%s"</string>
-    <string name="setup_welcome_additional_description">"nokuthayipha ngokuthinta"</string>
-    <string name="setup_start_action">"Qalisa"</string>
-    <string name="setup_steps_title">"Kusethwa i-%s"</string>
     <string name="setup_step1_title">"Nika amandla i-%s"</string>
     <string name="setup_step1_instruction">"Sicela uhlole i-\"%s\" kulimi lwakho nezilungiselelo zokokufaka. Lokhu kuzoyigunyaza ukuthi isebenze kudivayisi yakho."</string>
     <string name="setup_step1_action">"Nika amandla kuzilungiselelo"</string>
@@ -76,7 +73,6 @@
     <string name="setup_step2_instruction">"Okulandelayo, khetha i-\"%s\" njengendlela yakho yokufaka umbhalo osebenzayo."</string>
     <string name="setup_step2_action">"Shintsha izindlela zokufaka"</string>
     <string name="setup_step3_title">"Siyakuhalalisela, usumi ngomumo!"</string>
-    <string name="setup_step3_instruction">"Manje usungathayipha ngokufaka zonke izinhlelo zokusebenza eziyizintandokazi zakho nge-%s."</string>
     <string name="setup_finish_action">"Iqedile"</string>
     <string name="show_setup_wizard_icon">"Bonisa isithonjana sohlelo lokusebenza"</string>
     <string name="show_setup_wizard_icon_summary">"Bonisa isithonjana sohlelo lokusebenza kusiqalisi"</string>
