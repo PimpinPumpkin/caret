@@ -98,14 +98,14 @@
     <string name="delete_swipe_summary">Llisqueu damunt de la tecla d\'esborrar per seleccionar i treure grans parts de text d\'un sol cop</string>
     <string name="incognito">Força el mode d\'incògnit</string>
     <string name="abbreviation_unit_minutes">%s min</string>
-    <string name="spell_checker_service_name">Corrector ortogràfic de l\'HeliBoard</string>
-    <string name="android_spell_checker_settings">Configuració del corrector ortogràfic de l\'HeliBoard</string>
+    <string name="spell_checker_service_name">Corrector ortogràfic de l\'Caret</string>
+    <string name="android_spell_checker_settings">Configuració del corrector ortogràfic de l\'Caret</string>
     <string name="delete_swipe">Esborra amb lliscament</string>
     <string name="show_emoji_key">Tecla d\'accés a emojis</string>
     <string name="prefs_force_incognito_mode_summary">Desactiva l\'aprenentatge de paraules noves</string>
     <string name="number_row">Fila de nombres</string>
     <string name="number_row_summary">Mostra sempre la fila de nombres</string>
-    <string name="ime_settings">Configuració de l\'HeliBoard</string>
+    <string name="ime_settings">Configuració de l\'Caret</string>
     <string name="settings_category_input">Entrada</string>
     <string name="settings_category_miscellaneous">Miscel·lània</string>
     <string name="key_borders">Vores del teclat</string>
@@ -522,7 +522,7 @@
     <string name="gesture_data_background_gathering_manual_save">Descarta per defecte</string>
     <string name="gesture_data_background_gathering_manual_save_summary">Les dades es desen manualment mitjançant la tecla de la barra d\'eines</string>
     <string name="gesture_data_background_gathering_info">Més informació</string>
-    <string name="gesture_data_background_gathering_info_message">Activar la recopilació de dades en segon pla permet que l\'HeliBoard enregistri els gestos que escriviu en altres aplicacions. Això és molt útil per al projecte d\'escriptura gestual, ja que pot produir una quantitat considerable de dades, tot i que de menys qualitat que la recopilació activa. La recopilació en segon pla no substitueix les dades recopilades activament; està pensada com a complement, ja que la qualitat de les dades és més important que la quantitat.\n\n La recopilació en segon pla té un alt potencial de recollir dades que podríeu considerar massa privades per compartir-les, fins i tot si es publiquen de manera anònima. Per aquest motiu volem aclarir quan es recopilen dades gestuals i com hi podeu influir.\n\n Trobareu un vídeo que explica més coses sobre la recopilació de dades en segon pla a la secció d\'enllaços, a la part inferior dreta d\'aquesta pantalla.</string>
+    <string name="gesture_data_background_gathering_info_message">Activar la recopilació de dades en segon pla permet que l\'Caret enregistri els gestos que escriviu en altres aplicacions. Això és molt útil per al projecte d\'escriptura gestual, ja que pot produir una quantitat considerable de dades, tot i que de menys qualitat que la recopilació activa. La recopilació en segon pla no substitueix les dades recopilades activament; està pensada com a complement, ja que la qualitat de les dades és més important que la quantitat.\n\n La recopilació en segon pla té un alt potencial de recollir dades que podríeu considerar massa privades per compartir-les, fins i tot si es publiquen de manera anònima. Per aquest motiu volem aclarir quan es recopilen dades gestuals i com hi podeu influir.\n\n Trobareu un vídeo que explica més coses sobre la recopilació de dades en segon pla a la secció d\'enllaços, a la part inferior dreta d\'aquesta pantalla.</string>
     <string name="gesture_data_background_gathering_indicator">Indicador de recopilació de dades</string>
     <string name="gesture_data_background_gathering_indicator_message">Sempre que es puguin enregistrar dades gestuals, veureu una icona indicadora a la part inferior esquerra del teclat. Quan el cercle és ple, s\'ha recollit com a mínim un gest que està pendent de desar-se. Les dades es desen o bé mitjançant la tecla de la barra d\'eines (vegeu &lt;i&gt;%1$s&lt;/i&gt;) o bé automàticament (quan &lt;i&gt;%2$s&lt;/i&gt; està desactivat). El desament automàtic sol produir-se en canviar de camp de text o en tancar el teclat, però també pot passar si el camp de text canvia per algun altre motiu. Quan es desen les dades, l\'indicador es torna verd durant un moment.</string>
     <string name="gesture_data_background_gathering_control">Com controlar què es desa</string>

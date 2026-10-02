@@ -199,7 +199,7 @@ private fun restoreLauncher(onError: (String) -> Unit): ManagedActivityResultLau
                                     Log.w("AdvancedScreen", "skipping unsafe backup entry ${entry.name}")
                                 }
                                 anyMatch = true
-                            } else if (entry.name == Database.NAME) {
+                            } else if (entry.name == Database.NAME || entry.name == Database.OLD_NAME) {
                                 anyMatch = true
                                 FileUtils.copyStreamToNewFile(zip, restoredDb)
                             } else if (entry.name == PREFS_FILE_NAME) {

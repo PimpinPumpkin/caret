@@ -100,12 +100,12 @@
     <string name="prefs_force_incognito_mode_summary">Yeni sözcüklerin öğrenilmesini devre dışı bırak</string>
     <string name="number_row">Sayı satırı</string>
     <string name="prefs_long_press_keyboard_to_change_lang_summary">Boşluk tuşuna uzun süre basmak, giriş yöntemi seçim menüsünü gösterecektir</string>
-    <string name="android_spell_checker_settings">HeliBoard yazım denetleyicisi ayarları</string>
+    <string name="android_spell_checker_settings">Caret yazım denetleyicisi ayarları</string>
     <string name="prefs_keyboard_height_scale">Klavye yükseklik ölçeği</string>
     <string name="delete_swipe">Kadırarak silme</string>
     <string name="key_borders">Tuş kenarlıkları</string>
     <string name="day_night_mode">Otomatik gündüz/gece modu</string>
-    <string name="spell_checker_service_name">HeliBoard yazım denetleyicisi</string>
+    <string name="spell_checker_service_name">Caret yazım denetleyicisi</string>
     <string name="abbreviation_unit_minutes">%sdak.</string>
     <string name="settings_category_suggestions">Öneriler</string>
     <string name="show_emoji_key">Emoji tuşu</string>
@@ -120,7 +120,7 @@
     <string name="subtype_akkhor_bn_BD">%s (Akkhor)</string>
     <string name="delete_swipe_summary">Bir kerede metnin daha büyük bölümlerini seçmek ve silmek için silme tuşundan hızlıca kaydırın</string>
     <string name="day_night_mode_summary">Görünüm sistem ayarlarını takip edecektir</string>
-    <string name="ime_settings">HeliBoard ayarları</string>
+    <string name="ime_settings">Caret ayarları</string>
     <string name="settings_category_input">Giriş</string>
     <string name="settings_category_additional_keys">Ek tuşlar</string>
     <string name="autospace_after_punctuation">Noktalama işaretlerinden sonra otomatik boşluk</string>
@@ -531,7 +531,7 @@
     <string name="gesture_data_background_gathering_manual_save">Varsayılan olarak kaydetme</string>
     <string name="gesture_data_background_gathering_manual_save_summary">Veriler, araç çubuğu tuşu aracılığıyla elle kaydedilir</string>
     <string name="gesture_data_background_gathering_info">Daha fazla bilgi</string>
-    <string name="gesture_data_background_gathering_info_message">Arka planda veri toplamayı açmak, HeliBoard\'un diğer uygulamalarda yazdığın hareketleri kaydetmesine olanak tanır. Bu, etkin toplamadan daha düşük kalitede de olsa hatırı sayılır miktarda veri üretebildiği için hareketle yazma projesi açısından çok yararlıdır. Arka planda veri toplama, etkin olarak toplanan verilerin yerine geçmez; veri kalitesi miktardan daha önemli olduğu için bir ek olarak düşünülmüştür.\n\n Arka planda toplamanın, anonim olarak yayınlansa bile paylaşmak için fazla özel bulabileceğin verileri toplama olasılığı yüksektir. Bu nedenle hareket verilerinin ne zaman toplandığını ve bunu nasıl etkileyebileceğini netleştirmek istiyoruz.\n\n Arka planda veri toplama hakkında daha fazla bilgi veren bir videoyu bu ekranın sağ alt kısmındaki bağlantılar bölümünde bulabilirsin.</string>
+    <string name="gesture_data_background_gathering_info_message">Arka planda veri toplamayı açmak, Caret\'un diğer uygulamalarda yazdığın hareketleri kaydetmesine olanak tanır. Bu, etkin toplamadan daha düşük kalitede de olsa hatırı sayılır miktarda veri üretebildiği için hareketle yazma projesi açısından çok yararlıdır. Arka planda veri toplama, etkin olarak toplanan verilerin yerine geçmez; veri kalitesi miktardan daha önemli olduğu için bir ek olarak düşünülmüştür.\n\n Arka planda toplamanın, anonim olarak yayınlansa bile paylaşmak için fazla özel bulabileceğin verileri toplama olasılığı yüksektir. Bu nedenle hareket verilerinin ne zaman toplandığını ve bunu nasıl etkileyebileceğini netleştirmek istiyoruz.\n\n Arka planda veri toplama hakkında daha fazla bilgi veren bir videoyu bu ekranın sağ alt kısmındaki bağlantılar bölümünde bulabilirsin.</string>
     <string name="gesture_data_background_gathering_indicator">Veri toplama göstergesi</string>
     <string name="gesture_data_background_gathering_indicator_message">Hareket verisinin kaydedilebileceği her an, klavyenin sol alt köşesinde bir gösterge simgesi görürsün. Daire dolu olduğunda, en az bir hareket toplanmış ve kaydedilmeyi bekliyor demektir. Veriler ya araç çubuğu tuşu kullanılarak (bkz. &lt;i&gt;%1$s&lt;/i&gt;) ya da otomatik olarak (&lt;i&gt;%2$s&lt;/i&gt; devre dışıyken) kaydedilir. Otomatik kaydetme genellikle metin alanları arasında geçiş yapılırken veya klavye kapatılırken gerçekleşir, ancak metin alanı başka bir nedenle değişirse de gerçekleşebilir. Veriler kaydedilirken gösterge kısa bir süre yeşile döner.</string>
     <string name="gesture_data_background_gathering_control">Nelerin kaydedileceğini denetleme</string>

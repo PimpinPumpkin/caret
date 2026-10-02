@@ -108,7 +108,7 @@
     <string name="more_keys_strip_description">Tekla gehiago</string>
     <string name="number_row">Zenbakien errenkada</string>
     <string name="prefs_long_press_keyboard_to_change_lang_summary">Zuriune tekla luze sakatzeak sarrera-metodoa hautatzeko menua erakutsiko du</string>
-    <string name="spell_checker_service_name">HeliBoard ortografia zuzentzailea</string>
+    <string name="spell_checker_service_name">Caret ortografia zuzentzailea</string>
     <string name="autospace_after_punctuation">Zuriunea puntuazioen ondoren</string>
     <string name="incognito">Behartu ezkutuko modua</string>
     <string name="subtype_akkhor_bn_BD">%s (Akkhor hizkuntza)</string>
@@ -116,9 +116,9 @@
     <string name="key_borders">Teklen ertzak</string>
     <string name="day_night_mode">Egun/gau modu automatikoa</string>
     <string name="day_night_mode_summary">Itxurak sistemaren ezarpenei jarraituko die</string>
-    <string name="ime_settings">HeliBoard ezarpenak</string>
+    <string name="ime_settings">Caret ezarpenak</string>
     <string name="settings_category_additional_keys">Tekla gehigarriak</string>
-    <string name="android_spell_checker_settings">HeliBoard ortografia zuzentzailearen ezarpenak</string>
+    <string name="android_spell_checker_settings">Caret ortografia zuzentzailearen ezarpenak</string>
     <string name="show_emoji_key">Emoji tekla</string>
     <string name="delete_swipe">Desgaitu irristatzea</string>
     <string name="delete_swipe_summary">Ezabatu teklatik hatza irristatu, testuaren zati handiagoak hautatzeko eta ezabatzeko</string>
@@ -533,7 +533,7 @@
     <string name="gesture_data_background_gathering_manual_save">Baztertu lehenespenez</string>
     <string name="gesture_data_background_gathering_manual_save_summary">Datuak eskuz gordetzen dira tresna-barrako teklaren bidez</string>
     <string name="gesture_data_background_gathering_info">Informazio gehiago</string>
-    <string name="gesture_data_background_gathering_info_message">Bigarren planoko datu-bilketa aktibatzeak beste aplikazio batzuetan idazten dituzun keinuak grabatzeko aukera ematen dio HeliBoard-i. Oso baliagarria da keinu-idazketaren proiekturako, datu kopuru handia sor baitezake, nahiz eta bilketa aktiboa baino kalitate txikiagokoa izan. Bigarren planoko datu-bilketa ez da modu aktiboan bildutako datuen ordezkoa; osagarri gisa pentsatuta dago, datuen kalitatea kantitatea baino garrantzitsuagoa baita.\n\n Bigarren planoko bilketak aukera handia du partekatzeko pribatuegitzat jo ditzakezun datuak biltzeko, baita anonimoki argitaratuta ere. Horregatik, argitu nahi dugu noiz biltzen diren keinu-datuak eta nola eragin dezakezun horretan.\n\n Bigarren planoko datu-bilketari buruz gehiago azaltzen duen bideo bat aurki dezakezu pantaila honen behe-eskuinaldeko esteken atalean.</string>
+    <string name="gesture_data_background_gathering_info_message">Bigarren planoko datu-bilketa aktibatzeak beste aplikazio batzuetan idazten dituzun keinuak grabatzeko aukera ematen dio Caret-i. Oso baliagarria da keinu-idazketaren proiekturako, datu kopuru handia sor baitezake, nahiz eta bilketa aktiboa baino kalitate txikiagokoa izan. Bigarren planoko datu-bilketa ez da modu aktiboan bildutako datuen ordezkoa; osagarri gisa pentsatuta dago, datuen kalitatea kantitatea baino garrantzitsuagoa baita.\n\n Bigarren planoko bilketak aukera handia du partekatzeko pribatuegitzat jo ditzakezun datuak biltzeko, baita anonimoki argitaratuta ere. Horregatik, argitu nahi dugu noiz biltzen diren keinu-datuak eta nola eragin dezakezun horretan.\n\n Bigarren planoko datu-bilketari buruz gehiago azaltzen duen bideo bat aurki dezakezu pantaila honen behe-eskuinaldeko esteken atalean.</string>
     <string name="gesture_data_background_gathering_indicator">Datu-bilketaren adierazlea</string>
     <string name="gesture_data_background_gathering_indicator_message">Keinu-datuak graba daitezkeen bakoitzean, adierazle-ikono bat ikusiko duzu teklatuaren behe-ezkerraldean. Zirkulua beteta dagoenean, gutxienez keinu bat bildu da eta gordetzeko zain dago. Datuak tresna-barrako teklaren bidez (ikus &lt;i&gt;%1$s&lt;/i&gt;) edo automatikoki (&lt;i&gt;%2$s&lt;/i&gt; desgaituta dagoenean) gordetzen dira. Gordetze automatikoa testu-eremuz aldatzean edo teklatua ixtean gertatu ohi da, baina testu-eremua beste arrazoiren batengatik aldatzen bada ere gerta daiteke. Datuak gordetzen ari direnean, adierazlea berde jarriko da denbora laburrez.</string>
     <string name="gesture_data_background_gathering_control">Nola kontrolatu zer gordetzen den</string>

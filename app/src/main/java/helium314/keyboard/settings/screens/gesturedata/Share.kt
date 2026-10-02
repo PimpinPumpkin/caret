@@ -277,4 +277,4 @@ private var progress: Int = 0
 
 private var zippedDataPath = "" // set after writing the file
 
-private const val MAIL_SUBJECT = "HeliBoard ${BuildConfig.VERSION_NAME} gesture data"
+private const val MAIL_SUBJECT = "Caret ${BuildConfig.VERSION_NAME} (HeliBoard fork) gesture data"

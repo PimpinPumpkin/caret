@@ -72,6 +72,6 @@
 
     <string name="english_ime_name" translatable="false">Caret</string>
     <!-- App slogan-->
-    <string name="app_slogan" translatable="false">100% FOSS keyboard, based on AOSP.</string>
+    <string name="app_slogan" translatable="false">Free and open source keyboard, built on HeliBoard and AOSP.</string>
 
 </resources>

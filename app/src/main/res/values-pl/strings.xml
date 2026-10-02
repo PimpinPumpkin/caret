@@ -100,8 +100,8 @@
     <string name="more_keys_strip_description">Więcej klawiszy</string>
     <string name="number_row">Rząd numeryczny</string>
     <string name="show_emoji_key">Klawisz emotikonów</string>
-    <string name="spell_checker_service_name">Sprawdzanie pisowni HeliBoard</string>
-    <string name="android_spell_checker_settings">Ustawienia sprawdzania pisowni HeliBoard</string>
+    <string name="spell_checker_service_name">Sprawdzanie pisowni Caret</string>
+    <string name="android_spell_checker_settings">Ustawienia sprawdzania pisowni Caret</string>
     <string name="settings_category_clipboard_history">Historia schowka</string>
     <string name="enable_clipboard_history">Włącz historię schowka</string>
     <string name="incognito">Wymuś tryb incognito</string>
@@ -116,7 +116,7 @@
     <string name="show_hints">Pokazuj wskazówki klawiszy</string>
     <string name="prefs_keyboard_height_scale">Skala wysokości klawiatury</string>
     <string name="subtype_akkhor_bn_BD">%s (Akkhor)</string>
-    <string name="ime_settings">Ustawienia HeliBoard</string>
+    <string name="ime_settings">Ustawienia Caret</string>
     <string name="settings_category_additional_keys">Dodatkowe klawisze</string>
     <string name="settings_category_input">Wprowadzanie</string>
     <string name="settings_category_suggestions">Sugestie</string>
@@ -537,7 +537,7 @@
     <string name="gesture_data_add_key">Dodaj klawisz paska narzędzi</string>
     <string name="prefs_hint_font_scale">Rozmiar czcionki wskazówek</string>
     <string name="about_community_links_description">Motywy, edytor układu, dyskusje, …</string>
-    <string name="gesture_data_background_gathering_info_message">Włączenie gromadzenia danych w tle umożliwia HeliBoard rejestrowanie gestów wykonywanych w innych aplikacjach. Jest to bardzo przydatne w projekcie pisania gestami, ponieważ może wygenerować dużą ilość danych, choć o niższej jakości niż aktywne gromadzenie. Gromadzenie danych w tle nie zastępuje aktywnie gromadzonych danych, a ma być ich uzupełnieniem, ponieważ jakość danych jest ważniejsza niż ich ilość.\n\n Gromadzenie danych w tle wiąże się z dużym ryzykiem zebrania danych, które mogą być uważane za zbyt prywatne, by je udostępniać, nawet jeśli są publikowane anonimowo. Z tego powodu chcemy wyjaśnić, kiedy gromadzone są dane gestów i jaki możesz mieć na to wpływ.\n\n W sekcji linków w prawym dolnym rogu tego ekranu znajdziesz film wyjaśniający dokładniej sposób gromadzenia danych w tle.</string>
+    <string name="gesture_data_background_gathering_info_message">Włączenie gromadzenia danych w tle umożliwia Caret rejestrowanie gestów wykonywanych w innych aplikacjach. Jest to bardzo przydatne w projekcie pisania gestami, ponieważ może wygenerować dużą ilość danych, choć o niższej jakości niż aktywne gromadzenie. Gromadzenie danych w tle nie zastępuje aktywnie gromadzonych danych, a ma być ich uzupełnieniem, ponieważ jakość danych jest ważniejsza niż ich ilość.\n\n Gromadzenie danych w tle wiąże się z dużym ryzykiem zebrania danych, które mogą być uważane za zbyt prywatne, by je udostępniać, nawet jeśli są publikowane anonimowo. Z tego powodu chcemy wyjaśnić, kiedy gromadzone są dane gestów i jaki możesz mieć na to wpływ.\n\n W sekcji linków w prawym dolnym rogu tego ekranu znajdziesz film wyjaśniający dokładniej sposób gromadzenia danych w tle.</string>
     <string name="gesture_data_background_gathering_indicator">Wskaźnik gromadzenia danych</string>
     <string name="gesture_data_background_gathering_indicator_message">Za każdym razem, gdy rejestrowane są dane gestu, w lewym dolnym rogu klawiatury pojawi się ikona wskaźnika. Gdy okrąg jest wypełniony, co najmniej jeden gest został zebrany i czeka na zapisanie. Dane są zapisywane za pomocą klawisza na pasku narzędzi (zobacz &lt;i&gt;%1$s&lt;/i&gt;) lub automatycznie (kiedy &lt;i&gt;%2$s&lt;/i&gt; jest wyłączone). Automatyczne zapisywanie następuje zazwyczaj podczas przełączania pól tekstowych lub zamykania klawiatury, ale może się również zdarzyć, gdy pole tekstowe zmieni się z innego powodu. Podczas zapisywania danych wskaźnik na chwilę zmieni kolor na zielony.</string>
     <string name="gesture_data_background_gathering_control">Jak kontrolować, co jest zapisywane</string>

@@ -810,11 +810,11 @@ New dictionary:
     <!-- github repo link for about screen -->
     <string name="about_github_link">View on GitHub</string>
     <!-- link to the wiki for about screen -->
-    <string name="about_wiki_link">Go to Wiki</string>
+    <string name="about_wiki_link">HeliBoard wiki</string>
     <!-- description for wiki link -->
-    <string name="about_wiki_link_description">The Wiki can be improved by any GitHub user!</string>
+    <string name="about_wiki_link_description">Caret is built on HeliBoard, and its wiki explains layouts, dictionaries and more</string>
     <!-- links to community stuff -->
-    <string name="about_community_links">Community links</string>
+    <string name="about_community_links">HeliBoard community</string>
     <!-- description for about_community_links -->
     <string name="about_community_links_description">Themes, layout editor, discussions, …</string>
     <!-- preference title for saving the log to a file -->
@@ -1209,7 +1209,7 @@ New dictionary:
     <!-- Info dialog main message (other sections in different strings)
      string will probably be removed once data gathering is finished (end of 2026 latest) -->
     <string name="gesture_data_background_gathering_info_message">
-        Turning on background data collection allows Heliboard to record gestures you type in other apps.
+        Turning on background data collection allows Caret to record gestures you type in other apps.
         This is very useful for the gesture typing project as it can produce a considerable amount of data, albeit at lower quality than active gathering.
         Background data collection is not a replacement for actively gathered data, it is meant to be an addition, as data quality is more important than quantity.\n\n
         Background gathering has high potential of collecting data that you may consider too private to share, even when published anonymously.

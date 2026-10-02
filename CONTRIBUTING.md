@@ -1,19 +1,20 @@
-# NOTICE
+# Contributing
 
-**Currently it's not possible to open PRs. This is because I want to deal with existing PRs before migrating to Codeberg (https://github.com/HeliBorg/HeliBoard/issues/378), and this doesn't work for me while new PRs are coming in.**
-Will re-open probably in (late) October or November.
+## Getting started
 
-# Getting Started
+Caret builds with Gradle and the Android Gradle Plugin. Open the project in
+[Android Studio](https://developer.android.com/studio) or build from the command line:
 
-HeliBoard project is based on Gradle and Android Gradle Plugin. To get started, you can install [Android Studio](https://developer.android.com/studio), and import project 'from Version Control / Git / Github' by providing this git repository [URL](https://github.com/HeliBorg/HeliBoard) (or git SSH [URL](git@github.com:Helium314/heliboard.git)).
-Of course you can also use any other compatible IDE, or work with text editor and command line.
-Once everything is up correctly, you're ready to go!
+```
+./gradlew assembleDebug
+scripts/test.sh
+```
 
-If you have difficulties implementing some functionality, you're welcome to ask for help. No one will write the code for you, but often other contributors can give you very useful hints.
+The unit tests need Java 21. `scripts/smoke.sh` runs an end-to-end check on an emulator.
 
 # About the Code
 
-HeliBoard is based on AOSP keyboard, and in many places still contains mostly the original code. There are some extensions, and some parts have been replaced completely.
+Caret is a fork of Caret, which is based on the AOSP keyboard, and in many places still contains mostly the original code. There are some extensions, and some parts have been replaced completely.
 When working on this app, you will likely notice its rather large size, and quite different code styles and often ancient comments and _TODO_s, where the latter are typically untouched since AOSP times.
 Unfortunately a lot of the old code is hard to read or to fully understand with all of its intended (and unintended) consequences.
 
@@ -30,73 +31,22 @@ Some hints for finding what you're looking for:
 
 # Guidelines
 
-Note that the maintainer only has very limited time, and thus review might take a while.
-This especially applies to large PRs (hundreds of lines), which recently started to become more common. Sorry, but there is simply not enough time to review everything.  
-What's more likely to be reviewed soon:
-* Simple changes (but depends on what effect they have, as in some places it's easy to introduce unintended changes)
-* Wanted / accepted changes (labels [_PR_](https://github.com/HeliBorg/HeliBoard/labels/PR), [_contributor needed_](https://github.com/HeliBorg/HeliBoard/issues?q=label%3A%22contributor%20needed%22), [_help wanted_](https://github.com/HeliBorg/HeliBoard/labels/help%20wanted))
-* Changes where the hard work is mostly investigation / research rather than coding
-  * e.g. compiling text lists to dictionaries, customizable icons / key backgrounds, OnePlus disabling keyboard on reboot, ...
+- One topic per pull request, described so a reviewer can follow what changes and why.
+- Changes to typing behavior (`InputLogic`, `Suggest`, `RichInputConnection`, `PointerTracker`,
+  `LatinIME`) come with a test. These parts are easy to break in ways that only show up in
+  particular apps. See the refactoring rules in [FORK_PLAN.md](FORK_PLAN.md).
+- Moves and renames do not change behavior, and behavior changes do not ride along with moves.
+- Code must be compatible with GPL-3.0. Say where code comes from if you did not write it.
+- No code from FUTO Keyboard itself: its license is not compatible with the GPL. The FUTO swipe
+  library is GPL and is fine.
+- New user-facing text goes into `app/src/main/res/values/strings.xml`.
 
-What will likely take some time (depends very much on how much other stuff is coming in):
-* Large changes (especially when connected to rather niche functionality)
-* Changes in code that is prone to introducing unintended effects
-  * `InputLogic`, `Suggest`, `RichInputConnection` are especially dangerous here, and also hard to test (behavior may depend on app and possibly OS version)
+# Changes from HeliBoard
 
-## Recommended
-
-If you want to contribute, it's a good idea to make sure your idea is actually wanted in HeliBoard.
-Best check related issues before you start working on a PR. If the issue has the [labels](https://github.com/HeliBorg/HeliBoard/labels) [_PR_](https://github.com/HeliBorg/HeliBoard/labels/PR) or [_contributor needed_](https://github.com/HeliBorg/HeliBoard/issues?q=label%3A%22contributor%20needed%22) (even closed ones), contributions are wanted. If you don't find a related issue, it's recommended to open one, but ultimately it's your choice.
-Asking before starting a PR may help you for getting pointers to potentially relevant code, and deciding how to implement your desired changes.
-
-HeliBoard is a complex application and used by users with a large variety of opinions on how things should be.
-When contributing to the app, please:
-* Be careful when modifying core components, as it's easy to trigger unintended consequences
-* When introducing a feature or change that might not be wanted by everyone, make it optional
-* Keep code simple where possible. Complex code is harder to review and to maintain, so the complexity should also add a clear benefit
-* Avoid noticeable performance impact. Some parts of the code are executed very frequently, and the keyboard should stay responsive even on older devices.
-* Try making use of in-place mechanisms instead of re-inventing the wheel. Your contribution should only add as much complexity as necessary, the code is overly complicated already 😶.
-* Keep your changes to few places, as opposed to sprinkling them over many parts of the code. This helps with keeping down complexity during review, and with maintainability of the app.
-* Make a draft PR when you intend to still work on it. Submitting an unfinished PR can be a good idea when you're not sure how to best continue and would like some comments.
-* When you fix a bug without opening an issue, please provide a way to reproduce the bug (see [bug report template](.github/ISSUE_TEMPLATE/bug_report.md))
-* Noticeable adjustments (keyboard UI, default layouts, ...) should either provide a benefit for everyone, or be optional.
-* If your contribution contains code that is not your own, provide a link to the source
-  * This is especially relevant to be sure the code's license is compatible to HeliBoard's GPL3
-  * Note that with LLM generated PRs you might add code with an incompatible license. Better make sure the LLM you're using is trained only with GPL3 compatible code.
-
-Further things to consider (though irrelevant for most PRs):
-* APK size:
-  * Large increases should be discussed first, and will only be added when it's considered worth the increase for a majority of users. It might be possible to avoid size increase by importing optional parts, like it's done for dictionaries.
-  * Small increases like when adding code or layouts are never an issue
-* Do not add proprietary code or binary blobs. If it turns out to be necessary for a feature you want to add, it might be acceptable when the user opts in and imports those parts, like it's done for glide typing.
-* Privacy: Only relevant when adding some form of communication with other apps. Internet permission will not be added.
-
-## Necessary
-
-Some parts of the guidelines are necessary to fulfill for facilitating code review. It doesn't need to be perfect from the start, but consider it for your future PRs when you're reminded of these guidelines. Note that the larger / more complex your PR is, the more relevant these guidelines are.
-Your PR should:
-- **Be only about a single thing**. Mixing unrelated or semi-related contributions into a single PR is hard to review and can get messy. As a general rule: if one part doesn't need the other one(s), it should be separate PRs. If one feature builds on top of another one, but the base is usable on its own, do a PR for the base and then a follow-up once it's merged.
-- **Have a proper description**. A good description helps _a lot_ for understanding what you intend to achieve with the changes, and for understanding the code. This is relevant for separating wanted from unintended changes in behavior during review.
-- **Not contain translations**. Translations should be done using [Weblate](https://translate.codeberg.org/projects/heliboard/). Exception is when you add new resource strings, those can be added right away.
-- **Not be LLM generated**. LLMs enable contributors to quickly generate code that often is bulky and contains parts that are hard to understand. When the you do not understand the code, it's not possible to discuss such parts. See also [AI_USAGE.md](AI_USAGE.md).
-- **Not contain LLM generated discussion / description**. LLMs typically generate verbose and useless descriptions. Please save us some time and write it yourself, otherwise actual discussion is impossible.
-
-Please leave dependency upgrades to the maintainers, unless you state a good reason why they should be done now.
-
-# Adding / Adjusting Layouts
-
-See [layouts.md](layouts.md#adding-new-layouts--languages) for how to add new layouts to the app. Please stay in line with other layouts regarding the popup keys.
-
-When editing existing layouts, please consider that people should should still get what they're used to. In case of doubt it might be better to add a new layout instead of overhauling existing layouts.
-`locale_key_texts` files should only contain letters that are actually part of the language, with exception of the optional `more_popups_<...>.txt` files.
-
-# Update Emojis
-
-See make-emoji-keys tool [README](tools/make-emoji-keys/README.md).
+Before taking a pull request or a fix from HeliBoard, read the whole diff and its discussion, and
+record the decision in [docs/UPSTREAM.md](docs/UPSTREAM.md).
 
 # Translations
-Translations can be added using [Weblate](https://translate.codeberg.org/projects/heliboard/). You will need an account to update translations and add languages. Add the language you want to translate to in Languages -> Manage translated languages in the top menu bar.
-Updating translations in a PR will not be accepted, as it may cause conflicts with Weblate translations.
 
-# Dictionaries
-No new dictionaries will be added to this app. Please submit dictionaries and the wordlist to the [dictionaries repository](https://codeberg.org/Helium314/aosp-dictionaries)
+The translations were inherited from HeliBoard. Caret has no translation platform yet; strings
+added by Caret are English only for now.

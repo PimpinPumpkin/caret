@@ -41,8 +41,8 @@ class ShadowInputMethodManager2 : ShadowInputMethodManager() {
     @Implementation
     override fun getInputMethodList() = listOf(
         if (BuildConfig.BUILD_TYPE == "debug" || BuildConfig.BUILD_TYPE == "debugNoMinify")
-            InputMethodInfo("helium314.keyboard.debug", "LatinIME", "HeliBoard debug", null)
-        else InputMethodInfo("helium314.keyboard", "LatinIME", "HeliBoard", null),
+            InputMethodInfo("app.caret.debug", "LatinIME", "Caret debug", null)
+        else InputMethodInfo("app.caret", "LatinIME", "Caret", null),
     )
     @Implementation
     fun getShortcutInputMethodsAndSubtypes() = emptyMap<InputMethodInfo, List<InputMethodSubtype>>()

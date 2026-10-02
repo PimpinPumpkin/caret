@@ -95,10 +95,10 @@
     <string name="enable_clipboard_history">فعال‌سازی تاریخچه کلیپ‌بورد</string>
     <string name="select_input_method">"انتخاب روش ورودی"</string>
     <string name="settings_category_clipboard_history">تاریخچه کلیپ‌بورد</string>
-    <string name="spell_checker_service_name">غلط‌گیر املایی HeliBoard</string>
-    <string name="android_spell_checker_settings">تنظیمات غلط‌گیر املایی HeliBoard</string>
+    <string name="spell_checker_service_name">غلط‌گیر املایی Caret</string>
+    <string name="android_spell_checker_settings">تنظیمات غلط‌گیر املایی Caret</string>
     <string name="show_emoji_key">کلید ایموجی</string>
-    <string name="ime_settings">تنظیمات HeliBoard</string>
+    <string name="ime_settings">تنظیمات Caret</string>
     <string name="settings_category_additional_keys">کلیدهای بیشتر</string>
     <string name="settings_category_experimental">آزمایشی</string>
     <string name="settings_category_miscellaneous">متفرقه</string>
@@ -522,7 +522,7 @@
     <string name="gesture_data_background_gathering_manual_save">دور ریختن به‌صورت پیش‌فرض</string>
     <string name="gesture_data_background_gathering_manual_save_summary">داده‌ها به‌صورت دستی از طریق کلید نوار ابزار ذخیره می‌شوند</string>
     <string name="gesture_data_background_gathering_info">اطلاعات بیشتر</string>
-    <string name="gesture_data_background_gathering_info_message">فعال کردن جمع‌آوری داده‌ها در پس‌زمینه به HeliBoard اجازه می‌دهد اشاراتی را که در برنامه‌های دیگر تایپ می‌کنید ثبت کند. این کار برای پروژه تایپ اشاره‌ای بسیار مفید است، زیرا می‌تواند حجم قابل توجهی داده تولید کند، هرچند با کیفیتی پایین‌تر از جمع‌آوری فعال. جمع‌آوری داده‌ها در پس‌زمینه جایگزینی برای داده‌های جمع‌آوری فعال نیست، بلکه مکملی برای آن است، چرا که کیفیت داده‌ها مهم‌تر از کمیت آن‌هاست.\n\nجمع‌آوری در پس‌زمینه احتمال بالایی دارد داده‌هایی را جمع‌آوری کند که ممکن است آن‌ها را حتی در صورت انتشار ناشناس، برای اشتراک‌گذاری بیش از حد خصوصی بدانید. به همین دلیل می‌خواهیم روشن کنیم که چه زمانی داده‌های اشاره‌ای جمع‌آوری می‌شوند و چگونه می‌توانید بر آن تأثیر بگذارید.\n\nویدیویی با توضیحات بیشتر درباره جمع‌آوری داده‌ها در پس‌زمینه در بخش پیوندهای پایین این صفحه موجود است.</string>
+    <string name="gesture_data_background_gathering_info_message">فعال کردن جمع‌آوری داده‌ها در پس‌زمینه به Caret اجازه می‌دهد اشاراتی را که در برنامه‌های دیگر تایپ می‌کنید ثبت کند. این کار برای پروژه تایپ اشاره‌ای بسیار مفید است، زیرا می‌تواند حجم قابل توجهی داده تولید کند، هرچند با کیفیتی پایین‌تر از جمع‌آوری فعال. جمع‌آوری داده‌ها در پس‌زمینه جایگزینی برای داده‌های جمع‌آوری فعال نیست، بلکه مکملی برای آن است، چرا که کیفیت داده‌ها مهم‌تر از کمیت آن‌هاست.\n\nجمع‌آوری در پس‌زمینه احتمال بالایی دارد داده‌هایی را جمع‌آوری کند که ممکن است آن‌ها را حتی در صورت انتشار ناشناس، برای اشتراک‌گذاری بیش از حد خصوصی بدانید. به همین دلیل می‌خواهیم روشن کنیم که چه زمانی داده‌های اشاره‌ای جمع‌آوری می‌شوند و چگونه می‌توانید بر آن تأثیر بگذارید.\n\nویدیویی با توضیحات بیشتر درباره جمع‌آوری داده‌ها در پس‌زمینه در بخش پیوندهای پایین این صفحه موجود است.</string>
     <string name="gesture_data_background_gathering_indicator">نشانگر جمع‌آوری داده</string>
     <string name="gesture_data_background_gathering_indicator_message">هر زمان که امکان ثبت داده‌های اشاره‌ای وجود داشته باشد، یک آیکون نشانگر در گوشه پایین صفحه‌کلید خواهید دید. وقتی دایره پر باشد، حداقل یک اشاره جمع‌آوری شده و در انتظار ذخیره است. داده‌ها یا از طریق کلید نوار ابزار (نگاه کنید به &lt;i&gt;%1$s&lt;/i&gt;) یا به‌صورت خودکار (وقتی &lt;i&gt;%2$s&lt;/i&gt; غیرفعال باشد) ذخیره می‌شوند. ذخیره خودکار معمولاً هنگام جابجایی بین فیلدهای متنی یا بستن صفحه‌کلید انجام می‌شود، اما ممکن است در صورت تغییر فیلد متنی به دلایل دیگر نیز رخ دهد. هنگام ذخیره شدن داده‌ها، نشانگر برای مدت کوتاهی سبز می‌شود.</string>
     <string name="gesture_data_background_gathering_control">نحوه کنترل آنچه ذخیره می‌شود</string>

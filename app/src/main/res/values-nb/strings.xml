@@ -95,9 +95,9 @@
     <string name="number_row_summary">Alltid vis tallraden</string>
     <string name="day_night_mode">Automatisk dag-/nattmodus</string>
     <string name="prefs_long_press_keyboard_to_change_lang_summary">Langt trykk på mellomromstasten åpner meny for valg av inndatametode</string>
-    <string name="ime_settings">HeliBoard-innstillinger</string>
-    <string name="spell_checker_service_name">HeliBoard-stavekontroll</string>
-    <string name="android_spell_checker_settings">Innstillinger for HeliBoard-stavekontroll</string>
+    <string name="ime_settings">Caret-innstillinger</string>
+    <string name="spell_checker_service_name">Caret-stavekontroll</string>
+    <string name="android_spell_checker_settings">Innstillinger for Caret-stavekontroll</string>
     <string name="delete_swipe">Sveip for å slette</string>
     <string name="show_emoji_key">Emoji-tast</string>
     <string name="delete_swipe_summary">Utfør en dragning fra Delete-tasten for å velge og fjerne større deler av tekst samtidig</string>
@@ -530,7 +530,7 @@
     <string name="gesture_data_background_gathering_manual_save">Forkast som standard</string>
     <string name="gesture_data_background_gathering_manual_save_summary">Data lagres manuelt via verktøylinjetasten</string>
     <string name="gesture_data_background_gathering_info">Mer informasjon</string>
-    <string name="gesture_data_background_gathering_info_message">Når du slår på bakgrunnsinnsamling av data, kan HeliBoard registrere sveipebevegelser du skriver i andre apper. Dette er svært nyttig for sveipeskriving-prosjektet, siden det kan gi en betydelig mengde data, om enn med lavere kvalitet enn aktiv innsamling. Bakgrunnsinnsamling er ikke en erstatning for aktivt innsamlede data, men ment som et tillegg, ettersom datakvalitet er viktigere enn mengde.\n\nBakgrunnsinnsamling kan lett samle inn data du anser som for private til å dele, selv om de publiseres anonymt. Derfor ønsker vi å tydeliggjøre når bevegelsesdata samles inn, og hvordan du kan påvirke det.\n\nDu finner en video som forklarer mer om bakgrunnsinnsamling i lenkeseksjonen nederst til høyre på denne skjermen.</string>
+    <string name="gesture_data_background_gathering_info_message">Når du slår på bakgrunnsinnsamling av data, kan Caret registrere sveipebevegelser du skriver i andre apper. Dette er svært nyttig for sveipeskriving-prosjektet, siden det kan gi en betydelig mengde data, om enn med lavere kvalitet enn aktiv innsamling. Bakgrunnsinnsamling er ikke en erstatning for aktivt innsamlede data, men ment som et tillegg, ettersom datakvalitet er viktigere enn mengde.\n\nBakgrunnsinnsamling kan lett samle inn data du anser som for private til å dele, selv om de publiseres anonymt. Derfor ønsker vi å tydeliggjøre når bevegelsesdata samles inn, og hvordan du kan påvirke det.\n\nDu finner en video som forklarer mer om bakgrunnsinnsamling i lenkeseksjonen nederst til høyre på denne skjermen.</string>
     <string name="gesture_data_background_gathering_indicator">Indikator for datainnsamling</string>
     <string name="gesture_data_background_gathering_indicator_message">Når bevegelsesdata kan bli registrert, vises et indikatorikon nederst til venstre på tastaturet. Når sirkelen er fylt, er minst én bevegelse samlet inn og venter på å bli lagret. Data lagres enten med verktøylinjetasten (se &lt;i&gt;%1$s&lt;/i&gt;) eller automatisk (når &lt;i&gt;%2$s&lt;/i&gt; er deaktivert). Automatisk lagring skjer vanligvis ved bytte av tekstfelt eller når tastaturet lukkes, men kan også skje hvis tekstfeltet endres av andre grunner. Når data lagres, blir indikatoren grønn en kort stund.</string>
     <string name="gesture_data_background_gathering_control">Slik styrer du hva som lagres</string>

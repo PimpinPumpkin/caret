@@ -95,12 +95,12 @@
     <string name="settings_category_clipboard_history">Zwischenablage-Verlauf</string>
     <string name="settings_category_correction">Korrekturen</string>
     <string name="settings_category_suggestions">Vorschläge</string>
-    <string name="android_spell_checker_settings">HeliBoard-Rechtschreibprüfungs-Einstellungen</string>
-    <string name="ime_settings">HeliBoard-Einstellungen</string>
+    <string name="android_spell_checker_settings">Caret-Rechtschreibprüfungs-Einstellungen</string>
+    <string name="ime_settings">Caret-Einstellungen</string>
     <string name="settings_category_experimental">Experimentell</string>
     <string name="settings_no_limit">Keine Begrenzung</string>
     <string name="abbreviation_unit_minutes">%s Min.</string>
-    <string name="spell_checker_service_name">HeliBoard-Rechtschreibprüfung</string>
+    <string name="spell_checker_service_name">Caret-Rechtschreibprüfung</string>
     <string name="show_emoji_key">Emoji-Taste</string>
     <string name="settings_category_input">Eingabe</string>
     <string name="settings_category_additional_keys">Zusätzliche Tasten</string>
@@ -522,7 +522,7 @@
     <string name="gesture_data_background_gathering_manual_save">Standardmäßig verwerfen</string>
     <string name="gesture_data_background_gathering_manual_save_summary">Daten werden manuell über die Symbolleisten-Taste gespeichert</string>
     <string name="gesture_data_background_gathering_info">Weitere Informationen</string>
-    <string name="gesture_data_background_gathering_info_message">Das Einschalten der Hintergrund-Datenerfassung erlaubt HeliBoard, Gesten aufzuzeichnen, die du in anderen Apps eingibst. Das ist sehr nützlich für das Gesteneingabe-Projekt, da so eine beträchtliche Datenmenge entstehen kann, wenn auch mit geringerer Qualität als bei der aktiven Erfassung. Die Hintergrund-Datenerfassung ist kein Ersatz für aktiv erfasste Daten, sondern als Ergänzung gedacht, da Datenqualität wichtiger ist als -quantität.\n\n Die Hintergrund-Erfassung birgt ein hohes Potenzial, Daten zu sammeln, die du möglicherweise für zu privat hältst, um sie zu teilen, selbst wenn sie anonym veröffentlicht werden. Deshalb möchten wir klarstellen, wann Gestendaten erfasst werden und wie du das beeinflussen kannst.\n\n Ein Video mit weiteren Erklärungen zur Hintergrund-Datenerfassung findest du im Link-Bereich unten rechts auf diesem Bildschirm.</string>
+    <string name="gesture_data_background_gathering_info_message">Das Einschalten der Hintergrund-Datenerfassung erlaubt Caret, Gesten aufzuzeichnen, die du in anderen Apps eingibst. Das ist sehr nützlich für das Gesteneingabe-Projekt, da so eine beträchtliche Datenmenge entstehen kann, wenn auch mit geringerer Qualität als bei der aktiven Erfassung. Die Hintergrund-Datenerfassung ist kein Ersatz für aktiv erfasste Daten, sondern als Ergänzung gedacht, da Datenqualität wichtiger ist als -quantität.\n\n Die Hintergrund-Erfassung birgt ein hohes Potenzial, Daten zu sammeln, die du möglicherweise für zu privat hältst, um sie zu teilen, selbst wenn sie anonym veröffentlicht werden. Deshalb möchten wir klarstellen, wann Gestendaten erfasst werden und wie du das beeinflussen kannst.\n\n Ein Video mit weiteren Erklärungen zur Hintergrund-Datenerfassung findest du im Link-Bereich unten rechts auf diesem Bildschirm.</string>
     <string name="gesture_data_background_gathering_indicator">Datenerfassungs-Anzeige</string>
     <string name="gesture_data_background_gathering_indicator_message">Immer wenn Gestendaten aufgezeichnet werden können, siehst du ein Anzeigesymbol unten links auf der Tastatur. Wenn der Kreis gefüllt ist, wurde mindestens eine Geste erfasst und wartet auf das Speichern. Daten werden entweder über die Symbolleisten-Taste (siehe &lt;i&gt;%1$s&lt;/i&gt;) oder automatisch gespeichert (wenn &lt;i&gt;%2$s&lt;/i&gt; deaktiviert ist). Automatisches Speichern geschieht üblicherweise beim Wechseln des Textfelds oder beim Schließen der Tastatur, kann aber auch passieren, wenn sich das Textfeld aus einem anderen Grund ändert. Während Daten gespeichert werden, färbt sich die Anzeige kurz grün.</string>
     <string name="gesture_data_background_gathering_control">So steuerst du, was gespeichert wird</string>

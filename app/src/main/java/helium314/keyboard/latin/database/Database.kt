@@ -29,12 +29,27 @@ class Database private constructor(context: Context, name: String = NAME) : SQLi
     companion object {
         private val TAG = Database::class.java.simpleName
         private const val VERSION = 3
-        const val NAME = "heliboard.db"
+        const val NAME = "caret.db"
+        /** The name before the fork, still found in older installs and in HeliBoard backups. */
+        const val OLD_NAME = "heliboard.db"
         private var instance: Database? = null
         fun getInstance(context: Context): Database {
-            if (instance == null)
+            if (instance == null) {
+                renameOldDatabase(context)
                 instance = Database(context)
+            }
             return instance!!
+        }
+
+        private fun renameOldDatabase(context: Context) {
+            val old = context.getDatabasePath(OLD_NAME)
+            val new = context.getDatabasePath(NAME)
+            if (!old.exists() || new.exists()) return
+            for (suffix in listOf("", "-journal", "-wal", "-shm")) {
+                val file = File(old.path + suffix)
+                if (file.exists() && !file.renameTo(File(new.path + suffix)))
+                    Log.w(TAG, "could not rename ${file.name}")
+            }
         }
 
         // needs to be in sync with db version

@@ -29,11 +29,11 @@ If the layout has exactly 2 keys in the bottom row, these keys will replace comm
 * You can use character layouts from [FlorisBoard](https://github.com/florisboard/florisboard/blob/master/CONTRIBUTING.md#adding-the-layout)
   * Support is not 100% there yet, notably `kana_selector` and `char_width_selector` do not work.
 * There is no need for specifying a `code`, it will be determined from the label automatically
-  * You can still specify it, but it's only necessary if you want key label and code to be different (please avoid contributing layout with unnecessary codes to HeliBoard)
+  * You can still specify it, but it's only necessary if you want key label and code to be different (please avoid contributing layout with unnecessary codes to Caret)
   * Note that not all _special codes_ (negative numbers) from FlorisBoard are supported
-* Key classes: specified with `$`, usually you can omit them in HeliBoard 
+* Key classes: specified with `$`, usually you can omit them in Caret 
   * `text_key`: normal key, default
-  * `auto_text_key`: used in FlorisBoard for a key that changes text case when shift is enabled, HeliBoard does that anyway unless disabled with a _labelFlag_
+  * `auto_text_key`: used in FlorisBoard for a key that changes text case when shift is enabled, Caret does that anyway unless disabled with a _labelFlag_
   * `multi_text_key`: key with an array of code points, e.g. `{ "$": "multi_text_key", "codePoints": [2509, 2480], "label": "্র" }`
   * there are also selector classes, which allow to change keys conditionally, see the [dvorak layout](app/src/main/assets/layouts/main/dvorak.json) for an example:
     * `case_selector`: keys for `lower` and `upper` (both mandatory), similar to `shift_state_selector`
@@ -44,7 +44,7 @@ If the layout has exactly 2 keys in the bottom row, these keys will replace comm
     * `layout_direction_selector`: keys for `ltr` and `rtl` (both mandatory)
 ### Properties
 * A (non-selector) key can have the following properties:
-* `type`: only specific values, HeliBoard mostly uses this to determine background color and type, determined automatically by default
+* `type`: only specific values, Caret mostly uses this to determine background color and type, determined automatically by default
   * `normal`: normal key color
   * `function`: functional key color
   * `space`: space bar color

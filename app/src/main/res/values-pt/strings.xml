@@ -91,8 +91,8 @@
     <string name="user_dict_settings_edit_dialog_title">"Editar palavra"</string>
     <string name="user_dict_settings_all_languages">"Para todos os idiomas"</string>
     <string name="user_dict_settings_more_languages">"Mais idiomas…"</string>
-    <string name="spell_checker_service_name">Verificação ortográfica HeliBoard</string>
-    <string name="android_spell_checker_settings">Definições de verificação ortográfica HeliBoard</string>
+    <string name="spell_checker_service_name">Verificação ortográfica Caret</string>
+    <string name="android_spell_checker_settings">Definições de verificação ortográfica Caret</string>
     <string name="number_row">Número de linha</string>
     <string name="number_row_summary">Mostrar sempre n.º de linha</string>
     <string name="prefs_force_incognito_mode_summary">Desativar aprendizagem de palavras</string>
@@ -102,7 +102,7 @@
     <string name="settings_category_experimental">Experimental</string>
     <string name="settings_category_input">Introdução</string>
     <string name="settings_category_miscellaneous">Outras</string>
-    <string name="ime_settings">Definições HeliBoard</string>
+    <string name="ime_settings">Definições Caret</string>
     <string name="settings_category_suggestions">Sugestões</string>
     <string name="delete_swipe">Deslize para eliminar</string>
     <string name="more_keys_strip_description">Mais teclas</string>
@@ -522,7 +522,7 @@
     <string name="gesture_data_background_gathering_manual_save">Descartar por padrão</string>
     <string name="gesture_data_background_gathering_manual_save_summary">Os dados são guardados manualmente através da tecla da barra de ferramentas</string>
     <string name="gesture_data_background_gathering_info">Mais informações</string>
-    <string name="gesture_data_background_gathering_info_message">Ativar a recolha de dados em segundo plano permite ao HeliBoard registar os gestos que escreve noutras apps. Isto é muito útil para o projeto de escrita por gestos, pois pode produzir uma quantidade considerável de dados, embora com menor qualidade do que a recolha ativa. A recolha de dados em segundo plano não substitui os dados recolhidos ativamente; destina-se a ser um complemento, pois a qualidade dos dados é mais importante do que a quantidade.\n\n A recolha em segundo plano tem grande potencial de recolher dados que pode considerar demasiado privados para partilhar, mesmo quando publicados anonimamente. Por esta razão, queremos clarificar quando os dados de gestos estão a ser recolhidos e como pode influenciá-lo.\n\n Pode encontrar um vídeo que explica mais sobre a recolha de dados em segundo plano na secção de links, no canto inferior direito deste ecrã.</string>
+    <string name="gesture_data_background_gathering_info_message">Ativar a recolha de dados em segundo plano permite ao Caret registar os gestos que escreve noutras apps. Isto é muito útil para o projeto de escrita por gestos, pois pode produzir uma quantidade considerável de dados, embora com menor qualidade do que a recolha ativa. A recolha de dados em segundo plano não substitui os dados recolhidos ativamente; destina-se a ser um complemento, pois a qualidade dos dados é mais importante do que a quantidade.\n\n A recolha em segundo plano tem grande potencial de recolher dados que pode considerar demasiado privados para partilhar, mesmo quando publicados anonimamente. Por esta razão, queremos clarificar quando os dados de gestos estão a ser recolhidos e como pode influenciá-lo.\n\n Pode encontrar um vídeo que explica mais sobre a recolha de dados em segundo plano na secção de links, no canto inferior direito deste ecrã.</string>
     <string name="gesture_data_background_gathering_indicator">Indicador de recolha de dados</string>
     <string name="gesture_data_background_gathering_indicator_message">Sempre que dados de gestos possam ser registados, verá um ícone indicador no canto inferior esquerdo do teclado. Quando o círculo está preenchido, pelo menos um gesto foi recolhido e está à espera de ser guardado. Os dados são guardados usando a tecla da barra de ferramentas (ver &lt;i&gt;%1$s&lt;/i&gt;) ou automaticamente (quando &lt;i&gt;%2$s&lt;/i&gt; está desativado). A gravação automática acontece normalmente ao mudar de campo de texto ou ao fechar o teclado, mas também pode acontecer se o campo de texto mudar por outra razão. Quando os dados estão a ser guardados, o indicador ficará verde por um curto período.</string>
     <string name="gesture_data_background_gathering_control">Como controlar o que é guardado</string>

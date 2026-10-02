@@ -91,8 +91,8 @@
     <string name="user_dict_settings_edit_dialog_title">"Uređivanje riječi"</string>
     <string name="user_dict_settings_all_languages">"Za sve jezike"</string>
     <string name="user_dict_settings_more_languages">"Više jezika…"</string>
-    <string name="spell_checker_service_name">HeliBoard provjera pravopisa</string>
-    <string name="android_spell_checker_settings">Postavke HeliBoard provjere pravopisa</string>
+    <string name="spell_checker_service_name">Caret provjera pravopisa</string>
+    <string name="android_spell_checker_settings">Postavke Caret provjere pravopisa</string>
     <string name="subtype_akkhor_bn_BD">%s (Akkhor)</string>
     <string name="settings_category_suggestions">Prijedlozi</string>
     <string name="settings_category_clipboard_history">Povijest međuspremnika</string>
@@ -102,7 +102,7 @@
     <string name="show_emoji_key">Tipka za emojije</string>
     <string name="abbreviation_unit_minutes">%s min</string>
     <string name="settings_no_limit">Bez ograničenja</string>
-    <string name="ime_settings">HeliBoard postavke</string>
+    <string name="ime_settings">Caret postavke</string>
     <string name="settings_category_input">Unos</string>
     <string name="settings_category_additional_keys">Dodatne tipke</string>
     <string name="enable_clipboard_history">Omogući povijest međuspremnika</string>
@@ -522,7 +522,7 @@
     <string name="gesture_data_background_gathering_manual_save">Zadano odbacivanje</string>
     <string name="gesture_data_background_gathering_manual_save_summary">Podaci se spremaju ručno pomoću tipke alatne trake</string>
     <string name="gesture_data_background_gathering_info">Više informacija</string>
-    <string name="gesture_data_background_gathering_info_message">Uključivanje pozadinskog prikupljanja podataka omogućuje HeliBoardu bilježenje gesti koje unosite u drugim aplikacijama. To je vrlo korisno za projekt pisanja kretnjama jer može proizvesti znatnu količinu podataka, iako niže kvalitete od aktivnog prikupljanja. Pozadinsko prikupljanje podataka nije zamjena za aktivno prikupljene podatke, već dodatak, jer je kvaliteta podataka važnija od količine.\n\nPozadinsko prikupljanje ima velik potencijal prikupljanja podataka koje možda smatrate previše privatnima za dijeljenje, čak i kada se objavljuju anonimno. Zbog toga želimo pojasniti kada se podaci gesti prikupljaju i kako na to možete utjecati.\n\nVideozapis koji detaljnije objašnjava pozadinsko prikupljanje podataka možete pronaći u odjeljku s poveznicama u donjem desnom dijelu ovog zaslona.</string>
+    <string name="gesture_data_background_gathering_info_message">Uključivanje pozadinskog prikupljanja podataka omogućuje Caretu bilježenje gesti koje unosite u drugim aplikacijama. To je vrlo korisno za projekt pisanja kretnjama jer može proizvesti znatnu količinu podataka, iako niže kvalitete od aktivnog prikupljanja. Pozadinsko prikupljanje podataka nije zamjena za aktivno prikupljene podatke, već dodatak, jer je kvaliteta podataka važnija od količine.\n\nPozadinsko prikupljanje ima velik potencijal prikupljanja podataka koje možda smatrate previše privatnima za dijeljenje, čak i kada se objavljuju anonimno. Zbog toga želimo pojasniti kada se podaci gesti prikupljaju i kako na to možete utjecati.\n\nVideozapis koji detaljnije objašnjava pozadinsko prikupljanje podataka možete pronaći u odjeljku s poveznicama u donjem desnom dijelu ovog zaslona.</string>
     <string name="gesture_data_background_gathering_indicator">Indikator prikupljanja podataka</string>
     <string name="gesture_data_background_gathering_indicator_message">Kad god se podaci gesti mogu bilježiti, u donjem lijevom dijelu tipkovnice vidjet ćete ikonu indikatora. Kada je krug ispunjen, prikupljena je barem jedna gesta koja čeka na spremanje. Podaci se spremaju pomoću tipke alatne trake (pogledajte &lt;i&gt;%1$s&lt;/i&gt;) ili automatski (kada je &lt;i&gt;%2$s&lt;/i&gt; onemogućeno). Automatsko spremanje obično se događa pri promjeni polja za unos teksta ili zatvaranju tipkovnice, ali i ako se polje za unos promijeni iz nekog drugog razloga. Dok se podaci spremaju, indikator će nakratko postati zelen.</string>
     <string name="gesture_data_background_gathering_control">Kako upravljati onim što se sprema</string>
