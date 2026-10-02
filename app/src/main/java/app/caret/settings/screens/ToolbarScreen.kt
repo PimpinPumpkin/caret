@@ -1,6 +1,11 @@
 // SPDX-License-Identifier: GPL-3.0-only
 package app.caret.settings.screens
 
+import app.caret.latin.voice.InlineDictation
+import android.widget.Toast
+import androidx.core.content.edit
+import androidx.activity.result.contract.ActivityResultContracts
+import androidx.activity.compose.rememberLauncherForActivityResult
 import android.content.Context
 import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
@@ -66,6 +71,7 @@ fun ToolbarScreen(
         },
         if (toolbarMode == ToolbarMode.EXPANDABLE || toolbarMode == ToolbarMode.SUGGESTION_STRIP) SuggestionStripView.PREF_MIC_ON_LEFT else null,
         if (toolbarMode == ToolbarMode.EXPANDABLE || toolbarMode == ToolbarMode.SUGGESTION_STRIP) SuggestionStripView.PREF_MIC_SIZE else null,
+        Settings.PREF_INLINE_DICTATION,
         if (clipboardToolbarVisible) Settings.PREF_CLIPBOARD_TOOLBAR_KEYS else null,
         if (clipboardToolbarVisible) Settings.PREF_TOOLBAR_CUSTOM_KEY_CODES else null,
         if (toolbarMode == ToolbarMode.EXPANDABLE) Settings.PREF_QUICK_PIN_TOOLBAR_KEYS else null,
@@ -94,6 +100,19 @@ fun createToolbarSettings(context: Context) = listOf(
     },
     Setting(context, SuggestionStripView.PREF_MIC_ON_LEFT, R.string.mic_on_left, R.string.mic_on_left_summary) {
         SwitchPreference(it, false) { KeyboardSwitcher.getInstance().setThemeNeedsReload() }
+    },
+    Setting(context, Settings.PREF_INLINE_DICTATION, R.string.inline_dictation, R.string.inline_dictation_summary) {
+        val ctx = LocalContext.current
+        // the keyboard itself cannot ask for a permission, so it is asked for here when the switch goes on
+        val askForMicrophone = rememberLauncherForActivityResult(ActivityResultContracts.RequestPermission()) { granted ->
+            if (!granted) ctx.prefs().edit { putBoolean(Settings.PREF_INLINE_DICTATION, false) }
+        }
+        SwitchPreference(it, Defaults.PREF_INLINE_DICTATION) { on ->
+            if (!on) return@SwitchPreference
+            if (!InlineDictation.hasPermission(ctx)) askForMicrophone.launch(android.Manifest.permission.RECORD_AUDIO)
+            if (InlineDictation.findService(ctx) == null)
+                Toast.makeText(ctx, R.string.inline_dictation_no_service, Toast.LENGTH_LONG).show()
+        }
     },
     Setting(context, SuggestionStripView.PREF_MIC_SIZE, R.string.mic_size) { def ->
         SliderPreference(

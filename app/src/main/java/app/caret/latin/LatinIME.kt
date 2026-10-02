@@ -26,6 +26,8 @@ import android.util.PrintWriterPrinter
 import android.util.Printer
 import android.view.KeyEvent
 import android.view.View
+import android.widget.TextView
+import app.caret.latin.voice.InlineDictation
 import android.view.Window
 import android.view.inputmethod.CompletionInfo
 import android.view.inputmethod.EditorInfo
@@ -180,6 +182,32 @@ class LatinIME : InputMethodService(),
     private var gestureConsumer: GestureConsumer = GestureConsumer.NULL_GESTURE_CONSUMER
 
     val clipboardHistoryManager: ClipboardHistoryManager = ClipboardHistoryManager(this)
+
+    private val inlineDictation: InlineDictation = InlineDictation(this, object : InlineDictation.Host {
+        override fun insertText(text: String) = onTextInput(text)
+        override fun codePointBeforeCursor() = inputLogic.connection.getCodePointBeforeCursor()
+        override fun locale(): Locale = richImm.currentSubtypeLocale
+        override fun showStatus(text: String?) {
+            val stripView = suggestionStripView ?: return
+            if (text == null) {
+                setNeutralSuggestionStrip()
+                return
+            }
+            val view = TextView(stripView.context)
+            view.text = text
+            view.gravity = android.view.Gravity.CENTER
+            view.maxLines = 1
+            view.ellipsize = android.text.TextUtils.TruncateAt.START
+            view.setTextColor(settings.current.colors.get(app.caret.latin.common.ColorType.KEY_TEXT))
+            view.layoutParams = android.view.ViewGroup.LayoutParams(android.view.ViewGroup.LayoutParams.MATCH_PARENT, android.view.ViewGroup.LayoutParams.MATCH_PARENT)
+            view.setOnClickListener { stopDictation() }
+            stripView.setExternalSuggestionView(view, false)
+        }
+    })
+
+    private fun stopDictation() {
+        inlineDictation.stop()
+    }
 
     // (declared at Java line 1727, after onKeyUp; moved here because part 1 declares all fields)
     // receive ringer mode change.
@@ -1038,6 +1066,7 @@ class LatinIME : InputMethodService(),
     }
 
     fun onFinishInputViewInternal(finishingInput: Boolean) {
+        inlineDictation.cancel()
         super.onFinishInputView(finishingInput)
         Log.i(TAG, "onFinishInputView")
         cleanupInternalStateForFinishInput()
@@ -1406,7 +1435,9 @@ class LatinIME : InputMethodService(),
     // completely replace #onCodeInput.
     fun onEvent(event: Event) {
         if (KeyCode.VOICE_INPUT == event.keyCode) {
-            richImm.switchToShortcutIme(this)
+            // dictate here when that is switched on and possible, otherwise go to the voice keyboard
+            if (!(settings.current.inlineDictation && inlineDictation.toggle()))
+                richImm.switchToShortcutIme(this)
         }
         val completeInputTransaction =
                 inputLogic.onCodeInput(settings.current, event,

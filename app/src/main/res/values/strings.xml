@@ -1022,6 +1022,14 @@ New dictionary:
     <string name="hold_delete_by_word_summary">Holding backspace deletes a few characters, then whole words</string>
     <string name="mic_on_left">Microphone on the left</string>
     <string name="mic_on_left_summary">Puts the pinned microphone key at the left end of the suggestion strip</string>
+    <!-- Caret: dictation inside the keyboard -->
+    <string name="inline_dictation">Dictate inside the keyboard</string>
+    <string name="inline_dictation_summary">The microphone key listens right here and types what you say. Uses Alyo\'s speech service when it is switched on in Alyo, otherwise the phone\'s speech recognizer. Without either, the key switches to the voice keyboard as before.</string>
+    <string name="inline_dictation_no_service">No speech recognition service found. In Alyo, switch on its use as the phone\'s speech recognizer.</string>
+    <string name="dictation_starting">Starting…</string>
+    <string name="dictation_error_permission">Speech service has no microphone access</string>
+    <string name="dictation_error">Speech recognition is not set up</string>
+    <string name="dictation_listening">Listening… tap to stop</string>
     <string name="mic_size">Microphone size</string>
     <string name="swipe_models_download">Download swipe typing models</string>
     <string name="swipe_models_download_summary">Not installed. %s from huggingface.co. Swipe typing needs them.</string>

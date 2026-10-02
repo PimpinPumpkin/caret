@@ -108,6 +108,7 @@ class SettingsValues(context: Context, prefs: SharedPreferences, res: Resources,
     @JvmField val popupKeyHintOrder: List<String>
     @JvmField val secondaryLocales: List<Locale>
     @JvmField val bigramPredictionEnabled: Boolean // Use bigrams to predict the next word when there is no input for it yet
+    @JvmField val inlineDictation: Boolean // Caret: the microphone key dictates inside the keyboard
     @JvmField val lmNextWordEnabled: Boolean // Caret: let the language model of the swipe models rank those predictions
     @JvmField val suggestPunctuation: Boolean
     @JvmField val centerSuggestionTextToEnter: Boolean
@@ -237,6 +238,7 @@ class SettingsValues(context: Context, prefs: SharedPreferences, res: Resources,
         autoCorrectShortcuts = prefs.getBoolean(Settings.PREF_AUTOCORRECT_SHORTCUTS, Defaults.PREF_AUTOCORRECT_SHORTCUTS)
         backspaceRevertsAutocorrect = prefs.getBoolean(Settings.PREF_BACKSPACE_REVERTS_AUTOCORRECT, Defaults.PREF_BACKSPACE_REVERTS_AUTOCORRECT)
         bigramPredictionEnabled = prefs.getBoolean(Settings.PREF_BIGRAM_PREDICTIONS, Defaults.PREF_BIGRAM_PREDICTIONS)
+        inlineDictation = prefs.getBoolean(Settings.PREF_INLINE_DICTATION, Defaults.PREF_INLINE_DICTATION)
         lmNextWordEnabled = prefs.getBoolean(Settings.PREF_LM_NEXT_WORD, Defaults.PREF_LM_NEXT_WORD)
         suggestPunctuation = prefs.getBoolean(Settings.PREF_SUGGEST_PUNCTUATION, Defaults.PREF_SUGGEST_PUNCTUATION)
         suggestClipboardContent = prefs.getBoolean(Settings.PREF_SUGGEST_CLIPBOARD_CONTENT, Defaults.PREF_SUGGEST_CLIPBOARD_CONTENT)

@@ -252,8 +252,16 @@ Still open in the converted code:
 - "Teh" as a fast first word: autocorrect works; the earlier miss was in a search field, which
   asks keyboards not to correct.
 
+- Dictation inside the keyboard (0.1.2, off by default, Toolbar settings): the microphone key
+  starts a speech recognition service, Alyo's when Alyo offers one, else the phone's. Words show
+  in the suggestion strip while spoken and are typed per utterance; it keeps listening until the
+  key or the strip is tapped, nothing is heard, or the field goes away. Caret asks for the
+  microphone permission when the setting is switched on. Without permission or a service the
+  key switches to the voice keyboard as before. Tested with a simulated recognizer in unit tests
+  and, on the emulator, up to the service answering that it is not set up; not yet with real
+  speech.
+
 Open:
-- In-keyboard dictation through Alyo's speech service (needs a decision on the microphone
-  permission), clipboard masking, TV remote support.
+- Dictation with real speech on a phone, clipboard masking, TV remote support.
 - TalkBack on a real device.
 

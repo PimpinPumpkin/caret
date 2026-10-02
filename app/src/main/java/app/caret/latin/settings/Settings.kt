@@ -305,6 +305,8 @@ class Settings : SharedPreferences.OnSharedPreferenceChangeListener {
         const val PREF_BIGRAM_PREDICTIONS = "next_word_prediction"
         // Caret: rank next-word suggestions with the swipe models' language model
         const val PREF_LM_NEXT_WORD = "lm_next_word"
+        // Caret: the microphone key dictates inside the keyboard instead of switching keyboards
+        const val PREF_INLINE_DICTATION = "inline_dictation"
         const val PREF_SUGGEST_PUNCTUATION = "suggest_punctuation"
         const val PREF_PUNCTUATION_SUGGESTIONS = "punctuation_suggestions"
         const val PREF_SUGGEST_CLIPBOARD_CONTENT = "suggest_clipboard_content"
