@@ -810,6 +810,49 @@ class InputLogicTest {
         assertEquals("hello!", text)
     }
 
+    // ------- separators, branches that had no test (Caret) -------
+
+    private fun pickPunctuation(mark: String) {
+        val suggestions = PunctuationSuggestions.newPunctuationSuggestions(arrayOf(mark))
+        latinIME.mInputLogic.setSuggestedWords(suggestions)
+        latinIME.pickSuggestionManually(suggestions.getInfo(0))
+        handleMessages()
+    }
+
+    @Test fun `a typed comma after a typed space stays after the space`() {
+        chainInput("hello ")
+        input(',')
+        assertEquals("hello ,", text)
+    }
+
+    @Test fun `punctuation picked from the strip after a space moves in front of the space`() {
+        chainInput("hello ")
+        pickPunctuation("!")
+        assertEquals("hello! ", text)
+    }
+
+    @Test fun `backspace after swapped punctuation puts the space back in front`() {
+        chainInput("hello ")
+        pickPunctuation("!")
+        functionalKeyPress(KeyCode.DELETE)
+        assertEquals("hello !", text)
+    }
+
+    @Test fun `a space typed inside a word splits it`() {
+        setText("hello")
+        setCursorPosition(2)
+        input(' ')
+        assertEquals("he llo", text)
+        assertEquals(3, cursor)
+    }
+
+    @Test fun `a period ends the word being typed`() {
+        chainInput("hello")
+        input('.')
+        assertEquals("hello.", text)
+        assertEquals("", composingText)
+    }
+
     // ------- backspace branches that had no test (Caret) -------
 
     private fun repeatDelete(times: Int) = repeat(times) {
