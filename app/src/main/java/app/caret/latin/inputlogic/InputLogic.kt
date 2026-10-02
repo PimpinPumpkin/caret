@@ -1904,7 +1904,7 @@ class InputLogic(
         inputLogicHandler.getSuggestedWords { getSuggestedWords(
             inputStyle, SuggestedWords.NOT_A_SEQUENCE_NUMBER,
             object : OnGetSuggestedWordsCallback {
-                override fun onGetSuggestedWords(suggestedWords: SuggestedWords?) {
+                override fun onGetSuggestedWords(suggestedWords: SuggestedWords) {
                     val typedWordString = wordComposer.getTypedWord()
                     val typedWordInfo = SuggestedWordInfo(
                         typedWordString, "", SuggestedWordInfo.MAX_SCORE, SuggestedWordInfo.KIND_TYPED,
@@ -1913,7 +1913,7 @@ class InputLogic(
                     // Show new suggestions if we have at least one. Otherwise keep the old
                     // suggestions with the new typed word. Exception: if the length of the
                     // typed word is <= 1 (after a deletion typically) we clear old suggestions.
-                    if (suggestedWords!!.size() > 1 || typedWordString.length <= 1) {
+                    if (suggestedWords.size() > 1 || typedWordString.length <= 1) {
                         holder.set(suggestedWords)
                     } else {
                         holder.set(retrieveOlderSuggestions(typedWordInfo, this@InputLogic.suggestedWords))
@@ -1971,8 +1971,8 @@ class InputLogic(
         if (isInlineEmojiSearchAction()) {
             inputLogicHandler.getSuggestedWords { getSuggestedWords(SuggestedWords.INPUT_STYLE_TYPING,
                 SuggestedWords.NOT_A_SEQUENCE_NUMBER, object : OnGetSuggestedWordsCallback {
-                    override fun onGetSuggestedWords(suggestedWords: SuggestedWords?) {
-                        doShowSuggestionsAndClearAutoCorrectionIndicator(suggestedWords!!)
+                    override fun onGetSuggestedWords(suggestedWords: SuggestedWords) {
+                        doShowSuggestionsAndClearAutoCorrectionIndicator(suggestedWords)
                     }
                 }) }
             return
@@ -2047,8 +2047,8 @@ class InputLogic(
             // have no useful suggestions, so we will try to compute some for it instead.
             inputLogicHandler.getSuggestedWords { getSuggestedWords(SuggestedWords.INPUT_STYLE_TYPING,
                 SuggestedWords.NOT_A_SEQUENCE_NUMBER, object : OnGetSuggestedWordsCallback {
-                    override fun onGetSuggestedWords(suggestedWords: SuggestedWords?) {
-                        doShowSuggestionsAndClearAutoCorrectionIndicator(suggestedWords!!)
+                    override fun onGetSuggestedWords(suggestedWords: SuggestedWords) {
+                        doShowSuggestionsAndClearAutoCorrectionIndicator(suggestedWords)
                     }
                 }) }
         } else {
@@ -2468,8 +2468,8 @@ class InputLogic(
 
         if (isInlineEmojiSearchAction()) {
             searchForEmojiInline(SuggestedWords.NOT_A_SEQUENCE_NUMBER, object : OnGetSuggestedWordsCallback {
-                override fun onGetSuggestedWords(suggestedWords: SuggestedWords?) {
-                    latinIME.setSuggestions(suggestedWords!!)
+                override fun onGetSuggestedWords(suggestedWords: SuggestedWords) {
+                    latinIME.setSuggestions(suggestedWords)
                 }
             })
         }

@@ -54,7 +54,7 @@ class Suggest(private val mDictionaryFacilitator: DictionaryFacilitator) {
 
     // todo: remove when InputLogic is ready
     interface OnGetSuggestedWordsCallback {
-        fun onGetSuggestedWords(suggestedWords: SuggestedWords?)
+        fun onGetSuggestedWords(suggestedWords: SuggestedWords)
     }
 
     fun getSuggestedWords(wordComposer: WordComposer, ngramContext: NgramContext, keyboard: Keyboard,
