@@ -68,7 +68,7 @@
     <string name="setup_step1_title">Ative %s</string>
     <string name="setup_step1_action">Ativar nas Configurações</string>
     <string name="setup_step2_action">Alterar os métodos de entrada</string>
-    <string name="setup_step3_title">Parabéns, está tudo pronto!</string>
+    <string name="setup_step3_title">Tudo pronto</string>
     <string name="show_setup_wizard_icon">Mostrar ícone do app</string>
     <string name="dictionary_category_title">Adicionar dicionários</string>
     <string name="settings">Configurações</string>
@@ -103,12 +103,12 @@
     <string name="subtype_no_language">Nenhum idioma</string>
     <string name="setup_welcome_title">Bem-vindo ao %s</string>
     <string name="prefs_enable_emoji_alt_physical_key_summary">Mostrar a paleta de emojis ao tocar na tecla Alt física</string>
-    <string name="setup_step1_instruction">Ative o \"%s\" em \'Idiomas e Entrada\' nas configurações. Isso permitirá que ele seja usado no seu dispositivo.</string>
+    <string name="setup_step1_instruction">Ative o \"%s\" na lista de teclados do sistema. O Android mostra o mesmo aviso para todos os teclados.</string>
     <string name="setup_finish_action">Concluído</string>
     <string name="show_setup_wizard_icon_summary">Mostrar o ícone do app na launcher</string>
     <string name="dictionary_available">Dicionário disponível</string>
     <string name="setup_step2_title">Alternar para %s</string>
-    <string name="setup_step2_instruction">Em seguida, selecione o \"%s\" como o seu método de entrada ativo.</string>
+    <string name="setup_step2_instruction">Escolha o \"%s\" como o teclado para digitar.</string>
     <string name="version_text">Versão %s</string>
     <string name="user_dict_settings_add_word_hint">Escreva uma palavra</string>
     <string name="user_dict_settings_add_shortcut_hint">Atalho opcional</string>
@@ -551,4 +551,43 @@
     <string name="gesture_data_add_key">Adicionar tecla à barra de ferramentas</string>
     <string name="gesture_data_no_known_dict">A coleta em segundo plano só registra palavras provenientes de dicionários integrados ou disponíveis no &lt;a href=%s&gt;repositório de dicionários&lt;/a&gt;. No momento, você não tem nenhum dicionário desse tipo ativado.</string>
     <string name="gesture_data_swipe_o_scope">Ferramenta para visualizar dados de gestos: &lt;a href=%s&gt;Swipe-O-Scope&lt;/a&gt;</string>
+    <string name="swipe_delete_by_word">Deslizar no backspace apaga palavras</string>
+    <string name="swipe_delete_by_word_summary">Ao deslizar a partir da tecla backspace, seleciona e apaga palavras inteiras em vez de caracteres individuais</string>
+    <string name="url_email_layout">Adaptar layout para campos de URL e e-mail</string>
+    <string name="url_email_layout_summary">Mostra uma tecla de barra em campos de URL e uma tecla @ em campos de e-mail (no lugar da vírgula), além das teclas de pop-up correspondentes. Desative para manter sempre o layout normal.</string>
+    <string name="resize">Redimensionar teclado</string>
+    <string name="more">Todas as ações</string>
+    <string name="actions_panel_close">Fechar</string>
+    <string name="resize_reset">Redefinir</string>
+    <string name="resize_done">Concluído</string>
+    <string name="setup_subtitle">Um teclado livre que mantém no seu celular tudo o que você digita.</string>
+    <string name="setup_swipe_title">Digitação por gestos</string>
+    <string name="setup_swipe_instruction">A digitação por gestos precisa de modelos da FUTO: %s, baixados uma única vez de huggingface.co. Você também pode baixá-los ou importá-los depois nas configurações.</string>
+    <string name="setup_swipe_download">Baixar</string>
+    <string name="setup_swipe_skip">Agora não</string>
+    <string name="setup_try_hint">Experimente aqui</string>
+    <string name="emoji_font_link">Obter fonte de emojis a partir de um link</string>
+    <string name="emoji_font_link_summary">Baixa um arquivo de fonte de um link https informado por você e o usa para os emojis do teclado</string>
+    <string name="emoji_font_link_working">Baixando…</string>
+    <string name="emoji_font_link_done">Fonte de emojis instalada</string>
+    <string name="emoji_font_link_failed">Não foi possível usar esse link: %s</string>
+    <string name="action_key">Tecla ao lado da barra de espaço</string>
+    <string name="action_key_summary">Qualquer ação da barra de ferramentas. Oculte-a com "Tecla de emoji" em Preferências.</string>
+    <string name="hold_delete_by_word">Segurar o backspace para apagar palavras</string>
+    <string name="hold_delete_by_word_summary">Segurar o backspace apaga alguns caracteres e, depois, palavras inteiras</string>
+    <string name="mic_on_left">Microfone à esquerda</string>
+    <string name="mic_on_left_summary">Coloca a tecla fixada do microfone na extremidade esquerda da barra de sugestões</string>
+    <string name="mic_size">Tamanho do microfone</string>
+    <string name="swipe_models_download">Baixar modelos de digitação por gestos</string>
+    <string name="swipe_models_download_summary">Não instalados. %s de huggingface.co. A digitação por gestos precisa deles.</string>
+    <string name="swipe_models_title_installed">Modelos de digitação por gestos</string>
+    <string name="swipe_models_installed">Instalados. A digitação por gestos usa o FUTO Swipe (FUTO Model Weights License 1.0). Toque para remover.</string>
+    <string name="swipe_models_working">Obtendo modelos: %d%%</string>
+    <string name="swipe_models_failed">Não foi possível obter os modelos: %s</string>
+    <string name="swipe_models_import">Importar modelos de digitação por gestos</string>
+    <string name="swipe_models_import_summary">A partir de um zip com as pastas de modelos futo-swipe, para celulares que ficam offline</string>
+    <string name="swipe_models_remove">Remover</string>
+    <string name="swipe_models_remove_message">Remover os modelos de digitação por gestos? A digitação por gestos deixará de funcionar até que eles sejam baixados ou importados novamente.</string>
+    <string name="swipe_engine_futo">Usar o FUTO Swipe</string>
+    <string name="swipe_engine_futo_summary">Desativado, usa a biblioteca de digitação por gestos importada</string>
 </resources>
