@@ -53,7 +53,7 @@ data class KeyboardId(
         params.deviceLocked,
         params.settingsValues?.mShowsNumberRow ?: false,
         params.settingsValues?.mShowsNumberRowInSymbols ?: false,
-        params.settingsValues?.isLanguageSwitchKeyEnabled ?: false,
+        params.settingsValues?.isLanguageSwitchKeyEnabled() ?: false,
         params.settingsValues?.mShowsEmojiKey ?: false,
         params.settingsValues?.mShowsDpadKey ?: false,
         params.editorInfo.actionLabel?.toString(),
