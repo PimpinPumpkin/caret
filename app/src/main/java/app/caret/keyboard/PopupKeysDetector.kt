@@ -21,7 +21,7 @@ class PopupKeysDetector(slideAllowance: Float) : KeyDetector() {
     }
 
     override fun detectHitKey(x: Int, y: Int): Key? {
-        val keyboard = getKeyboard()
+        val keyboard = this.keyboard
         if (keyboard == null) {
             return null
         }

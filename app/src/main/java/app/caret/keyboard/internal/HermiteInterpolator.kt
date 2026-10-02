@@ -10,10 +10,10 @@ package app.caret.keyboard.internal
  * Interpolates XY-coordinates using Cubic Hermite Curve.
  */
 class HermiteInterpolator {
-    private lateinit var mXCoords: IntArray
-    private lateinit var mYCoords: IntArray
-    private var mMinPos = 0
-    private var mMaxPos = 0
+    private lateinit var xCoords: IntArray
+    private lateinit var yCoords: IntArray
+    private var minPos = 0
+    private var maxPos = 0
 
     // Working variable to calculate interpolated value.
     /** The coordinates of the start point of the interval. */
@@ -49,10 +49,10 @@ class HermiteInterpolator {
      */
     fun reset(xCoords: IntArray, yCoords: IntArray, minPos: Int,
             maxPos: Int) {
-        mXCoords = xCoords
-        mYCoords = yCoords
-        mMinPos = minPos
-        mMaxPos = maxPos
+        this.xCoords = xCoords
+        this.yCoords = yCoords
+        this.minPos = minPos
+        this.maxPos = maxPos
     }
 
     /**
@@ -72,25 +72,25 @@ class HermiteInterpolator {
      *           {@link #reset(int[],int[],int,int)}.
      */
     fun setInterval(p0: Int, p1: Int, p2: Int, p3: Int) {
-        p1X = mXCoords[p1]
-        p1Y = mYCoords[p1]
-        p2X = mXCoords[p2]
-        p2Y = mYCoords[p2]
+        p1X = xCoords[p1]
+        p1Y = yCoords[p1]
+        p2X = xCoords[p2]
+        p2Y = yCoords[p2]
         // A(ax,ay) is the vector p1->p2.
         val ax = p2X - p1X
         val ay = p2Y - p1Y
 
         // Calculate the slope of the tangent at p1.
-        if (p0 >= mMinPos) {
+        if (p0 >= minPos) {
             // p1 has previous valid point p0.
             // The slope of the tangent is half of the vector p0->p2.
-            slope1X = (p2X - mXCoords[p0]) / 2.0f
-            slope1Y = (p2Y - mYCoords[p0]) / 2.0f
-        } else if (p3 < mMaxPos) {
+            slope1X = (p2X - xCoords[p0]) / 2.0f
+            slope1Y = (p2Y - yCoords[p0]) / 2.0f
+        } else if (p3 < maxPos) {
             // p1 has no previous valid point, but p2 has next valid point p3.
             // B(bx,by) is the slope vector of the tangent at p2.
-            val bx = (mXCoords[p3] - p1X) / 2.0f
-            val by = (mYCoords[p3] - p1Y) / 2.0f
+            val bx = (xCoords[p3] - p1X) / 2.0f
+            val by = (yCoords[p3] - p1Y) / 2.0f
             val crossProdAB = ax * by - ay * bx
             val dotProdAB = ax * bx + ay * by
             val normASquare = (ax * ax + ay * ay).toFloat()
@@ -105,16 +105,16 @@ class HermiteInterpolator {
         }
 
         // Calculate the slope of the tangent at p2.
-        if (p3 < mMaxPos) {
+        if (p3 < maxPos) {
             // p2 has next valid point p3.
             // The slope of the tangent is half of the vector p1->p3.
-            slope2X = (mXCoords[p3] - p1X) / 2.0f
-            slope2Y = (mYCoords[p3] - p1Y) / 2.0f
-        } else if (p0 >= mMinPos) {
+            slope2X = (xCoords[p3] - p1X) / 2.0f
+            slope2Y = (yCoords[p3] - p1Y) / 2.0f
+        } else if (p0 >= minPos) {
             // p2 has no next valid point, but p1 has previous valid point p0.
             // B(bx,by) is the slope vector of the tangent at p1.
-            val bx = (p2X - mXCoords[p0]) / 2.0f
-            val by = (p2Y - mYCoords[p0]) / 2.0f
+            val bx = (p2X - xCoords[p0]) / 2.0f
+            val by = (p2Y - yCoords[p0]) / 2.0f
             val crossProdAB = ax * by - ay * bx
             val dotProdAB = ax * bx + ay * by
             val normASquare = (ax * ax + ay * ay).toFloat()

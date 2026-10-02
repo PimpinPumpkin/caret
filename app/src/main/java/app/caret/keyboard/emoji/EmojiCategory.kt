@@ -24,12 +24,12 @@ import androidx.core.content.edit
 
 internal class EmojiCategory(private val context: Context, private val layoutSet: KeyboardLayoutSet, emojiPaletteViewAttr: TypedArray) {
     inner class CategoryProperties(val category: Category) {
-        var mPageCount = -1
+        var cachedPageCount = -1
 
         val pageCount: Int
             get() {
-                if (mPageCount < 0) mPageCount = computeCategoryPageCount(category)
-                return mPageCount
+                if (cachedPageCount < 0) cachedPageCount = computeCategoryPageCount(category)
+                return cachedPageCount
             }
     }
 
@@ -86,7 +86,7 @@ internal class EmojiCategory(private val context: Context, private val layoutSet
 
     fun clearKeyboardCache() {
         categoryKeyboardMap.clear()
-        for (props in shownCategories) props.mPageCount = -1 // reset page count in case size (number of keys per row) changed
+        for (props in shownCategories) props.cachedPageCount = -1 // reset page count in case size (number of keys per row) changed
     }
 
     private fun isShownCategory(category: Category): Boolean {
@@ -181,7 +181,7 @@ internal class EmojiCategory(private val context: Context, private val layoutSet
             layoutSet.getKeyboard(KeyboardElement.EMOJI_RECENTS),
             0, true, ResourceUtils.getKeyboardWidth(context, Settings.getValues())
         )
-        return MAX_LINE_COUNT_PER_PAGE * tempKeyboard.getOccupiedColumnCount()
+        return MAX_LINE_COUNT_PER_PAGE * tempKeyboard.occupiedColumnCount
     }
 
     enum class Category(val element: KeyboardElement, val iconAttr: Int) {
@@ -208,8 +208,8 @@ internal class EmojiCategory(private val context: Context, private val layoutSet
             ((category.ordinal.toLong()) shl Integer.SIZE) or id.toLong()
 
         private val EMOJI_KEY_COMPARATOR = Comparator { lhs: Key, rhs: Key ->
-            val lHitBox = lhs.getHitBox()
-            val rHitBox = rhs.getHitBox()
+            val lHitBox = lhs.hitBox
+            val rHitBox = rhs.hitBox
             if (lHitBox.top < rHitBox.top) {
                 return@Comparator -1
             } else if (lHitBox.top > rHitBox.top) {
@@ -220,10 +220,10 @@ internal class EmojiCategory(private val context: Context, private val layoutSet
             } else if (lHitBox.left > rHitBox.left) {
                 return@Comparator 1
             }
-            if (lhs.getCode() == rhs.getCode()) {
+            if (lhs.code == rhs.code) {
                 return@Comparator 0
             }
-            if (lhs.getCode() < rhs.getCode()) -1 else 1
+            if (lhs.code < rhs.code) -1 else 1
         }
 
         private fun sortKeysGrouped(inKeys: List<Key>, maxPageCount: Int): Array<Array<Key?>> {

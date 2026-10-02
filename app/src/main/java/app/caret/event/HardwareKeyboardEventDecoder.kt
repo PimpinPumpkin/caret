@@ -19,7 +19,7 @@ import app.caret.latin.common.Constants
  * 10-key like keyboards; a different decoder is used for this.
  */
 // TODO: get the layout for this hardware keyboard
-class HardwareKeyboardEventDecoder(val mDeviceId: Int) : HardwareEventDecoder {
+class HardwareKeyboardEventDecoder(val deviceId: Int) : HardwareEventDecoder {
     override fun decodeHardwareKey(keyEvent: KeyEvent): Event {
         // KeyEvent#getUnicodeChar() does not exactly returns a unicode char, but rather a value
         // that includes both the unicode char in the lower 21 bits and flags in the upper bits,

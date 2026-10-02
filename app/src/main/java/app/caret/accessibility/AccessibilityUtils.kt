@@ -25,7 +25,7 @@ import app.caret.latin.SuggestedWords
 import app.caret.latin.utils.InputTypeUtils
 
 class AccessibilityUtils private constructor() {
-    private lateinit var mContext: Context
+    private lateinit var context: Context
     private lateinit var accessibilityManager: AccessibilityManager
     private lateinit var audioManager: AudioManager
     /** The most recent auto-correction.  */
@@ -34,7 +34,7 @@ class AccessibilityUtils private constructor() {
     private var typedWord: String? = null
 
     private fun initInternal(context: Context) {
-        mContext = context
+        this.context = context
         accessibilityManager = context.getSystemService(Context.ACCESSIBILITY_SERVICE) as AccessibilityManager
         audioManager = context.getSystemService(Context.AUDIO_SERVICE) as AudioManager
     }
@@ -67,7 +67,7 @@ class AccessibilityUtils private constructor() {
     fun shouldObscureInput(inputType: Int): Boolean {
         // The user can optionally force speaking passwords.
         if (Settings.Secure.ACCESSIBILITY_SPEAK_PASSWORD != null) {
-            val speakPassword = Settings.Secure.getInt(mContext.contentResolver,
+            val speakPassword = Settings.Secure.getInt(context.contentResolver,
                     Settings.Secure.ACCESSIBILITY_SPEAK_PASSWORD, 0) != 0
             if (speakPassword) return false
         }
@@ -122,9 +122,9 @@ class AccessibilityUtils private constructor() {
         if (!TextUtils.isEmpty(autoCorrectionWord)) {
             if (!TextUtils.equals(autoCorrectionWord, typedWord)) {
                 return if (shouldObscure) { // This should never happen, but just in case...
-                    mContext.getString(R.string.spoken_auto_correct_obscured,
+                    context.getString(R.string.spoken_auto_correct_obscured,
                             keyCodeDescription)
-                } else mContext.getString(R.string.spoken_auto_correct, keyCodeDescription,
+                } else context.getString(R.string.spoken_auto_correct, keyCodeDescription,
                         typedWord, autoCorrectionWord)
             }
         }
@@ -173,7 +173,7 @@ class AccessibilityUtils private constructor() {
      */
     fun onStartInputViewInternal(view: View, editorInfo: EditorInfo, restarting: Boolean) {
         if (shouldObscureInput(editorInfo.inputType)) {
-            val text = mContext.getText(R.string.spoken_use_headphones)
+            val text = context.getText(R.string.spoken_use_headphones)
             announceForAccessibility(view, text)
         }
     }

@@ -23,32 +23,32 @@ import app.caret.latin.common.ResizableIntArray
  * Drawing points in this class will be asynchronously removed when fading out animation goes.
  */
 class GestureTrailDrawingPoints {
-    // These three {@link ResizableIntArray}s should be synchronized by {@link #mEventTimes}.
+    // These three {@link ResizableIntArray}s should be synchronized by {@link #eventTimes}.
     private val xCoordinates = ResizableIntArray(DEFAULT_CAPACITY)
     private val yCoordinates = ResizableIntArray(DEFAULT_CAPACITY)
-    private val mEventTimes = ResizableIntArray(DEFAULT_CAPACITY)
-    private val mPointTypes = ResizableIntArray(
+    private val eventTimes = ResizableIntArray(DEFAULT_CAPACITY)
+    private val pointTypes = ResizableIntArray(
             if (DEBUG_SHOW_POINTS) DEFAULT_CAPACITY else 0)
     private var currentStrokeId = -1
-    // The wall time of the zero value in {@link #mEventTimes}
+    // The wall time of the zero value in {@link #eventTimes}
     private var currentTimeBase: Long = 0
     private var trailStartIndex = 0
     private var lastInterpolatedDrawIndex = 0
 
     fun addStroke(stroke: GestureStrokeDrawingPoints, downTime: Long) {
-        synchronized(mEventTimes) {
+        synchronized(eventTimes) {
             addStrokeLocked(stroke, downTime)
         }
     }
 
     private fun addStrokeLocked(stroke: GestureStrokeDrawingPoints, downTime: Long) {
-        val trailSize = mEventTimes.getLength()
-        stroke.appendPreviewStroke(mEventTimes, xCoordinates, yCoordinates, mPointTypes)
-        if (mEventTimes.getLength() == trailSize) {
+        val trailSize = eventTimes.getLength()
+        stroke.appendPreviewStroke(eventTimes, xCoordinates, yCoordinates, pointTypes)
+        if (eventTimes.getLength() == trailSize) {
             return
         }
-        val eventTimes = mEventTimes.getPrimitiveArray()
-        val strokeId = stroke.getGestureStrokeId()
+        val times = eventTimes.getPrimitiveArray()
+        val strokeId = stroke.gestureStrokeId
         // Because interpolation algorithm in {@link GestureStrokeDrawingPoints} can't determine
         // the interpolated points in the last segment of gesture stroke, it may need recalculation
         // of interpolation when new segments are added to the stroke.
@@ -60,21 +60,21 @@ class GestureTrailDrawingPoints {
         val lastInterpolatedIndex = if (strokeId == currentStrokeId)
                 lastInterpolatedDrawIndex else trailSize
         lastInterpolatedDrawIndex = stroke.interpolateStrokeAndReturnStartIndexOfLastSegment(
-                lastInterpolatedIndex, mEventTimes, xCoordinates, yCoordinates, mPointTypes)
+                lastInterpolatedIndex, eventTimes, xCoordinates, yCoordinates, pointTypes)
         if (strokeId != currentStrokeId) {
             val elapsedTime = (downTime - currentTimeBase).toInt()
             for (i in trailStartIndex until trailSize) {
                 // Decay the previous strokes' event times.
-                eventTimes[i] -= elapsedTime
+                times[i] -= elapsedTime
             }
             val xCoords = xCoordinates.getPrimitiveArray()
             xCoords[trailSize] = markAsDownEvent(xCoords[trailSize])
-            currentTimeBase = downTime - eventTimes[trailSize]
+            currentTimeBase = downTime - times[trailSize]
             currentStrokeId = strokeId
         }
     }
 
-    private val mRoundedLine = RoundedLine()
+    private val roundedLine = RoundedLine()
     private val roundedLineBounds = Rect()
 
     /**
@@ -87,7 +87,7 @@ class GestureTrailDrawingPoints {
      */
     fun drawGestureTrail(canvas: Canvas, paint: Paint,
             outBoundsRect: Rect, params: GestureTrailDrawingParams): Boolean {
-        synchronized(mEventTimes) {
+        synchronized(eventTimes) {
             return drawGestureTrailLocked(canvas, paint, outBoundsRect, params)
         }
     }
@@ -96,19 +96,19 @@ class GestureTrailDrawingPoints {
             outBoundsRect: Rect, params: GestureTrailDrawingParams): Boolean {
         // Initialize bounds rectangle.
         outBoundsRect.setEmpty()
-        val trailSize = mEventTimes.getLength()
+        val trailSize = eventTimes.getLength()
         if (trailSize == 0) {
             return false
         }
 
-        val eventTimes = mEventTimes.getPrimitiveArray()
+        val times = eventTimes.getPrimitiveArray()
         val xCoords = xCoordinates.getPrimitiveArray()
         val yCoords = yCoordinates.getPrimitiveArray()
-        val pointTypes = mPointTypes.getPrimitiveArray()
+        val types = pointTypes.getPrimitiveArray()
         val sinceDown = (SystemClock.uptimeMillis() - currentTimeBase).toInt()
         var startIndex = trailStartIndex
         while (startIndex < trailSize) {
-            val elapsedTime = sinceDown - eventTimes[startIndex]
+            val elapsedTime = sinceDown - times[startIndex]
             // Skip too old trail points.
             if (elapsedTime < params.trailLingerDuration) {
                 break
@@ -120,13 +120,12 @@ class GestureTrailDrawingPoints {
         if (startIndex < trailSize) {
             paint.setColor(params.trailColor)
             paint.setStyle(Paint.Style.FILL)
-            val roundedLine = mRoundedLine
             var p1x = getXCoordValue(xCoords[startIndex])
             var p1y = yCoords[startIndex]
-            val lastTime = sinceDown - eventTimes[startIndex]
+            val lastTime = sinceDown - times[startIndex]
             var r1 = getWidth(lastTime, params) / 2.0f
             for (i in startIndex + 1 until trailSize) {
-                val elapsedTime = sinceDown - eventTimes[i]
+                val elapsedTime = sinceDown - times[i]
                 val p2x = getXCoordValue(xCoords[i])
                 val p2y = yCoords[i]
                 val r2 = getWidth(elapsedTime, params) / 2.0f
@@ -164,18 +163,18 @@ class GestureTrailDrawingPoints {
         if (newSize < startIndex) {
             trailStartIndex = 0
             if (newSize > 0) {
-                System.arraycopy(eventTimes, startIndex, eventTimes, 0, newSize)
+                System.arraycopy(times, startIndex, times, 0, newSize)
                 System.arraycopy(xCoords, startIndex, xCoords, 0, newSize)
                 System.arraycopy(yCoords, startIndex, yCoords, 0, newSize)
                 if (DEBUG_SHOW_POINTS) {
-                    System.arraycopy(pointTypes, startIndex, pointTypes, 0, newSize)
+                    System.arraycopy(types, startIndex, types, 0, newSize)
                 }
             }
-            mEventTimes.setLength(newSize)
+            eventTimes.setLength(newSize)
             xCoordinates.setLength(newSize)
             yCoordinates.setLength(newSize)
             if (DEBUG_SHOW_POINTS) {
-                mPointTypes.setLength(newSize)
+                pointTypes.setLength(newSize)
             }
             // The start index of the last segment of the stroke
             // {@link lastInterpolatedDrawIndex} should also be updated because all array
@@ -189,12 +188,12 @@ class GestureTrailDrawingPoints {
             paint: Paint) {
         val xCoords = xCoordinates.getPrimitiveArray()
         val yCoords = yCoordinates.getPrimitiveArray()
-        val pointTypes = mPointTypes.getPrimitiveArray()
+        val types = pointTypes.getPrimitiveArray()
         // {@link Paint} that is zero width stroke and anti alias off draws exactly 1 pixel.
         paint.setAntiAlias(false)
         paint.setStrokeWidth(0f)
         for (i in startIndex until endIndex) {
-            val pointType = pointTypes[i]
+            val pointType = types[i]
             if (pointType == POINT_TYPE_INTERPOLATED) {
                 paint.setColor(Color.RED)
             } else if (pointType == POINT_TYPE_SAMPLED) {

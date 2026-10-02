@@ -304,7 +304,7 @@ class SwipeLayout(val letters: String, val cx: FloatArray, val cy: FloatArray,
 
     companion object {
         fun fromKeyboard(keyboard: Keyboard, maxLetters: Int): SwipeLayout? =
-            fromKeys(keyboard.getSortedKeys().map { KeyBox(it.getCode(), it.getX(), it.getY(), it.getWidth(), it.getHeight()) }, keyboard.occupiedWidth, maxLetters)
+            fromKeys(keyboard.getSortedKeys().map { KeyBox(it.code, it.getX(), it.getY(), it.width, it.height) }, keyboard.occupiedWidth, maxLetters)
 
         /**
          * Letters in reading order with their centers. x runs 0..1 over the keyboard width, y runs

@@ -15,7 +15,7 @@ class KeyPreviewDrawParams(mainKeyboardViewAttr: TypedArray) {
     // XML attributes of {@link MainKeyboardView}.
     @JvmField val previewOffset: Int
     @JvmField val previewBackgroundResId: Int
-    private var showPopup = true
+    var isPopupEnabled = true
 
     // The graphical geometry of the key preview.
     // <-width->
@@ -34,13 +34,15 @@ class KeyPreviewDrawParams(mainKeyboardViewAttr: TypedArray) {
     // paddings. To align the popup keys keyboard panel's visible part with the visible part of
     // the background, we need to record the width and height of key preview that don't include
     // invisible paddings.
-    private var mVisibleWidth = 0
-    private var mVisibleHeight = 0
+    var visibleWidth = 0
+        private set
+    var visibleHeight = 0
+        private set
     // The key preview may have an arbitrary offset and its background that may have a bottom
     // padding. To align the popup keys keyboard and the key preview we also need to record the
     // offset between the top edge of parent key and the bottom of the visible part of key
     // preview background.
-    private var mVisibleOffset = 0
+    var visibleOffset = 0
 
     init {
         previewOffset = mainKeyboardViewAttr.getDimensionPixelOffset(
@@ -49,40 +51,16 @@ class KeyPreviewDrawParams(mainKeyboardViewAttr: TypedArray) {
                 R.styleable.MainKeyboardView_keyPreviewBackground, 0)
     }
 
-    fun setVisibleOffset(previewVisibleOffset: Int) {
-        mVisibleOffset = previewVisibleOffset
-    }
-
-    fun getVisibleOffset(): Int {
-        return mVisibleOffset
-    }
-
     fun setGeometry(previewTextView: View) {
         val previewWidth = previewTextView.measuredWidth
         val previewHeight = previewTextView.measuredHeight
         // The width and height of visible part of the key preview background. The content marker
         // of the background 9-patch have to cover the visible part of the background.
-        mVisibleWidth = previewWidth - previewTextView.paddingLeft - previewTextView.paddingRight
-        mVisibleHeight = previewHeight - previewTextView.paddingTop - previewTextView.paddingBottom
+        visibleWidth = previewWidth - previewTextView.paddingLeft - previewTextView.paddingRight
+        visibleHeight = previewHeight - previewTextView.paddingTop - previewTextView.paddingBottom
         // The distance between the top edge of the parent key and the bottom of the visible part
         // of the key preview background.
-        setVisibleOffset(-previewTextView.paddingBottom / 2)
-    }
-
-    fun getVisibleWidth(): Int {
-        return mVisibleWidth
-    }
-
-    fun getVisibleHeight(): Int {
-        return mVisibleHeight
-    }
-
-    fun setPopupEnabled(enabled: Boolean) {
-        showPopup = enabled
-    }
-
-    fun isPopupEnabled(): Boolean {
-        return showPopup
+        visibleOffset = -previewTextView.paddingBottom / 2
     }
 
 }

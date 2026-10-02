@@ -36,8 +36,8 @@ import java.lang.ref.SoftReference
  * A [KeyboardLayoutSet] needs to be created for each
  * [EditorInfo].
  */
-class KeyboardLayoutSet internal constructor(private val mContext: Context, private val mParams: Params) {
-    val script = mParams.script
+class KeyboardLayoutSet internal constructor(private val context: Context, private val params: Params) {
+    val script = params.script
 
     /**
      * Represents an internal action that overrides the action provided by the input field.
@@ -47,7 +47,7 @@ class KeyboardLayoutSet internal constructor(private val mContext: Context, priv
     data class InternalAction(val code: Int, val label: String)
 
     fun getKeyboard(baseKeyboardLayoutSetElement: KeyboardElement): Keyboard {
-        val keyboardLayoutSetElementId = when (mParams.mode) {
+        val keyboardLayoutSetElementId = when (params.mode) {
             KeyboardMode.PHONE -> {
                 if (baseKeyboardLayoutSetElement == KeyboardElement.SYMBOLS) KeyboardElement.PHONE_SYMBOLS
                 else KeyboardElement.PHONE
@@ -60,7 +60,7 @@ class KeyboardLayoutSet internal constructor(private val mContext: Context, priv
         // attribute in a keyboard_layout_set XML file. Also each keyboard layout XML resource is
         // specified as an elementKeyboard attribute in the file.
         // The KeyboardId is an internal key for a Keyboard object.
-        val id = KeyboardId(keyboardLayoutSetElementId, mParams)
+        val id = KeyboardId(keyboardLayoutSetElementId, params)
         try {
             return getKeyboard(id)
         } catch (e: RuntimeException) {
@@ -79,15 +79,15 @@ class KeyboardLayoutSet internal constructor(private val mContext: Context, priv
             return cachedKeyboard
         }
 
-        val builder = KeyboardBuilder(mContext, KeyboardParams(uniqueKeysCache))
+        val builder = KeyboardBuilder(context, KeyboardParams(uniqueKeysCache))
         uniqueKeysCache.setEnabled(id.element.isAlphabet)
         builder.load(id)
-        if (mParams.disableTouchPositionCorrectionDataForTest) {
+        if (params.disableTouchPositionCorrectionDataForTest) {
             builder.disableTouchPositionCorrectionDataForTest()
         }
         val keyboard = builder.build()
         keyboardCache[id] = SoftReference<Keyboard>(keyboard)
-        if (!mParams.isSpellChecker
+        if (!params.isSpellChecker
             && (id.element == KeyboardElement.ALPHABET || id.element == KeyboardElement.ALPHABET_AUTOMATIC_SHIFTED)
         ) {
             // We only forcibly cache the primary, "ALPHABET", layouts.
@@ -126,7 +126,7 @@ class KeyboardLayoutSet internal constructor(private val mContext: Context, priv
         var isSplitLayoutEnabled = false
     }
 
-    class Builder(private val mContext: Context, ei: EditorInfo?, settingsValues: SettingsValues?) {
+    class Builder(private val context: Context, ei: EditorInfo?, settingsValues: SettingsValues?) {
         private val params = Params()
 
         init {
@@ -168,7 +168,7 @@ class KeyboardLayoutSet internal constructor(private val mContext: Context, priv
 
         fun build(): KeyboardLayoutSet {
             params.script = params.subtype.locale.script()
-            return KeyboardLayoutSet(mContext, params)
+            return KeyboardLayoutSet(context, params)
         }
 
         companion object {

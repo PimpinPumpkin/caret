@@ -15,17 +15,17 @@ import app.caret.keyboard.PointerTracker
 import app.caret.latin.common.CoordinateUtils
 
 class NonDistinctMultitouchHelper {
-    private var mOldPointerCount = 1
+    private var oldPointerCount = 1
     private var oldKey: Key? = null
     private val lastCoords = CoordinateUtils.newInstance()
 
     fun processMotionEvent(me: MotionEvent, keyDetector: KeyDetector) {
         val pointerCount = me.getPointerCount()
-        val oldPointerCount = mOldPointerCount
-        mOldPointerCount = pointerCount
+        val previousPointerCount = oldPointerCount
+        oldPointerCount = pointerCount
         // Ignore continuous multi-touch events because we can't trust the coordinates
         // in multi-touch events.
-        if (pointerCount > 1 && oldPointerCount > 1) {
+        if (pointerCount > 1 && previousPointerCount > 1) {
             return
         }
 
@@ -38,7 +38,7 @@ class NonDistinctMultitouchHelper {
         val downTime = me.getDownTime()
 
         // In single-touch.
-        if (oldPointerCount == 1 && pointerCount == 1) {
+        if (previousPointerCount == 1 && pointerCount == 1) {
             if (me.getPointerId(index) == mainTracker.pointerId) {
                 mainTracker.processMotionEvent(me, keyDetector)
                 return
@@ -50,7 +50,7 @@ class NonDistinctMultitouchHelper {
         }
 
         // Single-touch to multi-touch transition.
-        if (oldPointerCount == 1 && pointerCount == 2) {
+        if (previousPointerCount == 1 && pointerCount == 2) {
             // Send an up event for the last pointer, be cause we can't trust the coordinates of
             // this multi-touch event.
             mainTracker.getLastCoordinates(lastCoords)
@@ -64,7 +64,7 @@ class NonDistinctMultitouchHelper {
         }
 
         // Multi-touch to single-touch transition.
-        if (oldPointerCount == 2 && pointerCount == 1) {
+        if (previousPointerCount == 2 && pointerCount == 1) {
             // Send a down event for the latest pointer if the key is different from the previous
             // key.
             val x = me.getX(index).toInt()
@@ -85,7 +85,7 @@ class NonDistinctMultitouchHelper {
         }
 
         Log.w(TAG, "Unknown touch panel behavior: pointer count is "
-                + pointerCount + " (previously " + oldPointerCount + ")")
+                + pointerCount + " (previously " + previousPointerCount + ")")
     }
 
     companion object {

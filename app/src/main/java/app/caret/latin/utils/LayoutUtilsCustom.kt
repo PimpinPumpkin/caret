@@ -72,24 +72,24 @@ object LayoutUtilsCustom {
             return false
         }
         if (keys.any { row -> row.any {
-                if ((it.mLabel?.length ?: 0) > 20) {
-                    Log.w(TAG, "too long text on key: ${it.mLabel}")
+                if ((it.label?.length ?: 0) > 20) {
+                    Log.w(TAG, "too long text on key: ${it.label}")
                     true
                 } else false
             } }) {
             return false
         }
         if (keys.any { row -> row.any {
-                if ((it.mPopupKeys?.size ?: 0) > 20) {
-                    Log.w(TAG, "too many popup keys on key ${it.mLabel}")
+                if ((it.popupKeys?.size ?: 0) > 20) {
+                    Log.w(TAG, "too many popup keys on key ${it.label}")
                     true
                 } else false
             } }) {
             return false
         }
-        if (keys.any { row -> row.any { true == it.mPopupKeys?.any { popupKey ->
-                if ((popupKey.mLabel?.length ?: 0) > 10) {
-                    Log.w(TAG, "too long text on popup key: ${popupKey.mLabel}")
+        if (keys.any { row -> row.any { true == it.popupKeys?.any { popupKey ->
+                if ((popupKey.label?.length ?: 0) > 10) {
+                    Log.w(TAG, "too long text on popup key: ${popupKey.label}")
                     true
                 } else false
             } } }) {

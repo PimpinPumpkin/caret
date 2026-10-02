@@ -18,28 +18,24 @@ import app.caret.keyboard.PointerTracker
  * SlidingKeyInputDrawingPreview.
  */
 abstract class AbstractDrawingPreview {
-    private var mDrawingView: View? = null
-    private var mPreviewEnabled = false
+    private var drawingView: View? = null
+    private var previewEnabled = false
     private var hasValidGeometry = false
 
     fun setDrawingView(drawingView: DrawingPreviewPlacerView) {
-        mDrawingView = drawingView
+        this.drawingView = drawingView
         drawingView.addPreview(this)
     }
 
     protected fun invalidateDrawingView() {
-        val drawingView = mDrawingView
-        if (drawingView != null) {
-            drawingView.invalidate()
-        }
+        drawingView?.invalidate()
     }
 
-    protected fun isPreviewEnabled(): Boolean {
-        return mPreviewEnabled && hasValidGeometry
-    }
+    protected val isPreviewEnabled: Boolean
+        get() = previewEnabled && hasValidGeometry
 
     fun setPreviewEnabled(enabled: Boolean) {
-        mPreviewEnabled = enabled
+        previewEnabled = enabled
     }
 
     /**

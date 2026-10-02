@@ -8,7 +8,7 @@ import app.caret.latin.common.Constants
 import app.caret.latin.settings.Settings
 
 class TouchpadHandler {
-    private var mListener: KeyboardActionListener? = null
+    private var listener: KeyboardActionListener? = null
     private val handler = android.os.Handler(android.os.Looper.getMainLooper())
 
     private var inTouchpadMode = false
@@ -31,23 +31,23 @@ class TouchpadHandler {
         stopEdgeScrolling()
         stopHapticRunnable()
         inTouchpadMode = false
-        sTouchpadModeActive = false
-        mListener!!.onCustomRequest(KeyboardActionListener.CustomAction.TOUCHPAD_OFF)
-        mListener = null
+        touchpadModeActive = false
+        listener!!.onCustomRequest(KeyboardActionListener.CustomAction.TOUCHPAD_OFF)
+        listener = null
     }
 
     fun enableTouchpadMove(x: Int, y: Int, listener: KeyboardActionListener?) {
-        if (!sTouchpadModeActive) return
+        if (!touchpadModeActive) return
 
         // Initialize
         if (!inTouchpadMode) {
-            mListener = listener
+            this.listener = listener
             inTouchpadMode = true
             hasVibrated = false
             touchpadLastX = x
             touchpadLastY = y
             touchpadActivationTime = SystemClock.elapsedRealtime()
-            mListener!!.onCustomRequest(KeyboardActionListener.CustomAction.TOUCHPAD_ON)
+            listener!!.onCustomRequest(KeyboardActionListener.CustomAction.TOUCHPAD_ON)
             val sv = Settings.getValues()
             handler.postDelayed(hapticRunnable, sv.keyLongpressTimeout.toLong())
             return
@@ -102,7 +102,7 @@ class TouchpadHandler {
         while (Math.abs(touchpadAccX) >= moveThreshold) {
             val positive = touchpadAccX > 0
             val direction = if (positive) KeyCode.ARROW_RIGHT else KeyCode.ARROW_LEFT
-            mListener!!.onCodeInput(direction, Constants.NOT_A_COORDINATE, Constants.NOT_A_COORDINATE, false)
+            listener!!.onCodeInput(direction, Constants.NOT_A_COORDINATE, Constants.NOT_A_COORDINATE, false)
             touchpadAccX -= (if (positive) moveThreshold else -moveThreshold)
         }
 
@@ -110,14 +110,14 @@ class TouchpadHandler {
         while (Math.abs(touchpadAccY) >= moveThreshold) {
             val positive = touchpadAccY > 0
             val direction = if (positive) KeyCode.ARROW_DOWN else KeyCode.ARROW_UP
-            mListener!!.onCodeInput(direction, Constants.NOT_A_COORDINATE, Constants.NOT_A_COORDINATE, false)
+            listener!!.onCodeInput(direction, Constants.NOT_A_COORDINATE, Constants.NOT_A_COORDINATE, false)
             touchpadAccY -= (if (positive) moveThreshold else -moveThreshold)
         }
     }
 
     private val hapticRunnable = Runnable {
         if (!hasVibrated) {
-            mListener!!.onCustomRequest(KeyboardActionListener.CustomAction.PERFORM_HAPTIC)
+            listener!!.onCustomRequest(KeyboardActionListener.CustomAction.PERFORM_HAPTIC)
             hasVibrated = true
         }
     }
@@ -129,11 +129,11 @@ class TouchpadHandler {
 
     private val scrollRunnable: Runnable = object : Runnable {
         override fun run() {
-            val listener = mListener
-            if (isScrolling && listener != null) {
+            val actionListener = listener
+            if (isScrolling && actionListener != null) {
                 val keyCode = getKeyCodeForDirection(currentScrollDirection)
 
-                listener.onCodeInput(keyCode, Constants.NOT_A_COORDINATE, Constants.NOT_A_COORDINATE, false)
+                actionListener.onCodeInput(keyCode, Constants.NOT_A_COORDINATE, Constants.NOT_A_COORDINATE, false)
 
                 currentScrollDelay = Math.max(MIN_EDGE_ACCELERATION_DELAY.toLong(), (currentScrollDelay * EDGE_ACCELERATION_FACTOR).toLong())
 
@@ -143,7 +143,7 @@ class TouchpadHandler {
     }
 
     private fun handleEdgeScrolling(x: Int, y: Int): Boolean {
-        val currentKeyboard = KeyboardSwitcher.getInstance().getKeyboard()
+        val currentKeyboard = KeyboardSwitcher.getInstance().keyboard
         if (currentKeyboard == null) return false
 
         val keyboardHeight = currentKeyboard.baseHeight
@@ -206,7 +206,7 @@ class TouchpadHandler {
     }
 
     companion object {
-        private var sTouchpadModeActive = false
+        private var touchpadModeActive = false
 
         private const val EDGE_THRESHOLD_PERCENTAGE = 0.1f        // Screen edge threshold percentage
         private const val TOUCHPAD_ACCELERATION_FACTOR = 50.0f    // Lower = more acceleration
@@ -220,7 +220,7 @@ class TouchpadHandler {
 
         @JvmStatic
         fun setTouchpadModeActive(active: Boolean) {
-            sTouchpadModeActive = active
+            touchpadModeActive = active
         }
     }
 }

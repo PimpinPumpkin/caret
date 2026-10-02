@@ -29,7 +29,7 @@ class GestureStrokeRecognitionPoints(private val pointerId: Int,
     private val yCoordinates = ResizableIntArray(
             Constants.DEFAULT_GESTURE_POINTS_CAPACITY)
 
-    private var mKeyWidth = 0 // pixel
+    private var keyWidth = 0 // pixel
     private var minYCoordinate = 0 // pixel
     private var maxYCoordinate = 0 // pixel
     // Static threshold for starting gesture detection
@@ -53,7 +53,7 @@ class GestureStrokeRecognitionPoints(private val pointerId: Int,
 
     // TODO: Make this package private
     fun setKeyboardGeometry(keyWidth: Int, keyboardHeight: Int) {
-        mKeyWidth = keyWidth
+        this.keyWidth = keyWidth
         minYCoordinate = -(keyboardHeight * EXTRA_GESTURE_TRAIL_AREA_ABOVE_KEYBOARD_RATIO).toInt()
         maxYCoordinate = keyboardHeight
         // TODO: Find an appropriate base metric for these length. Maybe diagonal length of the key?
@@ -79,9 +79,8 @@ class GestureStrokeRecognitionPoints(private val pointerId: Int,
     }
 
     // TODO: Make this package private
-    fun getLength(): Int {
-        return eventTimes.getLength()
-    }
+    val length: Int
+        get() = eventTimes.getLength()
 
     // TODO: Make this package private
     fun addDownEventPoint(x: Int, y: Int, elapsedTimeSinceFirstDown: Int,
@@ -125,7 +124,7 @@ class GestureStrokeRecognitionPoints(private val pointerId: Int,
         if (!hasDetectedFastMove()) {
             return false
         }
-        val size = getLength()
+        val size = length
         if (size <= 0) {
             return false
         }
@@ -153,7 +152,7 @@ class GestureStrokeRecognitionPoints(private val pointerId: Int,
 
     // TODO: Make this package private
     fun duplicateLastPointWith(time: Int) {
-        val lastIndex = getLength() - 1
+        val lastIndex = length - 1
         if (lastIndex >= 0) {
             val x = xCoordinates.get(lastIndex)
             val y = yCoordinates.get(lastIndex)
@@ -179,7 +178,7 @@ class GestureStrokeRecognitionPoints(private val pointerId: Int,
     }
 
     private fun appendPoint(x: Int, y: Int, time: Int) {
-        val lastIndex = getLength() - 1
+        val lastIndex = length - 1
         // The point that is created by {@link duplicateLastPointWith(int)} may have later event
         // time than the next {@link MotionEvent}. To maintain the monotonicity of the event time,
         // drop the successive point here.
@@ -205,7 +204,7 @@ class GestureStrokeRecognitionPoints(private val pointerId: Int,
     }
 
     private fun detectFastMove(x: Int, y: Int, time: Int): Int {
-        val size = getLength()
+        val size = length
         val lastIndex = size - 1
         val lastX = xCoordinates.get(lastIndex)
         val lastY = yCoordinates.get(lastIndex)
@@ -215,13 +214,13 @@ class GestureStrokeRecognitionPoints(private val pointerId: Int,
             val pixels = getDistance(lastX, lastY, x, y)
             val pixelsPerSec = pixels * MSEC_PER_SEC
             if (DEBUG_SPEED) {
-                val speed = pixelsPerSec.toFloat() / msecs / mKeyWidth
+                val speed = pixelsPerSec.toFloat() / msecs / keyWidth
                 Log.d(TAG, String.format(Locale.US, "[%d] detectFastMove: speed=%5.2f", pointerId, speed))
             }
             // Equivalent to (pixels / msecs < mStartSpeedThreshold / MSEC_PER_SEC)
             if (!hasDetectedFastMove() && pixelsPerSec > detectFastMoveSpeedThreshold * msecs) {
                 if (DEBUG) {
-                    val speed = pixelsPerSec.toFloat() / msecs / mKeyWidth
+                    val speed = pixelsPerSec.toFloat() / msecs / keyWidth
                     Log.d(TAG, String.format(Locale.US,
                             "[%d] detectFastMove: speed=%5.2f T=%3d points=%3d fastMove",
                             pointerId, speed, time, size))
@@ -246,7 +245,7 @@ class GestureStrokeRecognitionPoints(private val pointerId: Int,
     // TODO: Make this package private
     fun addEventPoint(x: Int, y: Int, time: Int,
             isMajorEvent: Boolean): Boolean {
-        val size = getLength()
+        val size = length
         if (size <= 0) {
             // The first event of this stroke (a.k.a. down event).
             appendPoint(x, y, time)
@@ -273,7 +272,7 @@ class GestureStrokeRecognitionPoints(private val pointerId: Int,
         val pixelsPerSec = pixels * MSEC_PER_SEC
         // Equivalent to (pixels / msecs < mGestureRecognitionThreshold / MSEC_PER_SEC)
         if (pixelsPerSec < gestureRecognitionSpeedThreshold * msecs) {
-            incrementalRecognitionSize = getLength()
+            incrementalRecognitionSize = length
         }
     }
 
@@ -285,7 +284,7 @@ class GestureStrokeRecognitionPoints(private val pointerId: Int,
 
     // TODO: Make this package private
     fun appendAllBatchPoints(out: InputPointers) {
-        appendBatchPoints(out, getLength())
+        appendBatchPoints(out, length)
     }
 
     // TODO: Make this package private

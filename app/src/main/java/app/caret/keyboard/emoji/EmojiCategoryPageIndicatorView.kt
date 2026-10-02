@@ -17,8 +17,8 @@ class EmojiCategoryPageIndicatorView @JvmOverloads constructor(context: Context,
     private val paint = Paint()
     private var categoryPageSize = 0
     private var currentCategoryPageId = 0
-    private var mOffset = 0.0f
-    @JvmField var mWidth = 0
+    private var offset = 0.0f
+    @JvmField var indicatorWidth = 0
 
     fun setColors(foregroundColor: Int, backgroundColor: Int) {
         paint.setColor(foregroundColor)
@@ -28,7 +28,7 @@ class EmojiCategoryPageIndicatorView @JvmOverloads constructor(context: Context,
     fun setCategoryPageId(size: Int, id: Int, offset: Float) {
         categoryPageSize = size
         currentCategoryPageId = id
-        mOffset = offset
+        this.offset = offset
         invalidate()
     }
 
@@ -41,9 +41,9 @@ class EmojiCategoryPageIndicatorView @JvmOverloads constructor(context: Context,
         }
         val height = getHeight().toFloat()
         val leftPadding = getPaddingLeft().toFloat()
-        val width = mWidth - leftPadding - getPaddingRight()
+        val width = indicatorWidth - leftPadding - getPaddingRight()
         val unitWidth = width / categoryPageSize
-        val left = Math.min(unitWidth * currentCategoryPageId + mOffset * unitWidth, width - unitWidth)
+        val left = Math.min(unitWidth * currentCategoryPageId + offset * unitWidth, width - unitWidth)
         val top = 0.0f
         val right = Math.min(left + unitWidth, width)
         val bottom = height * BOTTOM_MARGIN_RATIO

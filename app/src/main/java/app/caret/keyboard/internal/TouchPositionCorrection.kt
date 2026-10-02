@@ -9,7 +9,7 @@ package app.caret.keyboard.internal
 import app.caret.latin.define.DebugFlags
 
 class TouchPositionCorrection {
-    private var mEnabled = false
+    private var enabled = false
     private var xs: FloatArray? = null
     private var ys: FloatArray? = null
     private var radii: FloatArray? = null
@@ -25,29 +25,32 @@ class TouchPositionCorrection {
         }
 
         val length = dataLength / TOUCH_POSITION_CORRECTION_RECORD_SIZE
-        xs = FloatArray(length)
-        ys = FloatArray(length)
-        radii = FloatArray(length)
+        val newXs = FloatArray(length)
+        val newYs = FloatArray(length)
+        val newRadii = FloatArray(length)
+        xs = newXs
+        ys = newYs
+        radii = newRadii
         try {
             for (i in 0 until dataLength) {
                 val type = i % TOUCH_POSITION_CORRECTION_RECORD_SIZE
                 val index = i / TOUCH_POSITION_CORRECTION_RECORD_SIZE
                 val value = java.lang.Float.parseFloat(data[i])
                 if (type == 0) {
-                    xs!![index] = value
+                    newXs[index] = value
                 } else if (type == 1) {
-                    ys!![index] = value
+                    newYs[index] = value
                 } else {
-                    radii!![index] = value
+                    newRadii[index] = value
                 }
             }
-            mEnabled = dataLength > 0
+            enabled = dataLength > 0
         } catch (e: NumberFormatException) {
             if (DebugFlags.DEBUG_ENABLED) {
                 throw RuntimeException(
                         "the number format for touch position correction data is invalid")
             }
-            mEnabled = false
+            enabled = false
             xs = null
             ys = null
             radii = null
@@ -55,16 +58,14 @@ class TouchPositionCorrection {
     }
 
     fun setEnabled(enabled: Boolean) {
-        mEnabled = enabled
+        this.enabled = enabled
     }
 
-    fun isValid(): Boolean {
-        return mEnabled
-    }
+    val isValid: Boolean
+        get() = enabled
 
-    fun getRows(): Int {
-        return radii!!.size
-    }
+    val rows: Int
+        get() = radii!!.size
 
     @Suppress("unused", "UNUSED_PARAMETER")
     fun getX(row: Int): Float {

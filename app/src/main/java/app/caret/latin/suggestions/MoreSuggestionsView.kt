@@ -77,13 +77,13 @@ class MoreSuggestionsView @JvmOverloads constructor(
         // With accessibility mode off, mAccessibilityDelegate is set to null at the above PopupKeysKeyboardView#setKeyboard call.
         // With accessibility mode on, mAccessibilityDelegate is set to a PopupKeysKeyboardAccessibilityDelegate object at the above
         // PopupKeysKeyboardView#setKeyboard call.
-        if (mAccessibilityDelegate != null) {
-            mAccessibilityDelegate?.setOpenAnnounce(R.string.spoken_open_more_suggestions)
-            mAccessibilityDelegate?.setCloseAnnounce(R.string.spoken_close_more_suggestions)
+        if (this.keyboardAccessibilityDelegate != null) {
+            this.keyboardAccessibilityDelegate?.setOpenAnnounce(R.string.spoken_open_more_suggestions)
+            this.keyboardAccessibilityDelegate?.setCloseAnnounce(R.string.spoken_close_more_suggestions)
         }
     }
 
-    override fun getDefaultCoordX() = (getKeyboard() as MoreSuggestions).occupiedWidth / 2
+    override fun getDefaultCoordX() = (this.keyboard as MoreSuggestions).occupiedWidth / 2
 
     fun updateKeyboardGeometry(keyHeight: Int) {
         updateKeyDrawParams(keyHeight)
@@ -92,7 +92,7 @@ class MoreSuggestionsView @JvmOverloads constructor(
     private fun setModalMode() {
         isInModalMode = true
         // Set vertical correction to zero (Reset popup keys keyboard sliding allowance R.dimen.config_popup_keys_keyboard_slide_allowance).
-        this.keyDetector.setKeyboard(getKeyboard(), -paddingLeft.toFloat(), -paddingTop.toFloat())
+        this.keyDetector.setKeyboard(this.keyboard, -paddingLeft.toFloat(), -paddingTop.toFloat())
     }
 
     override fun onKeyInput(key: Key, x: Int, y: Int) {
@@ -100,7 +100,7 @@ class MoreSuggestionsView @JvmOverloads constructor(
             Log.e(TAG, "Expected key is MoreSuggestionKey, but found ${key.javaClass.name}")
             return
         }
-        val keyboard = getKeyboard()
+        val keyboard = this.keyboard
         if (keyboard !is MoreSuggestions) {
             Log.e(TAG, "Expected keyboard is MoreSuggestions, but found ${keyboard?.javaClass?.name}")
             return
@@ -120,7 +120,7 @@ class MoreSuggestionsView @JvmOverloads constructor(
         layoutHelper: SuggestionStripLayoutHelper, parentView: View
     ): Boolean {
         val maxWidth = parentView.width - container.paddingLeft - container.paddingRight
-        val parentKeyboard = mainKeyboardView.getKeyboard() ?: return false
+        val parentKeyboard = mainKeyboardView.keyboard ?: return false
         val keyboard = moreSuggestionsBuilder.layout(
             suggestedWords, fromIndex, maxWidth,
             (maxWidth * layoutHelper.minMoreSuggestionsWidth).toInt(),

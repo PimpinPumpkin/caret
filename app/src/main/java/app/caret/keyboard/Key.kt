@@ -37,62 +37,90 @@ open class Key : Comparable<Key> {
     /**
      * The key code (unicode or custom code) that this key generates.
      */
-    private val mCode: Int
+    val code: Int
 
     /** Label to display */
-    private val mLabel: String?
+    val label: String?
     /** Hint label to display on the key in conjunction with the label */
-    private val mHintLabel: String?
+    val hintLabel: String?
     private val hintIconName: String?
     /** Flags of the label */
-    private val mLabelFlags: Int
+    private val labelFlags: Int
 
     /** Icon to display instead of a label. Icon takes precedence over a label */
-    private val mIconName: String?
+    val iconName: String?
 
-    /** Width of the key, excluding the gap */
-    private val mWidth: Int
-    /** Height of the key, excluding the gap */
-    private val mHeight: Int
+    /**
+     * Width of the key, excluding the gap
+     *
+     * Gets the width of the key in pixels, excluding the gap.
+     * @return The width of the key in pixels, excluding the gap.
+     */
+    val width: Int
+    /**
+     * Height of the key, excluding the gap
+     *
+     * Gets the height of the key in pixels, excluding the gap.
+     * @return The height of the key in pixels, excluding the gap.
+     */
+    val height: Int
     /**
      * The combined width in pixels of the horizontal gaps belonging to this key, both to the left
-     * and to the right. I.e., mWidth + mHorizontalGap = total width belonging to the key.
+     * and to the right. I.e., width + horizontalGap = total width belonging to the key.
+     *
+     * The combined width in pixels of the horizontal gaps belonging to this key, both above and
+     * below. I.e., getWidth() + getHorizontalGap() = total width belonging to the key.
+     * @return Horizontal gap belonging to this key.
      */
-    private val mHorizontalGap: Int
+    val horizontalGap: Int
     /**
      * The combined height in pixels of the vertical gaps belonging to this key, both above and
-     * below. I.e., mHeight + mVerticalGap = total height belonging to the key.
+     * below. I.e., height + verticalGap = total height belonging to the key.
+     *
+     * The combined height in pixels of the vertical gaps belonging to this key, both above and
+     * below. I.e., getHeight() + getVerticalGap() = total height belonging to the key.
+     * @return Vertical gap belonging to this key.
      */
-    private val mVerticalGap: Int
+    val verticalGap: Int
     /** X coordinate of the top-left corner of the key in the keyboard layout, excluding the gap. */
-    private val mX: Int
+    private val x: Int
     /** Y coordinate of the top-left corner of the key in the keyboard layout, excluding the gap. */
-    private val mY: Int
+    private val y: Int
     /** Hit bounding box of the key */
-    private val mHitBox = Rect()
+    val hitBox = Rect()
 
     /** Popup keys. It is guaranteed that this is null or an array of one or more elements */
-    private val mPopupKeys: Array<PopupKeySpec>?
+    val popupKeys: Array<PopupKeySpec>?
     /** Popup keys column number and flags */
-    private val mPopupKeysColumnAndFlags: Int
+    private val popupKeysColumnAndFlags: Int
 
-    /** Background type that represents different key background visual than normal one. */
-    private val mBackgroundType: Int
+    /**
+     * Background type that represents different key background visual than normal one.
+     *
+     * Gets the background type of this key.
+     * @return Background type.
+     * @see Key#BACKGROUND_TYPE_EMPTY
+     * @see Key#BACKGROUND_TYPE_NORMAL
+     * @see Key#BACKGROUND_TYPE_FUNCTIONAL
+     * @see Key#BACKGROUND_TYPE_ACTION
+     * @see Key#BACKGROUND_TYPE_SPACEBAR
+     */
+    val backgroundType: Int
 
-    private val mActionFlags: Int
+    private val actionFlags: Int
 
-    private val keyVisualAttributes: KeyVisualAttributes?
+    val visualAttributes: KeyVisualAttributes?
     private val optionalAttributes: OptionalAttributes?
 
     class OptionalAttributes private constructor(
         /** Text to output when pressed. This can be multiple characters, like ".com" */
-        @JvmField val mOutputText: String?,
-        @JvmField val mAltCode: Int,
+        @JvmField val outputText: String?,
+        @JvmField val altCode: Int,
         /** Icon for disabled state */
-        @JvmField val mDisabledIconName: String?,
+        @JvmField val disabledIconName: String?,
         /** The visual insets */
-        @JvmField val mVisualInsetsLeft: Int,
-        @JvmField val mVisualInsetsRight: Int
+        @JvmField val visualInsetsLeft: Int,
+        @JvmField val visualInsetsRight: Int
     ) {
         companion object {
             @JvmStatic
@@ -109,14 +137,14 @@ open class Key : Comparable<Key> {
         }
     }
 
-    private val mHashCode: Int
+    private val hashCode: Int
 
     /** The current pressed state of this key */
-    private var mPressed = false
+    private var pressed = false
     /** Key is enabled and responds on press */
-    private var mEnabled: Boolean
+    var isEnabled: Boolean
     /** Key is locked (appears permanently pressed) */
-    private var mLocked = false
+    private var locked = false
 
     /**
      * Constructor for a key on <code>PopupKeyKeyboard</code> and on <code>MoreSuggestions</code>.
@@ -125,31 +153,31 @@ open class Key : Comparable<Key> {
             outputText: String?, hintLabel: String?,
             labelFlags: Int, backgroundType: Int, x: Int, y: Int,
             width: Int, height: Int, horizontalGap: Int, verticalGap: Int) {
-        mWidth = width - horizontalGap
-        mHeight = height - verticalGap
-        mHorizontalGap = horizontalGap
-        mVerticalGap = verticalGap
-        mHintLabel = hintLabel
+        this.width = width - horizontalGap
+        this.height = height - verticalGap
+        this.horizontalGap = horizontalGap
+        this.verticalGap = verticalGap
+        this.hintLabel = hintLabel
         hintIconName = null
-        mLabelFlags = labelFlags
-        mBackgroundType = backgroundType
+        this.labelFlags = labelFlags
+        this.backgroundType = backgroundType
         // TODO: Pass keyActionFlags as an argument.
-        mActionFlags = ACTION_FLAGS_NO_KEY_PREVIEW
-        mPopupKeys = null
-        mPopupKeysColumnAndFlags = 0
-        mLabel = label
-        mCode = code
-        mEnabled = (code != KeyCode.NOT_SPECIFIED)
-        mIconName = iconName
+        actionFlags = ACTION_FLAGS_NO_KEY_PREVIEW
+        popupKeys = null
+        popupKeysColumnAndFlags = 0
+        this.label = label
+        this.code = code
+        isEnabled = (code != KeyCode.NOT_SPECIFIED)
+        this.iconName = iconName
         optionalAttributes = OptionalAttributes.newInstance(outputText, KeyCode.NOT_SPECIFIED,
                 if (iconName == null) null else getDisabledIconName(iconName), 0, 0)
         // Horizontal gap is divided equally to both sides of the key.
-        mX = x + mHorizontalGap / 2
-        mY = y
-        mHitBox.set(x, y, x + width + 1, y + height)
-        keyVisualAttributes = null
+        this.x = x + horizontalGap / 2
+        this.y = y
+        hitBox.set(x, y, x + width + 1, y + height)
+        visualAttributes = null
 
-        mHashCode = computeHashCode(this)
+        hashCode = computeHashCode(this)
     }
 
     /**
@@ -163,155 +191,155 @@ open class Key : Comparable<Key> {
     protected constructor(key: Key, popupKeys: Array<PopupKeySpec>?,
                 labelHint: String?, backgroundType: Int) {
         // Final attributes.
-        mCode = key.mCode
-        mLabel = key.mLabel
-        mHintLabel = labelHint
+        code = key.code
+        label = key.label
+        hintLabel = labelHint
         hintIconName = key.hintIconName
-        mLabelFlags = key.mLabelFlags
-        mIconName = key.mIconName
-        mWidth = key.mWidth
-        mHeight = key.mHeight
-        mHorizontalGap = key.mHorizontalGap
-        mVerticalGap = key.mVerticalGap
-        mX = key.mX
-        mY = key.mY
-        mHitBox.set(key.mHitBox)
-        mPopupKeys = popupKeys
-        mPopupKeysColumnAndFlags = key.mPopupKeysColumnAndFlags
-        mBackgroundType = backgroundType
-        mActionFlags = key.mActionFlags
-        keyVisualAttributes = key.keyVisualAttributes
+        labelFlags = key.labelFlags
+        iconName = key.iconName
+        width = key.width
+        height = key.height
+        horizontalGap = key.horizontalGap
+        verticalGap = key.verticalGap
+        x = key.x
+        y = key.y
+        hitBox.set(key.hitBox)
+        this.popupKeys = popupKeys
+        popupKeysColumnAndFlags = key.popupKeysColumnAndFlags
+        this.backgroundType = backgroundType
+        actionFlags = key.actionFlags
+        visualAttributes = key.visualAttributes
         optionalAttributes = key.optionalAttributes
-        mHashCode = key.mHashCode
+        hashCode = key.hashCode
         // Key state.
-        mPressed = key.mPressed
-        mEnabled = key.mEnabled
+        pressed = key.pressed
+        isEnabled = key.isEnabled
     }
 
     /** constructor for creating emoji recent keys when there is no keyboard to take keys from */
     constructor(key: Key, popupKeys: Array<PopupKeySpec>?,
              labelHint: String?, backgroundType: Int, code: Int, outputText: String?) {
         // Final attributes.
-        mCode = if (outputText == null) code else KeyCode.MULTIPLE_CODE_POINTS
-        mLabel = if (outputText == null) StringUtils.newSingleCodePointString(code) else outputText
-        mHintLabel = labelHint
+        this.code = if (outputText == null) code else KeyCode.MULTIPLE_CODE_POINTS
+        label = if (outputText == null) StringUtils.newSingleCodePointString(code) else outputText
+        hintLabel = labelHint
         hintIconName = key.hintIconName
-        mLabelFlags = key.mLabelFlags
-        mIconName = key.mIconName
-        mWidth = key.mWidth
-        mHeight = key.mHeight
-        mHorizontalGap = key.mHorizontalGap
-        mVerticalGap = key.mVerticalGap
-        mX = key.mX
-        mY = key.mY
-        mHitBox.set(key.mHitBox)
-        mPopupKeys = popupKeys
-        mPopupKeysColumnAndFlags = key.mPopupKeysColumnAndFlags
-        mBackgroundType = backgroundType
-        mActionFlags = key.mActionFlags
-        keyVisualAttributes = key.keyVisualAttributes
+        labelFlags = key.labelFlags
+        iconName = key.iconName
+        width = key.width
+        height = key.height
+        horizontalGap = key.horizontalGap
+        verticalGap = key.verticalGap
+        x = key.x
+        y = key.y
+        hitBox.set(key.hitBox)
+        this.popupKeys = popupKeys
+        popupKeysColumnAndFlags = key.popupKeysColumnAndFlags
+        this.backgroundType = backgroundType
+        actionFlags = key.actionFlags
+        visualAttributes = key.visualAttributes
         optionalAttributes = if (outputText == null) null
                 else OptionalAttributes.newInstance(outputText, KeyCode.NOT_SPECIFIED, null, 0, 0)
-        mHashCode = key.mHashCode
+        hashCode = key.hashCode
         // Key state.
-        mPressed = key.mPressed
-        mEnabled = key.mEnabled
+        pressed = key.pressed
+        isEnabled = key.isEnabled
     }
 
     /** constructor from KeyParams */
     private constructor(keyParams: KeyParams) {
         // stuff to copy
-        mCode = keyParams.mCode
-        mLabel = keyParams.mLabel
-        mHintLabel = keyParams.mHintLabel
+        code = keyParams.code
+        label = keyParams.label
+        hintLabel = keyParams.hintLabel
         hintIconName = keyParams.hintIconName
-        mLabelFlags = keyParams.mLabelFlags
-        mIconName = keyParams.mIconName
-        mPopupKeys = keyParams.mPopupKeys
-        mPopupKeysColumnAndFlags = keyParams.mPopupKeysColumnAndFlags
-        mBackgroundType = keyParams.mBackgroundType
-        mActionFlags = keyParams.mActionFlags
-        keyVisualAttributes = keyParams.keyVisualAttributes
+        labelFlags = keyParams.labelFlags
+        iconName = keyParams.iconName
+        popupKeys = keyParams.popupKeys
+        popupKeysColumnAndFlags = keyParams.popupKeysColumnAndFlags
+        backgroundType = keyParams.backgroundType
+        actionFlags = keyParams.actionFlags
+        visualAttributes = keyParams.keyVisualAttributes
         optionalAttributes = keyParams.optionalAttributes
-        mEnabled = keyParams.mEnabled
+        isEnabled = keyParams.enabled
 
         // stuff to create
 
         // get the "correct" float gap: may shift keys by one pixel, but results in more uniform gaps between keys
-        val horizontalGapFloat = if (isSpacer()) 0f else (keyParams.keyboardParams.relativeHorizontalGap * keyParams.keyboardParams.occupiedWidth)
-        mHorizontalGap = Math.round(horizontalGapFloat)
-        mVerticalGap = Math.round(keyParams.keyboardParams.relativeVerticalGap * keyParams.keyboardParams.occupiedHeight)
-        mWidth = Math.round(keyParams.absoluteWidth - horizontalGapFloat)
+        val horizontalGapFloat = if (isSpacer) 0f else (keyParams.keyboardParams.relativeHorizontalGap * keyParams.keyboardParams.occupiedWidth)
+        horizontalGap = Math.round(horizontalGapFloat)
+        verticalGap = Math.round(keyParams.keyboardParams.relativeVerticalGap * keyParams.keyboardParams.occupiedHeight)
+        width = Math.round(keyParams.absoluteWidth - horizontalGapFloat)
         // height is always rounded down, because rounding up may make the keyboard too high to fit, leading to issues
-        mHeight = (keyParams.absoluteHeight - keyParams.keyboardParams.verticalGap).toInt()
-        if (!isSpacer() && (mWidth == 0 || mHeight == 0)) {
+        height = (keyParams.absoluteHeight - keyParams.keyboardParams.verticalGap).toInt()
+        if (!isSpacer && (width == 0 || height == 0)) {
             throw IllegalStateException("key needs positive width and height")
         }
         // Horizontal gap is divided equally to both sides of the key.
-        mX = Math.round(keyParams.xPos + horizontalGapFloat / 2)
-        mY = Math.round(keyParams.yPos)
-        mHitBox.set(Math.round(keyParams.xPos), Math.round(keyParams.yPos), Math.round(keyParams.xPos + keyParams.absoluteWidth) + 1,
+        x = Math.round(keyParams.xPos + horizontalGapFloat / 2)
+        y = Math.round(keyParams.yPos)
+        hitBox.set(Math.round(keyParams.xPos), Math.round(keyParams.yPos), Math.round(keyParams.xPos + keyParams.absoluteWidth) + 1,
                 Math.round(keyParams.yPos + keyParams.absoluteHeight))
-        mHashCode = computeHashCode(this)
+        hashCode = computeHashCode(this)
     }
 
     private constructor(key: Key, popupKeys: Array<PopupKeySpec>?) {
         // Final attributes.
-        mCode = key.mCode
-        mLabel = key.mLabel
-        val labelAndIcon = findPopupHintLabelOrIcon(popupKeys, key.mHintLabel, key.hintIconName)
-        mHintLabel = labelAndIcon.component1()
+        code = key.code
+        label = key.label
+        val labelAndIcon = findPopupHintLabelOrIcon(popupKeys, key.hintLabel, key.hintIconName)
+        hintLabel = labelAndIcon.component1()
         hintIconName = labelAndIcon.component2()
-        mLabelFlags = key.mLabelFlags
-        mIconName = key.mIconName
-        mWidth = key.mWidth
-        mHeight = key.mHeight
-        mHorizontalGap = key.mHorizontalGap
-        mVerticalGap = key.mVerticalGap
-        mX = key.mX
-        mY = key.mY
-        mHitBox.set(key.mHitBox)
-        mPopupKeys = popupKeys
-        mPopupKeysColumnAndFlags = key.mPopupKeysColumnAndFlags
-        mBackgroundType = key.mBackgroundType
-        if (popupKeys == null && mCode > Constants.CODE_SPACE && (key.mActionFlags and ACTION_FLAGS_ENABLE_LONG_PRESS) != 0)
-            mActionFlags = key.mActionFlags - ACTION_FLAGS_ENABLE_LONG_PRESS
+        labelFlags = key.labelFlags
+        iconName = key.iconName
+        width = key.width
+        height = key.height
+        horizontalGap = key.horizontalGap
+        verticalGap = key.verticalGap
+        x = key.x
+        y = key.y
+        hitBox.set(key.hitBox)
+        this.popupKeys = popupKeys
+        popupKeysColumnAndFlags = key.popupKeysColumnAndFlags
+        backgroundType = key.backgroundType
+        if (popupKeys == null && code > Constants.CODE_SPACE && (key.actionFlags and ACTION_FLAGS_ENABLE_LONG_PRESS) != 0)
+            actionFlags = key.actionFlags - ACTION_FLAGS_ENABLE_LONG_PRESS
         else
-            mActionFlags = key.mActionFlags
-        keyVisualAttributes = key.keyVisualAttributes
+            actionFlags = key.actionFlags
+        visualAttributes = key.visualAttributes
         optionalAttributes = key.optionalAttributes
-        mHashCode = key.mHashCode
+        hashCode = key.hashCode
         // Key state.
-        mPressed = key.mPressed
-        mEnabled = key.mEnabled
+        pressed = key.pressed
+        isEnabled = key.isEnabled
     }
 
     private fun equalsInternal(o: Key): Boolean {
         if (this === o) return true
-        return o.mX == mX
-                && o.mY == mY
-                && o.mWidth == mWidth
-                && o.mHeight == mHeight
-                && o.mCode == mCode
-                && TextUtils.equals(o.mLabel, mLabel)
-                && TextUtils.equals(o.mHintLabel, mHintLabel)
+        return o.x == x
+                && o.y == y
+                && o.width == width
+                && o.height == height
+                && o.code == code
+                && TextUtils.equals(o.label, label)
+                && TextUtils.equals(o.hintLabel, hintLabel)
                 && TextUtils.equals(o.hintIconName, hintIconName)
-                && TextUtils.equals(o.mIconName, mIconName)
-                && o.mBackgroundType == mBackgroundType
-                && Arrays.equals(o.mPopupKeys, mPopupKeys)
-                && TextUtils.equals(o.getOutputText(), getOutputText())
-                && o.mActionFlags == mActionFlags
-                && o.mLabelFlags == mLabelFlags
+                && TextUtils.equals(o.iconName, iconName)
+                && o.backgroundType == backgroundType
+                && Arrays.equals(o.popupKeys, popupKeys)
+                && TextUtils.equals(o.outputText, outputText)
+                && o.actionFlags == actionFlags
+                && o.labelFlags == labelFlags
     }
 
     override fun compareTo(o: Key): Int {
         if (equalsInternal(o)) return 0
-        if (mHashCode > o.mHashCode) return 1
+        if (hashCode > o.hashCode) return 1
         return -1
     }
 
     override fun hashCode(): Int {
-        return mHashCode
+        return hashCode
     }
 
     override fun equals(o: Any?): Boolean {
@@ -319,80 +347,58 @@ open class Key : Comparable<Key> {
     }
 
     override fun toString(): String {
-        return toShortString() + " " + getX() + "," + getY() + " " + getWidth() + "x" + getHeight()
+        return toShortString() + " " + getX() + "," + getY() + " " + width + "x" + height
     }
 
     fun toShortString(): String? {
-        val code = getCode()
         if (code == KeyCode.MULTIPLE_CODE_POINTS) {
-            return getOutputText()
+            return outputText
         }
         return Constants.printableCode(code)
     }
 
     fun toLongString(): String {
-        val iconName = getIconName()
         val topVisual = if (iconName != null)
-                KeyboardIconsSet.PREFIX_ICON + iconName else getLabel()
-        val hintLabel = getHintLabel()
+                KeyboardIconsSet.PREFIX_ICON + iconName else label
         val visual = if (hintLabel == null) topVisual else topVisual + "^" + hintLabel
-        return toString() + " " + visual + "/" + backgroundName(mBackgroundType)
-    }
-
-    fun getCode(): Int {
-        return mCode
-    }
-
-    fun getLabel(): String? {
-        return mLabel
-    }
-
-    fun getHintLabel(): String? {
-        return mHintLabel
-    }
-
-    fun getPopupKeys(): Array<PopupKeySpec>? {
-        return mPopupKeys
+        return toString() + " " + visual + "/" + backgroundName(backgroundType)
     }
 
     fun markAsLeftEdge(params: KeyboardParams) {
-        mHitBox.left = params.leftPadding
+        hitBox.left = params.leftPadding
     }
 
     fun markAsRightEdge(params: KeyboardParams) {
-        mHitBox.right = params.occupiedWidth - params.rightPadding
+        hitBox.right = params.occupiedWidth - params.rightPadding
     }
 
     fun markAsTopEdge(params: KeyboardParams) {
-        mHitBox.top = params.topPadding
+        hitBox.top = params.topPadding
     }
 
     fun markAsBottomEdge(params: KeyboardParams) {
-        mHitBox.bottom = params.occupiedHeight + params.bottomPadding
+        hitBox.bottom = params.occupiedHeight + params.bottomPadding
     }
 
-    fun isSpacer(): Boolean {
-        return this is Spacer
-    }
+    val isSpacer: Boolean
+        get() = this is Spacer
 
     fun hasActionKeyBackground(): Boolean {
-        return mBackgroundType == BACKGROUND_TYPE_ACTION
+        return backgroundType == BACKGROUND_TYPE_ACTION
     }
 
-    fun isShift(): Boolean {
-        return mCode == KeyCode.SHIFT
-    }
+    val isShift: Boolean
+        get() = code == KeyCode.SHIFT
 
     fun isModifier(): Boolean {
-        return mCode.isModifier()
+        return code.isModifier()
     }
 
-    fun isRepeatable(): Boolean {
-        return (mActionFlags and ACTION_FLAGS_IS_REPEATABLE) != 0
-    }
+    val isRepeatable: Boolean
+        get() = (actionFlags and ACTION_FLAGS_IS_REPEATABLE) != 0
 
     fun hasPreview(): Boolean {
-        return (mActionFlags and ACTION_FLAGS_NO_KEY_PREVIEW) == 0
+        return (actionFlags and ACTION_FLAGS_NO_KEY_PREVIEW) == 0
     }
 
     /**
@@ -403,21 +409,16 @@ open class Key : Comparable<Key> {
      *  See PointerTracker.isClearlyInsideKey
      */
     fun altCodeWhileTyping(): Boolean {
-        return (mActionFlags and ACTION_FLAGS_ALT_CODE_WHILE_TYPING) != 0
+        return (actionFlags and ACTION_FLAGS_ALT_CODE_WHILE_TYPING) != 0
     }
 
-    fun isLongPressEnabled(): Boolean {
+    val isLongPressEnabled: Boolean
         // We need not start long press timer on the key which has activated shifted letter.
-        return (mActionFlags and ACTION_FLAGS_ENABLE_LONG_PRESS) != 0
-                && (mLabelFlags and LABEL_FLAGS_SHIFTED_LETTER_ACTIVATED) == 0
-    }
-
-    fun getVisualAttributes(): KeyVisualAttributes? {
-        return keyVisualAttributes
-    }
+        get() = (actionFlags and ACTION_FLAGS_ENABLE_LONG_PRESS) != 0
+                && (labelFlags and LABEL_FLAGS_SHIFTED_LETTER_ACTIVATED) == 0
 
     fun selectTypeface(params: KeyDrawParams): Typeface {
-        return when (mLabelFlags and LABEL_FLAGS_FONT_MASK) {
+        return when (labelFlags and LABEL_FLAGS_FONT_MASK) {
             LABEL_FLAGS_FONT_NORMAL -> Typeface.DEFAULT
             LABEL_FLAGS_FONT_MONO_SPACE -> Typeface.MONOSPACE
             else -> params.typeface // The type-face is specified by keyTypeface attribute.
@@ -425,21 +426,21 @@ open class Key : Comparable<Key> {
     }
 
     fun selectTextSize(params: KeyDrawParams): Int {
-        return when (mLabelFlags and LABEL_FLAGS_FOLLOW_KEY_TEXT_RATIO_MASK) {
+        return when (labelFlags and LABEL_FLAGS_FOLLOW_KEY_TEXT_RATIO_MASK) {
             LABEL_FLAGS_FOLLOW_KEY_LETTER_RATIO -> params.letterSize
             LABEL_FLAGS_FOLLOW_KEY_LARGE_LETTER_RATIO -> params.largeLetterSize
             LABEL_FLAGS_FOLLOW_KEY_LABEL_RATIO -> params.labelSize
             LABEL_FLAGS_FOLLOW_KEY_HINT_LABEL_RATIO -> params.hintLabelSize
             // No follow key ratio flag specified.
-            else -> if (StringUtils.codePointCount(mLabel) == 1) params.letterSize else params.labelSize
+            else -> if (StringUtils.codePointCount(label) == 1) params.letterSize else params.labelSize
         }
     }
 
     fun selectTextColor(params: KeyDrawParams): Int {
-        if ((mLabelFlags and LABEL_FLAGS_FOLLOW_FUNCTIONAL_TEXT_COLOR) != 0) {
+        if ((labelFlags and LABEL_FLAGS_FOLLOW_FUNCTIONAL_TEXT_COLOR) != 0) {
             return params.functionalTextColor
         }
-        return if (isShiftedLetterActivated()) params.textInactivatedColor else params.textColor
+        return if (isShiftedLetterActivated) params.textInactivatedColor else params.textColor
     }
 
     fun selectHintTextSize(params: KeyDrawParams): Int {
@@ -457,7 +458,7 @@ open class Key : Comparable<Key> {
             return params.hintLabelColor
         }
         if (hasShiftedLetterHint()) {
-            return if (isShiftedLetterActivated()) params.shiftedLetterHintActivatedColor
+            return if (isShiftedLetterActivated) params.shiftedLetterHintActivatedColor
                     else params.shiftedLetterHintInactivatedColor
         }
         return params.hintLetterColor
@@ -467,13 +468,12 @@ open class Key : Comparable<Key> {
         return if (hasLabelsInPopupKeys()) params.labelSize else params.letterSize
     }
 
-    fun getPreviewLabel(): String? {
-        return if (isShiftedLetterActivated()) mHintLabel else mLabel
-    }
+    val previewLabel: String?
+        get() = if (isShiftedLetterActivated) hintLabel else label
 
     private fun previewHasLetterSize(): Boolean {
-        return (mLabelFlags and LABEL_FLAGS_FOLLOW_KEY_LETTER_RATIO) != 0
-                || StringUtils.codePointCount(getPreviewLabel()) == 1
+        return (labelFlags and LABEL_FLAGS_FOLLOW_KEY_LETTER_RATIO) != 0
+                || StringUtils.codePointCount(previewLabel) == 1
     }
 
     fun selectPreviewTextSize(params: KeyDrawParams): Int {
@@ -491,66 +491,60 @@ open class Key : Comparable<Key> {
     }
 
     fun isAlignHintLabelToBottom(defaultFlags: Int): Boolean {
-        return ((mLabelFlags or defaultFlags) and LABEL_FLAGS_ALIGN_HINT_LABEL_TO_BOTTOM) != 0
+        return ((labelFlags or defaultFlags) and LABEL_FLAGS_ALIGN_HINT_LABEL_TO_BOTTOM) != 0
     }
 
-    fun isAlignIconToBottom(): Boolean {
-        return (mLabelFlags and LABEL_FLAGS_ALIGN_ICON_TO_BOTTOM) != 0
-    }
+    val isAlignIconToBottom: Boolean
+        get() = (labelFlags and LABEL_FLAGS_ALIGN_ICON_TO_BOTTOM) != 0
 
-    fun isAlignLabelOffCenter(): Boolean {
-        return (mLabelFlags and LABEL_FLAGS_ALIGN_LABEL_OFF_CENTER) != 0
-    }
+    val isAlignLabelOffCenter: Boolean
+        get() = (labelFlags and LABEL_FLAGS_ALIGN_LABEL_OFF_CENTER) != 0
 
     fun hasShiftedLetterHint(): Boolean {
-        return (mLabelFlags and LABEL_FLAGS_HAS_SHIFTED_LETTER_HINT) != 0
-                && !TextUtils.isEmpty(mHintLabel)
+        return (labelFlags and LABEL_FLAGS_HAS_SHIFTED_LETTER_HINT) != 0
+                && !TextUtils.isEmpty(hintLabel)
     }
 
     fun hasShiftedLetterHintIcon(): Boolean {
-        return (mLabelFlags and LABEL_FLAGS_HAS_SHIFTED_LETTER_HINT) != 0
+        return (labelFlags and LABEL_FLAGS_HAS_SHIFTED_LETTER_HINT) != 0
             && !TextUtils.isEmpty(hintIconName)
     }
 
     fun hasHintLabel(): Boolean {
-        return (mLabelFlags and LABEL_FLAGS_HAS_HINT_LABEL) != 0
+        return (labelFlags and LABEL_FLAGS_HAS_HINT_LABEL) != 0
     }
 
     fun needsAutoXScale(): Boolean {
-        return (mLabelFlags and LABEL_FLAGS_AUTO_X_SCALE) != 0
+        return (labelFlags and LABEL_FLAGS_AUTO_X_SCALE) != 0
     }
 
     fun needsAutoScale(): Boolean {
-        return (mLabelFlags and LABEL_FLAGS_AUTO_SCALE) == LABEL_FLAGS_AUTO_SCALE
+        return (labelFlags and LABEL_FLAGS_AUTO_SCALE) == LABEL_FLAGS_AUTO_SCALE
     }
 
     fun needsToKeepBackgroundAspectRatio(defaultFlags: Int): Boolean {
-        return ((mLabelFlags or defaultFlags) and LABEL_FLAGS_KEEP_BACKGROUND_ASPECT_RATIO) != 0
+        return ((labelFlags or defaultFlags) and LABEL_FLAGS_KEEP_BACKGROUND_ASPECT_RATIO) != 0
     }
 
     fun hasCustomActionLabel(): Boolean {
-        return (mLabelFlags and LABEL_FLAGS_FROM_CUSTOM_ACTION_LABEL) != 0
+        return (labelFlags and LABEL_FLAGS_FROM_CUSTOM_ACTION_LABEL) != 0
     }
 
-    private fun isShiftedLetterActivated(): Boolean {
-        return (mLabelFlags and LABEL_FLAGS_SHIFTED_LETTER_ACTIVATED) != 0
-                && !TextUtils.isEmpty(mHintLabel)
-    }
+    private val isShiftedLetterActivated: Boolean
+        get() = (labelFlags and LABEL_FLAGS_SHIFTED_LETTER_ACTIVATED) != 0
+                && !TextUtils.isEmpty(hintLabel)
 
-    fun getPopupKeysColumnNumber(): Int {
-        return mPopupKeysColumnAndFlags and POPUP_KEYS_COLUMN_NUMBER_MASK
-    }
+    val popupKeysColumnNumber: Int
+        get() = popupKeysColumnAndFlags and POPUP_KEYS_COLUMN_NUMBER_MASK
 
-    fun isPopupKeysFixedColumn(): Boolean {
-        return (mPopupKeysColumnAndFlags and POPUP_KEYS_FLAGS_FIXED_COLUMN) != 0
-    }
+    val isPopupKeysFixedColumn: Boolean
+        get() = (popupKeysColumnAndFlags and POPUP_KEYS_FLAGS_FIXED_COLUMN) != 0
 
-    fun isPopupKeysFixedOrder(): Boolean {
-        return (mPopupKeysColumnAndFlags and POPUP_KEYS_FLAGS_FIXED_ORDER) != 0
-    }
+    val isPopupKeysFixedOrder: Boolean
+        get() = (popupKeysColumnAndFlags and POPUP_KEYS_FLAGS_FIXED_ORDER) != 0
 
     fun hasLabelsInPopupKeys(): Boolean {
-        return (mPopupKeysColumnAndFlags and POPUP_KEYS_FLAGS_HAS_LABELS) != 0
+        return (popupKeysColumnAndFlags and POPUP_KEYS_FLAGS_HAS_LABELS) != 0
     }
 
     fun getPopupKeyLabelFlags(): Int {
@@ -561,31 +555,23 @@ open class Key : Comparable<Key> {
     }
 
     fun needsDividersInPopupKeys(): Boolean {
-        return (mPopupKeysColumnAndFlags and POPUP_KEYS_FLAGS_NEEDS_DIVIDERS) != 0
+        return (popupKeysColumnAndFlags and POPUP_KEYS_FLAGS_NEEDS_DIVIDERS) != 0
     }
 
     fun hasNoPanelAutoPopupKey(): Boolean {
-        return (mPopupKeysColumnAndFlags and POPUP_KEYS_FLAGS_NO_PANEL_AUTO_POPUP_KEY) != 0
+        return (popupKeysColumnAndFlags and POPUP_KEYS_FLAGS_NO_PANEL_AUTO_POPUP_KEY) != 0
     }
 
-    fun getOutputText(): String? {
-        val attrs = optionalAttributes
-        return if (attrs != null) attrs.mOutputText else null
-    }
+    val outputText: String?
+        get() = optionalAttributes?.outputText
 
-    fun getAltCode(): Int {
-        val attrs = optionalAttributes
-        return if (attrs != null) attrs.mAltCode else KeyCode.NOT_SPECIFIED
-    }
-
-    fun getIconName(): String? {
-        return mIconName
-    }
+    val altCode: Int
+        get() = optionalAttributes?.altCode ?: KeyCode.NOT_SPECIFIED
 
     open fun getIcon(iconSet: KeyboardIconsSet, alpha: Int): Drawable? {
         val attrs = optionalAttributes
-        val iconName = if (mEnabled) getIconName() else (if (attrs != null) attrs.mDisabledIconName else null)
-        val icon = iconSet.getIconDrawable(iconName)
+        val name = if (isEnabled) iconName else (if (attrs != null) attrs.disabledIconName else null)
+        val icon = iconSet.getIconDrawable(name)
         if (icon != null) {
             icon.setAlpha(alpha)
         }
@@ -594,8 +580,8 @@ open class Key : Comparable<Key> {
 
     fun getHintIcon(iconSet: KeyboardIconsSet, alpha: Int): Drawable? {
         val attrs = optionalAttributes
-        val iconName = if (mEnabled) hintIconName else (if (attrs != null) attrs.mDisabledIconName else null)
-        val icon = iconSet.getIconDrawable(iconName)
+        val name = if (isEnabled) hintIconName else (if (attrs != null) attrs.disabledIconName else null)
+        val icon = iconSet.getIconDrawable(name)
         if (icon != null) {
             icon.setAlpha(alpha)
         }
@@ -603,54 +589,7 @@ open class Key : Comparable<Key> {
     }
 
     fun getPreviewIcon(iconSet: KeyboardIconsSet): Drawable? {
-        return iconSet.getIconDrawable(getIconName())
-    }
-
-    /**
-     * Gets the background type of this key.
-     * @return Background type.
-     * @see Key#BACKGROUND_TYPE_EMPTY
-     * @see Key#BACKGROUND_TYPE_NORMAL
-     * @see Key#BACKGROUND_TYPE_FUNCTIONAL
-     * @see Key#BACKGROUND_TYPE_ACTION
-     * @see Key#BACKGROUND_TYPE_SPACEBAR
-     */
-    fun getBackgroundType(): Int {
-        return mBackgroundType
-    }
-
-    /**
-     * Gets the width of the key in pixels, excluding the gap.
-     * @return The width of the key in pixels, excluding the gap.
-     */
-    fun getWidth(): Int {
-        return mWidth
-    }
-
-    /**
-     * Gets the height of the key in pixels, excluding the gap.
-     * @return The height of the key in pixels, excluding the gap.
-     */
-    fun getHeight(): Int {
-        return mHeight
-    }
-
-    /**
-     * The combined width in pixels of the horizontal gaps belonging to this key, both above and
-     * below. I.e., getWidth() + getHorizontalGap() = total width belonging to the key.
-     * @return Horizontal gap belonging to this key.
-     */
-    fun getHorizontalGap(): Int {
-        return mHorizontalGap
-    }
-
-    /**
-     * The combined height in pixels of the vertical gaps belonging to this key, both above and
-     * below. I.e., getHeight() + getVerticalGap() = total height belonging to the key.
-     * @return Vertical gap belonging to this key.
-     */
-    fun getVerticalGap(): Int {
-        return mVerticalGap
+        return iconSet.getIconDrawable(iconName)
     }
 
     /**
@@ -658,7 +597,7 @@ open class Key : Comparable<Key> {
      * @return The x-coordinate of the top-left corner of the key in pixels, excluding the gap.
      */
     open fun getX(): Int {
-        return mX
+        return x
     }
 
     /**
@@ -666,19 +605,19 @@ open class Key : Comparable<Key> {
      * @return The y-coordinate of the top-left corner of the key in pixels, excluding the gap.
      */
     open fun getY(): Int {
-        return mY
+        return y
     }
 
     fun getDrawX(): Int {
-        val x = getX()
+        val left = getX()
         val attrs = optionalAttributes
-        return if (attrs == null) x else x + attrs.mVisualInsetsLeft
+        return if (attrs == null) left else left + attrs.visualInsetsLeft
     }
 
     fun getDrawWidth(): Int {
         val attrs = optionalAttributes
-        return if (attrs == null) mWidth
-                else mWidth - attrs.mVisualInsetsLeft - attrs.mVisualInsetsRight
+        return if (attrs == null) width
+                else width - attrs.visualInsetsLeft - attrs.visualInsetsRight
     }
 
     /**
@@ -687,7 +626,7 @@ open class Key : Comparable<Key> {
      * @see #onReleased()
      */
     fun onPressed() {
-        mPressed = true
+        pressed = true
     }
 
     /**
@@ -696,23 +635,11 @@ open class Key : Comparable<Key> {
      * @see #onPressed()
      */
     fun onReleased() {
-        mPressed = false
-    }
-
-    fun isEnabled(): Boolean {
-        return mEnabled
-    }
-
-    fun setEnabled(enabled: Boolean) {
-        mEnabled = enabled
+        pressed = false
     }
 
     fun setLocked(locked: Boolean) {
-        mLocked = locked
-    }
-
-    fun getHitBox(): Rect {
-        return mHitBox
+        this.locked = locked
     }
 
     /**
@@ -724,7 +651,7 @@ open class Key : Comparable<Key> {
      * @see #markAsLeftEdge(KeyboardParams) etc.
      */
     fun isOnKey(x: Int, y: Int): Boolean {
-        return mHitBox.contains(x, y)
+        return hitBox.contains(x, y)
     }
 
     /**
@@ -735,9 +662,9 @@ open class Key : Comparable<Key> {
      */
     fun squaredDistanceToEdge(x: Int, y: Int): Int {
         val left = getX()
-        val right = left + mWidth
+        val right = left + width
         val top = getY()
-        val bottom = top + mHeight
+        val bottom = top + height
         val edgeX = if (x < left) left else Math.min(x, right)
         val edgeY = if (y < top) top else Math.min(y, bottom)
         val dx = x - edgeX
@@ -790,12 +717,12 @@ open class Key : Comparable<Key> {
             background = actionKeyBackground
         } else if (hasFunctionalBackground()) {
             background = functionalKeyBackground
-        } else if (mBackgroundType == BACKGROUND_TYPE_SPACEBAR) {
+        } else if (backgroundType == BACKGROUND_TYPE_SPACEBAR) {
             background = spacebarBackground
         } else {
             background = keyBackground
         }
-        val state = KeyBackgroundState.STATES[mBackgroundType].getState(mPressed || mLocked)
+        val state = KeyBackgroundState.STATES[backgroundType].getState(pressed || locked)
         background.setState(state)
         return background
     }
@@ -803,11 +730,11 @@ open class Key : Comparable<Key> {
     fun hasActionKeyPopups(): Boolean {
         if (!hasActionKeyBackground()) return false
         // only use the special action key popups for action colored keys, and only for icon popups
-        return getPopupKeys()!!.none { key -> key.mIconName == null }
+        return popupKeys!!.none { key -> key.iconName == null }
     }
 
     fun hasFunctionalBackground(): Boolean {
-        return mBackgroundType == BACKGROUND_TYPE_FUNCTIONAL
+        return backgroundType == BACKGROUND_TYPE_FUNCTIONAL
     }
 
     open class Spacer : Key {
@@ -827,8 +754,8 @@ open class Key : Comparable<Key> {
         // params for building
         @JvmField var isSpacer = false
         @JvmField val keyboardParams: KeyboardParams // for reading gaps and keyboard width / height
-        @JvmField var mWidth = 0f
-        @JvmField var mHeight = 0f // also should allow negative values, indicating absolute height is defined
+        @JvmField var width = 0f
+        @JvmField var height = 0f // also should allow negative values, indicating absolute height is defined
 
         // params that may change
         @JvmField var absoluteWidth = 0f
@@ -837,19 +764,19 @@ open class Key : Comparable<Key> {
         @JvmField var yPos = 0f
 
         // params that remains constant
-        @JvmField val mCode: Int
-        @JvmField val mLabel: String?
-        @JvmField val mHintLabel: String?
+        @JvmField val code: Int
+        @JvmField val label: String?
+        @JvmField val hintLabel: String?
         @JvmField val hintIconName: String?
-        @JvmField val mLabelFlags: Int
-        @JvmField val mIconName: String?
-        @JvmField val mPopupKeys: Array<PopupKeySpec>?
-        @JvmField val mPopupKeysColumnAndFlags: Int
-        @JvmField val mBackgroundType: Int
-        @JvmField val mActionFlags: Int
+        @JvmField val labelFlags: Int
+        @JvmField val iconName: String?
+        @JvmField val popupKeys: Array<PopupKeySpec>?
+        @JvmField val popupKeysColumnAndFlags: Int
+        @JvmField val backgroundType: Int
+        @JvmField val actionFlags: Int
         @JvmField val keyVisualAttributes: KeyVisualAttributes?
         @JvmField val optionalAttributes: OptionalAttributes?
-        @JvmField val mEnabled: Boolean
+        @JvmField val enabled: Boolean
 
         fun createKey(): Key {
             if (isSpacer) return Spacer(this)
@@ -857,22 +784,21 @@ open class Key : Comparable<Key> {
         }
 
         fun setAbsoluteDimensions(newX: Float, newY: Float) {
-            if (mHeight == 0f)
-                mHeight = keyboardParams.defaultRowHeight
-            if (!isSpacer && mWidth == 0f)
+            if (height == 0f)
+                height = keyboardParams.defaultRowHeight
+            if (!isSpacer && width == 0f)
                 throw IllegalStateException("width = 0 should have been evaluated already")
-            if (mHeight < 0)
+            if (height < 0)
                 // todo (later): deal with it properly when it needs to be adjusted, i.e. when changing popupKeys or moreSuggestions
                 throw IllegalStateException("can't (yet) deal with absolute height")
             xPos = newX
             yPos = newY
-            absoluteWidth = mWidth * keyboardParams.mBaseWidth
-            absoluteHeight = mHeight * keyboardParams.mBaseHeight
+            absoluteWidth = width * keyboardParams.baseWidth
+            absoluteHeight = height * keyboardParams.baseHeight
         }
 
-        fun getOutputText(): String? {
-            return if (optionalAttributes == null) null else optionalAttributes.mOutputText
-        }
+        val outputText: String?
+            get() = if (optionalAttributes == null) null else optionalAttributes.outputText
 
         constructor(
                 keySpec: String,
@@ -898,71 +824,72 @@ open class Key : Comparable<Key> {
                 popupSet: PopupSet<*>?
         ) {
             keyboardParams = params
-            mBackgroundType = backgroundType
-            mLabelFlags = labelFlags
-            mWidth = width
-            mHeight = params.defaultRowHeight
-            mIconName = KeySpecParser.getIconName(keySpec)
+            this.backgroundType = backgroundType
+            this.labelFlags = labelFlags
+            this.width = width
+            height = params.defaultRowHeight
+            iconName = KeySpecParser.getIconName(keySpec)
 
-            val needsToUpcase = Key.needsToUpcase(mLabelFlags, params.id.element)
+            val needsToUpcase = Key.needsToUpcase(labelFlags, params.id.element)
             val localeForUpcasing = params.id.locale
-            var actionFlags = 0
+            var flags = 0
             if (params.id.element.isNumberLayout)
-                actionFlags = ACTION_FLAGS_NO_KEY_PREVIEW
+                flags = ACTION_FLAGS_NO_KEY_PREVIEW
 
             // label
-            var label: String? = null
-            if ((mLabelFlags and LABEL_FLAGS_FROM_CUSTOM_ACTION_LABEL) != 0) {
-                mLabel = params.id.customActionLabel
+            var keySpecLabel: String? = null
+            if ((labelFlags and LABEL_FLAGS_FROM_CUSTOM_ACTION_LABEL) != 0) {
+                label = params.id.customActionLabel
             } else if (code >= Character.MIN_SUPPLEMENTARY_CODE_POINT) {
                 // This is a workaround to have a key that has a supplementary code point in its label.
                 // Because we can put a string in resource neither as a XML entity of a supplementary
                 // code point nor as a surrogate pair.
-                mLabel = StringBuilder().appendCodePoint(code).toString()
+                label = StringBuilder().appendCodePoint(code).toString()
             } else {
-                label = KeySpecParser.getLabel(keySpec)
-                mLabel = if (needsToUpcase)
-                        StringUtils.toTitleCaseOfKeyLabel(label, localeForUpcasing)
-                        else label
+                keySpecLabel = KeySpecParser.getLabel(keySpec)
+                label = if (needsToUpcase)
+                        StringUtils.toTitleCaseOfKeyLabel(keySpecLabel, localeForUpcasing)
+                        else keySpecLabel
             }
 
             // popupKeys
             // the array is declared with nullable elements because reading the column and flags sets entries to null
             @Suppress("UNCHECKED_CAST")
-            val popupKeys = createPopupKeysArray(popupSet, keyboardParams, if (label != null) label else keySpec) as Array<String?>?
-            mPopupKeysColumnAndFlags = getPopupKeysColumnAndFlagsAndSetNullInArray(params, popupKeys)
-            val finalPopupKeys = if (popupKeys == null) null else PopupKeySpec.filterOutEmptyString(popupKeys)
+            val popupKeyStrings = createPopupKeysArray(popupSet, keyboardParams, if (keySpecLabel != null) keySpecLabel else keySpec) as Array<String?>?
+            popupKeysColumnAndFlags = getPopupKeysColumnAndFlagsAndSetNullInArray(params, popupKeyStrings)
+            val finalPopupKeys = if (popupKeyStrings == null) null else PopupKeySpec.filterOutEmptyString(popupKeyStrings)
             if (finalPopupKeys != null && finalPopupKeys.size > 0) {
                 val tempPopupKeys = arrayOfNulls<PopupKeySpec>(finalPopupKeys.size)
                 var hasRepeatPopup = false
                 for (i in finalPopupKeys.indices) {
-                    tempPopupKeys[i] = PopupKeySpec(finalPopupKeys[i], needsToUpcase, localeForUpcasing)
-                    if (tempPopupKeys[i]!!.mCode == KeyCode.KEY_REPEAT)
+                    val popupKeySpec = PopupKeySpec(finalPopupKeys[i], needsToUpcase, localeForUpcasing)
+                    tempPopupKeys[i] = popupKeySpec
+                    if (popupKeySpec.code == KeyCode.KEY_REPEAT)
                         hasRepeatPopup = true
                 }
                 if (hasRepeatPopup) {
-                    mPopupKeys = null
-                    actionFlags = actionFlags or ACTION_FLAGS_IS_REPEATABLE
+                    popupKeys = null
+                    flags = flags or ACTION_FLAGS_IS_REPEATABLE
                 } else {
                     @Suppress("UNCHECKED_CAST")
-                    mPopupKeys = tempPopupKeys as Array<PopupKeySpec>
-                    actionFlags = actionFlags or ACTION_FLAGS_ENABLE_LONG_PRESS
+                    popupKeys = tempPopupKeys as Array<PopupKeySpec>
+                    flags = flags or ACTION_FLAGS_ENABLE_LONG_PRESS
                 }
             } else {
-                mPopupKeys = null
+                popupKeys = null
             }
 
             // hint label
-            if ((mLabelFlags and LABEL_FLAGS_DISABLE_HINT_LABEL) != 0) {
-                mHintLabel = null
+            if ((labelFlags and LABEL_FLAGS_DISABLE_HINT_LABEL) != 0) {
+                hintLabel = null
                 hintIconName = null
             } else {
                 // maybe also always null for comma and period keys
-                val hintLabel = getHintLabel(popupSet, params, keySpec)
-                mHintLabel = if (needsToUpcase)
-                        StringUtils.toTitleCaseOfKeyLabel(hintLabel, localeForUpcasing)
-                        else hintLabel
-                hintIconName = if (mHintLabel != null) null else getHintIcon(popupSet, params, keySpec)
+                val rawHintLabel = getHintLabel(popupSet, params, keySpec)
+                hintLabel = if (needsToUpcase)
+                        StringUtils.toTitleCaseOfKeyLabel(rawHintLabel, localeForUpcasing)
+                        else rawHintLabel
+                hintIconName = if (hintLabel != null) null else getHintIcon(popupSet, params, keySpec)
             }
 
             var outputText: String? = KeySpecParser.getOutputText(keySpec, code)
@@ -970,62 +897,62 @@ open class Key : Comparable<Key> {
                 outputText = StringUtils.toTitleCaseOfKeyLabel(outputText, localeForUpcasing)
             }
             // Choose the first letter of the label as primary code if not specified.
-            if (code == KeyCode.NOT_SPECIFIED && TextUtils.isEmpty(outputText) && !TextUtils.isEmpty(mLabel)) {
-                if (StringUtils.codePointCount(mLabel) == 1) {
+            if (code == KeyCode.NOT_SPECIFIED && TextUtils.isEmpty(outputText) && !label.isNullOrEmpty()) {
+                if (StringUtils.codePointCount(label) == 1) {
                     // Use the first letter of the hint label if shiftedLetterActivated flag is
                     // specified.
-                    if ((mLabelFlags and LABEL_FLAGS_HAS_SHIFTED_LETTER_HINT) != 0 && (mLabelFlags and LABEL_FLAGS_SHIFTED_LETTER_ACTIVATED) != 0
-                            && !TextUtils.isEmpty(mHintLabel)) {
-                        mCode = mHintLabel!!.codePointAt(0)
+                    if ((labelFlags and LABEL_FLAGS_HAS_SHIFTED_LETTER_HINT) != 0 && (labelFlags and LABEL_FLAGS_SHIFTED_LETTER_ACTIVATED) != 0
+                            && !hintLabel.isNullOrEmpty()) {
+                        this.code = hintLabel.codePointAt(0)
                     } else {
-                        mCode = mLabel!!.codePointAt(0)
+                        this.code = label.codePointAt(0)
                     }
                 } else {
                     // In some locale and case, the character might be represented by multiple code
                     // points, such as upper case Eszett of German alphabet.
-                    outputText = mLabel
-                    mCode = KeyCode.MULTIPLE_CODE_POINTS
+                    outputText = label
+                    this.code = KeyCode.MULTIPLE_CODE_POINTS
                 }
             } else if (code == KeyCode.NOT_SPECIFIED && outputText != null) {
                 if (StringUtils.codePointCount(outputText) == 1) {
-                    mCode = outputText.codePointAt(0)
+                    this.code = outputText.codePointAt(0)
                     outputText = null
                 } else {
-                    mCode = KeyCode.MULTIPLE_CODE_POINTS
+                    this.code = KeyCode.MULTIPLE_CODE_POINTS
                 }
             } else {
-                mCode = if (needsToUpcase) StringUtils.toTitleCaseOfKeyCode(code, localeForUpcasing) else code
+                this.code = if (needsToUpcase) StringUtils.toTitleCaseOfKeyCode(code, localeForUpcasing) else code
             }
 
             // action flags don't need to be specified, they can be deduced from the key
-            if (mCode == Constants.CODE_SPACE
-                    || mCode == KeyCode.LANGUAGE_SWITCH
-                    || (mCode == KeyCode.SYMBOL_ALPHA && !params.id.element.isAlphabet)
+            if (this.code == Constants.CODE_SPACE
+                    || this.code == KeyCode.LANGUAGE_SWITCH
+                    || (this.code == KeyCode.SYMBOL_ALPHA && !params.id.element.isAlphabet)
             )
-                actionFlags = actionFlags or ACTION_FLAGS_ENABLE_LONG_PRESS
-            if (mCode <= Constants.CODE_SPACE && mCode != KeyCode.MULTIPLE_CODE_POINTS && mIconName == null)
-                actionFlags = actionFlags or ACTION_FLAGS_NO_KEY_PREVIEW
-            when (mCode) {
+                flags = flags or ACTION_FLAGS_ENABLE_LONG_PRESS
+            if (this.code <= Constants.CODE_SPACE && this.code != KeyCode.MULTIPLE_CODE_POINTS && iconName == null)
+                flags = flags or ACTION_FLAGS_NO_KEY_PREVIEW
+            when (this.code) {
                 KeyCode.DELETE, KeyCode.ARROW_LEFT, KeyCode.ARROW_RIGHT, KeyCode.ARROW_UP, KeyCode.ARROW_DOWN,
                         KeyCode.WORD_LEFT, KeyCode.WORD_RIGHT, KeyCode.PAGE_UP, KeyCode.PAGE_DOWN -> {
                     // repeating is disabled if a key is configured with pop-ups
-                    if (mPopupKeys == null)
-                        actionFlags = actionFlags or ACTION_FLAGS_IS_REPEATABLE
+                    if (popupKeys == null)
+                        flags = flags or ACTION_FLAGS_IS_REPEATABLE
                     // fallthrough
-                    actionFlags = actionFlags or ACTION_FLAGS_NO_KEY_PREVIEW // no preview even if icon!
+                    flags = flags or ACTION_FLAGS_NO_KEY_PREVIEW // no preview even if icon!
                 }
                 KeyCode.SHIFT, Constants.CODE_ENTER, KeyCode.SHIFT_ENTER, KeyCode.ALPHA, Constants.CODE_SPACE, KeyCode.NUMPAD,
                         KeyCode.DPAD, KeyCode.SYMBOL, KeyCode.SYMBOL_ALPHA, KeyCode.LANGUAGE_SWITCH, KeyCode.EMOJI, KeyCode.CLIPBOARD,
                         KeyCode.MOVE_START_OF_LINE, KeyCode.MOVE_END_OF_LINE, KeyCode.MOVE_START_OF_PAGE, KeyCode.MOVE_END_OF_PAGE,
                         KeyCode.EMOJI_SEARCH ->
-                    actionFlags = actionFlags or ACTION_FLAGS_NO_KEY_PREVIEW // no preview even if icon!
+                    flags = flags or ACTION_FLAGS_NO_KEY_PREVIEW // no preview even if icon!
             }
-            if (mCode == KeyCode.SETTINGS || mCode == KeyCode.LANGUAGE_SWITCH)
-                actionFlags = actionFlags or ACTION_FLAGS_ALT_CODE_WHILE_TYPING
-            mActionFlags = actionFlags
+            if (this.code == KeyCode.SETTINGS || this.code == KeyCode.LANGUAGE_SWITCH)
+                flags = flags or ACTION_FLAGS_ALT_CODE_WHILE_TYPING
+            actionFlags = flags
 
             val altCodeInAttr: Int // settings and language switch keys have alt code space, all others nothing
-            if (mCode == KeyCode.SETTINGS || mCode == KeyCode.LANGUAGE_SWITCH || mCode == KeyCode.EMOJI || mCode == KeyCode.CLIPBOARD)
+            if (this.code == KeyCode.SETTINGS || this.code == KeyCode.LANGUAGE_SWITCH || this.code == KeyCode.EMOJI || this.code == KeyCode.CLIPBOARD)
                 altCodeInAttr = Constants.CODE_SPACE
             else
                 altCodeInAttr = KeyCode.NOT_SPECIFIED
@@ -1034,53 +961,53 @@ open class Key : Comparable<Key> {
                     else altCodeInAttr
             optionalAttributes = OptionalAttributes.newInstance(outputText, altCode,
                     // disabled icon only shortcut / voice key, visual insets can be replaced with spacer
-                    if (mIconName == null) null else getDisabledIconName(mIconName), 0, 0)
+                    if (iconName == null) null else getDisabledIconName(iconName), 0, 0)
             // KeyVisualAttributes for a key essentially are what the theme has, but on a per-key base
             // could be used e.g. for having a color gradient on key color
             keyVisualAttributes = null
-            mEnabled = true
+            enabled = true
         }
 
         /** constructor for emoji parser */
         constructor(label: String?, code: Int, hintLabel: String?,
                    popupKeySpecs: String?, labelFlags: Int, params: KeyboardParams) {
             keyboardParams = params
-            mHintLabel = hintLabel
-            mLabelFlags = labelFlags
-            mBackgroundType = BACKGROUND_TYPE_EMPTY
+            this.hintLabel = hintLabel
+            this.labelFlags = labelFlags
+            backgroundType = BACKGROUND_TYPE_EMPTY
 
             if (popupKeySpecs != null) {
-                var popupKeys = PopupKeySpec.splitKeySpecs(popupKeySpecs)
-                mPopupKeysColumnAndFlags = getPopupKeysColumnAndFlagsAndSetNullInArray(params, popupKeys)
+                var popupKeyStrings = PopupKeySpec.splitKeySpecs(popupKeySpecs)
+                popupKeysColumnAndFlags = getPopupKeysColumnAndFlagsAndSetNullInArray(params, popupKeyStrings)
 
-                popupKeys = PopupKeySpec.insertAdditionalPopupKeys(popupKeys, null)
-                var actionFlags = 0
-                if (popupKeys != null) {
-                    actionFlags = actionFlags or ACTION_FLAGS_ENABLE_LONG_PRESS
-                    val newPopupKeys = arrayOfNulls<PopupKeySpec>(popupKeys.size)
-                    for (i in popupKeys.indices) {
-                        newPopupKeys[i] = PopupKeySpec(popupKeys[i], false, Locale.getDefault())
+                popupKeyStrings = PopupKeySpec.insertAdditionalPopupKeys(popupKeyStrings, null)
+                var flags = 0
+                if (popupKeyStrings != null) {
+                    flags = flags or ACTION_FLAGS_ENABLE_LONG_PRESS
+                    val newPopupKeys = arrayOfNulls<PopupKeySpec>(popupKeyStrings.size)
+                    for (i in popupKeyStrings.indices) {
+                        newPopupKeys[i] = PopupKeySpec(popupKeyStrings[i], false, Locale.getDefault())
                     }
                     @Suppress("UNCHECKED_CAST")
-                    mPopupKeys = newPopupKeys as Array<PopupKeySpec>
+                    popupKeys = newPopupKeys as Array<PopupKeySpec>
                 } else {
-                    mPopupKeys = null
+                    popupKeys = null
                 }
-                mActionFlags = actionFlags
+                actionFlags = flags
             } else {
                 // TODO: Pass keyActionFlags as an argument.
-                mActionFlags = ACTION_FLAGS_NO_KEY_PREVIEW
-                mPopupKeys = null
-                mPopupKeysColumnAndFlags = 0
+                actionFlags = ACTION_FLAGS_NO_KEY_PREVIEW
+                popupKeys = null
+                popupKeysColumnAndFlags = 0
             }
 
-            mLabel = label
+            this.label = label
             optionalAttributes = if (code == KeyCode.MULTIPLE_CODE_POINTS)
                     OptionalAttributes.newInstance(label, KeyCode.NOT_SPECIFIED, null, 0, 0)
                     else null
-            mCode = code
-            mEnabled = (code != KeyCode.NOT_SPECIFIED)
-            mIconName = null
+            this.code = code
+            enabled = (code != KeyCode.NOT_SPECIFIED)
+            iconName = null
             keyVisualAttributes = null
             hintIconName = null
         }
@@ -1090,42 +1017,42 @@ open class Key : Comparable<Key> {
             isSpacer = true // this is only for spacer!
             keyboardParams = params
 
-            mCode = KeyCode.NOT_SPECIFIED
-            mLabel = null
-            mHintLabel = null
+            code = KeyCode.NOT_SPECIFIED
+            label = null
+            hintLabel = null
             keyVisualAttributes = null
             optionalAttributes = null
-            mIconName = null
-            mBackgroundType = BACKGROUND_TYPE_NORMAL
-            mActionFlags = ACTION_FLAGS_NO_KEY_PREVIEW
-            mPopupKeys = null
-            mPopupKeysColumnAndFlags = 0
-            mLabelFlags = LABEL_FLAGS_FONT_NORMAL
-            mEnabled = true
+            iconName = null
+            backgroundType = BACKGROUND_TYPE_NORMAL
+            actionFlags = ACTION_FLAGS_NO_KEY_PREVIEW
+            popupKeys = null
+            popupKeysColumnAndFlags = 0
+            labelFlags = LABEL_FLAGS_FONT_NORMAL
+            enabled = true
             hintIconName = null
         }
 
         constructor(keyParams: KeyParams) {
             xPos = keyParams.xPos
             yPos = keyParams.yPos
-            mWidth = keyParams.mWidth
-            mHeight = keyParams.mHeight
+            width = keyParams.width
+            height = keyParams.height
             isSpacer = keyParams.isSpacer
             keyboardParams = keyParams.keyboardParams
-            mEnabled = keyParams.mEnabled
+            enabled = keyParams.enabled
 
-            mCode = keyParams.mCode
-            mLabel = keyParams.mLabel
-            mHintLabel = keyParams.mHintLabel
+            code = keyParams.code
+            label = keyParams.label
+            hintLabel = keyParams.hintLabel
             hintIconName = keyParams.hintIconName
-            mLabelFlags = keyParams.mLabelFlags
-            mIconName = keyParams.mIconName
+            labelFlags = keyParams.labelFlags
+            iconName = keyParams.iconName
             absoluteWidth = keyParams.absoluteWidth
             absoluteHeight = keyParams.absoluteHeight
-            mPopupKeys = keyParams.mPopupKeys
-            mPopupKeysColumnAndFlags = keyParams.mPopupKeysColumnAndFlags
-            mBackgroundType = keyParams.mBackgroundType
-            mActionFlags = keyParams.mActionFlags
+            popupKeys = keyParams.popupKeys
+            popupKeysColumnAndFlags = keyParams.popupKeysColumnAndFlags
+            backgroundType = keyParams.backgroundType
+            actionFlags = keyParams.actionFlags
             keyVisualAttributes = keyParams.keyVisualAttributes
             optionalAttributes = keyParams.optionalAttributes
         }
@@ -1134,8 +1061,8 @@ open class Key : Comparable<Key> {
             @JvmStatic
             fun newSpacer(params: KeyboardParams, width: Float): KeyParams {
                 val spacer = KeyParams(params)
-                spacer.mWidth = width
-                spacer.mHeight = params.defaultRowHeight
+                spacer.width = width
+                spacer.height = params.defaultRowHeight
                 return spacer
             }
 
@@ -1234,9 +1161,9 @@ open class Key : Comparable<Key> {
         @JvmStatic
         fun removeRedundantPopupKeys(key: Key,
                 lettersOnBaseLayout: PopupKeySpec.LettersOnBaseLayout): Key {
-            if ((key.mPopupKeysColumnAndFlags and POPUP_KEYS_FLAGS_FIXED_COLUMN) != 0)
+            if ((key.popupKeysColumnAndFlags and POPUP_KEYS_FLAGS_FIXED_COLUMN) != 0)
                 return key // don't remove anything for fixed column popup keys
-            val popupKeys = key.getPopupKeys()
+            val popupKeys = key.popupKeys
             val filteredPopupKeys = PopupKeySpec.removeRedundantPopupKeys(
                     popupKeys, lettersOnBaseLayout)
             return if (filteredPopupKeys === popupKeys) key else Key(key, filteredPopupKeys)
@@ -1252,26 +1179,26 @@ open class Key : Comparable<Key> {
 
         private fun computeHashCode(key: Key): Int {
             return Arrays.hashCode(arrayOf<Any?>(
-                    key.mX,
-                    key.mY,
-                    key.mWidth,
-                    key.mHeight,
-                    key.mCode,
-                    key.mLabel,
-                    key.mHintLabel,
+                    key.x,
+                    key.y,
+                    key.width,
+                    key.height,
+                    key.code,
+                    key.label,
+                    key.hintLabel,
                     key.hintIconName,
-                    key.mIconName,
-                    key.mBackgroundType,
-                    Arrays.hashCode(key.mPopupKeys),
-                    key.getOutputText(),
-                    key.mActionFlags,
-                    key.mLabelFlags,
+                    key.iconName,
+                    key.backgroundType,
+                    Arrays.hashCode(key.popupKeys),
+                    key.outputText,
+                    key.actionFlags,
+                    key.labelFlags,
                     // Key can be distinguishable without the following members.
-                    // key.optionalAttributes.mAltCode,
+                    // key.optionalAttributes.altCode,
                     // key.optionalAttributes.mDisabledIconId,
                     // key.optionalAttributes.mPreviewIconId,
-                    // key.mHorizontalGap,
-                    // key.mVerticalGap,
+                    // key.horizontalGap,
+                    // key.verticalGap,
                     // key.optionalAttributes.mVisualInsetLeft,
                     // key.optionalAttributes.mVisualInsetRight,
                     // key.mMaxPopupKeysColumn,

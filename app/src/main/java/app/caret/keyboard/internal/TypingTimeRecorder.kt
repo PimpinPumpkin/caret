@@ -8,20 +8,21 @@ package app.caret.keyboard.internal
 
 class TypingTimeRecorder(staticTimeThresholdAfterFastTyping: Int,
         suppressKeyPreviewAfterBatchInputDuration: Int) {
-    private val mStaticTimeThresholdAfterFastTyping: Int // msec
-    private val mSuppressKeyPreviewAfterBatchInputDuration: Int
+    private val staticTimeThresholdAfterFastTyping: Int // msec
+    private val suppressKeyPreviewAfterBatchInputDuration: Int
     private var lastTypingTime: Long = 0
-    private var mLastLetterTypingTime: Long = 0
+    var lastLetterTypingTime: Long = 0
+        private set
     private var lastBatchInputTime: Long = 0
 
     init {
-        mStaticTimeThresholdAfterFastTyping = staticTimeThresholdAfterFastTyping
-        mSuppressKeyPreviewAfterBatchInputDuration = suppressKeyPreviewAfterBatchInputDuration
+        this.staticTimeThresholdAfterFastTyping = staticTimeThresholdAfterFastTyping
+        this.suppressKeyPreviewAfterBatchInputDuration = suppressKeyPreviewAfterBatchInputDuration
     }
 
     fun isInFastTyping(eventTime: Long): Boolean {
-        val elapsedTimeSinceLastLetterTyping = eventTime - mLastLetterTypingTime
-        return elapsedTimeSinceLastLetterTyping < mStaticTimeThresholdAfterFastTyping
+        val elapsedTimeSinceLastLetterTyping = eventTime - lastLetterTypingTime
+        return elapsedTimeSinceLastLetterTyping < staticTimeThresholdAfterFastTyping
     }
 
     private fun wasLastInputTyping(): Boolean {
@@ -35,13 +36,13 @@ class TypingTimeRecorder(staticTimeThresholdAfterFastTyping: Int,
         // 3. A non-letter key is typed within the threshold time since the last letter key typing.
         if (Character.isLetter(code)) {
             if (wasLastInputTyping()
-                    || eventTime - lastTypingTime < mStaticTimeThresholdAfterFastTyping) {
-                mLastLetterTypingTime = eventTime
+                    || eventTime - lastTypingTime < staticTimeThresholdAfterFastTyping) {
+                lastLetterTypingTime = eventTime
             }
         } else {
-            if (eventTime - mLastLetterTypingTime < mStaticTimeThresholdAfterFastTyping) {
+            if (eventTime - lastLetterTypingTime < staticTimeThresholdAfterFastTyping) {
                 // This non-letter typing should be treated as a part of fast typing.
-                mLastLetterTypingTime = eventTime
+                lastLetterTypingTime = eventTime
             }
         }
         lastTypingTime = eventTime
@@ -51,12 +52,8 @@ class TypingTimeRecorder(staticTimeThresholdAfterFastTyping: Int,
         lastBatchInputTime = eventTime
     }
 
-    fun getLastLetterTypingTime(): Long {
-        return mLastLetterTypingTime
-    }
-
     fun needsToSuppressKeyPreviewPopup(eventTime: Long): Boolean {
         return !wasLastInputTyping()
-                && eventTime - lastBatchInputTime < mSuppressKeyPreviewAfterBatchInputDuration
+                && eventTime - lastBatchInputTime < suppressKeyPreviewAfterBatchInputDuration
     }
 }

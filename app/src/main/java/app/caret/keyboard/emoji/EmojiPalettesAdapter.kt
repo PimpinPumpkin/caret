@@ -21,21 +21,21 @@ internal class EmojiPalettesAdapter(
     emojiViewCallback: EmojiViewCallback
 ) : RecyclerView.Adapter<EmojiPalettesAdapter.ViewHolder>() {
 
-    private val mCategory: EmojiCategory.Category
-    private val mEmojiViewCallback: EmojiViewCallback
-    private val mEmojiCategory: EmojiCategory
+    private val category: EmojiCategory.Category
+    private val emojiViewCallback: EmojiViewCallback
+    private val emojiCategory: EmojiCategory
 
     init {
-        mEmojiCategory = emojiCategory
-        mCategory = category
-        mEmojiViewCallback = emojiViewCallback
+        this.emojiCategory = emojiCategory
+        this.category = category
+        this.emojiViewCallback = emojiViewCallback
     }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
         val inflater = LayoutInflater.from(parent.context)
         val keyboardView = inflater.inflate(
                 R.layout.emoji_keyboard_page, parent, false) as EmojiPageKeyboardView
-        keyboardView.setEmojiViewCallback(mEmojiViewCallback)
+        keyboardView.setEmojiViewCallback(emojiViewCallback)
         return ViewHolder(keyboardView)
     }
 
@@ -44,17 +44,17 @@ internal class EmojiPalettesAdapter(
             Log.d(TAG, "instantiate item: " + position)
         }
 
-        val keyboard = mEmojiCategory.getKeyboardFromAdapterPosition(mCategory, position)
-        holder.getKeyboardView().setKeyboard(keyboard!!)
+        val keyboard = emojiCategory.getKeyboardFromAdapterPosition(category, position)
+        holder.keyboardView.setKeyboard(keyboard!!)
     }
 
     override fun onViewDetachedFromWindow(holder: ViewHolder) {
-        holder.getKeyboardView().releaseCurrentKey(false)
-        holder.getKeyboardView().deallocateMemory()
+        holder.keyboardView.releaseCurrentKey(false)
+        holder.keyboardView.deallocateMemory()
     }
 
     override fun getItemCount(): Int {
-        return mEmojiCategory.getCategoryPageCount(mCategory)
+        return emojiCategory.getCategoryPageCount(category)
     }
 
     class ViewHolder(v: View) : RecyclerView.ViewHolder(v) {
@@ -64,9 +64,8 @@ internal class EmojiPalettesAdapter(
             customView = v as EmojiPageKeyboardView
         }
 
-        fun getKeyboardView(): EmojiPageKeyboardView {
-            return customView
-        }
+        val keyboardView: EmojiPageKeyboardView
+            get() = customView
     }
 
     companion object {

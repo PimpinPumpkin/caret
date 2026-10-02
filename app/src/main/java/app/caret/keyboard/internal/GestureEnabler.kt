@@ -10,26 +10,26 @@ import app.caret.accessibility.AccessibilityUtils
 
 class GestureEnabler {
     /** True if we should handle gesture events. */
-    private var mShouldHandleGesture = false
-    private var mMainDictionaryAvailable = false
+    private var gestureHandlingEnabled = false
+    private var mainDictionaryAvailable = false
     private var gestureHandlingEnabledByInputField = false
-    private var mGestureHandlingEnabledByUser = false
+    private var gestureHandlingEnabledByUser = false
 
     private fun updateGestureHandlingMode() {
-        mShouldHandleGesture = mMainDictionaryAvailable
+        gestureHandlingEnabled = mainDictionaryAvailable
                 && gestureHandlingEnabledByInputField
-                && mGestureHandlingEnabledByUser
+                && gestureHandlingEnabledByUser
                 && !AccessibilityUtils.instance.isTouchExplorationEnabled
     }
 
     // Note that this method is called from a non-UI thread.
     fun setMainDictionaryAvailability(mainDictionaryAvailable: Boolean) {
-        mMainDictionaryAvailable = mainDictionaryAvailable
+        this.mainDictionaryAvailable = mainDictionaryAvailable
         updateGestureHandlingMode()
     }
 
     fun setGestureHandlingEnabledByUser(gestureHandlingEnabledByUser: Boolean) {
-        mGestureHandlingEnabledByUser = gestureHandlingEnabledByUser
+        this.gestureHandlingEnabledByUser = gestureHandlingEnabledByUser
         updateGestureHandlingMode()
     }
 
@@ -39,6 +39,6 @@ class GestureEnabler {
     }
 
     fun shouldHandleGesture(): Boolean {
-        return mShouldHandleGesture
+        return gestureHandlingEnabled
     }
 }

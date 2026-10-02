@@ -34,9 +34,9 @@ class InputTest {
     }
 
     @Test fun pressShift() {
-        assertEquals(KeyboardElement.ALPHABET, keyboardSwitcher.getKeyboard()?.id?.element)
+        assertEquals(KeyboardElement.ALPHABET, keyboardSwitcher.keyboard?.id?.element)
         touchKey(KeyCode.SHIFT, MotionEvent.ACTION_DOWN)
-        assertEquals(KeyboardElement.ALPHABET_MANUAL_SHIFTED, keyboardSwitcher.getKeyboard()?.id?.element)
+        assertEquals(KeyboardElement.ALPHABET_MANUAL_SHIFTED, keyboardSwitcher.keyboard?.id?.element)
     }
 
     @Test fun keyInput() {
@@ -47,9 +47,9 @@ class InputTest {
 
     @Test fun holdShift() {
         touchKey(KeyCode.SHIFT, MotionEvent.ACTION_DOWN)
-        assertEquals(KeyboardElement.ALPHABET_MANUAL_SHIFTED, keyboardSwitcher.getKeyboard()?.id?.element)
+        assertEquals(KeyboardElement.ALPHABET_MANUAL_SHIFTED, keyboardSwitcher.keyboard?.id?.element)
         ShadowLooper.runUiThreadTasksIncludingDelayedTasks() // this doesn't actually wait, just results in handling the delayed message immediately
-        assertEquals(KeyboardElement.ALPHABET_SHIFT_LOCKED, keyboardSwitcher.getKeyboard()?.id?.element)
+        assertEquals(KeyboardElement.ALPHABET_SHIFT_LOCKED, keyboardSwitcher.keyboard?.id?.element)
     }
 
     @Test fun slidingInput() {
@@ -57,7 +57,7 @@ class InputTest {
         touchKey('F'.code, MotionEvent.ACTION_MOVE)
         touchKey('F'.code, MotionEvent.ACTION_UP)
         assertEquals("F", ShadowInputMethodService.text)
-        assertEquals(KeyboardElement.ALPHABET, keyboardSwitcher.getKeyboard()?.id?.element)
+        assertEquals(KeyboardElement.ALPHABET, keyboardSwitcher.keyboard?.id?.element)
     }
 
     @Test fun endCapsLockWithShift() {
@@ -69,7 +69,7 @@ class InputTest {
         // need to set event time to prevent mTouchNoiseThresholdTime thing triggering (todo: should be done automatically in the test)
         touchKey(KeyCode.SHIFT, MotionEvent.ACTION_DOWN, 50L)
         touchKey(KeyCode.SHIFT, MotionEvent.ACTION_UP, 50L)
-        assertEquals(KeyboardElement.ALPHABET, keyboardSwitcher.getKeyboard()?.id?.element)
+        assertEquals(KeyboardElement.ALPHABET, keyboardSwitcher.keyboard?.id?.element)
     }
 
     @Test fun slidingInputFromCapsLock() {
@@ -78,11 +78,11 @@ class InputTest {
         touchKey(KeyCode.SHIFT, MotionEvent.ACTION_UP)
 
         touchKey(KeyCode.SHIFT, MotionEvent.ACTION_DOWN, 50L)
-        assertEquals(KeyboardElement.ALPHABET, keyboardSwitcher.getKeyboard()?.id?.element)
+        assertEquals(KeyboardElement.ALPHABET, keyboardSwitcher.keyboard?.id?.element)
         touchKey('f'.code, MotionEvent.ACTION_MOVE)
         touchKey('f'.code, MotionEvent.ACTION_UP)
         assertEquals("f", ShadowInputMethodService.text)
-        assertEquals(KeyboardElement.ALPHABET_SHIFT_LOCKED, keyboardSwitcher.getKeyboard()?.id?.element)
+        assertEquals(KeyboardElement.ALPHABET_SHIFT_LOCKED, keyboardSwitcher.keyboard?.id?.element)
     }
 
     // ------- Caret: taps, layout switching, key repeat, two fingers -------
@@ -98,8 +98,8 @@ class InputTest {
     }
 
     private fun touchCenter(code: Int, action: Int, eventTime: Long) {
-        val key = keyboardSwitcher.getKeyboard()!!.getKey(code)!!
-        val me = MotionEvent.obtain(0L, eventTime, action, key.getX() + key.getWidth() / 2f, key.getY() + key.getHeight() / 2f, 0)
+        val key = keyboardSwitcher.keyboard!!.getKey(code)!!
+        val me = MotionEvent.obtain(0L, eventTime, action, key.getX() + key.width / 2f, key.getY() + key.height / 2f, 0)
         keyboardSwitcher.getMainKeyboardView()!!.onTouchEvent(me)
     }
 
@@ -123,9 +123,9 @@ class InputTest {
 
     @Test fun `the symbols key switches to symbols and back`() {
         tap(KeyCode.SYMBOL_ALPHA)
-        assertEquals(KeyboardElement.SYMBOLS, keyboardSwitcher.getKeyboard()?.id?.element)
+        assertEquals(KeyboardElement.SYMBOLS, keyboardSwitcher.keyboard?.id?.element)
         tap(KeyCode.SYMBOL_ALPHA)
-        assertEquals(KeyboardElement.ALPHABET, keyboardSwitcher.getKeyboard()?.id?.element)
+        assertEquals(KeyboardElement.ALPHABET, keyboardSwitcher.keyboard?.id?.element)
     }
 
     @Test fun `a digit typed on the symbols page arrives`() {
@@ -163,10 +163,10 @@ class InputTest {
     }
 
     private fun touchKey(code: Int, action: Int, eventTime: Long = 0L) {
-        val kb = keyboardSwitcher.getKeyboard()!!
+        val kb = keyboardSwitcher.keyboard!!
         val key = kb.getKey(code)!!
-        val x = key.getX() + key.getHeight() / 2
-        val y = key.getY() + key.getWidth() / 2
+        val x = key.getX() + key.height / 2
+        val y = key.getY() + key.width / 2
         val me = MotionEvent.obtain( // todo: there are many more parameters, also related to pointers
             0L,
             eventTime,

@@ -87,7 +87,7 @@ class GestureFloatingTextDrawingPreview(mainKeyboardViewAttr: TypedArray) : Abst
     private val gesturePreviewRectangle = RectF()
     private var previewTextX = 0
     private var previewTextY = 0
-    private var mSuggestedWords: SuggestedWords = SuggestedWords.getEmptyInstance()
+    private var suggestedWords: SuggestedWords = SuggestedWords.getEmptyInstance()
     private val lastPointerCoords = CoordinateUtils.newInstance()
 
     init {
@@ -103,15 +103,15 @@ class GestureFloatingTextDrawingPreview(mainKeyboardViewAttr: TypedArray) : Abst
     }
 
     fun setSuggestedWords(suggestedWords: SuggestedWords) {
-        if (!isPreviewEnabled()) {
+        if (!isPreviewEnabled) {
             return
         }
-        mSuggestedWords = suggestedWords
+        this.suggestedWords = suggestedWords
         updatePreviewPosition()
     }
 
     override fun setPreviewPosition(tracker: PointerTracker) {
-        if (!isPreviewEnabled()) {
+        if (!isPreviewEnabled) {
             return
         }
         tracker.getLastCoordinates(lastPointerCoords)
@@ -123,14 +123,14 @@ class GestureFloatingTextDrawingPreview(mainKeyboardViewAttr: TypedArray) : Abst
      * @param canvas The canvas where preview text is drawn.
      */
     override fun drawPreview(canvas: Canvas) {
-        if (!isPreviewEnabled() || mSuggestedWords.isEmpty()
-                || TextUtils.isEmpty(mSuggestedWords.getWord(0))) {
+        if (!isPreviewEnabled || suggestedWords.isEmpty()
+                || TextUtils.isEmpty(suggestedWords.getWord(0))) {
             return
         }
         val round = params.gesturePreviewRoundRadius
         canvas.drawRoundRect(
                 gesturePreviewRectangle, round, round, params.getBackgroundPaint())
-        val text = mSuggestedWords.getWord(0)
+        val text = suggestedWords.getWord(0)
         canvas.drawText(text, previewTextX.toFloat(), previewTextY.toFloat(), params.getTextPaint())
     }
 
@@ -138,11 +138,11 @@ class GestureFloatingTextDrawingPreview(mainKeyboardViewAttr: TypedArray) : Abst
      * Updates gesture preview text position based on mLastPointerCoords.
      */
     protected fun updatePreviewPosition() {
-        if (mSuggestedWords.isEmpty() || TextUtils.isEmpty(mSuggestedWords.getWord(0))) {
+        if (suggestedWords.isEmpty() || TextUtils.isEmpty(suggestedWords.getWord(0))) {
             invalidateDrawingView()
             return
         }
-        val text = mSuggestedWords.getWord(0)
+        val text = suggestedWords.getWord(0)
 
         val textHeight = params.gesturePreviewTextHeight
         val textWidth = params.getTextPaint().measureText(text)

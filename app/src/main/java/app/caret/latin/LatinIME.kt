@@ -893,7 +893,7 @@ class LatinIME : InputMethodService(),
         gestureConsumer = GestureConsumer.newInstance(editorInfo,
                 inputLogic.getPrivateCommandPerformer(),
                 richImm.currentSubtypeLocale,
-                switcher.getKeyboard())
+                switcher.keyboard)
 
         // Forward this event to the accessibility utilities, if enabled.
         val accessUtils = AccessibilityUtils.instance
@@ -1077,7 +1077,7 @@ class LatinIME : InputMethodService(),
             // we don't want to update a manually set shift state if selection changed towards one side
             // because this may end the manual shift, which is unwanted in case of shift + arrow keys for changing selection
             // todo: this is not fully implemented yet, and maybe should be behind a setting
-            val keyboard = keyboardSwitcher.getKeyboard()
+            val keyboard = keyboardSwitcher.keyboard
             if (keyboard != null && keyboard.id.element.isAlphabetShiftedManually
                 && ((oldSelEnd == newSelEnd && oldSelStart != newSelStart) || (oldSelEnd != newSelEnd && oldSelStart == newSelStart)))
                 return
@@ -1185,7 +1185,7 @@ class LatinIME : InputMethodService(),
         if (currentInputView == null) {
             return
         }
-        val visibleKeyboardView = keyboardSwitcher.getWrapperView()
+        val visibleKeyboardView = keyboardSwitcher.wrapperView
         if (visibleKeyboardView == null) {
             return
         }
@@ -1200,8 +1200,8 @@ class LatinIME : InputMethodService(),
             insetsUpdater.setInsets(insets)
             return
         }
-        val stripHeight = if (keyboardSwitcher.isShowingStripContainer()) keyboardSwitcher.getStripContainer()!!.getHeight() else 0
-        var visibleTopY = inputHeight - visibleKeyboardView.getHeight() - stripHeight
+        val stripHeight = if (keyboardSwitcher.isShowingStripContainer) keyboardSwitcher.getStripContainer()!!.getHeight() else 0
+        var visibleTopY = inputHeight - visibleKeyboardView.height - stripHeight
         if (Settings.getValues().isFloatingKeyboard)
             visibleTopY = getResources().getDisplayMetrics().heightPixels
 
@@ -1211,7 +1211,7 @@ class LatinIME : InputMethodService(),
         if (visibleKeyboardView.isShown()) {
             var touchLeft = 0
             var touchTop = if (keyboardSwitcher.isShowingPopupKeysPanel()) 0 else visibleTopY
-            var touchRight = visibleKeyboardView.getWidth()
+            var touchRight = visibleKeyboardView.width
             var touchBottom = inputHeight + EXTENDED_TOUCHABLE_REGION_HEIGHT // Extend touchable region below the keyboard.
             if (settings.getCurrent().isFloatingKeyboard) {
                 val xy = FloatingKeyboardUtils.readPosition(this, Int.MAX_VALUE, Int.MAX_VALUE)
@@ -1337,7 +1337,7 @@ class LatinIME : InputMethodService(),
      * @return x,y coordinates for this keyboard, as a flattened array.
      */
     fun getCoordinatesForCurrentKeyboard(codePoints: IntArray): IntArray {
-        val keyboard = keyboardSwitcher.getKeyboard()
+        val keyboard = keyboardSwitcher.keyboard
         if (null == keyboard) {
             return CoordinateUtils.newCoordinateArray(codePoints.size,
                     Constants.NOT_A_COORDINATE, Constants.NOT_A_COORDINATE)
@@ -1429,7 +1429,7 @@ class LatinIME : InputMethodService(),
 
     fun onStartBatchInput() {
         inputLogic.onStartBatchInput(settings.getCurrent(), keyboardSwitcher, handler)
-        gestureConsumer.onGestureStarted(richImm.currentSubtypeLocale, keyboardSwitcher.getKeyboard())
+        gestureConsumer.onGestureStarted(richImm.currentSubtypeLocale, keyboardSwitcher.keyboard)
     }
 
     fun onUpdateBatchInput(batchPointers: InputPointers?) {
@@ -1742,7 +1742,7 @@ class LatinIME : InputMethodService(),
         p.println("LatinIME state :")
         p.println("  VersionCode = " + BuildConfig.VERSION_CODE)
         p.println("  VersionName = " + BuildConfig.VERSION_NAME)
-        val keyboard = keyboardSwitcher.getKeyboard()
+        val keyboard = keyboardSwitcher.keyboard
         val keyboardMode = if (keyboard != null) keyboard.id.mode else null
         p.println("  Keyboard mode = " + keyboardMode)
         val settingsValues = settings.getCurrent()

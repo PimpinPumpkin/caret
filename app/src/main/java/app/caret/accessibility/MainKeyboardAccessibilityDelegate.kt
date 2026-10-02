@@ -25,7 +25,7 @@ class MainKeyboardAccessibilityDelegate(
     keyDetector: KeyDetector
 ) : KeyboardAccessibilityDelegate<MainKeyboardView>(mainKeyboardView, keyDetector), LongPressTimerCallback {
     /** The most recently set keyboard mode.  */
-    private var mLastKeyboardMode: KeyboardMode? = null
+    private var lastKeyboardMode: KeyboardMode? = null
     // The rectangle region to ignore hover events.
     private val boundsToIgnoreHoverEvent = Rect()
     private val accessibilityLongPressTimer = AccessibilityLongPressTimer(this /* callback */, mainKeyboardView.context)
@@ -46,8 +46,8 @@ class MainKeyboardAccessibilityDelegate(
             }
             val lastKeyboard = super.keyboard
             super.keyboard = keyboard
-            val lastKeyboardMode = mLastKeyboardMode
-            mLastKeyboardMode = keyboard.id.mode
+            val previousKeyboardMode = lastKeyboardMode
+            lastKeyboardMode = keyboard.id.mode
             // Since this method is called even when accessibility is off, make sure
             // to check the state before announcing anything.
             if (!AccessibilityUtils.instance.isAccessibilityEnabled) {
@@ -59,7 +59,7 @@ class MainKeyboardAccessibilityDelegate(
                 return
             }
             // Announce the mode only when the mode is changed.
-            if (keyboard.id.mode != lastKeyboardMode) {
+            if (keyboard.id.mode != previousKeyboardMode) {
                 announceKeyboardMode(keyboard)
                 return
             }
@@ -74,10 +74,10 @@ class MainKeyboardAccessibilityDelegate(
      * Called when the keyboard is hidden and accessibility is enabled.
      */
     fun onHideWindow() {
-        if (mLastKeyboardMode != null) {
+        if (lastKeyboardMode != null) {
             announceKeyboardHidden()
         }
-        mLastKeyboardMode = null
+        lastKeyboardMode = null
     }
 
     /**
@@ -150,8 +150,8 @@ class MainKeyboardAccessibilityDelegate(
     }
 
     override fun performClickOn(key: Key) {
-        val x = key.getHitBox().centerX()
-        val y = key.getHitBox().centerY()
+        val x = key.hitBox.centerX()
+        val y = key.hitBox.centerY()
         if (DEBUG_HOVER) {
             Log.d(TAG, "performClickOn: key=" + key
                     + " inIgnoreBounds=" + boundsToIgnoreHoverEvent.contains(x, y))
@@ -166,8 +166,8 @@ class MainKeyboardAccessibilityDelegate(
     }
 
     override fun onHoverEnterTo(key: Key) {
-        val x = key.getHitBox().centerX()
-        val y = key.getHitBox().centerY()
+        val x = key.hitBox.centerX()
+        val y = key.hitBox.centerY()
         if (DEBUG_HOVER) {
             Log.d(TAG, "onHoverEnterTo: key=" + key
                     + " inIgnoreBounds=" + boundsToIgnoreHoverEvent.contains(x, y))
@@ -180,14 +180,14 @@ class MainKeyboardAccessibilityDelegate(
         // Further hover events should be handled.
         boundsToIgnoreHoverEvent.setEmpty()
         super.onHoverEnterTo(key)
-        if (key.isLongPressEnabled()) {
+        if (key.isLongPressEnabled) {
             accessibilityLongPressTimer.startLongPress(key)
         }
     }
 
     override fun onHoverExitFrom(key: Key) {
-        val x = key.getHitBox().centerX()
-        val y = key.getHitBox().centerY()
+        val x = key.hitBox.centerX()
+        val y = key.hitBox.centerY()
         if (DEBUG_HOVER) {
             Log.d(TAG, "onHoverExitFrom: key=" + key
                     + " inIgnoreBounds=" + boundsToIgnoreHoverEvent.contains(x, y))
@@ -202,8 +202,8 @@ class MainKeyboardAccessibilityDelegate(
         }
         val tracker = PointerTracker.getPointerTracker(HOVER_EVENT_POINTER_ID)
         val eventTime = SystemClock.uptimeMillis()
-        val x = key.getHitBox().centerX()
-        val y = key.getHitBox().centerY()
+        val x = key.hitBox.centerX()
+        val y = key.hitBox.centerY()
         val downEvent = MotionEvent.obtain(eventTime, eventTime, MotionEvent.ACTION_DOWN, x.toFloat(), y.toFloat(), 0)
         // Inject a fake down event to {@link PointerTracker} to handle a long press correctly.
         tracker.processMotionEvent(downEvent, this.keyDetector)
@@ -222,11 +222,11 @@ class MainKeyboardAccessibilityDelegate(
         }
         // This long press has handled at {@link MainKeyboardView#onLongPress(PointerTracker)}.
         // We should ignore further hover events on this key.
-        boundsToIgnoreHoverEvent.set(key.getHitBox())
+        boundsToIgnoreHoverEvent.set(key.hitBox)
         if (key.hasNoPanelAutoPopupKey()) {
             // This long press has registered a code point without showing a popup keys keyboard.
             // We should talk back the code point if possible.
-            val codePointOfNoPanelAutoPopupKey = key.getPopupKeys()?.get(0)?.mCode ?: return
+            val codePointOfNoPanelAutoPopupKey = key.popupKeys?.get(0)?.code ?: return
             val text: String = KeyCodeDescriptionMapper.instance.getDescriptionForCodePoint(
                     this.keyboardView.context, codePointOfNoPanelAutoPopupKey) ?: return
             sendWindowStateChanged(text)

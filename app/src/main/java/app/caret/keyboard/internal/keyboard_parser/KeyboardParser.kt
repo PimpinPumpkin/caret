@@ -69,21 +69,21 @@ class KeyboardParser(private val params: KeyboardParams, private val context: Co
             val virtualRows = if (Settings.getValues().showsNumberRow) 5 else 4 // determine from Settings, because it's not actually in params for bottom rows
             // params rescale is not perfect, especially mTopPadding may cause 1 pixel offsets because it's already been converted to int once
             params.occupiedHeight /= virtualRows
-            params.mBaseHeight /= virtualRows
+            params.baseHeight /= virtualRows
             params.topPadding = (params.topPadding.toDouble() / virtualRows).roundToInt()
         } else {
             // rescale height if we have anything but the usual 4 rows
             heightRescale = if (keysInRows.size != 4) 4f / keysInRows.size else 1f
         }
         if (heightRescale != 1f) {
-            keysInRows.forEach { row -> row.forEach { it.mHeight *= heightRescale } }
+            keysInRows.forEach { row -> row.forEach { it.height *= heightRescale } }
         }
         // rescale without changing keyboard height
         if (params.id.element.takesFunctionalKeys) {
             val bottomRowScale = Settings.getValues().bottomRowScale
             val otherRowScale = (keysInRows.size - bottomRowScale) / (keysInRows.size - 1)
             keysInRows.forEachIndexed { i, row ->
-                row.forEach { it.mHeight *= if (i == keysInRows.lastIndex) bottomRowScale else otherRowScale }
+                row.forEach { it.height *= if (i == keysInRows.lastIndex) bottomRowScale else otherRowScale }
             }
         }
 
@@ -97,7 +97,7 @@ class KeyboardParser(private val params: KeyboardParams, private val context: Co
                 && context.resources.configuration.orientation == Configuration.ORIENTATION_LANDSCAPE) {
             params.leftPadding = (params.occupiedWidth * 0.1f).toInt()
             params.rightPadding = (params.occupiedWidth * 0.1f).toInt()
-            params.mBaseWidth = params.occupiedWidth - params.leftPadding - params.rightPadding
+            params.baseWidth = params.occupiedWidth - params.leftPadding - params.rightPadding
         }
 
         val numberRow = getNumberRow()
@@ -162,8 +162,8 @@ class KeyboardParser(private val params: KeyboardParams, private val context: Co
             var totalWidth = 0f
             val allKeys = (functionalKeysLeft + keys + functionalKeysRight)
             allKeys.forEach {
-                if (it.mWidth == -1f) varWidthKeys.add(it)
-                else totalWidth += it.mWidth
+                if (it.width == -1f) varWidthKeys.add(it)
+                else totalWidth += it.width
             }
 
             // set width for varWidthKeys
@@ -171,10 +171,10 @@ class KeyboardParser(private val params: KeyboardParams, private val context: Co
                 val width = if (totalWidth + varWidthKeys.size * params.defaultKeyWidth > 1)
                     params.defaultKeyWidth // never go below default width
                 else (1f - totalWidth) / varWidthKeys.size // split remaining space evenly
-                varWidthKeys.forEach { it.mWidth = width }
+                varWidthKeys.forEach { it.width = width }
 
                 // re-calculate total width
-                totalWidth = allKeys.sumOf { it.mWidth }
+                totalWidth = allKeys.sumOf { it.width }
             }
 
             // re-scale total width, or add spacers (or do nothing if totalWidth is near 1)
@@ -185,12 +185,12 @@ class KeyboardParser(private val params: KeyboardParams, private val context: Co
                 keysInRows.add(paramsRow)
             } else {
                 if (totalWidth > 1.0001f) { // re-scale total width
-                    val normalKeysWith = keys.sumOf { it.mWidth }
+                    val normalKeysWith = keys.sumOf { it.width }
                     val functionalKeysWidth = totalWidth - normalKeysWith
                     val scaleFactor = (1f - functionalKeysWidth) / normalKeysWith
                     // re-scale normal  keys if factor is > 0.82, otherwise re-scale all keys
-                    if (scaleFactor > 0.82f) keys.forEach { it.mWidth *= scaleFactor }
-                    else allKeys.forEach { it.mWidth /= totalWidth }
+                    if (scaleFactor > 0.82f) keys.forEach { it.width *= scaleFactor }
+                    else allKeys.forEach { it.width /= totalWidth }
                 }
                 keysInRows.add(ArrayList(allKeys))
             }
@@ -203,19 +203,19 @@ class KeyboardParser(private val params: KeyboardParams, private val context: Co
             return keysInRows
         val lastNormalRow = bassKeyParams[bassKeyParams.lastIndex - 1]
         val rowAboveLast = bassKeyParams[bassKeyParams.lastIndex - 2]
-        val lastNormalRowKeyWidth = lastNormalRow.first().mWidth
-        val rowAboveLastNormalRowKeyWidth = rowAboveLast.first().mWidth
+        val lastNormalRowKeyWidth = lastNormalRow.first().width
+        val rowAboveLastNormalRowKeyWidth = rowAboveLast.first().width
         if (lastNormalRowKeyWidth <= rowAboveLastNormalRowKeyWidth + 0.0001f // no need
             || lastNormalRowKeyWidth / rowAboveLastNormalRowKeyWidth > 1.1f // don't resize on large size difference
             || lastNormalRow.any { it.isSpacer } || rowAboveLast.any { it.isSpacer } // annoying to deal with, and probably no resize wanted anyway
-            || lastNormalRow.any { it.mWidth != lastNormalRowKeyWidth } || rowAboveLast.any { it.mWidth != rowAboveLastNormalRowKeyWidth })
+            || lastNormalRow.any { it.width != lastNormalRowKeyWidth } || rowAboveLast.any { it.width != rowAboveLastNormalRowKeyWidth })
             return keysInRows
-        val numberOfKeysInLast = lastNormalRow.count { it.mBackgroundType == Key.BACKGROUND_TYPE_NORMAL }
+        val numberOfKeysInLast = lastNormalRow.count { it.backgroundType == Key.BACKGROUND_TYPE_NORMAL }
         val widthBefore = numberOfKeysInLast * lastNormalRowKeyWidth
         val widthAfter = numberOfKeysInLast * rowAboveLastNormalRowKeyWidth
         val spacerWidth = (widthBefore - widthAfter) / 2
         // resize keys
-        lastNormalRow.forEach { if (it.mBackgroundType == Key.BACKGROUND_TYPE_NORMAL) it.mWidth = rowAboveLastNormalRowKeyWidth }
+        lastNormalRow.forEach { if (it.backgroundType == Key.BACKGROUND_TYPE_NORMAL) it.width = rowAboveLastNormalRowKeyWidth }
         // add spacers
         val lastNormalFullRow = keysInRows[keysInRows.lastIndex - 1]
         lastNormalFullRow.add(lastNormalFullRow.indexOfFirst { it == lastNormalRow.first() }, KeyParams.newSpacer(params, spacerWidth))

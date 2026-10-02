@@ -31,10 +31,10 @@ class KeyPreviewChoreographer(params: KeyPreviewDrawParams) {
     // preview.
     private val showingKeyPreviewViews = HashMap<Key?, KeyPreviewView>()
 
-    private val mParams: KeyPreviewDrawParams
+    private val params: KeyPreviewDrawParams
 
     init {
-        mParams = params
+        this.params = params
     }
 
     fun getKeyPreviewView(key: Key?, placerView: ViewGroup): KeyPreviewView {
@@ -48,7 +48,7 @@ class KeyPreviewChoreographer(params: KeyPreviewDrawParams) {
         }
         val context = placerView.context
         keyPreviewView = KeyPreviewView(context, null /* attrs */)
-        keyPreviewView.setBackgroundResource(mParams.previewBackgroundResId)
+        keyPreviewView.setBackgroundResource(params.previewBackgroundResId)
         placerView.addView(keyPreviewView, ViewLayoutUtils.newLayoutParam(placerView, 0, 0))
         return keyPreviewView
     }
@@ -84,7 +84,7 @@ class KeyPreviewChoreographer(params: KeyPreviewDrawParams) {
             drawParams: KeyDrawParams, fullKeyboardViewWidth: Int, originCoords: IntArray) {
         keyPreviewView.setPreviewVisual(key, iconsSet, drawParams)
         keyPreviewView.measure(ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT)
-        mParams.setGeometry(keyPreviewView)
+        params.setGeometry(keyPreviewView)
         val previewWidth = keyPreviewView.measuredWidth
         val previewHeight = keyPreviewView.measuredHeight
         val keyDrawWidth = key.getDrawWidth()
@@ -103,14 +103,14 @@ class KeyPreviewChoreographer(params: KeyPreviewDrawParams) {
         } else {
             keyPreviewPosition = KeyPreviewView.POSITION_MIDDLE
         }
-        val hasPopupKeys = (key.getPopupKeys() != null)
+        val hasPopupKeys = (key.popupKeys != null)
         keyPreviewView.setPreviewBackground(hasPopupKeys, keyPreviewPosition)
         val colors = Settings.getValues().mColors
         colors.setBackground(keyPreviewView, ColorType.KEY_PREVIEW_BACKGROUND)
 
         // The key preview is placed vertically above the top edge of the parent key with an
         // arbitrary offset.
-        val previewY = key.getY() - previewHeight + key.getHeight() - mParams.previewOffset +
+        val previewY = key.getY() - previewHeight + key.height - params.previewOffset +
                 CoordinateUtils.y(originCoords)
 
         ViewLayoutUtils.placeViewAt(keyPreviewView, previewX, previewY, previewWidth, previewHeight)

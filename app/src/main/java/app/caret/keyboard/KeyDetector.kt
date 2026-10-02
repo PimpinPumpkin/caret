@@ -10,12 +10,13 @@ package app.caret.keyboard
  * This class handles key detection.
  */
 open class KeyDetector {
-    private val mKeyHysteresisDistanceSquared: Int
+    private val keyHysteresisDistanceSquared: Int
     private val keyHysteresisDistanceForSlidingModifierSquared: Int
 
-    private var mKeyboard: Keyboard? = null
-    private var mCorrectionX = 0
-    private var mCorrectionY = 0
+    var keyboard: Keyboard? = null
+        private set
+    private var correctionX = 0
+    private var correctionY = 0
 
     constructor() : this(0.0f /* keyHysteresisDistance */, 0.0f /* keyHysteresisDistanceForSlidingModifier */)
 
@@ -28,7 +29,7 @@ open class KeyDetector {
      * starts from a modifier key such as shift and symbols key.
      */
     constructor(keyHysteresisDistance: Float, keyHysteresisDistanceForSlidingModifier: Float) {
-        mKeyHysteresisDistanceSquared = (keyHysteresisDistance * keyHysteresisDistance).toInt()
+        keyHysteresisDistanceSquared = (keyHysteresisDistance * keyHysteresisDistance).toInt()
         keyHysteresisDistanceForSlidingModifierSquared = (
                 keyHysteresisDistanceForSlidingModifier * keyHysteresisDistanceForSlidingModifier).toInt()
     }
@@ -37,27 +38,23 @@ open class KeyDetector {
         if (keyboard == null) {
             throw NullPointerException()
         }
-        mCorrectionX = correctionX.toInt()
-        mCorrectionY = correctionY.toInt()
-        mKeyboard = keyboard
+        this.correctionX = correctionX.toInt()
+        this.correctionY = correctionY.toInt()
+        this.keyboard = keyboard
     }
 
     fun getKeyHysteresisDistanceSquared(isSlidingFromModifier: Boolean): Int {
         return if (isSlidingFromModifier)
-            keyHysteresisDistanceForSlidingModifierSquared else mKeyHysteresisDistanceSquared
+            keyHysteresisDistanceForSlidingModifierSquared else keyHysteresisDistanceSquared
     }
 
     fun getTouchX(x: Int): Int {
-        return x + mCorrectionX
+        return x + correctionX
     }
 
     // TODO: Remove vertical correction.
     fun getTouchY(y: Int): Int {
-        return y + mCorrectionY
-    }
-
-    fun getKeyboard(): Keyboard? {
-        return mKeyboard
+        return y + correctionY
     }
 
     open fun alwaysAllowsKeySelectionByDraggingFinger(): Boolean {
@@ -72,13 +69,13 @@ open class KeyDetector {
      * @return the key that the touch point hits.
      */
     open fun detectHitKey(x: Int, y: Int): Key? {
-        val keyboard = mKeyboard ?: return null
+        val currentKeyboard = keyboard ?: return null
         val touchX = getTouchX(x)
         val touchY = getTouchY(y)
 
         var minDistance = Int.MAX_VALUE
         var primaryKey: Key? = null
-        for (key in keyboard.getNearestKeys(touchX, touchY)) {
+        for (key in currentKeyboard.getNearestKeys(touchX, touchY)) {
             // An edge key always has its enlarged hitbox to respond to an event that occurred in
             // the empty area around the key. (@see Key#markAsLeftEdge(KeyboardParams)} etc.)
             if (!key.isOnKey(touchX, touchY)) {
@@ -90,7 +87,7 @@ open class KeyDetector {
             }
             // To take care of hitbox overlaps, we compare key's code here too.
             if (primaryKey == null || distance < minDistance
-                    || key.getCode() > primaryKey.getCode()) {
+                    || key.code > primaryKey.code) {
                 minDistance = distance
                 primaryKey = key
             }

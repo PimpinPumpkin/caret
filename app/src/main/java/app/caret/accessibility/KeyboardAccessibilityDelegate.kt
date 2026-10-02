@@ -35,15 +35,9 @@ open class KeyboardAccessibilityDelegate<KV : KeyboardView>(
     protected val keyboardView: KV,
     protected val keyDetector: KeyDetector
     ) : AccessibilityDelegateCompat() {
-    private var mKeyboard: Keyboard? = null
-    private var mAccessibilityNodeProvider: KeyboardAccessibilityNodeProvider<KV>? = null
-    private var mLastHoverKey: Key? = null
+    private var cachedNodeProvider: KeyboardAccessibilityNodeProvider<KV>? = null
 
-    protected open var lastHoverKey: Key?
-        get() = mLastHoverKey
-        set(key) {
-            mLastHoverKey = key
-        }
+    protected open var lastHoverKey: Key? = null
     /**
      * Called when the keyboard layout changes.
      *
@@ -51,14 +45,13 @@ open class KeyboardAccessibilityDelegate<KV : KeyboardView>(
      * enabled.
      * [keyboard]: The keyboard that is being set to the wrapping view.
      */
-    open var keyboard: Keyboard?
-        get() = mKeyboard
+    open var keyboard: Keyboard? = null
         set(keyboard) {
             if (keyboard == null) {
                 return
             }
-            mAccessibilityNodeProvider?.setKeyboard(keyboard)
-            mKeyboard = keyboard
+            cachedNodeProvider?.setKeyboard(keyboard)
+            field = keyboard
         }
 
     /**
@@ -111,7 +104,7 @@ open class KeyboardAccessibilityDelegate<KV : KeyboardView>(
             // Instantiate the provide only when requested. Since the system
             // will call this method multiple times it is a good practice to
             // cache the provider instance.
-            return mAccessibilityNodeProvider ?: KeyboardAccessibilityNodeProvider(keyboardView, this)
+            return cachedNodeProvider ?: KeyboardAccessibilityNodeProvider(keyboardView, this)
         }
 
     /**
@@ -154,7 +147,7 @@ open class KeyboardAccessibilityDelegate<KV : KeyboardView>(
             Log.d(TAG, "onHoverEnter: key=$key")
         }
         key?.let { onHoverEnterTo(it) }
-        mLastHoverKey = key
+        lastHoverKey = key
     }
 
     /**
@@ -163,14 +156,14 @@ open class KeyboardAccessibilityDelegate<KV : KeyboardView>(
      * @param event A hover move event.
      */
     protected open fun onHoverMove(event: MotionEvent) {
-        val lastKey = mLastHoverKey
+        val lastKey = lastHoverKey
         val key = getHoverKeyOf(event)
         if (key !== lastKey) {
             lastKey?.let { onHoverExitFrom(it) }
             key?.let { onHoverEnterTo(it) }
         }
         key?.let { onHoverMoveWithin(it) }
-        mLastHoverKey = key
+        lastHoverKey = key
     }
 
     /**
@@ -179,7 +172,7 @@ open class KeyboardAccessibilityDelegate<KV : KeyboardView>(
      * @param event A hover exit event.
      */
     protected open fun onHoverExit(event: MotionEvent) {
-        val lastKey = mLastHoverKey
+        val lastKey = lastHoverKey
         if (DEBUG_HOVER) {
             Log.d(TAG, "onHoverExit: key=" + getHoverKeyOf(event) + " last=" + lastKey)
         }
@@ -189,7 +182,7 @@ open class KeyboardAccessibilityDelegate<KV : KeyboardView>(
         // off the keyboard area, then force a key press.
         key?.let { performClickOn(it)
         onHoverExitFrom(it) }
-        mLastHoverKey = null
+        lastHoverKey = null
     }
 
     /**
@@ -212,8 +205,8 @@ open class KeyboardAccessibilityDelegate<KV : KeyboardView>(
      * @param key The key that a synthesized touch event is on.
      */
     private fun simulateTouchEvent(touchAction: Int, key: Key) {
-        val x = key.getHitBox().centerX()
-        val y = key.getHitBox().centerY()
+        val x = key.hitBox.centerX()
+        val y = key.hitBox.centerY()
         val eventTime = SystemClock.uptimeMillis()
         val touchEvent = MotionEvent.obtain(
                 eventTime, eventTime, touchAction, x.toFloat(), y.toFloat(), 0 /* metaState */)

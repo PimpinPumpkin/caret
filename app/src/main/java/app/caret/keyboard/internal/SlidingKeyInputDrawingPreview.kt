@@ -60,7 +60,7 @@ class SlidingKeyInputDrawingPreview(mainKeyboardViewAttr: TypedArray) : Abstract
      * @param canvas The canvas where the preview is drawn.
      */
     override fun drawPreview(canvas: Canvas) {
-        if (!isPreviewEnabled() || !showsSlidingKeyInputPreview) {
+        if (!isPreviewEnabled || !showsSlidingKeyInputPreview) {
             return
         }
 

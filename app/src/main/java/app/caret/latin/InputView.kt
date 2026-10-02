@@ -49,7 +49,7 @@ class InputView(context: Context, attrs: AttributeSet?) : FrameLayout(context, a
 
     override fun dispatchHoverEvent(event: MotionEvent?): Boolean {
         if (AccessibilityUtils.instance.isTouchExplorationEnabled
-                && mMainKeyboardView.isShowingPopupKeysPanel()) {
+                && mMainKeyboardView.isShowingPopupKeysPanel) {
             // With accessibility mode on, discard hover events while a popup keys keyboard is shown.
             // The {@link PopupKeysKeyboard} receives hover events directly from the platform.
             return true

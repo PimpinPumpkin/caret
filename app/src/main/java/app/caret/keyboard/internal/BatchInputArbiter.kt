@@ -73,10 +73,10 @@ class BatchInputArbiter(pointerId: Int, params: GestureStrokeRecognitionParams) 
      */
     fun addMoveEventPoint(x: Int, y: Int, moveEventTime: Long,
             isMajorEvent: Boolean, listener: BatchInputArbiterListener): Boolean {
-        val beforeLength = recognitionPoints.getLength()
+        val beforeLength = recognitionPoints.length
         val onValidArea = recognitionPoints.addEventPoint(
                 x, y, getElapsedTimeSinceFirstDown(moveEventTime), isMajorEvent)
-        if (recognitionPoints.getLength() > beforeLength) {
+        if (recognitionPoints.length > beforeLength) {
             listener.onStartUpdateBatchInputTimer()
         }
         return onValidArea
@@ -92,8 +92,8 @@ class BatchInputArbiter(pointerId: Int, params: GestureStrokeRecognitionParams) 
         if (!recognitionPoints.isStartOfAGesture()) {
             return false
         }
-        synchronized(sAggregatedPointers) {
-            sAggregatedPointers.reset()
+        synchronized(aggregatedPointers) {
+            aggregatedPointers.reset()
             lastRecognitionPointSize = 0
             lastRecognitionTime = 0
             listener.onStartBatchInput()
@@ -125,16 +125,16 @@ class BatchInputArbiter(pointerId: Int, params: GestureStrokeRecognitionParams) 
      */
     fun updateBatchInput(moveEventTime: Long,
             listener: BatchInputArbiterListener) {
-        synchronized(sAggregatedPointers) {
-            recognitionPoints.appendIncrementalBatchPoints(sAggregatedPointers)
-            val size = sAggregatedPointers.getPointerSize()
+        synchronized(aggregatedPointers) {
+            recognitionPoints.appendIncrementalBatchPoints(aggregatedPointers)
+            val size = aggregatedPointers.getPointerSize()
             if (size > lastRecognitionPointSize && recognitionPoints.hasRecognitionTimePast(
                     moveEventTime, lastRecognitionTime)) {
-                listener.onUpdateBatchInput(sAggregatedPointers, moveEventTime)
+                listener.onUpdateBatchInput(aggregatedPointers, moveEventTime)
                 listener.onStartUpdateBatchInputTimer()
                 // The listener may change the size of the pointers (when auto-committing
                 // for example), so we need to get the size from the pointers again.
-                lastRecognitionPointSize = sAggregatedPointers.getPointerSize()
+                lastRecognitionPointSize = aggregatedPointers.getPointerSize()
                 lastRecognitionTime = moveEventTime
             }
         }
@@ -150,10 +150,10 @@ class BatchInputArbiter(pointerId: Int, params: GestureStrokeRecognitionParams) 
      */
     fun mayEndBatchInput(upEventTime: Long, activePointerCount: Int,
             listener: BatchInputArbiterListener): Boolean {
-        synchronized(sAggregatedPointers) {
-            recognitionPoints.appendAllBatchPoints(sAggregatedPointers)
+        synchronized(aggregatedPointers) {
+            recognitionPoints.appendAllBatchPoints(aggregatedPointers)
             if (activePointerCount == 1) {
-                listener.onEndBatchInput(sAggregatedPointers, upEventTime)
+                listener.onEndBatchInput(aggregatedPointers, upEventTime)
                 return true
             }
         }
@@ -164,9 +164,9 @@ class BatchInputArbiter(pointerId: Int, params: GestureStrokeRecognitionParams) 
         // The starting time of the first stroke of a gesture input.
         private var gestureFirstDownTime: Long = 0
         // The {@link InputPointers} that includes all events of a gesture input.
-        private val sAggregatedPointers = InputPointers(
+        private val aggregatedPointers = InputPointers(
                 Constants.DEFAULT_GESTURE_POINTS_CAPACITY)
-        private var lastRecognitionPointSize = 0 // synchronized using sAggregatedPointers
-        private var lastRecognitionTime: Long = 0 // synchronized using sAggregatedPointers
+        private var lastRecognitionPointSize = 0 // synchronized using aggregatedPointers
+        private var lastRecognitionTime: Long = 0 // synchronized using aggregatedPointers
     }
 }

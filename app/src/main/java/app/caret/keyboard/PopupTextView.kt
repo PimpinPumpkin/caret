@@ -24,11 +24,11 @@ import app.caret.latin.settings.Settings
  */
 class PopupTextView : TextView, PopupKeysPanel {
     private val coordinates = CoordinateUtils.newInstance()
-    private var mController: PopupKeysPanel.Controller = PopupKeysPanel.EMPTY_CONTROLLER
+    private var controller: PopupKeysPanel.Controller = PopupKeysPanel.EMPTY_CONTROLLER
     private var originX = 0
     private var originY = 0
-    private var mKey: Key? = null
-    private var mOnReleaseKey: ((Key) -> Unit)? = null
+    private var key: Key? = null
+    private var onReleaseKey: ((Key) -> Unit)? = null
 
     constructor(context: Context, attrs: AttributeSet?) : this(context, attrs, R.attr.popupKeysKeyboardViewStyle)
 
@@ -36,7 +36,7 @@ class PopupTextView : TextView, PopupKeysPanel {
                 defStyle: Int) : super(context, attrs, defStyle)
 
     fun setKeyDrawParams(key: Key, drawParams: KeyDrawParams) {
-        mKey = key
+        this.key = key
         Settings.getValues().mColors.setBackground(this, ColorType.KEY_PREVIEW_BACKGROUND)
         setTextColor(drawParams.previewTextColor)
         setTextSize(TypedValue.COMPLEX_UNIT_PX, (key.selectHintTextSize(drawParams) shl 1).toFloat())
@@ -50,13 +50,13 @@ class PopupTextView : TextView, PopupKeysPanel {
 
     override fun showPopupKeysPanel(parentView: View, controller: PopupKeysPanel.Controller,
             pointX: Int, pointY: Int, onReleaseKey: (Key) -> Unit) {
-        mOnReleaseKey = onReleaseKey
+        this.onReleaseKey = onReleaseKey
         showPopupKeysPanelInternal(parentView, controller, pointX, pointY)
     }
 
     private fun showPopupKeysPanelInternal(parentView: View, controller: PopupKeysPanel.Controller,
             pointX: Int, pointY: Int) {
-        mController = controller
+        this.controller = controller
         val container = getContainerView()
         // The coordinates of panel's left-top corner in parentView's coordinate system.
         // We need to consider background drawable paddings.
@@ -85,14 +85,14 @@ class PopupTextView : TextView, PopupKeysPanel {
     }
 
     override fun onUpEvent(x: Int, y: Int, pointerId: Int, eventTime: Long) {
-        mOnReleaseKey!!.invoke(mKey!!)
+        onReleaseKey!!.invoke(key!!)
     }
 
     override fun dismissPopupKeysPanel() {
         if (!isShowingInParent()) {
             return
         }
-        mController.onDismissPopupKeysPanel()
+        controller.onDismissPopupKeysPanel()
     }
 
     override fun translateX(x: Int): Int {

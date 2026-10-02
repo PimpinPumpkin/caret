@@ -18,15 +18,15 @@ class PointerTrackerQueue {
         fun cancelTrackingForAction()
     }
 
-    // Note: {@link #expandableArrayOfActivePointers} and {@link #mArraySize} are synchronized by
+    // Note: {@link #expandableArrayOfActivePointers} and {@link #arraySize} are synchronized by
     // {@link #expandableArrayOfActivePointers}
     private val expandableArrayOfActivePointers =
             ArrayList<Element>(INITIAL_CAPACITY)
-    private var mArraySize = 0
+    private var arraySize = 0
 
     fun size(): Int {
         synchronized(expandableArrayOfActivePointers) {
-            return mArraySize
+            return arraySize
         }
     }
 
@@ -36,13 +36,13 @@ class PointerTrackerQueue {
                 Log.d(TAG, "add: " + pointer + " " + this)
             }
             val expandableArray = expandableArrayOfActivePointers
-            val arraySize = mArraySize
-            if (arraySize < expandableArray.size) {
-                expandableArray.set(arraySize, pointer)
+            val size = arraySize
+            if (size < expandableArray.size) {
+                expandableArray.set(size, pointer)
             } else {
                 expandableArray.add(pointer)
             }
-            mArraySize = arraySize + 1
+            arraySize = size + 1
         }
     }
 
@@ -52,9 +52,9 @@ class PointerTrackerQueue {
                 Log.d(TAG, "remove: " + pointer + " " + this)
             }
             val expandableArray = expandableArrayOfActivePointers
-            val arraySize = mArraySize
+            val size = arraySize
             var newIndex = 0
-            for (index in 0 until arraySize) {
+            for (index in 0 until size) {
                 val element = expandableArray.get(index)
                 if (element === pointer) {
                     if (newIndex != index) {
@@ -68,13 +68,13 @@ class PointerTrackerQueue {
                 }
                 newIndex++
             }
-            mArraySize = newIndex
+            arraySize = newIndex
         }
     }
 
     fun getOldestElement(): Element? {
         synchronized(expandableArrayOfActivePointers) {
-            return if (mArraySize == 0) null else expandableArrayOfActivePointers.get(0)
+            return if (arraySize == 0) null else expandableArrayOfActivePointers.get(0)
         }
     }
 
@@ -84,10 +84,10 @@ class PointerTrackerQueue {
                 Log.d(TAG, "releaseAllPointerOlderThan: " + pointer + " " + this)
             }
             val expandableArray = expandableArrayOfActivePointers
-            val arraySize = mArraySize
+            val size = arraySize
             var newIndex = 0
             var index = 0
-            while (index < arraySize) {
+            while (index < size) {
                 val element = expandableArray.get(index)
                 if (element === pointer) {
                     break // Stop releasing elements.
@@ -106,7 +106,7 @@ class PointerTrackerQueue {
             }
             // Shift rest of the expandableArray.
             var count = 0
-            while (index < arraySize) {
+            while (index < size) {
                 val element = expandableArray.get(index)
                 if (element === pointer) {
                     count++
@@ -122,7 +122,7 @@ class PointerTrackerQueue {
                 newIndex++
                 index++
             }
-            mArraySize = newIndex
+            arraySize = newIndex
         }
     }
 
@@ -140,10 +140,10 @@ class PointerTrackerQueue {
                 }
             }
             val expandableArray = expandableArrayOfActivePointers
-            val arraySize = mArraySize
+            val size = arraySize
             var newIndex = 0
             var count = 0
-            for (index in 0 until arraySize) {
+            for (index in 0 until size) {
                 val element = expandableArray.get(index)
                 if (element === pointer) {
                     count++
@@ -161,14 +161,14 @@ class PointerTrackerQueue {
                 }
                 newIndex++
             }
-            mArraySize = newIndex
+            arraySize = newIndex
         }
     }
 
     fun hasModifierKeyOlderThan(pointer: Element): Boolean {
         synchronized(expandableArrayOfActivePointers) {
-            val arraySize = mArraySize
-            for (index in 0 until arraySize) {
+            val size = arraySize
+            for (index in 0 until size) {
                 val element = expandableArrayOfActivePointers.get(index)
                 if (element === pointer) {
                     return false // Stop searching modifier key.
@@ -183,8 +183,8 @@ class PointerTrackerQueue {
 
     fun isAnyInDraggingFinger(): Boolean {
         synchronized(expandableArrayOfActivePointers) {
-            val arraySize = mArraySize
-            for (index in 0 until arraySize) {
+            val size = arraySize
+            for (index in 0 until size) {
                 val element = expandableArrayOfActivePointers.get(index)
                 if (element.isInDraggingFinger()) {
                     return true
@@ -199,8 +199,8 @@ class PointerTrackerQueue {
             if (DEBUG) {
                 Log.d(TAG, "cancelAllPointerTracker: " + this)
             }
-            val arraySize = mArraySize
-            for (index in 0 until arraySize) {
+            val size = arraySize
+            for (index in 0 until size) {
                 val element = expandableArrayOfActivePointers.get(index)
                 element.cancelTrackingForAction()
             }
@@ -210,8 +210,8 @@ class PointerTrackerQueue {
     override fun toString(): String {
         synchronized(expandableArrayOfActivePointers) {
             val sb = StringBuilder()
-            val arraySize = mArraySize
-            for (index in 0 until arraySize) {
+            val size = arraySize
+            for (index in 0 until size) {
                 val element = expandableArrayOfActivePointers.get(index)
                 if (sb.length > 0) {
                     sb.append(" ")

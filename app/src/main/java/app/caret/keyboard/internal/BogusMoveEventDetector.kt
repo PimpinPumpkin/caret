@@ -20,7 +20,8 @@ class BogusMoveEventDetector {
     private var radiusThreshold = 0
 
     // Accumulated distance from actual and artificial down keys.
-    /* package */ var mAccumulatedDistanceFromDownKey = 0
+    /* package */ var accumulatedDistanceFromDownKey = 0
+        private set
     private var actualDownX = 0
     private var actualDownY = 0
 
@@ -37,26 +38,22 @@ class BogusMoveEventDetector {
     }
 
     fun onDownKey() {
-        mAccumulatedDistanceFromDownKey = 0
+        accumulatedDistanceFromDownKey = 0
     }
 
     fun onMoveKey(distance: Int) {
-        mAccumulatedDistanceFromDownKey += distance
+        accumulatedDistanceFromDownKey += distance
     }
 
     fun hasTraveledLongDistance(x: Int, y: Int): Boolean {
-        if (!sNeedsProximateBogusDownMoveUpEventHack) {
+        if (!needsProximateBogusDownMoveUpEventHack) {
             return false
         }
         val dx = Math.abs(x - actualDownX)
         val dy = Math.abs(y - actualDownY)
         // A bogus move event should be a horizontal movement. A vertical movement might be
         // a sloppy typing and should be ignored.
-        return dx >= dy && mAccumulatedDistanceFromDownKey >= accumulatedDistanceThreshold
-    }
-
-    fun getAccumulatedDistanceFromDownKey(): Int {
-        return mAccumulatedDistanceFromDownKey
+        return dx >= dy && accumulatedDistanceFromDownKey >= accumulatedDistanceThreshold
     }
 
     fun getDistanceFromDownEvent(x: Int, y: Int): Int {
@@ -64,7 +61,7 @@ class BogusMoveEventDetector {
     }
 
     fun isCloseToActualDownEvent(x: Int, y: Int): Boolean {
-        return sNeedsProximateBogusDownMoveUpEventHack
+        return needsProximateBogusDownMoveUpEventHack
                 && getDistanceFromDownEvent(x, y) < radiusThreshold
     }
 
@@ -76,7 +73,7 @@ class BogusMoveEventDetector {
         private const val BOGUS_MOVE_ACCUMULATED_DISTANCE_THRESHOLD = 0.53f
         private const val BOGUS_MOVE_RADIUS_THRESHOLD = 1.14f
 
-        private var sNeedsProximateBogusDownMoveUpEventHack = false
+        private var needsProximateBogusDownMoveUpEventHack = false
 
         @JvmStatic
         fun init(res: Resources) {
@@ -97,7 +94,7 @@ class BogusMoveEventDetector {
                         + " smallestScreenWidthDp=" + sw + " densityDpi=" + densityDpi
                         + " screenMetrics=" + screenMetrics)
             }
-            sNeedsProximateBogusDownMoveUpEventHack = needsTheHack
+            needsProximateBogusDownMoveUpEventHack = needsTheHack
         }
 
         private fun getDistance(x1: Int, y1: Int, x2: Int, y2: Int): Int {

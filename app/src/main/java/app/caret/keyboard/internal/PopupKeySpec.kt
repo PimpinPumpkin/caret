@@ -31,49 +31,46 @@ import java.util.Locale
 // TODO: Should extend the key specification object.
 class PopupKeySpec(popupKeySpec: String, needsToUpperCase: Boolean, locale: Locale) {
     @JvmField
-    val mCode: Int
+    val code: Int
     @JvmField
-    val mLabel: String?
+    val label: String?
     @JvmField
-    val mOutputText: String?
+    val outputText: String?
     @JvmField
-    val mIconName: String?
+    val iconName: String?
 
     init {
         if (popupKeySpec.isEmpty()) {
             throw KeySpecParser.KeySpecParserError("Empty popup key spec")
         }
-        val label: String? = KeySpecParser.getLabel(popupKeySpec)
-        mLabel = if (needsToUpperCase) StringUtils.toTitleCaseOfKeyLabel(label, locale) else label
+        val specLabel: String? = KeySpecParser.getLabel(popupKeySpec)
+        label = if (needsToUpperCase) StringUtils.toTitleCaseOfKeyLabel(specLabel, locale) else specLabel
         val codeInSpec = KeySpecParser.getCode(popupKeySpec)
-        val code = if (needsToUpperCase) StringUtils.toTitleCaseOfKeyCode(codeInSpec, locale)
+        val upperCode = if (needsToUpperCase) StringUtils.toTitleCaseOfKeyCode(codeInSpec, locale)
                 else codeInSpec
-        if (code == KeyCode.NOT_SPECIFIED) {
+        if (upperCode == KeyCode.NOT_SPECIFIED) {
             // Some letter, for example German Eszett (U+00DF: "ß"), has multiple characters
             // upper case representation ("SS").
-            mCode = KeyCode.MULTIPLE_CODE_POINTS
-            mOutputText = mLabel
+            code = KeyCode.MULTIPLE_CODE_POINTS
+            outputText = label
         } else {
-            mCode = code
-            val outputText: String? = KeySpecParser.getOutputText(popupKeySpec, code)
-            mOutputText = if (needsToUpperCase)
-                    StringUtils.toTitleCaseOfKeyLabel(outputText, locale) else outputText
+            code = upperCode
+            val specOutputText: String? = KeySpecParser.getOutputText(popupKeySpec, upperCode)
+            outputText = if (needsToUpperCase)
+                    StringUtils.toTitleCaseOfKeyLabel(specOutputText, locale) else specOutputText
         }
-        mIconName = KeySpecParser.getIconName(popupKeySpec)
+        iconName = KeySpecParser.getIconName(popupKeySpec)
     }
 
     fun buildKey(x: Int, y: Int, labelFlags: Int, background: Int, params: KeyboardParams): Key {
-        return Key(mLabel, mIconName, mCode, mOutputText, null, labelFlags, background, x, y,
+        return Key(label, iconName, code, outputText, null, labelFlags, background, x, y,
                 params.defaultAbsoluteKeyWidth, params.defaultAbsoluteRowHeight, params.horizontalGap, params.verticalGap)
     }
 
     override fun hashCode(): Int {
-        var hashCode = 31 + mCode
-        val iconName = mIconName
+        var hashCode = 31 + code
         hashCode = hashCode * 31 + (if (iconName == null) 0 else iconName.hashCode())
-        val label = mLabel
         hashCode = hashCode * 31 + (if (label == null) 0 else label.hashCode())
-        val outputText = mOutputText
         hashCode = hashCode * 31 + (if (outputText == null) 0 else outputText.hashCode())
         return hashCode
     }
@@ -83,21 +80,22 @@ class PopupKeySpec(popupKeySpec: String, needsToUpperCase: Boolean, locale: Loca
             return true
         }
         if (other is PopupKeySpec) {
-            return mCode == other.mCode
-                    && TextUtils.equals(mIconName, other.mIconName)
-                    && TextUtils.equals(mLabel, other.mLabel)
-                    && TextUtils.equals(mOutputText, other.mOutputText)
+            return code == other.code
+                    && TextUtils.equals(iconName, other.iconName)
+                    && TextUtils.equals(label, other.label)
+                    && TextUtils.equals(outputText, other.outputText)
         }
         return false
     }
 
     override fun toString(): String {
-        val label = (if (mIconName == null) mLabel else KeyboardIconsSet.PREFIX_ICON + mIconName)
-        val output = (if (mCode == KeyCode.MULTIPLE_CODE_POINTS) mOutputText else Constants.printableCode(mCode))
-        if (StringUtils.codePointCount(label) == 1 && label!!.codePointAt(0) == mCode) {
-            return output!!
+        val labelText = (if (iconName == null) label else KeyboardIconsSet.PREFIX_ICON + iconName)
+        if (labelText != null && StringUtils.codePointCount(labelText) == 1 && labelText.codePointAt(0) == code) {
+            // code is a real code point here, so it is not MULTIPLE_CODE_POINTS
+            return Constants.printableCode(code)
         }
-        return label + "|" + output
+        val output = (if (code == KeyCode.MULTIPLE_CODE_POINTS) outputText else Constants.printableCode(code))
+        return labelText + "|" + output
     }
 
     class LettersOnBaseLayout {
@@ -105,19 +103,19 @@ class PopupKeySpec(popupKeySpec: String, needsToUpperCase: Boolean, locale: Loca
         private val texts = HashSet<String?>()
 
         fun addLetter(key: Key.KeyParams) {
-            val code = key.mCode
+            val code = key.code
             if (code > 32) {
                 codes.put(code, 0)
             } else if (code == KeyCode.MULTIPLE_CODE_POINTS) {
-                texts.add(key.getOutputText())
+                texts.add(key.outputText)
             }
         }
 
         fun contains(popupKey: PopupKeySpec): Boolean {
-            val code = popupKey.mCode
+            val code = popupKey.code
             if (codes.indexOfKey(code) >= 0) {
                 return true
-            } else return code == KeyCode.MULTIPLE_CODE_POINTS && texts.contains(popupKey.mOutputText)
+            } else return code == KeyCode.MULTIPLE_CODE_POINTS && texts.contains(popupKey.outputText)
         }
     }
 
@@ -163,10 +161,10 @@ class PopupKeySpec(popupKeySpec: String, needsToUpperCase: Boolean, locale: Loca
          */
         @JvmStatic
         fun splitKeySpecs(text: String?): Array<String>? {
-            if (TextUtils.isEmpty(text)) {
+            if (text.isNullOrEmpty()) {
                 return null
             }
-            val size = text!!.length
+            val size = text.length
             // Optimization for one-letter key specification.
             if (size == 1) {
                 return if (text[0] == COMMA) null else arrayOf(text)
@@ -220,12 +218,12 @@ class PopupKeySpec(popupKeySpec: String, needsToUpperCase: Boolean, locale: Loca
             var out: ArrayList<String>? = null
             for (i in entries.indices) {
                 val entry = entries[i]
-                if (TextUtils.isEmpty(entry)) {
+                if (entry.isNullOrEmpty()) {
                     if (out == null) {
                         out = CollectionUtils.arrayAsList(array, 0, i) as ArrayList<String> // entries before i are not empty
                     }
                 } else if (out != null) {
-                    out.add(entry!!)
+                    out.add(entry)
                 }
             }
             if (out == null) {

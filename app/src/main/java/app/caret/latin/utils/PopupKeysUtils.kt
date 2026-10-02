@@ -117,8 +117,8 @@ fun getEnabledPopupKeys(string: String): List<String> {
 // this is not really correct because it does not respect hint label order (fixing that is a little more effort)
 fun findPopupHintLabelOrIcon(popupKeys: Array<PopupKeySpec>?, oldHintLabel: String?, oldHintIconName: String?): Pair<String?, String?> {
     if (popupKeys == null || (oldHintLabel == null && oldHintIconName == null)) return null to null
-    if (oldHintLabel != null && popupKeys.any { it.mLabel == oldHintLabel }) return oldHintLabel to null
-    if (oldHintIconName != null && popupKeys.any { it.mIconName == oldHintIconName }) return null to oldHintIconName
-    val first = popupKeys.firstOrNull { it.mLabel != null || it.mIconName != null }
-    return first?.mLabel to first?.mIconName
+    if (oldHintLabel != null && popupKeys.any { it.label == oldHintLabel }) return oldHintLabel to null
+    if (oldHintIconName != null && popupKeys.any { it.iconName == oldHintIconName }) return null to oldHintIconName
+    val first = popupKeys.firstOrNull { it.label != null || it.iconName != null }
+    return first?.label to first?.iconName
 }

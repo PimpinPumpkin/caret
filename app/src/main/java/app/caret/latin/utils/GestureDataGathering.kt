@@ -46,7 +46,7 @@ object BackgroundGatheringCache {
     }
 
     fun addWord(word: WordData) {
-        if (KeyboardSwitcher.getInstance().getKeyboard()?.id?.internalAction?.code == KeyCode.INLINE_EMOJI_SEARCH_DONE) {
+        if (KeyboardSwitcher.getInstance().keyboard?.id?.internalAction?.code == KeyCode.INLINE_EMOJI_SEARCH_DONE) {
             if (DEBUG) Log.i(TAG, "inline emoji search, not adding anything")
             return
         }
@@ -226,10 +226,10 @@ class WordData(
             height,
             keys.map {
                 KeyInfo(
-                    it.getX(), it.getWidth(), it.getY(), it.getHeight(),
-                    it.getOutputText() ?: if (it.getCode() > 0) StringUtils.newSingleCodePointString(it.getCode()) else "",
-                    it.getPopupKeys().orEmpty().map { popup ->
-                        popup.mOutputText ?: if (popup.mCode > 0) StringUtils.newSingleCodePointString(popup.mCode) else ""
+                    it.getX(), it.width, it.getY(), it.height,
+                    it.outputText ?: if (it.code > 0) StringUtils.newSingleCodePointString(it.code) else "",
+                    it.popupKeys.orEmpty().map { popup ->
+                        popup.outputText ?: if (popup.code > 0) StringUtils.newSingleCodePointString(popup.code) else ""
                     }
                 )
             }

@@ -19,12 +19,12 @@ class TimerHandler(ownerInstance: DrawingProxy,
         ignoreAltCodeKeyTimeout: Int, gestureRecognitionUpdateTime: Int)
     : LeakGuardHandlerWrapper<DrawingProxy>(ownerInstance), TimerProxy {
 
-    private val mIgnoreAltCodeKeyTimeout: Int
-    private val mGestureRecognitionUpdateTime: Int
+    private val ignoreAltCodeKeyTimeout: Int
+    private val gestureRecognitionUpdateTime: Int
 
     init {
-        mIgnoreAltCodeKeyTimeout = ignoreAltCodeKeyTimeout
-        mGestureRecognitionUpdateTime = gestureRecognitionUpdateTime
+        this.ignoreAltCodeKeyTimeout = ignoreAltCodeKeyTimeout
+        this.gestureRecognitionUpdateTime = gestureRecognitionUpdateTime
     }
 
     override fun handleMessage(msg: Message) {
@@ -66,7 +66,7 @@ class TimerHandler(ownerInstance: DrawingProxy,
             return
         }
         sendMessageDelayed(
-                obtainMessage(MSG_REPEAT_KEY, key.getCode(), repeatCount, tracker), delay.toLong())
+                obtainMessage(MSG_REPEAT_KEY, key.code, repeatCount, tracker), delay.toLong())
     }
 
     private fun cancelKeyRepeatTimerOf(tracker: PointerTracker) {
@@ -89,7 +89,7 @@ class TimerHandler(ownerInstance: DrawingProxy,
         }
         // Use a separate message id for long pressing shift key, because long press shift key
         // timers should be canceled when other key is pressed.
-        val messageId = when (key.getCode()) {
+        val messageId = when (key.code) {
             KeyCode.SHIFT -> MSG_LONGPRESS_SHIFT_KEY
             KeyCode.SYMBOL_ALPHA -> MSG_LONGPRESS_ALPHA_SYMBOL_KEY
             else -> MSG_LONGPRESS_KEY
@@ -130,7 +130,7 @@ class TimerHandler(ownerInstance: DrawingProxy,
         }
 
         // When user hits the space or the enter key, just cancel the while-typing timer.
-        val typedCode = typedKey.getCode()
+        val typedCode = typedKey.code
         if (typedCode == Constants.CODE_SPACE || typedCode == Constants.CODE_ENTER) {
             if (isTyping) {
                 drawingProxy.startWhileTypingAnimation(DrawingProxy.FADE_IN)
@@ -139,7 +139,7 @@ class TimerHandler(ownerInstance: DrawingProxy,
         }
 
         sendMessageDelayed(
-                obtainMessage(MSG_TYPING_STATE_EXPIRED), mIgnoreAltCodeKeyTimeout.toLong())
+                obtainMessage(MSG_TYPING_STATE_EXPIRED), ignoreAltCodeKeyTimeout.toLong())
         if (isTyping) {
             return
         }
@@ -178,12 +178,12 @@ class TimerHandler(ownerInstance: DrawingProxy,
     }
 
     override fun startUpdateBatchInputTimer(tracker: PointerTracker) {
-        if (mGestureRecognitionUpdateTime <= 0) {
+        if (gestureRecognitionUpdateTime <= 0) {
             return
         }
         removeMessages(MSG_UPDATE_BATCH_INPUT, tracker)
         sendMessageDelayed(obtainMessage(MSG_UPDATE_BATCH_INPUT, tracker),
-                mGestureRecognitionUpdateTime.toLong())
+                gestureRecognitionUpdateTime.toLong())
     }
 
     override fun cancelUpdateBatchInputTimer(tracker: PointerTracker) {

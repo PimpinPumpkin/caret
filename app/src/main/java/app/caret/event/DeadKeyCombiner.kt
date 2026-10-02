@@ -258,14 +258,16 @@ class DeadKeyCombiner : Combiner {
             if (index <= 0) {
                 return originalEvent
             }
-            var lastEvent: Event? = null
+            var next: Event? = null
+            var lastEvent: Event
             do {
                 val codePoint = Character.codePointBefore(text, index)
-                lastEvent = Event.createHardwareKeypressEvent(codePoint, originalEvent.keyCode, 0, lastEvent, false)
+                lastEvent = Event.createHardwareKeypressEvent(codePoint, originalEvent.keyCode, 0, next, false)
+                next = lastEvent
                 index -= Character.charCount(codePoint)
             } while (index > 0)
             // can't be null because
-            return lastEvent!!
+            return lastEvent
         }
     }
 }

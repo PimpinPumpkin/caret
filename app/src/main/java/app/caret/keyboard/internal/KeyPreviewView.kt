@@ -9,7 +9,6 @@ package app.caret.keyboard.internal
 import android.content.Context
 import android.graphics.Rect
 import android.text.TextPaint
-import android.text.TextUtils
 import android.util.AttributeSet
 import android.util.TypedValue
 import android.view.Gravity
@@ -36,7 +35,7 @@ class KeyPreviewView @JvmOverloads constructor(context: Context, attrs: Attribut
 
     fun setPreviewVisual(key: Key, iconsSet: KeyboardIconsSet, drawParams: KeyDrawParams) {
         // What we show as preview should match what we show on a key top in onDraw().
-        if (key.getIconName() != null) {
+        if (key.iconName != null) {
             setCompoundDrawables(key.getPreviewIcon(iconsSet), null, null, null)
             setText(null as CharSequence?)
             return
@@ -46,9 +45,9 @@ class KeyPreviewView @JvmOverloads constructor(context: Context, attrs: Attribut
         setTextColor(drawParams.previewTextColor)
         setTextSize(TypedValue.COMPLEX_UNIT_PX, key.selectPreviewTextSize(drawParams)
                 * Settings.getValues().fontSizeMultiplier)
-        KeyboardTypeface.applyToTextView(this, key.getPreviewLabel(), key.selectPreviewTypeface(drawParams))
+        KeyboardTypeface.applyToTextView(this, key.previewLabel, key.selectPreviewTypeface(drawParams))
         // TODO Should take care of temporaryShiftLabel here.
-        setTextAndScaleX(key.getPreviewLabel())
+        setTextAndScaleX(key.previewLabel)
     }
 
     private fun setTextAndScaleX(text: String?) {
@@ -100,10 +99,10 @@ class KeyPreviewView @JvmOverloads constructor(context: Context, attrs: Attribut
         }
 
         private fun getTextWidth(text: String?, paint: TextPaint): Float {
-            if (TextUtils.isEmpty(text)) {
+            if (text.isNullOrEmpty()) {
                 return 0.0f
             }
-            val len = text!!.length
+            val len = text.length
             val widths = FloatArray(len)
             val count = paint.getTextWidths(text, 0, len, widths)
             var width = 0f

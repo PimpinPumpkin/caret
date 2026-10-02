@@ -39,9 +39,9 @@ open class KeyboardParams {
      *  widths
      */
     @JvmField
-    var mBaseHeight = 0
+    var baseHeight = 0
     @JvmField
-    var mBaseWidth = 0
+    var baseWidth = 0
 
     @JvmField
     var topPadding = 0
@@ -140,8 +140,8 @@ open class KeyboardParams {
 
     fun onAddKey(newKey: Key) {
         val key = uniqueKeysCache.getUniqueKey(newKey)
-        val isSpacer = key.isSpacer()
-        if (isSpacer && key.getWidth() == 0) {
+        val isSpacer = key.isSpacer
+        if (isSpacer && key.width == 0) {
             // Ignore zero width {@link Spacer}.
             return
         }
@@ -150,7 +150,7 @@ open class KeyboardParams {
             return
         }
         updateHistogram(key)
-        if (key.getCode() == KeyCode.SHIFT) {
+        if (key.code == KeyCode.SHIFT) {
             shiftKeys.add(key)
         }
         if (key.altCodeWhileTyping()) {
@@ -159,12 +159,13 @@ open class KeyboardParams {
     }
 
     fun removeRedundantPopupKeys() {
-        if (allowRedundantPopupKeys || baseKeys == null) {
+        val keys = baseKeys
+        if (allowRedundantPopupKeys || keys == null) {
             return
         }
         val lettersOnBaseLayout =
                 PopupKeySpec.LettersOnBaseLayout()
-        for (key in baseKeys!!) {
+        for (key in keys) {
             lettersOnBaseLayout.addLetter(key)
         }
         val allKeys = ArrayList<Key>(sortedKeys)
@@ -192,14 +193,14 @@ open class KeyboardParams {
     }
 
     private fun updateHistogram(key: Key) {
-        val height = key.getHeight() + verticalGap
+        val height = key.height + verticalGap
         val heightCount = updateHistogramCounter(heightHistogram, height)
         if (heightCount > maxHeightCount) {
             maxHeightCount = heightCount
             mostCommonKeyHeight = height
         }
 
-        val width = key.getWidth() + horizontalGap
+        val width = key.width + horizontalGap
         val widthCount = updateHistogramCounter(widthHistogram, width)
         if (widthCount > maxWidthCount) {
             maxWidthCount = widthCount
@@ -234,13 +235,13 @@ open class KeyboardParams {
                     R.styleable.Keyboard_keyboardRightPadding, width, width, 0f)
                     * sv.sidePaddingScale).toInt()
 
-            mBaseWidth = occupiedWidth - leftPadding - rightPadding
+            baseWidth = occupiedWidth - leftPadding - rightPadding
             val defaultKeyWidthFactor = if (context.getResources().getInteger(R.integer.config_screen_metrics) > 2) 0.9f else 1f
             val alphaSymbolKeyWidth = keyAttr.getFraction(R.styleable.Keyboard_Key_keyWidth,
                     1, 1, defaultKeyWidthFactor / DEFAULT_KEYBOARD_COLUMNS)
             defaultKeyWidth = if (id.element.isNumberLayout) 0.17f else alphaSymbolKeyWidth
-            defaultAbsoluteKeyWidth = (defaultKeyWidth * mBaseWidth).toInt()
-            absolutePopupKeyWidth = (alphaSymbolKeyWidth * mBaseWidth).toInt()
+            defaultAbsoluteKeyWidth = (defaultKeyWidth * baseWidth).toInt()
+            absolutePopupKeyWidth = (alphaSymbolKeyWidth * baseWidth).toInt()
 
             relativeHorizontalGap = keyboardAttr.getFraction(
                     R.styleable.Keyboard_horizontalGap, 1, 1, 0f) * sv.keyGapScale
@@ -249,14 +250,14 @@ open class KeyboardParams {
             horizontalGap = (relativeHorizontalGap * width).toInt()
             verticalGap = (relativeVerticalGap * height).toInt()
 
-            mBaseHeight = occupiedHeight - topPadding - bottomPadding + verticalGap
+            baseHeight = occupiedHeight - topPadding - bottomPadding + verticalGap
             defaultRowHeight = ResourceUtils.getDimensionOrFraction(keyboardAttr,
                     R.styleable.Keyboard_rowHeight, 1, 1f / DEFAULT_KEYBOARD_ROWS)
             if (defaultRowHeight > 1) { // can be absolute size, in that case will be > 1
                 defaultAbsoluteRowHeight = defaultRowHeight.toInt()
                 defaultRowHeight *= -1f // make it negative when it's absolute
             } else {
-                defaultAbsoluteRowHeight = (defaultRowHeight * mBaseHeight).toInt()
+                defaultAbsoluteRowHeight = (defaultRowHeight * baseHeight).toInt()
             }
 
             keyVisualAttributes = KeyVisualAttributes.newInstance(keyAttr)

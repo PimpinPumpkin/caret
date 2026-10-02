@@ -275,12 +275,12 @@ class MainKeyboardView @JvmOverloads constructor(context: Context, attrs: Attrib
         super.setKeyboard(keyboard)
         app.caret.latin.swipe.FutoSwipe.warmUp(keyboard)
         keyDetector.setKeyboard(
-                keyboard, (-getPaddingLeft()).toFloat(), -getPaddingTop() + getVerticalCorrection())
+                keyboard, (-getPaddingLeft()).toFloat(), -getPaddingTop() + this.verticalCorrection)
         PointerTracker.setKeyDetector(keyDetector)
         popupKeysKeyboardCache.clear()
 
         spaceKey = keyboard.getKey(Constants.CODE_SPACE)
-        val keyHeight = keyboard.mostCommonKeyHeight - keyboard.mVerticalGap
+        val keyHeight = keyboard.mostCommonKeyHeight - keyboard.verticalGap
         languageOnSpacebarTextSize = keyHeight * languageOnSpacebarTextRatio
 
         if (AccessibilityUtils.instance.isAccessibilityEnabled) {
@@ -298,7 +298,7 @@ class MainKeyboardView @JvmOverloads constructor(context: Context, attrs: Attrib
      * @param previewEnabled whether or not to enable the key feedback preview
      */
     fun setKeyPreviewPopupEnabled(previewEnabled: Boolean) {
-        keyPreviewDrawParams.setPopupEnabled(previewEnabled)
+        keyPreviewDrawParams.isPopupEnabled = previewEnabled
     }
 
     private fun locatePreviewPlacerView() {
@@ -329,12 +329,12 @@ class MainKeyboardView @JvmOverloads constructor(context: Context, attrs: Attrib
         key.onPressed()
         invalidateKey(key)
 
-        val keyboard = getKeyboard()
+        val keyboard = this.keyboard
         if (keyboard == null) {
             return
         }
-        keyPreviewDrawParams.setVisibleOffset(-keyboard.mVerticalGap)
-        if (withPreview && key.hasPreview() && keyPreviewDrawParams.isPopupEnabled()) {
+        keyPreviewDrawParams.visibleOffset = -keyboard.verticalGap
+        if (withPreview && key.hasPreview() && keyPreviewDrawParams.isPopupEnabled) {
             showKeyPreview(key, keyboard)
         }
     }
@@ -342,8 +342,8 @@ class MainKeyboardView @JvmOverloads constructor(context: Context, attrs: Attrib
     private fun showKeyPreview(key: Key, keyboard: Keyboard) {
         locatePreviewPlacerView()
         getLocationInWindow(originCoords)
-        keyPreviewChoreographer.placeAndShowKeyPreview(key, keyboard.iconsSet, getKeyDrawParams(),
-                KeyboardSwitcher.getInstance().getWrapperView()!!.getWidth(), originCoords, drawingPreviewPlacerView)
+        keyPreviewChoreographer.placeAndShowKeyPreview(key, keyboard.iconsSet, this.keyDrawParams,
+                KeyboardSwitcher.getInstance().wrapperView!!.width, originCoords, drawingPreviewPlacerView)
     }
 
     private fun dismissKeyPreviewWithoutDelay(key: Key) {
@@ -440,7 +440,7 @@ class MainKeyboardView @JvmOverloads constructor(context: Context, attrs: Attrib
     // Implements {@link DrawingProxy@showPopupKeysKeyboard(Key,PointerTracker)}.
     override fun showPopupKeysKeyboard(key: Key,
                                        tracker: PointerTracker): PopupKeysPanel? {
-        val popupKeys = key.getPopupKeys()
+        val popupKeys = key.popupKeys
         if (popupKeys == null) {
             return null
         }
@@ -451,13 +451,13 @@ class MainKeyboardView @JvmOverloads constructor(context: Context, attrs: Attrib
             // though there may be some chances that the value is zero. <code>width == 0</code>
             // will cause zero-division error at
             // {@link PopupKeysKeyboardParams#setParameters(int,int,int,int,int,int,boolean,int)}.
-            val isSinglePopupKeyWithPreview = keyPreviewDrawParams.isPopupEnabled()
+            val isSinglePopupKeyWithPreview = keyPreviewDrawParams.isPopupEnabled
                     && key.hasPreview() && popupKeys.size == 1
-                    && keyPreviewDrawParams.getVisibleWidth() > 0
+                    && keyPreviewDrawParams.visibleWidth > 0
             val builder = PopupKeysKeyboard.Builder(
-                    getContext(), key, getKeyboard(), isSinglePopupKeyWithPreview,
-                    keyPreviewDrawParams.getVisibleWidth(),
-                    keyPreviewDrawParams.getVisibleHeight(), newLabelPaint(key))
+                    getContext(), key, this.keyboard, isSinglePopupKeyWithPreview,
+                    keyPreviewDrawParams.visibleWidth,
+                    keyPreviewDrawParams.visibleHeight, newLabelPaint(key))
             popupKeysKeyboard = builder.build()
             popupKeysKeyboardCache.put(key, popupKeysKeyboard)
         }
@@ -471,25 +471,25 @@ class MainKeyboardView @JvmOverloads constructor(context: Context, attrs: Attrib
 
         val lastCoords = CoordinateUtils.newInstance()
         tracker.getLastCoordinates(lastCoords)
-        val keyPreviewEnabled = keyPreviewDrawParams.isPopupEnabled() && key.hasPreview()
+        val keyPreviewEnabled = keyPreviewDrawParams.isPopupEnabled && key.hasPreview()
         // The popup keys keyboard is usually horizontally aligned with the center of the parent key.
         // If showPopupKeysKeyboardAtTouchedPoint is true and the key preview is disabled, the more
         // keys keyboard is placed at the touch point of the parent key.
         val pointX = if (configShowPopupKeysKeyboardAtTouchedPoint && !keyPreviewEnabled)
                 CoordinateUtils.x(lastCoords)
-                else key.getX() + key.getWidth() / 2
+                else key.getX() + key.width / 2
         // The popup keys keyboard is usually vertically aligned with the top edge of the parent key
         // (plus vertical gap). If the key preview is enabled, the popup keys keyboard is vertically
         // aligned with the bottom edge of the visible part of the key preview.
         // {@code mPreviewVisibleOffset} has been set appropriately in
         // {@link KeyboardView#showKeyPreview(PointerTracker)}.
-        val pointY = key.getY() + keyPreviewDrawParams.getVisibleOffset()
+        val pointY = key.getY() + keyPreviewDrawParams.visibleOffset
         popupKeysKeyboardView.showPopupKeysPanel(this, this, pointX, pointY, keyboardActionListener)
         return popupKeysKeyboardView
     }
 
     fun isInDraggingFinger(): Boolean {
-        if (isShowingPopupKeysPanel()) {
+        if (isShowingPopupKeysPanel) {
             return true
         }
         return PointerTracker.isAnyInDraggingFinger()
@@ -507,9 +507,8 @@ class MainKeyboardView @JvmOverloads constructor(context: Context, attrs: Attrib
         popupKeysPanel = panel
     }
 
-    fun isShowingPopupKeysPanel(): Boolean {
-        return popupKeysPanel?.isShowingInParent() == true
-    }
+    val isShowingPopupKeysPanel: Boolean
+        get() = popupKeysPanel?.isShowingInParent() == true
 
     override fun onCancelPopupKeysPanel() {
         PointerTracker.dismissAllPopupKeysPanels()
@@ -537,7 +536,7 @@ class MainKeyboardView @JvmOverloads constructor(context: Context, attrs: Attrib
 
     @SuppressLint("ClickableViewAccessibility")
     override fun onTouchEvent(event: MotionEvent?): Boolean {
-        if (getKeyboard() == null) {
+        if (this.keyboard == null) {
             return false
         }
         val ev = event!!
@@ -559,7 +558,7 @@ class MainKeyboardView @JvmOverloads constructor(context: Context, attrs: Attrib
         val tracker = PointerTracker.getPointerTracker(id)
         // When a popup keys panel is showing, we should ignore other fingers' single touch events
         // other than the finger that is showing the popup keys panel.
-        if (isShowingPopupKeysPanel() && !tracker.isShowingPopupKeysPanel()
+        if (isShowingPopupKeysPanel && !tracker.isShowingPopupKeysPanel
                 && PointerTracker.getActivePointerTrackerCount() == 1) {
             return true
         }
@@ -603,7 +602,7 @@ class MainKeyboardView @JvmOverloads constructor(context: Context, attrs: Attrib
     }
 
     fun updateShortcutKey(available: Boolean) {
-        val keyboard = getKeyboard()
+        val keyboard = this.keyboard
         if (keyboard == null) {
             return
         }
@@ -611,12 +610,12 @@ class MainKeyboardView @JvmOverloads constructor(context: Context, attrs: Attrib
         if (shortcutKey == null) {
             return
         }
-        shortcutKey.setEnabled(available)
+        shortcutKey.isEnabled = available
         invalidateKey(shortcutKey)
     }
 
     fun updateLockState(keyCode: Int, locked: Boolean) {
-        val keyboard = getKeyboard()
+        val keyboard = this.keyboard
         if (keyboard == null) {
             return
         }
@@ -659,18 +658,18 @@ class MainKeyboardView @JvmOverloads constructor(context: Context, attrs: Attrib
 
     override fun onDrawKeyTopVisuals(key: Key, canvas: Canvas,
             paint: Paint, params: KeyDrawParams) {
-        if (key.altCodeWhileTyping() && key.isEnabled()) {
+        if (key.altCodeWhileTyping() && key.isEnabled) {
             params.animAlpha = Constants.Color.ALPHA_OPAQUE
         }
         super.onDrawKeyTopVisuals(key, canvas, paint, params)
-        val code = key.getCode()
+        val code = key.code
         if (code == Constants.CODE_SPACE) {
             // If input language are explicitly selected.
             if (languageOnSpacebarFormatType != LanguageOnSpacebarUtils.FORMAT_TYPE_NONE) {
                 drawLanguageOnSpacebar(key, canvas, paint)
             }
             // Whether space key needs to show the "..." popup hint for special purposes
-            if (key.isLongPressEnabled() && hasMultipleEnabledIMEsOrSubtypes && Settings.getValues().spaceForLangChange) {
+            if (key.isLongPressEnabled && hasMultipleEnabledIMEsOrSubtypes && Settings.getValues().spaceForLangChange) {
                 drawKeyPopupHint(key, canvas, paint, params)
             }
         } else if (code == KeyCode.LANGUAGE_SWITCH) {
@@ -759,12 +758,12 @@ class MainKeyboardView @JvmOverloads constructor(context: Context, attrs: Attrib
     }
 
     private fun drawLanguageOnSpacebar(key: Key, canvas: Canvas, paint: Paint) {
-        val keyboard = getKeyboard()
+        val keyboard = this.keyboard
         if (keyboard == null) {
             return
         }
-        val width = key.getWidth()
-        val height = key.getHeight()
+        val width = key.width
+        val height = key.height
         paint.setTextAlign(Align.CENTER)
         paint.setTextSize(languageOnSpacebarTextSize)
         val customText = Settings.getValues().spaceBarText

@@ -84,7 +84,7 @@ class KeyboardActionListenerImpl(private val latinIME: LatinIME, private val inp
 
         val event: Event
         if (settings.getCurrent().mLocale.language == "ko") { // todo: this does not appear to be the right place
-            val subtype = keyboardSwitcher.getKeyboard()?.id?.subtype ?: RichInputMethodManager.getInstance().currentSubtype
+            val subtype = keyboardSwitcher.keyboard?.id?.subtype ?: RichInputMethodManager.getInstance().currentSubtype
             event = HangulEventDecoder.decodeHardwareKeyEvent(subtype, keyEvent) {
                 getHardwareKeyEventDecoder(keyEvent.deviceId).decodeHardwareKey(keyEvent)
             }

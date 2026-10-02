@@ -118,7 +118,7 @@ f""", // no newline at the end
         val wantedKeyLabels = listOf(listOf("a", "b", "c"), listOf("d", "e", "f"))
         layoutStrings.forEach { layout ->
             val keyLabels = LayoutParser.parseSimpleString(layout)
-                .map { row -> row.map { it.toKeyParams(params).mLabel } }
+                .map { row -> row.map { it.toKeyParams(params).label } }
             assertEquals(wantedKeyLabels, keyLabels)
         }
     }
@@ -342,40 +342,40 @@ f""", // no newline at the end
         keyParams[1].absoluteWidth = 1f
         keyParams[1].absoluteHeight = 1f
         val key = keyParams[1].createKey()
-        assertEquals(null, key.getHintLabel())
-        assertEquals(2, key.getPopupKeys()?.size)
+        assertEquals(null, key.hintLabel)
+        assertEquals(2, key.popupKeys?.size)
         val lettersOnBaseLayout = PopupKeySpec.LettersOnBaseLayout()
         lettersOnBaseLayout.addLetter(keyParams[0])
         val keyWithoutRedundantPopups = Key.removeRedundantPopupKeys(key, lettersOnBaseLayout)
-        assertEquals(1, keyWithoutRedundantPopups.getPopupKeys()?.size)
-        assertEquals(null, keyWithoutRedundantPopups.getHintLabel())
+        assertEquals(1, keyWithoutRedundantPopups.popupKeys?.size)
+        assertEquals(null, keyWithoutRedundantPopups.hintLabel)
     }
 
     @Test fun popupWithCodeAndLabel() {
         val key = LayoutParser.parseJsonString("""[[{ "label": "w", "popup": {
           "main": { "code":   55, "label": "!" }
     } }]]""").flatMap { row -> row.mapNotNull { it.compute(params) } }.single()
-        assertEquals("!", key.toKeyParams(params).mPopupKeys?.first()?.mLabel)
-        assertEquals('7'.code, key.toKeyParams(params).mPopupKeys?.first()?.mCode)
-        assertEquals("!", key.toKeyParams(params).mHintLabel)
+        assertEquals("!", key.toKeyParams(params).popupKeys?.first()?.label)
+        assertEquals('7'.code, key.toKeyParams(params).popupKeys?.first()?.code)
+        assertEquals("!", key.toKeyParams(params).hintLabel)
     }
 
     @Test fun popupWithCodeAndIcon() {
         val key = LayoutParser.parseJsonString("""[[{ "label": "w", "popup": {
           "main": { "code":   55, "label": "!icon/clipboard_action_key" }
     } }]]""").flatMap { row -> row.mapNotNull { it.compute(params) } }.single()
-        assertEquals(null, key.toKeyParams(params).mPopupKeys?.first()?.mLabel)
-        assertEquals("clipboard_action_key", key.toKeyParams(params).mPopupKeys?.first()?.mIconName)
-        assertEquals('7'.code, key.toKeyParams(params).mPopupKeys?.first()?.mCode)
+        assertEquals(null, key.toKeyParams(params).popupKeys?.first()?.label)
+        assertEquals("clipboard_action_key", key.toKeyParams(params).popupKeys?.first()?.iconName)
+        assertEquals('7'.code, key.toKeyParams(params).popupKeys?.first()?.code)
     }
 
     @Test fun popupToolbarKey() {
         val key = LayoutParser.parseJsonString("""[[{ "label": "x", "popup": {
           "main": { "label": "undo" }
     } }]]""").flatMap { row -> row.mapNotNull { it.compute(params) } }.single()
-        assertEquals(null, key.toKeyParams(params).mPopupKeys?.first()?.mLabel)
-        assertEquals("undo", key.toKeyParams(params).mPopupKeys?.first()?.mIconName)
-        assertEquals(KeyCode.UNDO, key.toKeyParams(params).mPopupKeys?.first()?.mCode)
+        assertEquals(null, key.toKeyParams(params).popupKeys?.first()?.label)
+        assertEquals("undo", key.toKeyParams(params).popupKeys?.first()?.iconName)
+        assertEquals(KeyCode.UNDO, key.toKeyParams(params).popupKeys?.first()?.code)
         assertEquals("undo", key.toKeyParams(params).hintIconName)
     }
 
@@ -384,20 +384,20 @@ f""", // no newline at the end
        { "label": "!icon/go_key|aa" }
       ]
     } }]]""").flatMap { row -> row.mapNotNull { it.compute(params) } }.single()
-        assertEquals(null, key.toKeyParams(params).mPopupKeys?.first()?.mLabel)
-        assertEquals("go_key", key.toKeyParams(params).mPopupKeys?.first()?.mIconName)
-        assertEquals(KeyCode.MULTIPLE_CODE_POINTS, key.toKeyParams(params).mPopupKeys?.first()?.mCode)
-        assertEquals("aa", key.toKeyParams(params).mPopupKeys?.first()?.mOutputText)
+        assertEquals(null, key.toKeyParams(params).popupKeys?.first()?.label)
+        assertEquals("go_key", key.toKeyParams(params).popupKeys?.first()?.iconName)
+        assertEquals(KeyCode.MULTIPLE_CODE_POINTS, key.toKeyParams(params).popupKeys?.first()?.code)
+        assertEquals("aa", key.toKeyParams(params).popupKeys?.first()?.outputText)
         assertEquals("go_key", key.toKeyParams(params).hintIconName)
 
         val key2 = LayoutParser.parseJsonString("""[[{ "label": "a", "popup": { "relevant": [
        { "label": "!icon/go_key|" }
       ]
     } }]]""").flatMap { row -> row.mapNotNull { it.compute(params) } }.single()
-        assertEquals(null, key2.toKeyParams(params).mPopupKeys?.first()?.mLabel)
-        assertEquals("go_key", key2.toKeyParams(params).mPopupKeys?.first()?.mIconName)
-        assertEquals(KeyCode.MULTIPLE_CODE_POINTS, key2.toKeyParams(params).mPopupKeys?.first()?.mCode)
-        assertEquals("", key2.toKeyParams(params).mPopupKeys?.first()?.mOutputText)
+        assertEquals(null, key2.toKeyParams(params).popupKeys?.first()?.label)
+        assertEquals("go_key", key2.toKeyParams(params).popupKeys?.first()?.iconName)
+        assertEquals(KeyCode.MULTIPLE_CODE_POINTS, key2.toKeyParams(params).popupKeys?.first()?.code)
+        assertEquals("", key2.toKeyParams(params).popupKeys?.first()?.outputText)
     }
 
     // output text is null here, maybe should be changed?
@@ -406,28 +406,28 @@ f""", // no newline at the end
        { "label": "!icon/go_key|", "code": 55 }
       ]
     } }]]""").flatMap { row -> row.mapNotNull { it.compute(params) } }.single()
-        assertEquals(null, key.toKeyParams(params).mPopupKeys?.first()?.mLabel)
-        assertEquals("go_key", key.toKeyParams(params).mPopupKeys?.first()?.mIconName)
-        assertEquals(55, key.toKeyParams(params).mPopupKeys?.first()?.mCode)
-        assertEquals(null, key.toKeyParams(params).mPopupKeys?.first()?.mOutputText)
+        assertEquals(null, key.toKeyParams(params).popupKeys?.first()?.label)
+        assertEquals("go_key", key.toKeyParams(params).popupKeys?.first()?.iconName)
+        assertEquals(55, key.toKeyParams(params).popupKeys?.first()?.code)
+        assertEquals(null, key.toKeyParams(params).popupKeys?.first()?.outputText)
 
         val key2 = LayoutParser.parseJsonString("""[[{ "label": "a", "popup": { "relevant": [
        { "label": "!icon/go_key|a", "code": 55 }
       ]
     } }]]""").flatMap { row -> row.mapNotNull { it.compute(params) } }.single()
-        assertEquals(null, key2.toKeyParams(params).mPopupKeys?.first()?.mLabel)
-        assertEquals("go_key", key2.toKeyParams(params).mPopupKeys?.first()?.mIconName)
-        assertEquals(55, key2.toKeyParams(params).mPopupKeys?.first()?.mCode)
-        assertEquals(null, key2.toKeyParams(params).mPopupKeys?.first()?.mOutputText)
+        assertEquals(null, key2.toKeyParams(params).popupKeys?.first()?.label)
+        assertEquals("go_key", key2.toKeyParams(params).popupKeys?.first()?.iconName)
+        assertEquals(55, key2.toKeyParams(params).popupKeys?.first()?.code)
+        assertEquals(null, key2.toKeyParams(params).popupKeys?.first()?.outputText)
 
         val key3 = LayoutParser.parseJsonString("""[[{ "label": "a", "popup": { "relevant": [
        { "label": "!icon/go_key|aa", "code": 55 }
       ]
     } }]]""").flatMap { row -> row.mapNotNull { it.compute(params) } }.single()
-        assertEquals(null, key3.toKeyParams(params).mPopupKeys?.first()?.mLabel)
-        assertEquals("go_key", key3.toKeyParams(params).mPopupKeys?.first()?.mIconName)
-        assertEquals(55, key3.toKeyParams(params).mPopupKeys?.first()?.mCode)
-        assertEquals(null, key3.toKeyParams(params).mPopupKeys?.first()?.mOutputText)
+        assertEquals(null, key3.toKeyParams(params).popupKeys?.first()?.label)
+        assertEquals("go_key", key3.toKeyParams(params).popupKeys?.first()?.iconName)
+        assertEquals(55, key3.toKeyParams(params).popupKeys?.first()?.code)
+        assertEquals(null, key3.toKeyParams(params).popupKeys?.first()?.outputText)
     }
 
     @Test fun invalidPopupKeys() {
@@ -442,8 +442,8 @@ f""", // no newline at the end
         val key = LayoutParser.parseJsonString("""[[{ "label": "c", "popup": {
           "main": { "code":   -10001, "label": "x" }
     } }]]""").flatMap { row -> row.mapNotNull { it.compute(params) } }.single()
-        assertEquals("x", key.toKeyParams(params).mPopupKeys?.first()?.mLabel)
-        assertEquals(-10001, key.toKeyParams(params).mPopupKeys?.first()?.mCode)
+        assertEquals("x", key.toKeyParams(params).popupKeys?.first()?.label)
+        assertEquals(-10001, key.toKeyParams(params).popupKeys?.first()?.code)
     }
 
     @Test fun canLoadKeyboard() {
@@ -480,10 +480,10 @@ f""", // no newline at the end
         val (kb2, keys2) = buildKeyboard(editorInfo, subtype, KeyboardElement.ALPHABET_AUTOMATIC_SHIFTED)
         assertEquals(kb.getSortedKeys().size, kb2.getSortedKeys().size)
         keys.forEachIndexed { i, kpList -> kpList.forEachIndexed { j, kp ->
-            assertEquals(kp.mPopupKeys?.size, keys2[i][j].mPopupKeys?.size)
+            assertEquals(kp.popupKeys?.size, keys2[i][j].popupKeys?.size)
         } }
         kb.getSortedKeys().forEachIndexed { index, key ->
-            assertEquals(key.getPopupKeys()?.size, kb2.getSortedKeys()[index].getPopupKeys()?.size)
+            assertEquals(key.popupKeys?.size, kb2.getSortedKeys()[index].popupKeys?.size)
         }
     }
 
@@ -510,34 +510,34 @@ f""", // no newline at the end
             f blah
             tab timestamp
     """).flatMap { row -> row.mapNotNull { it.compute(params)?.toKeyParams(params) } }
-        assertEquals("?123", keys[0].mPopupKeys?.first()?.mLabel)
-        assertEquals(KeyCode.SYMBOL_ALPHA, keys[0].mPopupKeys?.first()?.mCode)
-        assertEquals("ESC", keys[1].mPopupKeys?.first()?.mLabel)
-        assertEquals(KeyCode.ESCAPE, keys[1].mPopupKeys?.first()?.mCode)
-        assertEquals(null, keys[2].mPopupKeys?.first()?.mLabel)
-        assertEquals("undo", keys[2].mPopupKeys?.first()?.mIconName)
-        assertEquals(KeyCode.UNDO, keys[2].mPopupKeys?.first()?.mCode)
-        assertEquals("$", keys[3].mPopupKeys?.first()?.mLabel)
-        assertEquals('$'.code, keys[3].mPopupKeys?.first()?.mCode)
-        assertEquals("£", keys[4].mPopupKeys?.first()?.mLabel)
-        assertEquals('£'.code, keys[4].mPopupKeys?.first()?.mCode)
-        assertEquals("blah", keys[5].mPopupKeys?.first()?.mLabel)
-        assertEquals(KeyCode.MULTIPLE_CODE_POINTS, keys[5].mPopupKeys?.first()?.mCode)
-        assertEquals("tab_key", keys[6].mIconName)
-        assertEquals(KeyCode.TAB, keys[6].mCode)
-        assertEquals("⌚", keys[6].mPopupKeys?.first()?.mLabel)
-        assertEquals(KeyCode.TIMESTAMP, keys[6].mPopupKeys?.first()?.mCode)
+        assertEquals("?123", keys[0].popupKeys?.first()?.label)
+        assertEquals(KeyCode.SYMBOL_ALPHA, keys[0].popupKeys?.first()?.code)
+        assertEquals("ESC", keys[1].popupKeys?.first()?.label)
+        assertEquals(KeyCode.ESCAPE, keys[1].popupKeys?.first()?.code)
+        assertEquals(null, keys[2].popupKeys?.first()?.label)
+        assertEquals("undo", keys[2].popupKeys?.first()?.iconName)
+        assertEquals(KeyCode.UNDO, keys[2].popupKeys?.first()?.code)
+        assertEquals("$", keys[3].popupKeys?.first()?.label)
+        assertEquals('$'.code, keys[3].popupKeys?.first()?.code)
+        assertEquals("£", keys[4].popupKeys?.first()?.label)
+        assertEquals('£'.code, keys[4].popupKeys?.first()?.code)
+        assertEquals("blah", keys[5].popupKeys?.first()?.label)
+        assertEquals(KeyCode.MULTIPLE_CODE_POINTS, keys[5].popupKeys?.first()?.code)
+        assertEquals("tab_key", keys[6].iconName)
+        assertEquals(KeyCode.TAB, keys[6].code)
+        assertEquals("⌚", keys[6].popupKeys?.first()?.label)
+        assertEquals(KeyCode.TIMESTAMP, keys[6].popupKeys?.first()?.code)
     }
 
     @Test fun keyRepeatPopup() {
         val key = LayoutParser.parseJsonString("""[[{ "label": "c", "popup": {
           "main": { "code":   -11000, "label": "x" }
     } }]]""").flatMap { row -> row.mapNotNull { it.compute(params) } }.single()
-        assertEquals(null, key.toKeyParams(params).mPopupKeys)
-        assertEquals(1, key.toKeyParams(params).mActionFlags and 0x01 )
+        assertEquals(null, key.toKeyParams(params).popupKeys)
+        assertEquals(1, key.toKeyParams(params).actionFlags and 0x01 )
         val key2 = LayoutParser.parseSimpleString("a b|!code/-11000").flatMap { row -> row.mapNotNull { it.compute(params) } }.single()
-        assertEquals(null, key2.toKeyParams(params).mPopupKeys)
-        assertEquals(1, key2.toKeyParams(params).mActionFlags and 0x01 )
+        assertEquals(null, key2.toKeyParams(params).popupKeys)
+        assertEquals(1, key2.toKeyParams(params).actionFlags and 0x01 )
     }
 
     @Test fun keyRepeatKeyDoesNotWork() {
@@ -568,13 +568,13 @@ f""", // no newline at the end
         keys.forEachIndexed { index, keyData ->
             println("data: key ${keyData.label}: code ${keyData.code}, popups: ${keyData.popup.getPopupKeyLabels(params)}")
             val keyParams = keyData.toKeyParams(params)
-            println("params: key ${keyParams.mLabel}: code ${keyParams.mCode}, popups: ${keyParams.mPopupKeys?.toList()}")
-            assertEquals(expected[index].label, keyParams.mLabel)
-            assertEquals(expected[index].icon, keyParams.mIconName)
-            assertEquals(expected[index].code, keyParams.mCode)
-            assertEquals(expected[index].popups, keyParams.mPopupKeys?.mapNotNull { it.mLabel to it.mCode })
-            assertEquals(expected[index].text, keyParams.getOutputText())
-            assertEquals(expected[index].background, keyParams.mBackgroundType)
+            println("params: key ${keyParams.label}: code ${keyParams.code}, popups: ${keyParams.popupKeys?.toList()}")
+            assertEquals(expected[index].label, keyParams.label)
+            assertEquals(expected[index].icon, keyParams.iconName)
+            assertEquals(expected[index].code, keyParams.code)
+            assertEquals(expected[index].popups, keyParams.popupKeys?.mapNotNull { it.label to it.code })
+            assertEquals(expected[index].text, keyParams.outputText)
+            assertEquals(expected[index].background, keyParams.backgroundType)
             assertTrue(LayoutUtilsCustom.checkKeys(listOf(listOf(keyParams))))
         }
     }
@@ -604,11 +604,11 @@ f""", // no newline at the end
        { "type": "placeholder" }
       ]
     } }]]""").flatMap { row -> row.mapNotNull { it.compute(params)?.toKeyParams(params) } }.single()
-        assertEquals(null, keyParams.mPopupKeys)
+        assertEquals(null, keyParams.popupKeys)
         keyParams.absoluteWidth = 1f
         keyParams.absoluteHeight = 1f
         val key = keyParams.createKey()
-        assertEquals(false, key.isLongPressEnabled())
+        assertEquals(false, key.isLongPressEnabled)
     }
 
     @Test fun placeholderNextToOtherPopup() {
@@ -616,8 +616,8 @@ f""", // no newline at the end
        { "type": "placeholder" }, { "label": "k" }
       ]
     } }]]""").flatMap { row -> row.mapNotNull { it.compute(params) } }.single()
-        assertEquals(1, key.toKeyParams(params).mPopupKeys?.size)
-        assertEquals("k", key.toKeyParams(params).mPopupKeys?.first()?.mLabel)
+        assertEquals(1, key.toKeyParams(params).popupKeys?.size)
+        assertEquals("k", key.toKeyParams(params).popupKeys?.first()?.label)
     }
 
 }

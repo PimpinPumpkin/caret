@@ -775,7 +775,7 @@ class InputLogic(
             KeyCode.SHIFT ->
                 handleShiftKey(inputTransaction)
             KeyCode.CAPS_LOCK -> {
-                val keyboard = KeyboardSwitcher.getInstance().getKeyboard()
+                val keyboard = KeyboardSwitcher.getInstance().keyboard
                 if (keyboard == null || keyboard.id.element.isAlphabet)
                     inputTransaction.setRequiresUpdateSuggestions()
             }
@@ -880,7 +880,7 @@ class InputLogic(
     /** Shift on the letters or the d-pad: change the capitalization of the word or selection at the cursor. */
     private fun handleShiftKey(inputTransaction: InputTransaction) {
         val sv = inputTransaction.settingsValues
-        val keyboard = KeyboardSwitcher.getInstance().getKeyboard()
+        val keyboard = KeyboardSwitcher.getInstance().keyboard
         if (keyboard != null) {
             val element = keyboard.id.element
             if (!element.isAlphabet && element != KeyboardElement.DPAD) {
@@ -2644,7 +2644,7 @@ class InputLogic(
 
     // we used to provide keyboard, settingsValues and keyboardShiftMode, but every time read it from current instance anyway
     fun getSuggestedWords(inputStyle: Int, sequenceNumber: Int, callback: OnGetSuggestedWordsCallback) {
-        val keyboard = KeyboardSwitcher.getInstance().getKeyboard()
+        val keyboard = KeyboardSwitcher.getInstance().keyboard
         if (keyboard == null) {
             callback.onGetSuggestedWords(SuggestedWords.getEmptyInstance())
             return
@@ -2952,7 +2952,7 @@ class InputLogic(
         }
 
         private fun isInlineEmojiSearchAction(): Boolean {
-            val keyboard = KeyboardSwitcher.getInstance().getKeyboard()
+            val keyboard = KeyboardSwitcher.getInstance().keyboard
             val internalAction = if (keyboard != null) keyboard.id.internalAction else null
             return internalAction != null && internalAction.code == KeyCode.INLINE_EMOJI_SEARCH_DONE
         }

@@ -24,7 +24,7 @@ sealed interface LayoutDirective {
         }
     }
 
-    enum class Utility(private val mMode: KeyboardState.Mode) : LayoutDirective {
+    enum class Utility(private val mode: KeyboardState.Mode) : LayoutDirective {
         SYMBOLS(KeyboardState.Mode.SYMBOLS),
         SYMBOLS_SHIFTED(KeyboardState.Mode.SYMBOLS_SHIFTED),
         EMOJI(KeyboardState.Mode.EMOJI),
@@ -34,7 +34,7 @@ sealed interface LayoutDirective {
     ;
 
         override fun mode(): KeyboardState.Mode {
-            return mMode
+            return mode
         }
     }
 }

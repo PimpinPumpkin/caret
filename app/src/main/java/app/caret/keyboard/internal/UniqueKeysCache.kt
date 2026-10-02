@@ -18,14 +18,14 @@ abstract class UniqueKeysCache {
     private class UniqueKeysCacheImpl : UniqueKeysCache() {
         private val cache: HashMap<Key, Key>
 
-        private var mEnabled = false
+        private var enabled = false
 
         init {
             cache = HashMap()
         }
 
         override fun setEnabled(enabled: Boolean) {
-            mEnabled = enabled
+            this.enabled = enabled
         }
 
         override fun clear() {
@@ -33,7 +33,7 @@ abstract class UniqueKeysCache {
         }
 
         override fun getUniqueKey(key: Key): Key {
-            if (!mEnabled) {
+            if (!enabled) {
                 return key
             }
             val existingKey = cache.get(key)

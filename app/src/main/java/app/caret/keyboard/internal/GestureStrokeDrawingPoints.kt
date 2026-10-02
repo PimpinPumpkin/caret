@@ -34,9 +34,8 @@ class GestureStrokeDrawingPoints(private val drawingParams: GestureStrokeDrawing
         previewYCoordinates.setLength(0)
     }
 
-    fun getGestureStrokeId(): Int {
-        return strokeId
-    }
+    val gestureStrokeId: Int
+        get() = strokeId
 
     fun onDownEvent(x: Int, y: Int, elapsedTimeSinceFirstDown: Int) {
         reset()

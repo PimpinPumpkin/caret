@@ -124,7 +124,7 @@ class KeyboardSwitcher private constructor() {
                 || Settings.getValues().mColors.haveColorsChanged(context)) {
             themeNeedsReload = false
             keyboardTheme = newTheme
-            themeContext = ContextThemeWrapper(context, newTheme.mStyleId)
+            themeContext = ContextThemeWrapper(context, newTheme.styleId)
             currentUiMode = res.getConfiguration().uiMode
             currentOrientation = res.getConfiguration().orientation
             currentDpi = res.getDisplayMetrics().densityDpi
@@ -161,7 +161,7 @@ class KeyboardSwitcher private constructor() {
     }
 
     fun saveKeyboardState() {
-        if (getKeyboard() != null || isShowingEmojiPalettes() || isShowingClipboardHistory()) {
+        if (keyboard != null || isShowingEmojiPalettes || isShowingClipboardHistory) {
             state.onSaveKeyboardState()
         }
     }
@@ -170,9 +170,8 @@ class KeyboardSwitcher private constructor() {
         keyboardView?.onHideWindow()
     }
 
-    fun getKeyboard(): Keyboard? {
-        return keyboardView?.getKeyboard()
-    }
+    val keyboard: Keyboard?
+        get() = keyboardView?.keyboard
 
     // TODO: Remove this method. Come up with a more comprehensive way to reset the keyboard layout
     // when a keyboard layout set doesn't get reloaded in LatinIME.onStartInputViewInternal().
@@ -243,7 +242,7 @@ class KeyboardSwitcher private constructor() {
         state.onLongPressAlphaSymbolForNumpad()
     }
 
-    enum class KeyboardSwitchState(val mKeyboardElement: KeyboardElement?) {
+    enum class KeyboardSwitchState(val keyboardElement: KeyboardElement?) {
         HIDDEN(null),
         SYMBOLS_SHIFTED(KeyboardElement.SYMBOLS_SHIFTED),
         EMOJI(KeyboardElement.EMOJI_RECENTS),
@@ -253,15 +252,15 @@ class KeyboardSwitcher private constructor() {
 
     fun getKeyboardSwitchState(): KeyboardSwitchState {
         val view = keyboardView
-        val hidden = !isShowingEmojiPalettes() && !isShowingClipboardHistory()
+        val hidden = !isShowingEmojiPalettes && !isShowingClipboardHistory
                 && (keyboardLayoutSet == null
                 || view == null
                 || !view.isShown())
         if (hidden) {
             return KeyboardSwitchState.HIDDEN
-        } else if (isShowingEmojiPalettes()) {
+        } else if (isShowingEmojiPalettes) {
             return KeyboardSwitchState.EMOJI
-        } else if (isShowingClipboardHistory()) {
+        } else if (isShowingClipboardHistory) {
             return KeyboardSwitchState.CLIPBOARD
         } else if (isShowingKeyboardId(KeyboardElement.SYMBOLS_SHIFTED)) {
             return KeyboardSwitchState.SYMBOLS_SHIFTED
@@ -358,8 +357,8 @@ class KeyboardSwitcher private constructor() {
 
     fun reloadMainKeyboard() {
         // Reload the entire keyboard, and switch to the previous layout
-        val wasEmoji = isShowingEmojiPalettes()
-        val wasClipboard = isShowingClipboardHistory()
+        val wasEmoji = isShowingEmojiPalettes
+        val wasClipboard = isShowingClipboardHistory
         loadKeyboard(latinIME.getCurrentInputEditorInfo(), Settings.getValues(),
                 latinIME.getCurrentAutoCapsState(), latinIME.getCurrentRecapitalizeState(), null)
         if (wasEmoji) {
@@ -424,7 +423,7 @@ class KeyboardSwitcher private constructor() {
         if (!::backgroundGatheringIndicator.isInitialized || backgroundGatheringIndicator.visibility != View.VISIBLE) return
         val margin = backgroundGatheringIndicator.layoutParams
         if (margin is ViewGroup.MarginLayoutParams) {
-            val kb = keyboardView!!.getKeyboard()
+            val kb = keyboardView!!.keyboard
             if (kb != null)
                 margin.topMargin = kb.occupiedHeight - 16.dpToPx(currentInputView!!.resources)
             backgroundGatheringIndicator.layoutParams = backgroundGatheringIndicator.layoutParams
@@ -443,7 +442,7 @@ class KeyboardSwitcher private constructor() {
         if (view == null || !view.isShown()) {
             return false
         }
-        val keyboard = view.getKeyboard()
+        val keyboard = view.keyboard
         if (keyboard == null) // may happen when using hardware keyboard
             return false
         val activeKeyboardId = keyboard.id.element
@@ -455,45 +454,39 @@ class KeyboardSwitcher private constructor() {
         return false
     }
 
-    fun isShowingEmojiPalettes(): Boolean {
-        return ::emojiPalettesView.isInitialized && emojiPalettesView.isShown()
-    }
+    val isShowingEmojiPalettes: Boolean
+        get() = ::emojiPalettesView.isInitialized && emojiPalettesView.isShown()
 
-    fun isShowingClipboardHistory(): Boolean {
-        return ::clipboardHistoryView.isInitialized && clipboardHistoryView.isShown()
-    }
+    val isShowingClipboardHistory: Boolean
+        get() = ::clipboardHistoryView.isInitialized && clipboardHistoryView.isShown()
 
     fun isShowingPopupKeysPanel(): Boolean {
-        if (isShowingEmojiPalettes() || isShowingClipboardHistory()) {
+        if (isShowingEmojiPalettes || isShowingClipboardHistory) {
             return false
         }
-        return keyboardView!!.isShowingPopupKeysPanel()
+        return keyboardView!!.isShowingPopupKeysPanel
     }
 
-    fun isShowingStripContainer(): Boolean {
-        return stripContainer.isShown()
-    }
+    val isShowingStripContainer: Boolean
+        get() = stripContainer.isShown()
 
     fun getVisibleKeyboardView(): View? {
-        if (isShowingEmojiPalettes()) {
+        if (isShowingEmojiPalettes) {
             return emojiPalettesView
-        } else if (isShowingClipboardHistory()) {
+        } else if (isShowingClipboardHistory) {
             return clipboardHistoryView
         }
         return keyboardView
     }
 
-    fun getWrapperView(): View? {
-        return keyboardViewWrapper
-    }
+    val wrapperView: View?
+        get() = keyboardViewWrapper
 
-    fun getEmojiTabStrip(): View? {
-        return if (::emojiTabStripView.isInitialized) emojiTabStripView else null
-    }
+    val emojiTabStrip: View?
+        get() = if (::emojiTabStripView.isInitialized) emojiTabStripView else null
 
-    fun getClipboardStrip(): LinearLayout? {
-        return clipboardStripView
-    }
+    val clipboardStrip: LinearLayout?
+        get() = clipboardStripView
 
     fun getMainKeyboardView(): MainKeyboardView? {
         return keyboardView
@@ -566,7 +559,7 @@ class KeyboardSwitcher private constructor() {
     }
 
     fun getKeyboardCapsMode(): CapsMode {
-        val keyboard = getKeyboard()
+        val keyboard = this.keyboard
         if (keyboard == null) {
             return CapsMode.OFF
         }
@@ -642,7 +635,7 @@ class KeyboardSwitcher private constructor() {
             clipboardStripScrollView.visibility = View.GONE
             emojiTabStripView.visibility = View.VISIBLE
             clipboardHistoryView.visibility = View.GONE
-            emojiPalettesView.startEmojiPalettes(view.getKeyVisualAttribute(),
+            emojiPalettesView.startEmojiPalettes(view.keyVisualAttributes,
                 latinIME.getCurrentInputEditorInfo(), latinIME.keyboardActionListener)
             emojiPalettesView.visibility = View.VISIBLE
         }
@@ -663,7 +656,7 @@ class KeyboardSwitcher private constructor() {
             clipboardStripScrollView.post { clipboardStripScrollView.fullScroll(HorizontalScrollView.FOCUS_RIGHT) }
             clipboardStripScrollView.visibility = View.VISIBLE
             emojiPalettesView.visibility = View.GONE
-            clipboardHistoryView.startClipboardHistory(latinIME.clipboardHistoryManager, view.getKeyVisualAttribute(),
+            clipboardHistoryView.startClipboardHistory(latinIME.clipboardHistoryManager, view.keyVisualAttributes,
                 latinIME.getCurrentInputEditorInfo(), latinIME.keyboardActionListener)
             clipboardHistoryView.visibility = View.VISIBLE
         }
@@ -738,7 +731,7 @@ class KeyboardSwitcher private constructor() {
             val currentSettingsValues = Settings.getValues()
             setMainKeyboardFrame(view, currentSettingsValues, toggleState)
             // TODO: pass this object to setKeyboard instead of getting the current values.
-            val oldKeyboard = view.getKeyboard()
+            val oldKeyboard = view.keyboard
             val newKeyboard = keyboardLayoutSet!!.getKeyboard(keyboardElement)
             view.setKeyboard(newKeyboard)
             currentInputView!!.setKeyboardTopPadding(newKeyboard.topPadding)

@@ -63,7 +63,7 @@ open class Keyboard {
     val topPadding: Int
     /** Default gap between rows */
     @JvmField
-    val mVerticalGap: Int
+    val verticalGap: Int
 
     /** Per keyboard key visual parameters */
     @JvmField
@@ -83,7 +83,7 @@ open class Keyboard {
     val maxPopupKeysKeyboardColumn: Int
 
     /** List of keys in this keyboard */
-    private val mSortedKeys: List<Key>
+    private val sortedKeys: List<Key>
     @JvmField
     val shiftKeys: List<Key>
     @JvmField
@@ -93,7 +93,7 @@ open class Keyboard {
 
     private val keyCache = SparseArray<Key?>()
 
-    private val mProximityInfo: ProximityInfo
+    val proximityInfo: ProximityInfo
 
     private val proximityCharsCorrectionEnabled: Boolean
 
@@ -102,24 +102,24 @@ open class Keyboard {
         themeId = params.themeId
         occupiedHeight = params.occupiedHeight
         occupiedWidth = params.occupiedWidth
-        baseHeight = params.mBaseHeight
-        baseWidth = params.mBaseWidth
+        baseHeight = params.baseHeight
+        baseWidth = params.baseWidth
         mostCommonKeyHeight = params.mostCommonKeyHeight
         mostCommonKeyWidth = params.mostCommonKeyWidth
         popupKeysTemplate = params.popupKeysTemplate
         maxPopupKeysKeyboardColumn = params.maxPopupKeysKeyboardColumn
         keyVisualAttributes = params.keyVisualAttributes
         topPadding = params.topPadding
-        mVerticalGap = params.verticalGap
+        verticalGap = params.verticalGap
 
-        mSortedKeys = Collections.unmodifiableList(ArrayList(params.sortedKeys))
+        sortedKeys = Collections.unmodifiableList(ArrayList(params.sortedKeys))
         shiftKeys = Collections.unmodifiableList(params.shiftKeys)
         altCodeKeysWhileTyping = Collections.unmodifiableList(params.altCodeKeysWhileTyping)
         iconsSet = params.iconsSet
 
-        mProximityInfo = ProximityInfo(params.GRID_WIDTH, params.GRID_HEIGHT,
+        proximityInfo = ProximityInfo(params.GRID_WIDTH, params.GRID_HEIGHT,
                 occupiedWidth, occupiedHeight, mostCommonKeyWidth, mostCommonKeyHeight,
-                mSortedKeys, params.touchPositionCorrection)
+                sortedKeys, params.touchPositionCorrection)
         proximityCharsCorrectionEnabled = params.proximityCharsCorrectionEnabled
     }
 
@@ -136,14 +136,14 @@ open class Keyboard {
         maxPopupKeysKeyboardColumn = keyboard.maxPopupKeysKeyboardColumn
         keyVisualAttributes = keyboard.keyVisualAttributes
         topPadding = keyboard.topPadding
-        mVerticalGap = keyboard.mVerticalGap
+        verticalGap = keyboard.verticalGap
 
-        mSortedKeys = keyboard.mSortedKeys
+        sortedKeys = keyboard.sortedKeys
         shiftKeys = keyboard.shiftKeys
         altCodeKeysWhileTyping = keyboard.altCodeKeysWhileTyping
         iconsSet = keyboard.iconsSet
 
-        mProximityInfo = keyboard.mProximityInfo
+        proximityInfo = keyboard.proximityInfo
         proximityCharsCorrectionEnabled = keyboard.proximityCharsCorrectionEnabled
     }
 
@@ -159,10 +159,6 @@ open class Keyboard {
         return canAssumeNativeHasProximityCharsInfoOfAllKeys || Character.isLetter(code)
     }
 
-    fun getProximityInfo(): ProximityInfo {
-        return mProximityInfo
-    }
-
     /**
      * Return the sorted list of keys of this keyboard.
      * The keys are sorted from top-left to bottom-right order.
@@ -170,7 +166,7 @@ open class Keyboard {
      * @return the sorted unmodifiable list of {@link Key}s of this keyboard.
      */
     open fun getSortedKeys(): List<Key> {
-        return mSortedKeys
+        return sortedKeys
     }
 
     fun getKey(code: Int): Key? {
@@ -184,7 +180,7 @@ open class Keyboard {
             }
 
             for (key in getSortedKeys()) {
-                if (key.getCode() == code) {
+                if (key.code == code) {
                     keyCache.put(code, key)
                     return key
                 }
@@ -201,7 +197,7 @@ open class Keyboard {
 
         for (key in getSortedKeys()) {
             if (key === aKey) {
-                keyCache.put(key.getCode(), key)
+                keyCache.put(key.code, key)
                 return true
             }
         }
@@ -223,7 +219,7 @@ open class Keyboard {
         // Avoid dead pixels at edges of the keyboard
         val adjustedX = Math.max(0, Math.min(x, occupiedWidth - 1))
         val adjustedY = Math.max(0, Math.min(y, occupiedHeight - 1))
-        return mProximityInfo.getNearestKeys(adjustedX, adjustedY)
+        return proximityInfo.getNearestKeys(adjustedX, adjustedY)
     }
 
     fun getCoordinates(codePoints: IntArray): IntArray {
@@ -233,7 +229,7 @@ open class Keyboard {
             val key = getKey(codePoints[i])
             if (null != key) {
                 CoordinateUtils.setXYInArray(coordinates, i,
-                        key.getX() + key.getWidth() / 2, key.getY() + key.getHeight() / 2)
+                        key.getX() + key.width / 2, key.getY() + key.height / 2)
             } else {
                 CoordinateUtils.setXYInArray(coordinates, i,
                         Constants.NOT_A_COORDINATE, Constants.NOT_A_COORDINATE)

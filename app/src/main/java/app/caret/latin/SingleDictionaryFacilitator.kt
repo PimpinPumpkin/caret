@@ -48,7 +48,7 @@ class SingleDictionaryFacilitator(private val dict: Dictionary) : DictionaryFaci
         val suggestionResults = getSuggestionResults(
             ComposedData.createForWord(word),
             NgramContext.getEmptyPrevWordsContext(0),
-            KeyboardSwitcher.getInstance().getKeyboard()!!, // looks like actual keyboard doesn't matter (composed data doesn't contain coordinates)
+            KeyboardSwitcher.getInstance().keyboard!!, // looks like actual keyboard doesn't matter (composed data doesn't contain coordinates)
             SettingsValuesForSuggestion(false, false),
             Suggest.SESSION_ID_TYPING, SuggestedWords.INPUT_STYLE_TYPING
         )
@@ -64,7 +64,7 @@ class SingleDictionaryFacilitator(private val dict: Dictionary) : DictionaryFaci
             false
         )
         suggestionResults.addAll(
-            dict.getSuggestions(composedData, ngramContext, keyboard.getProximityInfo().nativeProximityInfo,
+            dict.getSuggestions(composedData, ngramContext, keyboard.proximityInfo.nativeProximityInfo,
                 settingsValuesForSuggestion, sessionId, 1f,
                 floatArrayOf(Dictionary.NOT_A_WEIGHT_OF_LANG_MODEL_VS_SPATIAL_MODEL)
             )?.filter { !SupportedEmojis.isUnsupported(it.getWord()) }

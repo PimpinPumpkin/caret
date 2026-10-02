@@ -141,7 +141,7 @@ class EmojiSearchActivity : ComponentActivity() {
         init()
         enableEdgeToEdge()
         setContent {
-            LocalContext.current.setTheme(KeyboardTheme.getKeyboardTheme(this).mStyleId)
+            LocalContext.current.setTheme(KeyboardTheme.getKeyboardTheme(this).styleId)
             Surface(modifier = Modifier.fillMaxSize(), color = Color(0x80000000)) {
                 var heightDp by remember { mutableStateOf(0.dp) }
                 Column(modifier = Modifier.fillMaxSize().clickable(onClick = { cancel() })
@@ -279,10 +279,10 @@ class EmojiSearchActivity : ComponentActivity() {
         super.onStop()
     }
 
-    private fun getEmoji(key: Key): String? = if (key.getCode() == KeyCode.MULTIPLE_CODE_POINTS)
-        key.getOutputText()
+    private fun getEmoji(key: Key): String? = if (key.code == KeyCode.MULTIPLE_CODE_POINTS)
+        key.outputText
     else
-        Character.toString(key.getCode())
+        Character.toString(key.code)
 
     private fun init() {
         Log.d(TAG, "init start")
@@ -336,7 +336,8 @@ class EmojiSearchActivity : ComponentActivity() {
 
     private fun search(text: String) {
         initDictionaryFacilitator(this)
-        if (dictionaryFacilitator == null) {
+        val facilitator = dictionaryFacilitator
+        if (facilitator == null) {
             cancel()
             return
         }
@@ -345,16 +346,16 @@ class EmojiSearchActivity : ComponentActivity() {
             return
         }
 
-        if (KeyboardSwitcher.getInstance().getKeyboard() == null) {
+        if (KeyboardSwitcher.getInstance().keyboard == null) {
             /** Avoid crash in [SingleDictionaryFacilitator.getSuggestions] */
             return
         }
 
-        val keyboard = emojiPageKeyboardView.getKeyboard() as DynamicGridKeyboard
+        val keyboard = emojiPageKeyboardView.keyboard as DynamicGridKeyboard
         keyboard.removeAllKeys()
         firstKey = null
         pressedKey = null
-        dictionaryFacilitator!!.getSuggestions(text.splitOnWhitespace()).filter { it.isEmoji() }.forEach {
+        facilitator.getSuggestions(text.splitOnWhitespace()).filter { it.isEmoji() }.forEach {
             val emoji = getEmojiDefaultVersion(it.getWord())
             val popupSpec = getEmojiPopupSpec(emoji)
             val keyParams = Key.KeyParams(emoji, emoji.getCode(), if (popupSpec != null) EMOJI_HINT_LABEL else null, popupSpec,

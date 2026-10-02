@@ -46,17 +46,17 @@ import java.util.WeakHashMap
  */
 class EmojiPageKeyboardView : KeyboardView, PopupKeysPanel.Controller {
 
-    private var mEmojiViewCallback: EmojiViewCallback = EMPTY_EMOJI_VIEW_CALLBACK
+    private var emojiViewCallback: EmojiViewCallback = EMPTY_EMOJI_VIEW_CALLBACK
     private val keyDetector = KeyDetector()
-    private var mAccessibilityDelegate: KeyboardAccessibilityDelegate<EmojiPageKeyboardView>? = null
+    private var accessibilityDelegate: KeyboardAccessibilityDelegate<EmojiPageKeyboardView>? = null
 
     // Touch inputs
     private var pointerId = MotionEvent.INVALID_POINTER_ID
     private var lastX = 0
     private var lastY = 0
-    private var mCurrentKey: Key? = null
-    private var mPendingKeyDown: Runnable? = null
-    private var mPendingLongPress: Runnable? = null
+    private var currentKey: Key? = null
+    private var pendingKeyDown: Runnable? = null
+    private var pendingLongPress: Runnable? = null
     private val handler: Handler
 
     // More keys keyboard
@@ -68,7 +68,7 @@ class EmojiPageKeyboardView : KeyboardView, PopupKeysPanel.Controller {
     private val popupKeysPlacerView: ViewGroup
     // More keys panel (used by popup keys keyboard view)
     // TODO: Consider extending to support multiple popup keys panels
-    private var mPopupKeysPanel: PopupKeysPanel? = null
+    private var popupKeysPanel: PopupKeysPanel? = null
 
     constructor(context: Context, attrs: AttributeSet?) : this(context, attrs, R.attr.keyboardViewStyle)
 
@@ -93,7 +93,7 @@ class EmojiPageKeyboardView : KeyboardView, PopupKeysPanel.Controller {
     }
 
     override fun onMeasure(widthMeasureSpec: Int, heightMeasureSpec: Int) {
-        val keyboard = getKeyboard()
+        val keyboard = this.keyboard
         if (keyboard is DynamicGridKeyboard) {
             val width = keyboard.occupiedWidth + getPaddingLeft() + getPaddingRight()
             val occupiedHeight = keyboard.getOccupiedHeight()
@@ -133,7 +133,7 @@ class EmojiPageKeyboardView : KeyboardView, PopupKeysPanel.Controller {
     }
 
     fun setEmojiViewCallback(emojiViewCallback: EmojiViewCallback) {
-        mEmojiViewCallback = emojiViewCallback
+        this.emojiViewCallback = emojiViewCallback
     }
 
     /**
@@ -144,43 +144,39 @@ class EmojiPageKeyboardView : KeyboardView, PopupKeysPanel.Controller {
         keyDetector.setKeyboard(keyboard, 0f /* correctionX */, 0f /* correctionY */)
         popupKeysKeyboardCache.clear()
         if (AccessibilityUtils.instance.isAccessibilityEnabled) {
-            if (mAccessibilityDelegate == null) {
-                mAccessibilityDelegate = KeyboardAccessibilityDelegate(this, keyDetector)
-            }
-            mAccessibilityDelegate!!.keyboard = keyboard
+            val delegate = accessibilityDelegate
+                ?: KeyboardAccessibilityDelegate<EmojiPageKeyboardView>(this, keyDetector).also { accessibilityDelegate = it }
+            delegate.keyboard = keyboard
         } else {
-            mAccessibilityDelegate = null
+            accessibilityDelegate = null
         }
     }
 
     private fun showPopupKeysKeyboard(key: Key): PopupKeysPanel? {
         popupKeysKeyboardView.setVisibility(View.GONE)
-        val popupKeys = key.getPopupKeys()
+        val popupKeys = key.popupKeys
         if (popupKeys == null) {
             return null
         }
         var popupKeysKeyboard: Keyboard? = popupKeysKeyboardCache.get(key)
         if (popupKeysKeyboard == null) {
             val builder = PopupKeysKeyboard.Builder(
-                    getContext(), key, getKeyboard(), false, 0, 0, newLabelPaint(key))
+                    getContext(), key, this.keyboard, false, 0, 0, newLabelPaint(key))
             popupKeysKeyboard = builder.build()
             popupKeysKeyboardCache.put(key, popupKeysKeyboard)
         }
 
-        popupKeysKeyboardView.setKeyboard(popupKeysKeyboard!!)
+        popupKeysKeyboardView.setKeyboard(popupKeysKeyboard)
         popupKeysKeyboardView.setVisibility(View.VISIBLE)
         return popupKeysKeyboardView
     }
 
     private fun dismissPopupKeysPanel() {
-        if (isShowingPopupKeysPanel()) {
-            mPopupKeysPanel!!.dismissPopupKeysPanel()
-        }
+        popupKeysPanel?.dismissPopupKeysPanel()
     }
 
-    fun isShowingPopupKeysPanel(): Boolean {
-        return mPopupKeysPanel != null
-    }
+    val isShowingPopupKeysPanel: Boolean
+        get() = popupKeysPanel != null
 
     override fun setLayoutGravity(layoutGravity: Int) {
         val layoutParams = LinearLayout.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT)
@@ -194,19 +190,20 @@ class EmojiPageKeyboardView : KeyboardView, PopupKeysPanel.Controller {
         // view is attached to window
         installPopupKeysPlacerView(false /* uninstall */)
         panel.showInParent(popupKeysPlacerView)
-        mPopupKeysPanel = panel
+        popupKeysPanel = panel
     }
 
     override fun onDismissPopupKeysPanel() {
-        if (isShowingPopupKeysPanel()) {
-            mPopupKeysPanel!!.removeFromParent()
-            mPopupKeysPanel = null
+        val panel = popupKeysPanel
+        if (panel != null) {
+            panel.removeFromParent()
+            popupKeysPanel = null
             installPopupKeysPlacerView(true /* uninstall */)
         }
     }
 
     override fun onCancelPopupKeysPanel() {
-        if (isShowingPopupKeysPanel()) {
+        if (isShowingPopupKeysPanel) {
             dismissPopupKeysPanel()
         }
     }
@@ -216,17 +213,16 @@ class EmojiPageKeyboardView : KeyboardView, PopupKeysPanel.Controller {
         return true
     }
 
-    private fun getLongPressTimeout(): Int {
-        return Settings.getValues().keyLongpressTimeout
-    }
+    private val longPressTimeout: Int
+        get() = Settings.getValues().keyLongpressTimeout
 
     /**
      * {@inheritDoc}
      */
     override fun onHoverEvent(event: MotionEvent?): Boolean {
-        val accessibilityDelegate = mAccessibilityDelegate
-        if (accessibilityDelegate != null && AccessibilityUtils.instance.isTouchExplorationEnabled) {
-            return accessibilityDelegate.onHoverEvent(event!!)
+        val delegate = accessibilityDelegate
+        if (delegate != null && AccessibilityUtils.instance.isTouchExplorationEnabled) {
+            return delegate.onHoverEvent(event!!)
         }
         return super.onHoverEvent(event)
     }
@@ -253,7 +249,7 @@ class EmojiPageKeyboardView : KeyboardView, PopupKeysPanel.Controller {
     }
 
     private fun onLongPressed(key: Key?) {
-        if (isShowingPopupKeysPanel()) {
+        if (isShowingPopupKeysPanel) {
             return
         }
 
@@ -263,11 +259,12 @@ class EmojiPageKeyboardView : KeyboardView, PopupKeysPanel.Controller {
         }
 
         val descriptionPanel = showDescription(key)
-        val popupKeysPanel = showPopupKeysKeyboard(key)
+        val keysPanel = showPopupKeysKeyboard(key)
 
         val x = lastX
         val y = lastY
-        if (popupKeysPanel != null || descriptionPanel != null) {
+        val shownPanel = keysPanel ?: descriptionPanel
+        if (shownPanel != null) {
             popupKeysKeyboardContainer.measure(ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT)
 
             val lastCoords = CoordinateUtils.newCoordinateArray(1, x, y)
@@ -276,21 +273,21 @@ class EmojiPageKeyboardView : KeyboardView, PopupKeysPanel.Controller {
             // keys keyboard is placed at the touch point of the parent key.
             val pointX = if (configShowPopupKeysKeyboardAtTouchedPoint)
                     CoordinateUtils.x(lastCoords)
-                    else key.getX() + key.getWidth() / 2
-            val keyboard = getKeyboard() as DynamicGridKeyboard
-            val pointY = key.getY() - keyboard.mVerticalGap
-            (if (popupKeysPanel != null) popupKeysPanel else descriptionPanel)!!
+                    else key.getX() + key.width / 2
+            val keyboard = this.keyboard as DynamicGridKeyboard
+            val pointY = key.getY() - keyboard.verticalGap
+            shownPanel
                 .showPopupKeysPanel(this, this, pointX, pointY
                 ) { popupKey ->
-                    if (keyboard.isRecents()) mEmojiViewCallback.onRemoveRecentsKey(key)
-                    else mEmojiViewCallback.onReleaseKey(popupKey)
+                    if (keyboard.isRecents) emojiViewCallback.onRemoveRecentsKey(key)
+                    else emojiViewCallback.onReleaseKey(popupKey)
                 }
         }
 
-        if (popupKeysPanel != null) {
-            val translatedX = popupKeysPanel.translateX(x)
-            val translatedY = popupKeysPanel.translateY(y)
-            popupKeysPanel.onDownEvent(translatedX, translatedY, pointerId, 0 /* nor used for now */)
+        if (keysPanel != null) {
+            val translatedX = keysPanel.translateX(x)
+            val translatedY = keysPanel.translateY(y)
+            keysPanel.onDownEvent(translatedX, translatedY, pointerId, 0 /* nor used for now */)
             // No need of re-allowing parent later as we don't
             // want any scroll to append during this entire input.
             disallowParentInterceptTouchEvent(true)
@@ -299,61 +296,61 @@ class EmojiPageKeyboardView : KeyboardView, PopupKeysPanel.Controller {
 
     private fun showDescription(key: Key): PopupKeysPanel? {
         descriptionView.setVisibility(View.GONE)
-        val description = mEmojiViewCallback.getDescription(key.getLabel())
+        val description = emojiViewCallback.getDescription(key.label)
         if (description == null) {
             return null
         }
 
         descriptionView.setText(description)
-        descriptionView.setKeyDrawParams(key, getKeyDrawParams())
+        descriptionView.setKeyDrawParams(key, this.keyDrawParams)
         descriptionView.setVisibility(View.VISIBLE)
         return descriptionView
     }
 
     private fun registerPress(key: Key) {
         // Do not trigger key-down effect right now in case this is actually a fling action.
-        mPendingKeyDown = Runnable { callListenerOnPressKey(key) }
-        handler.postDelayed(mPendingKeyDown!!, KEY_PRESS_DELAY_TIME)
+        val keyDown = Runnable { callListenerOnPressKey(key) }
+        pendingKeyDown = keyDown
+        handler.postDelayed(keyDown, KEY_PRESS_DELAY_TIME)
     }
 
     private fun registerLongPress(key: Key) {
-        mPendingLongPress = Runnable { onLongPressed(key) }
-        handler.postDelayed(mPendingLongPress!!, getLongPressTimeout().toLong())
+        val longPress = Runnable { onLongPressed(key) }
+        pendingLongPress = longPress
+        handler.postDelayed(longPress, longPressTimeout.toLong())
     }
 
     fun callListenerOnReleaseKey(releasedKey: Key, withKeyRegistering: Boolean) {
         releasedKey.onReleased()
         invalidateKey(releasedKey)
         if (withKeyRegistering) {
-            mEmojiViewCallback.onReleaseKey(releasedKey)
+            emojiViewCallback.onReleaseKey(releasedKey)
         }
     }
 
     fun callListenerOnPressKey(pressedKey: Key) {
-        mPendingKeyDown = null
+        pendingKeyDown = null
         pressedKey.onPressed()
         invalidateKey(pressedKey)
-        mEmojiViewCallback.onPressKey(pressedKey)
+        emojiViewCallback.onPressKey(pressedKey)
     }
 
     fun releaseCurrentKey(withKeyRegistering: Boolean) {
         // Handler.removeCallbacks does nothing for null, and its parameter is declared non-null
-        val pendingKeyDown = mPendingKeyDown
-        if (pendingKeyDown != null) handler.removeCallbacks(pendingKeyDown)
-        mPendingKeyDown = null
-        val currentKey = mCurrentKey
-        if (currentKey == null) {
+        pendingKeyDown?.let { handler.removeCallbacks(it) }
+        pendingKeyDown = null
+        val key = currentKey
+        if (key == null) {
             return
         }
-        callListenerOnReleaseKey(currentKey, withKeyRegistering)
-        mCurrentKey = null
+        callListenerOnReleaseKey(key, withKeyRegistering)
+        currentKey = null
     }
 
     override fun cancelLongPress() {
         // Handler.removeCallbacks does nothing for null, and its parameter is declared non-null
-        val pendingLongPress = mPendingLongPress
-        if (pendingLongPress != null) handler.removeCallbacks(pendingLongPress)
-        mPendingLongPress = null
+        pendingLongPress?.let { handler.removeCallbacks(it) }
+        pendingLongPress = null
     }
 
     fun onDown(e: MotionEvent): Boolean {
@@ -361,7 +358,7 @@ class EmojiPageKeyboardView : KeyboardView, PopupKeysPanel.Controller {
         val y = e.getY().toInt()
         val key = getKey(x, y)
         releaseCurrentKey(false /* withKeyRegistering */)
-        mCurrentKey = key
+        currentKey = key
         if (key == null) {
             return false
         }
@@ -378,19 +375,19 @@ class EmojiPageKeyboardView : KeyboardView, PopupKeysPanel.Controller {
         val x = e.getX().toInt()
         val y = e.getY().toInt()
         val key = getKey(x, y)
-        val pendingKeyDown = mPendingKeyDown
-        val currentKey = mCurrentKey
+        val keyDown = pendingKeyDown
+        val previousKey = currentKey
         releaseCurrentKey(false /* withKeyRegistering */)
 
-        val isShowingPopupKeysPanel = isShowingPopupKeysPanel()
-        if (isShowingPopupKeysPanel) {
+        val panel = popupKeysPanel
+        if (panel != null) {
             val eventTime = e.getEventTime()
-            val translatedX = mPopupKeysPanel!!.translateX(x)
-            val translatedY = mPopupKeysPanel!!.translateY(y)
-            mPopupKeysPanel!!.onUpEvent(translatedX, translatedY, pointerId, eventTime)
+            val translatedX = panel.translateX(x)
+            val translatedY = panel.translateY(y)
+            panel.onUpEvent(translatedX, translatedY, pointerId, eventTime)
             dismissPopupKeysPanel()
-        } else if (key === currentKey && pendingKeyDown != null) {
-            pendingKeyDown.run()
+        } else if (key === previousKey && keyDown != null) {
+            keyDown.run()
             // Trigger key-release event a little later so that a user can see visual feedback.
             handler.postDelayed({ callListenerOnReleaseKey(key!!, true) }, KEY_RELEASE_DELAY_TIME)
         } else if (key != null) {
@@ -412,15 +409,16 @@ class EmojiPageKeyboardView : KeyboardView, PopupKeysPanel.Controller {
         val x = e.getX().toInt()
         val y = e.getY().toInt()
         val key = getKey(x, y)
-        val isShowingPopupKeyboard = isShowingPopupKeysPanel() && popupKeysKeyboardView.getVisibility() == View.VISIBLE
+        val panel = popupKeysPanel
+        val isShowingPopupKeyboard = panel != null && popupKeysKeyboardView.getVisibility() == View.VISIBLE
 
         // Touched key has changed, release previous key's callbacks and
         // re-register them for the new key.
-        if (key !== mCurrentKey && !isShowingPopupKeyboard) {
+        if (key !== currentKey && !isShowingPopupKeyboard) {
             releaseCurrentKey(false)
-            mCurrentKey = key
+            currentKey = key
             cancelLongPress()
-            if (isShowingPopupKeysPanel()) {
+            if (isShowingPopupKeysPanel) {
                 onCancelPopupKeysPanel()
             }
             if (key == null) {
@@ -430,11 +428,11 @@ class EmojiPageKeyboardView : KeyboardView, PopupKeysPanel.Controller {
             registerLongPress(key)
         }
 
-        if (isShowingPopupKeyboard) {
+        if (panel != null && isShowingPopupKeyboard) {
             val eventTime = e.getEventTime()
-            val translatedX = mPopupKeysPanel!!.translateX(x)
-            val translatedY = mPopupKeysPanel!!.translateY(y)
-            mPopupKeysPanel!!.onMoveEvent(translatedX, translatedY, pointerId, eventTime)
+            val translatedX = panel.translateX(x)
+            val translatedY = panel.translateY(y)
+            panel.onMoveEvent(translatedX, translatedY, pointerId, eventTime)
         }
 
         lastX = x

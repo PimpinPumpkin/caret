@@ -63,20 +63,20 @@ import app.caret.latin.common.Constants.NOT_A_COORDINATE
 class EmojiPalettesView(context: Context, attrs: AttributeSet?, defStyle: Int) :
         LinearLayout(context, attrs, defStyle), View.OnClickListener, EmojiViewCallback {
     private class PagerViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
-        var mCategoryId: Long = 0
+        var categoryId: Long = 0
     }
 
-    private inner class PagerAdapter(pager: ViewPager2) : RecyclerView.Adapter<PagerViewHolder>() {
-        private var mInitialized = false
-        private val mViews: MutableMap<Int, RecyclerView> = HashMap(emojiCategory.shownCategories.size)
+    private inner class PagerAdapter(viewPager: ViewPager2) : RecyclerView.Adapter<PagerViewHolder>() {
+        private var pagerInitialized = false
+        private val views: MutableMap<Int, RecyclerView> = HashMap(emojiCategory.shownCategories.size)
 
         init {
             setHasStableIds(true)
-            pager.registerOnPageChangeCallback(object : ViewPager2.OnPageChangeCallback() {
+            viewPager.registerOnPageChangeCallback(object : ViewPager2.OnPageChangeCallback() {
                 override fun onPageSelected(position: Int) {
                     val categoryId = getItemId(position).toInt()
                     setCurrentCategory(EmojiCategory.Category.entries[categoryId], false)
-                    val recyclerView = mViews[position]
+                    val recyclerView = views[position]
                     if (recyclerView != null) {
                         updateState(recyclerView, categoryId.toLong())
                     }
@@ -100,7 +100,7 @@ class EmojiPalettesView(context: Context, attrs: AttributeSet?, defStyle: Int) :
                 }
 
                 override fun onScrolled(recyclerView: RecyclerView, dx: Int, dy: Int) {
-                    updateState(recyclerView, viewHolder.mCategoryId)
+                    updateState(recyclerView, viewHolder.categoryId)
                 }
             })
 
@@ -109,18 +109,18 @@ class EmojiPalettesView(context: Context, attrs: AttributeSet?, defStyle: Int) :
         }
 
         override fun onBindViewHolder(holder: PagerViewHolder, position: Int) {
-            holder.mCategoryId = getItemId(position)
+            holder.categoryId = getItemId(position)
             val recyclerView = getRecyclerView(holder.itemView)
-            mViews.put(position, recyclerView)
+            views.put(position, recyclerView)
             recyclerView.setAdapter(EmojiPalettesAdapter(
                 emojiCategory,
-                EmojiCategory.Category.entries[holder.mCategoryId.toInt()],
+                EmojiCategory.Category.entries[holder.categoryId.toInt()],
                 this@EmojiPalettesView
             ))
 
-            if (!mInitialized) {
+            if (!pagerInitialized) {
                 recyclerView.scrollToPosition(emojiCategory.currentCategoryPageId)
-                mInitialized = true
+                pagerInitialized = true
             }
         }
 
@@ -129,7 +129,7 @@ class EmojiPalettesView(context: Context, attrs: AttributeSet?, defStyle: Int) :
         }
 
         override fun onViewDetachedFromWindow(holder: PagerViewHolder) {
-            if (holder.mCategoryId == EmojiCategory.Category.RECENTS.ordinal.toLong()) {
+            if (holder.categoryId == EmojiCategory.Category.RECENTS.ordinal.toLong()) {
                 // Needs to save pending updates for recent keys when we get out of the recents
                 // category because we don't want to move the recent emojis around while the user
                 // is in the recents category.
@@ -174,9 +174,9 @@ class EmojiPalettesView(context: Context, attrs: AttributeSet?, defStyle: Int) :
     private val emojiLayoutParams: EmojiLayoutParams
     private var tabStrip: LinearLayout? = null
     private var emojiCategoryPageIndicatorView: EmojiCategoryPageIndicatorView? = null
-    private var mKeyboardActionListener: KeyboardActionListener = KeyboardActionListener.EMPTY_LISTENER
+    private var keyboardActionListener: KeyboardActionListener = KeyboardActionListener.EMPTY_LISTENER
     private val emojiCategory: EmojiCategory
-    private lateinit var mPager: ViewPager2
+    private lateinit var pager: ViewPager2
 
     constructor(context: Context, attrs: AttributeSet?) : this(context, attrs, R.attr.emojiPalettesViewStyle)
 
@@ -204,7 +204,7 @@ class EmojiPalettesView(context: Context, attrs: AttributeSet?, defStyle: Int) :
                 + paddingLeft + paddingRight)
         val height = (ResourceUtils.getSecondaryKeyboardHeight(res, Settings.getValues())
                 + paddingTop + paddingBottom)
-        emojiCategoryPageIndicatorView!!.mWidth = width
+        emojiCategoryPageIndicatorView!!.indicatorWidth = width
         setMeasuredDimension(width, height)
     }
 
@@ -233,20 +233,21 @@ class EmojiPalettesView(context: Context, attrs: AttributeSet?, defStyle: Int) :
     fun initialize() { // needs to be delayed for access to EmojiTabStrip, which is not a child of this view
         if (initialized) return
         emojiCategory.initialize()
-        tabStrip = KeyboardSwitcher.getInstance().getEmojiTabStrip() as LinearLayout?
+        tabStrip = KeyboardSwitcher.getInstance().emojiTabStrip as LinearLayout?
         if (Settings.getValues().isSecondaryStripVisible()) {
             for (properties in emojiCategory.shownCategories) {
                 addTab(tabStrip, properties.category)
             }
         }
 
-        mPager = findViewById(R.id.emoji_pager)
-        mPager.setAdapter(PagerAdapter(mPager))
-        emojiLayoutParams.setEmojiListProperties(mPager)
-        emojiCategoryPageIndicatorView = findViewById(R.id.emoji_category_page_id_view)
-        emojiLayoutParams.setCategoryPageIdViewProperties(emojiCategoryPageIndicatorView!!)
+        pager = findViewById(R.id.emoji_pager)
+        pager.setAdapter(PagerAdapter(pager))
+        emojiLayoutParams.setEmojiListProperties(pager)
+        val indicatorView: EmojiCategoryPageIndicatorView = findViewById(R.id.emoji_category_page_id_view)
+        emojiCategoryPageIndicatorView = indicatorView
+        emojiLayoutParams.setCategoryPageIdViewProperties(indicatorView)
         setCurrentCategory(emojiCategory.currentCategory, true)
-        emojiCategoryPageIndicatorView!!.setColors(colors.get(ColorType.EMOJI_CATEGORY_SELECTED), colors.get(ColorType.STRIP_BACKGROUND))
+        indicatorView.setColors(colors.get(ColorType.EMOJI_CATEGORY_SELECTED), colors.get(ColorType.STRIP_BACKGROUND))
         initialized = true
     }
 
@@ -272,8 +273,8 @@ class EmojiPalettesView(context: Context, attrs: AttributeSet?, defStyle: Int) :
      * interface to handle touch events from non-View-based elements such as Emoji buttons.
      */
     override fun onPressKey(key: Key) {
-        val code = key.getCode()
-        mKeyboardActionListener.onPressKey(code, 0, 1, HapticEvent.KEY_PRESS)
+        val code = key.code
+        keyboardActionListener.onPressKey(code, 0, 1, HapticEvent.KEY_PRESS)
     }
 
     /**
@@ -283,17 +284,17 @@ class EmojiPalettesView(context: Context, attrs: AttributeSet?, defStyle: Int) :
      */
     override fun onReleaseKey(key: Key) {
         addRecentKey(key)
-        val code = key.getCode()
+        val code = key.code
         if (code == KeyCode.MULTIPLE_CODE_POINTS) {
             // todo: when we enter some emoticons, e.g. :-D, inline emoji search is triggered and emoji view is closed
             //  (one more instance of "emoji search should recognize emoticons", but in this case could be fixed in other ways)
-            mKeyboardActionListener.onTextInput(key.getOutputText())
+            keyboardActionListener.onTextInput(key.outputText)
         } else if (code != KeyCode.UNSPECIFIED) {
-            mKeyboardActionListener.onCodeInput(code, NOT_A_COORDINATE, NOT_A_COORDINATE, false)
+            keyboardActionListener.onCodeInput(code, NOT_A_COORDINATE, NOT_A_COORDINATE, false)
         }
-        mKeyboardActionListener.onReleaseKey(code, false)
+        keyboardActionListener.onReleaseKey(code, false)
         if (Settings.getValues().alphaAfterEmojiInEmojiView)
-            mKeyboardActionListener.onCodeInput(KeyCode.ALPHA, NOT_A_COORDINATE, NOT_A_COORDINATE, false)
+            keyboardActionListener.onCodeInput(KeyCode.ALPHA, NOT_A_COORDINATE, NOT_A_COORDINATE, false)
     }
 
     override fun onRemoveRecentsKey(key: Key)
@@ -305,16 +306,17 @@ class EmojiPalettesView(context: Context, attrs: AttributeSet?, defStyle: Int) :
         if (RecentEmojis.get().isEmpty()) return
         RecentEmojis.clear()
         getRecentsKeyboard().removeAllKeys()
-        mPager.getAdapter()!!.notifyItemChanged(emojiCategory.recentTabId)
+        pager.getAdapter()!!.notifyItemChanged(emojiCategory.recentTabId)
         KeyboardSwitcher.getInstance().showToast(getResources().getString(R.string.recent_emojis_cleared), true)
     }
 
     override fun getDescription(emoji: String?): String? {
-        if (dictionaryFacilitator == null) {
+        val facilitator = dictionaryFacilitator
+        if (facilitator == null) {
             return null
         }
 
-        val wordProperty = dictionaryFacilitator!!.getWordProperty(getEmojiNeutralVersion(emoji!!))
+        val wordProperty = facilitator.getWordProperty(getEmojiNeutralVersion(emoji!!))
         if (wordProperty == null || !wordProperty.mHasShortcuts) {
             return null
         }
@@ -329,13 +331,13 @@ class EmojiPalettesView(context: Context, attrs: AttributeSet?, defStyle: Int) :
     }
 
     fun startEmojiPalettes(keyVisualAttr: KeyVisualAttributes?,
-               editorInfo: EditorInfo?, keyboardActionListener: KeyboardActionListener) {
+               editorInfo: EditorInfo?, listener: KeyboardActionListener) {
         initialize()
 
-        setupBottomRowKeyboard(editorInfo, keyboardActionListener)
+        setupBottomRowKeyboard(editorInfo, listener)
         val params = KeyDrawParams()
         params.updateParams(emojiLayoutParams.bottomRowKeyboardHeight, keyVisualAttr)
-        EmojiLayoutParams(getResources()).setEmojiListProperties(mPager) // necessary when floating
+        EmojiLayoutParams(getResources()).setEmojiListProperties(pager) // necessary when floating
         emojiCategory.reloadRecents() // in case recents changed from outside emoji keyboards
         setupSidePadding()
         initDictionaryFacilitator()
@@ -351,12 +353,12 @@ class EmojiPalettesView(context: Context, attrs: AttributeSet?, defStyle: Int) :
             return
         }
         getRecentsKeyboard().addKeyFirst(key)
-        mPager.getAdapter()!!.notifyItemChanged(emojiCategory.recentTabId)
+        pager.getAdapter()!!.notifyItemChanged(emojiCategory.recentTabId)
     }
 
-    private fun setupBottomRowKeyboard(editorInfo: EditorInfo?, keyboardActionListener: KeyboardActionListener) {
+    private fun setupBottomRowKeyboard(editorInfo: EditorInfo?, listener: KeyboardActionListener) {
         val keyboardView: MainKeyboardView = findViewById(R.id.bottom_row_keyboard)
-        keyboardView.setKeyboardActionListener(keyboardActionListener)
+        keyboardView.setKeyboardActionListener(listener)
         PointerTracker.switchTo(keyboardView)
         val kls = KeyboardLayoutSet.Builder.buildEmojiClipBottomRow(getContext(), editorInfo)
         val keyboard = kls.getKeyboard(KeyboardElement.EMOJI_BOTTOM_ROW)
@@ -373,17 +375,18 @@ class EmojiPalettesView(context: Context, attrs: AttributeSet?, defStyle: Int) :
         val rightPadding = keyboardAttr.getFraction(R.styleable.Keyboard_keyboardRightPadding,
                 keyboardWidth, keyboardWidth, 0f) * sv.sidePaddingScale
         keyboardAttr.recycle()
-        mPager.setPadding(
+        pager.setPadding(
                 leftPadding.toInt(),
-                mPager.getPaddingTop(),
+                pager.getPaddingTop(),
                 rightPadding.toInt(),
-                mPager.getPaddingBottom()
+                pager.getPaddingBottom()
         )
-        emojiCategoryPageIndicatorView!!.setPadding(
+        val indicatorView = emojiCategoryPageIndicatorView!!
+        indicatorView.setPadding(
                 leftPadding.toInt(),
-                emojiCategoryPageIndicatorView!!.getPaddingTop(),
+                indicatorView.getPaddingTop(),
                 rightPadding.toInt(),
-                emojiCategoryPageIndicatorView!!.getPaddingBottom()
+                indicatorView.getPaddingBottom()
         )
         // setting width does not do anything, so we have some workaround in EmojiCategoryPageIndicatorView
     }
@@ -398,14 +401,15 @@ class EmojiPalettesView(context: Context, attrs: AttributeSet?, defStyle: Int) :
     }
 
     fun setKeyboardActionListener(listener: KeyboardActionListener) {
-        mKeyboardActionListener = listener
+        keyboardActionListener = listener
     }
 
     private fun updateEmojiCategoryPageIdView() {
-        if (emojiCategoryPageIndicatorView == null) {
+        val indicatorView = emojiCategoryPageIndicatorView
+        if (indicatorView == null) {
             return
         }
-        emojiCategoryPageIndicatorView!!.setCategoryPageId(
+        indicatorView.setCategoryPageId(
                 emojiCategory.currentCategoryPageCount,
                 emojiCategory.currentCategoryPageId, 0.0f)
     }
@@ -415,15 +419,16 @@ class EmojiPalettesView(context: Context, attrs: AttributeSet?, defStyle: Int) :
         if (initial || oldCategory != category) {
             emojiCategory.currentCategory = category
 
-            if (mPager.getScrollState() != ViewPager2.SCROLL_STATE_DRAGGING) {
+            if (pager.getScrollState() != ViewPager2.SCROLL_STATE_DRAGGING) {
                 // Not swiping
-                mPager.setCurrentItem(emojiCategory.getTabIdFromCategoryId(
+                pager.setCurrentItem(emojiCategory.getTabIdFromCategoryId(
                                 emojiCategory.currentCategory), !initial && !isAnimationsDisabled())
             }
 
             if (Settings.getValues().isSecondaryStripVisible()) {
-                val old: View? = tabStrip!!.findViewWithTag(oldCategory)
-                val current: View? = tabStrip!!.findViewWithTag(category)
+                val strip = tabStrip!!
+                val old: View? = strip.findViewWithTag(oldCategory)
+                val current: View? = strip.findViewWithTag(category)
 
                 if (old is ImageView)
                     Settings.getValues().mColors.setColor(old, ColorType.EMOJI_CATEGORY)
@@ -444,14 +449,15 @@ class EmojiPalettesView(context: Context, attrs: AttributeSet?, defStyle: Int) :
         }
 
         emojiCategory.clearKeyboardCache()
-        mPager.getAdapter()!!.notifyDataSetChanged()
+        pager.getAdapter()!!.notifyDataSetChanged()
         closeDictionaryFacilitator()
     }
 
     private fun initDictionaryFacilitator() {
         if (Settings.getValues().showEmojiDescriptions) {
             val locale = RichInputMethodManager.getInstance().currentSubtype.locale
-            if (dictionaryFacilitator == null || !dictionaryFacilitator!!.isForLocale(locale)) {
+            val facilitator = dictionaryFacilitator
+            if (facilitator == null || !facilitator.isForLocale(locale)) {
                 closeDictionaryFacilitator()
                 val dictFile = DictionaryInfoUtils.getCachedDictForLocaleAndType(locale, Dictionary.TYPE_EMOJI, getContext())
                 val dictionary = if (dictFile != null) DictionaryFactory.getDictionary(dictFile, locale) else null
@@ -467,8 +473,8 @@ class EmojiPalettesView(context: Context, attrs: AttributeSet?, defStyle: Int) :
 
         @JvmStatic
         fun closeDictionaryFacilitator() {
-            if (dictionaryFacilitator != null) {
-                dictionaryFacilitator!!.closeDictionaries()
+            dictionaryFacilitator?.let {
+                it.closeDictionaries()
                 dictionaryFacilitator = null
             }
         }

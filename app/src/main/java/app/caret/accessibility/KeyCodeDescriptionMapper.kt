@@ -59,7 +59,7 @@ internal class KeyCodeDescriptionMapper private constructor() {
      * @return a character sequence describing the action performed by pressing the key
      */
     fun getDescriptionForKey(context: Context, keyboard: Keyboard?, key: Key, shouldObscure: Boolean): String? {
-        val code = key.getCode()
+        val code = key.code
         if (code == KeyCode.SYMBOL_ALPHA || code == KeyCode.SYMBOL || code == KeyCode.ALPHA) {
             val description = getDescriptionForSwitchAlphaSymbol(context, keyboard)
             if (description != null) {
@@ -75,7 +75,7 @@ internal class KeyCodeDescriptionMapper private constructor() {
             return getDescriptionForActionKey(context, keyboard, key)
         }
         if (code == KeyCode.MULTIPLE_CODE_POINTS) {
-            return key.getOutputText() ?: context.getString(R.string.spoken_description_unknown)
+            return key.outputText ?: context.getString(R.string.spoken_description_unknown)
         }
         // Just attempt to speak the description.
         if (code != KeyCode.NOT_SPECIFIED) {
@@ -89,8 +89,8 @@ internal class KeyCodeDescriptionMapper private constructor() {
             if (description != null) {
                 return description
             }
-            return if (!TextUtils.isEmpty(key.getLabel())) {
-                key.getLabel()
+            return if (!TextUtils.isEmpty(key.label)) {
+                key.label
             } else context.getString(R.string.spoken_description_unknown)
         }
         return null
@@ -172,8 +172,9 @@ internal class KeyCodeDescriptionMapper private constructor() {
          */
         private fun getDescriptionForActionKey(context: Context, keyboard: Keyboard?, key: Key): String {
             // Always use the label, if available.
-            if (!TextUtils.isEmpty(key.getLabel())) {
-                return key.getLabel()!!.trim { it <= ' ' }
+            val label = key.label
+            if (!label.isNullOrEmpty()) {
+                return label.trim { it <= ' ' }
             }
             val resId = when (keyboard?.id?.imeAction) {
                 EditorInfo.IME_ACTION_SEARCH -> R.string.label_search_key

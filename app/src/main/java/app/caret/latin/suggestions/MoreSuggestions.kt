@@ -79,9 +79,9 @@ class MoreSuggestions(params: MoreSuggestionsParam, suggestedWords: SuggestedWor
             numRows = row + 1
             this.occupiedWidth = Math.max(
                     minWidth, calcurateMaxRowWidth(fromIndex, index))
-            mBaseWidth = this.occupiedWidth
+            this.baseWidth = this.occupiedWidth
             this.occupiedHeight = numRows * this.defaultAbsoluteRowHeight + this.verticalGap
-            mBaseHeight = this.occupiedHeight
+            this.baseHeight = this.occupiedHeight
             return index - fromIndex
         }
 
@@ -177,11 +177,11 @@ class MoreSuggestions(params: MoreSuggestionsParam, suggestedWords: SuggestedWor
             val xmlId = R.xml.kbd_suggestions_pane_template
             mParams.id = parentKeyboard.id
             readAttributes(xmlId)
-            mParams.topPadding = parentKeyboard.mVerticalGap / 2
+            mParams.topPadding = parentKeyboard.verticalGap / 2
             mParams.verticalGap = mParams.topPadding
             mPaneView.updateKeyboardGeometry(mParams.defaultAbsoluteRowHeight)
             val count = mParams.layout(suggestedWords, fromIndex, maxWidth, minWidth, maxRow,
-                    mPaneView.newLabelPaint(null /* key */), mContext)
+                    mPaneView.newLabelPaint(null /* key */), this.context)
             mFromIndex = fromIndex
             toIndex = fromIndex + count
             mSuggestedWords = suggestedWords

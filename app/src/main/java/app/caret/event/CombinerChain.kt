@@ -34,29 +34,29 @@ class CombinerChain(initialText: String, combiningSpec: String) {
     private val combinedText = StringBuilder(initialText)
     // The feedback on the composing state, as described above
     private val stateFeedback = SpannableStringBuilder()
-    private val mCombiners = ArrayList<Combiner>()
+    private val combiners = ArrayList<Combiner>()
 
     init {
         // The dead key combiner is always active, and always first
-        mCombiners.add(DeadKeyCombiner())
+        combiners.add(DeadKeyCombiner())
         if (combiningSpec == "hangul")
-            mCombiners.add(HangulCombiner())
+            combiners.add(HangulCombiner())
         else if (combiningSpec == "bn_khipro")
-            mCombiners.add(BnKhiproCombiner())
+            combiners.add(BnKhiproCombiner())
     }
 
     fun reset() {
         combinedText.setLength(0)
         stateFeedback.clear()
-        for (c in mCombiners) {
+        for (c in combiners) {
             c.reset()
         }
     }
 
     private fun updateStateFeedback() {
         stateFeedback.clear()
-        for (i in mCombiners.indices.reversed()) {
-            stateFeedback.append(mCombiners[i].combiningStateFeedback)
+        for (i in combiners.indices.reversed()) {
+            stateFeedback.append(combiners[i].combiningStateFeedback)
         }
     }
 
@@ -70,7 +70,7 @@ class CombinerChain(initialText: String, combiningSpec: String) {
     fun processEvent(previousEvents: ArrayList<Event>?, newEvent: Event): Event {
         val modifiablePreviousEvents = ArrayList(previousEvents!!)
         var event = newEvent
-        for (combiner in mCombiners) {
+        for (combiner in combiners) {
             // A combiner can never return more than one event; it can return several
             // code points, but they should be encapsulated within one event.
             event = combiner.processEvent(modifiablePreviousEvents, event)

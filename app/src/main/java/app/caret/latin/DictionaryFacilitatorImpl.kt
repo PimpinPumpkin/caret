@@ -493,7 +493,7 @@ class DictionaryFacilitatorImpl : DictionaryFacilitator {
             if (!FutoSwipe.hasOtherLibrary)
                 return SuggestionResults(SuggestedWords.MAX_SUGGESTIONS, ngramContext.isBeginningOfSentenceContext(), false)
         }
-        val proximityInfoHandle = keyboard.getProximityInfo().nativeProximityInfo
+        val proximityInfoHandle = keyboard.proximityInfo.nativeProximityInfo
         val weightOfLangModelVsSpatialModel = floatArrayOf(Dictionary.NOT_A_WEIGHT_OF_LANG_MODEL_VS_SPATIAL_MODEL)
 
         val waitForOtherDicts = if (dictionaryGroups.size == 1) null else CountDownLatch(dictionaryGroups.size - 1)
