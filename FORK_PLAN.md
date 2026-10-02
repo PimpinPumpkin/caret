@@ -165,8 +165,13 @@ Done:
   a bug: after "page start" or "page end" in a field that ignores the key event (Compose fields),
   the next letter went into the previously composed word. Fixed.
 
+- Undoing an autocorrection and cursor moves (`revertCommit`, `onUpdateSelection`): six new tests,
+  three steps pulled out.
+
+`InputLogic` is through its first pass: 33 Caret tests were added to the 78 that existed, and no
+method but the function-key switch is longer than about 75 lines.
+
 Next, in this order:
-1. The rest of `InputLogic`: `revertCommit`, `onUpdateSelection`.
-2. `RichInputConnection`: the cached picture of the text field.
-3. `LatinIME` and `PointerTracker`.
-4. Kotlin conversion of `InputLogic`, once nothing in it is longer than a screen.
+1. `RichInputConnection`: the cached picture of the text field.
+2. `LatinIME` and `PointerTracker`.
+3. Kotlin conversion of `InputLogic`.
