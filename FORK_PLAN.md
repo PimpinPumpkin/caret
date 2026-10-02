@@ -178,7 +178,14 @@ method but the function-key switch is longer than about 75 lines.
 - `PointerTracker`: no method over 76 lines, left as is. It has no unit tests; touch handling is
   covered only by the smoke test.
 
+- `InputLogic` is Kotlin (`InputLogic.kt`), a faithful translation in one commit. How it was done:
+  the file was cut into five ranges on method boundaries, each translated under one written set of
+  rules, then joined, compiled and run against the tests. The one runtime problem was a parameter
+  Java callers pass as null. When converting the next files, check every non-private function for
+  that before running the tests.
+
 Next, in this order:
-1. Kotlin conversion of `InputLogic`, one commit, no other change in it.
-2. Tests for `PointerTracker` (taps, sliding between keys, long press, the start of a swipe).
-3. Kotlin conversion of `RichInputConnection`, `LatinIME`, `PointerTracker`.
+1. Tests for `PointerTracker` (taps, sliding between keys, long press, the start of a swipe).
+2. Kotlin conversion of `RichInputConnection`, `LatinIME`, `PointerTracker`.
+3. A cleanup pass over `InputLogic.kt`: drop the `m` prefixes, turn Java-style getters into
+   properties, remove the 13 `!!`.
