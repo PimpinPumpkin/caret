@@ -167,7 +167,7 @@ class ClipboardHistoryView @JvmOverloads constructor(
         }
         clipboardRecyclerView.apply {
             adapter = clipboardAdapter
-            val keyboardWidth = ResourceUtils.getKeyboardWidth(context, settings.current)
+            val keyboardWidth = ResourceUtils.getKeyboardWidth(context, settings.getCurrent())
             layoutParams.width = keyboardWidth
             // new ClipboardLayoutParams means ClipboardAdapter has wrong gaps, but that's ok (only relevant when resizing floating keyboard)
             ClipboardLayoutParams(context).setListProperties(this)
@@ -177,10 +177,10 @@ class ClipboardHistoryView @JvmOverloads constructor(
                 null, R.styleable.Keyboard, R.attr.keyboardStyle, R.style.Keyboard)
             val leftPadding = (keyboardAttr.getFraction(R.styleable.Keyboard_keyboardLeftPadding,
                 keyboardWidth, keyboardWidth, 0f)
-                    * settings.current.mSidePaddingScale).toInt()
+                    * settings.getCurrent().mSidePaddingScale).toInt()
             val rightPadding =  (keyboardAttr.getFraction(R.styleable.Keyboard_keyboardRightPadding,
                 keyboardWidth, keyboardWidth, 0f)
-                    * settings.current.mSidePaddingScale).toInt()
+                    * settings.getCurrent().mSidePaddingScale).toInt()
             keyboardAttr.recycle()
             setPadding(leftPadding, paddingTop, rightPadding, paddingBottom)
         }

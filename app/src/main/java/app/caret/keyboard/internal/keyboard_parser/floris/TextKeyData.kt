@@ -213,7 +213,7 @@ sealed interface KeyData : AbstractKeyData {
             }
             // remove emoji shortcut on enter in tablet mode (like original, because bottom row always has an emoji key)
             // (probably not necessary, but whatever) and in emoji mode
-            if ((Settings.getInstance().isTablet || params.mId.element == KeyboardElement.EMOJI_BOTTOM_ROW)
+            if ((Settings.getInstance().isTablet() || params.mId.element == KeyboardElement.EMOJI_BOTTOM_ROW)
                 && popupKeys.remove("!icon/emoji_action_key|!code/key_emoji")) {
                 val i = popupKeys.indexOfFirst { it.startsWith(Key.POPUP_KEYS_FIXED_COLUMN_ORDER) }
                 if (i > -1) {
@@ -245,7 +245,7 @@ sealed interface KeyData : AbstractKeyData {
         }
 
         private fun shouldShowTldPopups(params: KeyboardParams): Boolean =
-            (Settings.getInstance().current.mShowTldPopupKeys
+            (Settings.getInstance().getCurrent().mShowTldPopupKeys
                     && params.mId.subtype.layouts[LayoutType.FUNCTIONAL] != "functional_keys_tablet"
                     && (params.mId.mode == KeyboardMode.URL || params.mId.mode == KeyboardMode.EMAIL))
 

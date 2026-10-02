@@ -83,7 +83,7 @@ class KeyboardActionListenerImpl(private val latinIME: LatinIME, private val inp
             return false
 
         val event: Event
-        if (settings.current.mLocale.language == "ko") { // todo: this does not appear to be the right place
+        if (settings.getCurrent().mLocale.language == "ko") { // todo: this does not appear to be the right place
             val subtype = keyboardSwitcher.getKeyboard()?.mId?.subtype ?: RichInputMethodManager.getInstance().currentSubtype
             event = HangulEventDecoder.decodeHardwareKeyEvent(subtype, keyEvent) {
                 getHardwareKeyEventDecoder(keyEvent.deviceId).decodeHardwareKey(keyEvent)
@@ -94,7 +94,7 @@ class KeyboardActionListenerImpl(private val latinIME: LatinIME, private val inp
 
         if (event.isHandled) {
             inputLogic.onCodeInput(
-                settings.current, event,
+                settings.getCurrent(), event,
                 keyboardSwitcher.getKeyboardCapsMode(), // TODO: this is not necessarily correct for a hardware keyboard right now
                 keyboardSwitcher.getCurrentKeyboardScript(),
                 latinIME.handler
@@ -286,7 +286,7 @@ class KeyboardActionListenerImpl(private val latinIME: LatinIME, private val inp
     }
 
     private fun onLanguageSlide(steps: Int): Boolean {
-        if (abs(steps) < settings.current.mLanguageSwipeDistance) return false
+        if (abs(steps) < settings.getCurrent().mLanguageSwipeDistance) return false
         val subtypes = SubtypeSettings.getEnabledSubtypes(true)
         if (subtypes.size <= 1) { // only allow if we have more than one subtype
             return false
@@ -387,7 +387,7 @@ class KeyboardActionListenerImpl(private val latinIME: LatinIME, private val inp
         inputLogic.finishInput()
         val newPosition = connection.expectedSelectionStart + moveSteps
         connection.setSelection(newPosition, newPosition)
-        inputLogic.restartSuggestionsOnWordTouchedByCursor(settings.current, keyboardSwitcher.getCurrentKeyboardScript())
+        inputLogic.restartSuggestionsOnWordTouchedByCursor(settings.getCurrent(), keyboardSwitcher.getCurrentKeyboardScript())
         return true
     }
 

@@ -154,7 +154,7 @@ object KeyLabel {
     private fun getShiftLabel(params: KeyboardParams) = when (params.mId.element) {
         KeyboardElement.SYMBOLS_SHIFTED -> params.mLocaleKeyboardInfos.labelSymbol
         KeyboardElement.SYMBOLS -> params.mLocaleKeyboardInfos.getShiftSymbolLabel(
-            Settings.getInstance().isTablet)
+            Settings.getInstance().isTablet())
         KeyboardElement.ALPHABET_MANUAL_SHIFTED, KeyboardElement.ALPHABET_AUTOMATIC_SHIFTED -> "!icon/${KeyboardIconsSet.NAME_SHIFT_KEY_SHIFTED}"
         KeyboardElement.ALPHABET_SHIFT_LOCKED -> "!icon/${KeyboardIconsSet.NAME_SHIFT_KEY_LOCKED}"
 

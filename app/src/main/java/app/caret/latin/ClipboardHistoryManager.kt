@@ -51,7 +51,7 @@ class ClipboardHistoryManager(
         clipboardManager = latinIME.getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
         clipboardManager.addPrimaryClipChangedListener(this)
         clipboardDao = ClipboardDao.getInstance(latinIME)
-        if (latinIME.settings.current.mClipboardHistoryEnabled)
+        if (latinIME.settings.getCurrent().mClipboardHistoryEnabled)
             fetchPrimaryClip()
     }
 
@@ -61,7 +61,7 @@ class ClipboardHistoryManager(
 
     override fun onPrimaryClipChanged() {
         // Make sure we read clipboard content only if history settings is set
-        if (latinIME.settings.current.mClipboardHistoryEnabled) {
+        if (latinIME.settings.getCurrent().mClipboardHistoryEnabled) {
             fetchPrimaryClip()
             dontShowCurrentSuggestion = false
         }
@@ -184,7 +184,7 @@ class ClipboardHistoryManager(
         clipboardSuggestionView = null
 
         // get the content, or return null
-        if (!latinIME.settings.current.mSuggestClipboardContent) return null
+        if (!latinIME.settings.getCurrent().mSuggestClipboardContent) return null
         if (dontShowCurrentSuggestion) return null
         if (parent == null) return null
         val clipData = clipboardManager.primaryClip ?: return null
@@ -240,7 +240,7 @@ class ClipboardHistoryManager(
         closeButton.layoutParams.height = textView.lineHeight
         closeButton.setOnClickListener { removeClipboardSuggestion() }
 
-        val colors = latinIME.settings.current.mColors
+        val colors = latinIME.settings.getCurrent().mColors
         textView.setTextColor(colors.get(ColorType.KEY_TEXT))
         clipIcon?.let { colors.setColor(it, ColorType.CLIPBOARD_SUGGESTION_ICON) }
         colors.setColor(closeButton, ColorType.REMOVE_SUGGESTION_ICON)
