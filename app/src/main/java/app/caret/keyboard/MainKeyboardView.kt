@@ -656,6 +656,26 @@ class MainKeyboardView @JvmOverloads constructor(context: Context, attrs: Attrib
         invalidateKey(spaceKey)
     }
 
+    /** The key a remote control's highlight is on, drawn with a ring so it can be seen from a sofa. */
+    var remoteFocusKey: Key? = null
+        set(value) {
+            field = value
+            invalidate()
+        }
+    private val remoteFocusPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply { style = Paint.Style.STROKE }
+
+    override fun onDraw(canvas: Canvas) {
+        super.onDraw(canvas)
+        val key = remoteFocusKey ?: return
+        val stroke = resources.displayMetrics.density * 3
+        remoteFocusPaint.strokeWidth = stroke
+        remoteFocusPaint.color = Settings.values.colors.get(ColorType.KEY_TEXT)
+        val left = key.getX() + paddingLeft + stroke
+        val top = key.getY() + paddingTop + stroke
+        val radius = resources.displayMetrics.density * 8
+        canvas.drawRoundRect(left, top, left + key.width - 2 * stroke, top + key.height - 2 * stroke, radius, radius, remoteFocusPaint)
+    }
+
     override fun onDrawKeyTopVisuals(key: Key, canvas: Canvas,
             paint: Paint, params: KeyDrawParams) {
         if (key.altCodeWhileTyping() && key.isEnabled) {

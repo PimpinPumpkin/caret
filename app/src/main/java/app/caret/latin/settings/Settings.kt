@@ -307,6 +307,10 @@ class Settings : SharedPreferences.OnSharedPreferenceChangeListener {
         const val PREF_LM_NEXT_WORD = "lm_next_word"
         // Caret: the microphone key dictates inside the keyboard instead of switching keyboards
         const val PREF_INLINE_DICTATION = "inline_dictation"
+        // Caret: hide copied card numbers, tokens, keys and seed phrases where the clipboard is shown
+        const val PREF_MASK_CLIPBOARD_SECRETS = "mask_clipboard_secrets"
+        // Caret: arrow keys of a remote move between keys; on by default on a TV
+        const val PREF_REMOTE_NAVIGATION = "remote_navigation"
         const val PREF_SUGGEST_PUNCTUATION = "suggest_punctuation"
         const val PREF_PUNCTUATION_SUGGESTIONS = "punctuation_suggestions"
         const val PREF_SUGGEST_CLIPBOARD_CONTENT = "suggest_clipboard_content"
@@ -492,6 +496,13 @@ class Settings : SharedPreferences.OnSharedPreferenceChangeListener {
                 return !isApplicationInSystemImage
             }
             return prefs.getBoolean(PREF_SHOW_SETUP_WIZARD_ICON, Defaults.PREF_SHOW_SETUP_WIZARD_ICON)
+        }
+
+        /** True on a TV, where a remote is the usual way to type. */
+        @JvmStatic
+        fun isTelevision(context: Context): Boolean {
+            val uiMode = context.getSystemService(Context.UI_MODE_SERVICE) as? android.app.UiModeManager
+            return uiMode?.currentModeType == android.content.res.Configuration.UI_MODE_TYPE_TELEVISION
         }
 
         @JvmStatic

@@ -1022,6 +1022,12 @@ New dictionary:
     <string name="hold_delete_by_word_summary">Holding backspace deletes a few characters, then whole words</string>
     <string name="mic_on_left">Microphone on the left</string>
     <string name="mic_on_left_summary">Puts the pinned microphone key at the left end of the suggestion strip</string>
+    <!-- Caret: use with a TV remote -->
+    <string name="remote_navigation">Remote control navigation</string>
+    <string name="remote_navigation_summary">Arrow buttons move a highlight between keys and the middle button presses the key. Hold it for the key\'s popup. On by default on a TV.</string>
+    <!-- Caret: hiding copied secrets -->
+    <string name="mask_clipboard_secrets">Hide copied secrets</string>
+    <string name="mask_clipboard_secrets_summary">Card numbers, login tokens, private keys and seed phrases are shown as dots in the clipboard suggestion and the clipboard history. Pasting still inserts the real text.</string>
     <!-- Caret: dictation inside the keyboard -->
     <string name="inline_dictation">Dictate inside the keyboard</string>
     <string name="inline_dictation_summary">The microphone key listens right here and types what you say. Uses Alyo\'s speech service when it is switched on in Alyo, otherwise the phone\'s speech recognizer. Without either, the key switches to the voice keyboard as before.</string>

@@ -78,6 +78,7 @@ fun AdvancedSettingsScreen(
         Settings.PREF_SPACE_TO_CHANGE_LANG,
         Settings.PREFS_LONG_PRESS_SYMBOLS_FOR_NUMPAD,
         Settings.PREF_ENABLE_EMOJI_ALT_PHYSICAL_KEY,
+        Settings.PREF_REMOTE_NAVIGATION,
         if (Build.VERSION.SDK_INT < Build.VERSION_CODES.Q) Settings.PREF_SHOW_SETUP_WIZARD_ICON else null,
         Settings.PREF_ABC_AFTER_SYMBOL_SPACE,
         Settings.PREF_ABC_AFTER_NUMPAD_SPACE,
@@ -178,6 +179,9 @@ fun createAdvancedSettings(context: Context) = listOf(
     },
     Setting(context, Settings.PREFS_LONG_PRESS_SYMBOLS_FOR_NUMPAD, R.string.prefs_long_press_symbol_for_numpad) {
         SwitchPreference(it, Defaults.PREFS_LONG_PRESS_SYMBOLS_FOR_NUMPAD)
+    },
+    Setting(context, Settings.PREF_REMOTE_NAVIGATION, R.string.remote_navigation, R.string.remote_navigation_summary) {
+        SwitchPreference(it, Settings.isTelevision(LocalContext.current))
     },
     Setting(context, Settings.PREF_ENABLE_EMOJI_ALT_PHYSICAL_KEY, R.string.prefs_enable_emoji_alt_physical_key,
         R.string.prefs_enable_emoji_alt_physical_key_summary)

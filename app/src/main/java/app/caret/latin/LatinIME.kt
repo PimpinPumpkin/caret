@@ -28,6 +28,7 @@ import android.view.KeyEvent
 import android.view.View
 import android.widget.TextView
 import app.caret.latin.voice.InlineDictation
+import app.caret.keyboard.RemoteNavigation
 import android.view.Window
 import android.view.inputmethod.CompletionInfo
 import android.view.inputmethod.EditorInfo
@@ -204,6 +205,8 @@ class LatinIME : InputMethodService(),
             stripView.setExternalSuggestionView(view, false)
         }
     })
+
+    private val remoteNavigation = RemoteNavigation { keyboardSwitcher.getMainKeyboardView() }
 
     private fun stopDictation() {
         inlineDictation.stop()
@@ -1067,6 +1070,7 @@ class LatinIME : InputMethodService(),
 
     fun onFinishInputViewInternal(finishingInput: Boolean) {
         inlineDictation.cancel()
+        remoteNavigation.reset()
         super.onFinishInputView(finishingInput)
         Log.i(TAG, "onFinishInputView")
         cleanupInternalStateForFinishInput()
@@ -1690,12 +1694,22 @@ class LatinIME : InputMethodService(),
 
     // Hooks for hardware keyboard
     override fun onKeyDown(keyCode: Int, keyEvent: KeyEvent?): Boolean {
+        if (settings.current.remoteNavigation && isInputViewShown()) {
+            if (remoteNavigation.onKeyDown(keyCode, keyEvent!!)) return true
+            // the emoji and clipboard panels cannot be steered with arrows yet: Back returns to the letters
+            if (keyCode == KeyEvent.KEYCODE_BACK && (keyboardSwitcher.isShowingEmojiPalettes || keyboardSwitcher.isShowingClipboardHistory)) {
+                keyboardSwitcher.resetKeyboardStateToAlphabet()
+                return true
+            }
+        }
         if (keyboardActionListener.onKeyDown(keyCode, keyEvent!!))
             return true
         return super.onKeyDown(keyCode, keyEvent)
     }
 
     override fun onKeyUp(keyCode: Int, keyEvent: KeyEvent?): Boolean {
+        if (settings.current.remoteNavigation && isInputViewShown() && remoteNavigation.onKeyUp(keyCode, keyEvent!!))
+            return true
         if (keyboardActionListener.onKeyUp(keyCode, keyEvent!!))
             return true
         return super.onKeyUp(keyCode, keyEvent)

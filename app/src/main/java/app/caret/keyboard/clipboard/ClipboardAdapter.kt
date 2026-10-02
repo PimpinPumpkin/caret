@@ -2,6 +2,7 @@
 
 package app.caret.keyboard.clipboard
 
+import app.caret.latin.ClipboardSecrets
 import android.annotation.SuppressLint
 import android.graphics.Typeface
 import android.util.TypedValue
@@ -83,7 +84,10 @@ class ClipboardAdapter(
             if (historyEntry.filename != null) {
                 historyEntry.setImageAndDescription(contentImageView, contentTextView)
             } else {
-                contentTextView.text = historyEntry.text?.take(1000) // truncate displayed text for performance reasons
+                val text = historyEntry.text
+                contentTextView.text = if (text != null && Settings.values.maskClipboardSecrets && ClipboardSecrets.looksSecret(text))
+                        ClipboardSecrets.mask(text, 24)
+                    else text?.take(1000) // truncate displayed text for performance reasons
             }
             pinnedIconView.visibility = if (historyEntry.isPinned) View.VISIBLE else View.GONE
             contentImageView.visibility = if (historyEntry.filename != null) View.VISIBLE else View.GONE
