@@ -462,9 +462,9 @@ class SuggestionStripView(context: Context, attrs: AttributeSet?, defStyle: Int)
         val index = wordView.tag as? Int ?: return
         if (index >= suggestedWords.size()) return
         val info = suggestedWords.getInfo(index)
-        if (info.word != word) return
+        if (info.getWord() != word) return
 
-        val text = info.mSourceDict.mDictType + ":" + info.mSourceDict.mLocale
+        val text = info.mSourceDict!!.mDictType + ":" + info.mSourceDict!!.mLocale
         if (isShowingMoreSuggestionPanel) {
             moreSuggestionsView.dismissPopupKeysPanel()
         }
@@ -479,19 +479,19 @@ class SuggestionStripView(context: Context, attrs: AttributeSet?, defStyle: Int)
         val suggestedWordInfos = ArrayList<SuggestedWordInfo>()
         for (i in 0..<suggestedWords.size()) {
             val info = suggestedWords.getInfo(i)
-            if (info.word != word) suggestedWordInfos.add(info)
+            if (info.getWord() != word) suggestedWordInfos.add(info)
         }
-        suggestedWords.mRawSuggestions?.removeFirst { it.word == word }
+        suggestedWords.mRawSuggestions?.removeFirst { it.getWord() == word }
 
         val newSuggestedWords = SuggestedWords(
-            suggestedWordInfos, suggestedWords.mRawSuggestions, suggestedWords.typedWordInfo, suggestedWords.mTypedWordValid,
+            suggestedWordInfos, suggestedWords.mRawSuggestions, suggestedWords.getTypedWordInfo(), suggestedWords.mTypedWordValid,
             suggestedWords.mWillAutoCorrect, suggestedWords.mIsObsoleteSuggestions, suggestedWords.mInputStyle, suggestedWords.mSequenceNumber
         )
         setSuggestions(newSuggestedWords, direction != 1)
         suggestionsStrip.isVisible = true
 
         // Show the toolbar if no suggestions are left and the "Auto show toolbar" setting is enabled
-        if (this.suggestedWords.isEmpty && Settings.getValues().mAutoShowToolbar) {
+        if (this.suggestedWords.isEmpty() && Settings.getValues().mAutoShowToolbar) {
             setToolbarVisibility(true)
         }
     }

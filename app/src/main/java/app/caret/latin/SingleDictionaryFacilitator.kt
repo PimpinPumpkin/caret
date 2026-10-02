@@ -28,14 +28,14 @@ class SingleDictionaryFacilitator(private val dict: Dictionary) : DictionaryFaci
      */
     fun getSuggestions(words: List<String>): SuggestionResults {
         val suggestionResults = SuggestionResults(SuggestedWords.MAX_SUGGESTIONS, false, false)
-        words.flatMap { word -> getSuggestions(word).distinctBy { it.word } } // Filter out duplicate results per word
-            .groupBy { it.word }
+        words.flatMap { word -> getSuggestions(word).distinctBy { it.getWord() } } // Filter out duplicate results per word
+            .groupBy { it.getWord() }
             .forEach { (_, results) ->
                 val info = results.maxBy { it.mScore }
                 val score = (results.sumOf { it.mScore.toLong() - Int.MIN_VALUE } / words.size + Int.MIN_VALUE).toInt()
                 suggestionResults.add(
                     SuggestedWords.SuggestedWordInfo(
-                        info.word, info.mPrevWordsContext, score, info.mKindAndFlags,
+                        info.getWord(), info.mPrevWordsContext, score, info.mKindAndFlags,
                         info.mSourceDict, info.mIndexOfTouchPointOfSecondWord, info.mAutoCommitFirstWordConfidence
                     )
                 )
@@ -67,7 +67,7 @@ class SingleDictionaryFacilitator(private val dict: Dictionary) : DictionaryFaci
             dict.getSuggestions(composedData, ngramContext, keyboard.proximityInfo.nativeProximityInfo,
                 settingsValuesForSuggestion, sessionId, 1f,
                 floatArrayOf(Dictionary.NOT_A_WEIGHT_OF_LANG_MODEL_VS_SPATIAL_MODEL)
-            )?.filter { !SupportedEmojis.isUnsupported(it.word) }
+            )?.filter { !SupportedEmojis.isUnsupported(it.getWord()) }
         )
         suggestionLogger?.onNewSuggestions(suggestionResults, composedData, ngramContext, keyboard, inputStyle)
 

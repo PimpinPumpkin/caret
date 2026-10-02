@@ -11,9 +11,9 @@ import app.caret.keyboard.KeyboardElement
 import app.caret.keyboard.KeyboardLayoutSet
 import app.caret.keyboard.internal.KeyboardParams
 import app.caret.latin.SuggestedWords.SuggestedWordInfo
-import app.caret.latin.SuggestedWords.SuggestedWordInfo.KIND_FLAG_APPROPRIATE_FOR_AUTO_CORRECTION
-import app.caret.latin.SuggestedWords.SuggestedWordInfo.KIND_SHORTCUT
-import app.caret.latin.SuggestedWords.SuggestedWordInfo.KIND_WHITELIST
+import app.caret.latin.SuggestedWords.SuggestedWordInfo.Companion.KIND_FLAG_APPROPRIATE_FOR_AUTO_CORRECTION
+import app.caret.latin.SuggestedWords.SuggestedWordInfo.Companion.KIND_SHORTCUT
+import app.caret.latin.SuggestedWords.SuggestedWordInfo.Companion.KIND_WHITELIST
 import app.caret.latin.common.ComposedData
 import app.caret.latin.common.Constants
 import app.caret.latin.common.InputPointers
@@ -527,7 +527,7 @@ class SuggestTest {
         // mWillAutoCorrect is true on phone, because after glide typing is done, the result is set as typed word
         // when pressing shift to capitalize it, autocorrect will only work if the typed word changes when capitalized. this does not work without typed word
         //assert(result3.mWillAutoCorrect)
-        assertEquals("but", result3.typedWordInfo.mWord)
+        assertEquals("but", result3.getTypedWordInfo()!!.mWord)
         assertEquals(listOf("But", "Buy", "Bit", "😢", "Butter"), result3.mSuggestedWordInfoList.map { it.mWord })
     }
 

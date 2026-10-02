@@ -540,7 +540,7 @@ class DictionaryFacilitatorImpl : DictionaryFacilitator {
             ?: return null
         val results = SuggestionResults(SuggestedWords.MAX_SUGGESTIONS, ngramContext.isBeginningOfSentenceContext(), false)
         suggestions.forEach {
-            if (isBlacklisted(it.word)) return@forEach
+            if (isBlacklisted(it.getWord())) return@forEach
             results.add(it)
             results.mRawSuggestions?.add(it)
         }
@@ -568,20 +568,20 @@ class DictionaryFacilitatorImpl : DictionaryFacilitator {
             val checkForGarbage = composedData.mIsBatchMode && (dictType == Dictionary.TYPE_USER_HISTORY || dictType == Dictionary.TYPE_MAIN)
 
             for (info in dictionarySuggestions) {
-                val word = info.word
+                val word = info.getWord()
                 if (isBlacklisted(word) || SupportedEmojis.isUnsupported(word)) // don't add blacklisted words and unsupported emojis
                     continue
                 if (checkForGarbage
                     // consider the user might use custom main dictionary containing shortcuts
                     //  assume this is unlikely to happen, and take care about common shortcuts that are not actual words (emoji, symbols)
                     && word.length > 2 // should exclude most symbol shortcuts
-                    && info.mSourceDict.mDictType == dictType // dictType is always main, but info.mSourceDict.mDictType contains the actual dict (main dict is a dictionary group)
+                    && info.mSourceDict!!.mDictType == dictType // dictType is always main, but info.mSourceDict.mDictType contains the actual dict (main dict is a dictionary group)
                     && !mightBeEmoji(word) // simplified check for performance reasons
                     && !dictionary.isInDictionary(word)
                 )
                     continue
 
-                if (word.length == 1 && info.mSourceDict.mDictType == Dictionary.TYPE_EMOJI && !StringUtils.mightBeEmoji(word[0].code))
+                if (word.length == 1 && info.mSourceDict!!.mDictType == Dictionary.TYPE_EMOJI && !StringUtils.mightBeEmoji(word[0].code))
                     continue
 
                 suggestions.add(info)
@@ -715,18 +715,18 @@ class DictionaryFacilitatorImpl : DictionaryFacilitator {
             for (i in 0 until 2 - nonEmojiNonTypedWordCount) {
                 val firstNonEmojiNonTypedWord = allResults.firstOrNull {
                     !suggestionResults.contains(it) && !isEmojiOrTypedWord(it, typedWord)
-                        && addedWord?.compareTo(it.word, true) != 0
+                        && addedWord?.compareTo(it.getWord(), true) != 0
                 } ?: continue
                 // The conditions above guarantee that there are at least two EmojiOrTypedWord items
                 val lastEmojiOrTypedWord = suggestionResults.last { isEmojiOrTypedWord(it, typedWord) }
                 suggestionResults.remove(lastEmojiOrTypedWord)
                 suggestionResults.add(firstNonEmojiNonTypedWord)
-                addedWord = firstNonEmojiNonTypedWord.word
+                addedWord = firstNonEmojiNonTypedWord.getWord()
             }
         }
 
         private fun isEmojiOrTypedWord(info: SuggestedWordInfo, typedWord: String): Boolean =
-            info.isEmoji || info.word.compareTo(typedWord, true) == 0
+            info.isEmoji() || info.getWord().compareTo(typedWord, true) == 0
     }
 }
 

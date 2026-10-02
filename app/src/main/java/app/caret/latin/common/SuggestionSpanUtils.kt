@@ -23,8 +23,8 @@ fun getTextWithAutoCorrectionIndicatorUnderline(context: Context?, text: String,
 }
 
 fun getTextWithSuggestionSpan(context: Context, pickedWord: String, suggestedWords: SuggestedWords, locale: Locale): CharSequence {
-    if (pickedWord.isEmpty() || suggestedWords.isEmpty
-        || suggestedWords.isPrediction || suggestedWords.isPunctuationSuggestions
+    if (pickedWord.isEmpty() || suggestedWords.isEmpty()
+        || suggestedWords.isPrediction() || suggestedWords.isPunctuationSuggestions()
     ) {
         return pickedWord
     }

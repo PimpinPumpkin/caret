@@ -99,7 +99,7 @@ class Suggest(private val mDictionaryFacilitator: DictionaryFacilitator) {
             {
                 val first = suggestionsContainer.firstOrNull() ?: suggestionResults.first()
                 val suggestions = getNextWordSuggestions(ngramContext, keyboard, inputStyleIfNotPrediction, settingsValuesForSuggestion)
-                val suggestionForFirstInContainer = suggestions.firstOrNull { it.mWord == first.word }
+                val suggestionForFirstInContainer = suggestions.firstOrNull { it.mWord == first.getWord() }
                 val suggestionForTypedWord = suggestions.firstOrNull { it.mWord == capitalizedTypedWord }
                 suggestionForFirstInContainer to suggestionForTypedWord
             },
@@ -242,9 +242,9 @@ class Suggest(private val mDictionaryFacilitator: DictionaryFacilitator) {
                     // don't allow if suggestion has too low score
                     return true to false
                 }
-                if (firstSuggestion.mSourceDict.mLocale !== typedWordInfo.mSourceDict.mLocale) {
+                if (firstSuggestion.mSourceDict!!.mLocale !== typedWordInfo.mSourceDict!!.mLocale) {
                     // dict locale different -> return the better match
-                    return true to (dictLocale == firstSuggestion.mSourceDict.mLocale)
+                    return true to (dictLocale == firstSuggestion.mSourceDict!!.mLocale)
                 }
                 // the score difference may need tuning, but so far it seems alright
                 val firstWordBonusScore =
@@ -384,7 +384,7 @@ class Suggest(private val mDictionaryFacilitator: DictionaryFacilitator) {
             if (capsMode != CapsMode.OFF || 0 != trailingSingleQuotesCount) {
                 for (i in 0 until suggestionsCount) {
                     val wordInfo = suggestions[i]
-                    val wordLocale = wordInfo.mSourceDict.mLocale
+                    val wordLocale = wordInfo.mSourceDict!!.mLocale
                     val transformedWordInfo = capitalizeAndAddTrailingSingleQuotes(
                         wordInfo, wordLocale ?: defaultLocale, capsMode, trailingSingleQuotesCount
                     )
@@ -428,13 +428,13 @@ class Suggest(private val mDictionaryFacilitator: DictionaryFacilitator) {
                 return
             val normalizedScore = BinaryDictionaryUtils.calcNormalizedScore(typedWord, wordInfo.toString(), wordInfo!!.mScore)
             val scoreInfoString: String
-            val dict = wordInfo.mSourceDict.mDictType + ":" + wordInfo.mSourceDict.mLocale
+            val dict = wordInfo.mSourceDict!!.mDictType + ":" + wordInfo.mSourceDict!!.mLocale
             scoreInfoString = if (normalizedScore > 0) {
                 String.format(Locale.ROOT, "%d (%4.2f), %s", wordInfo.mScore, normalizedScore, dict)
             } else {
                 String.format(Locale.ROOT, "%d, %s", wordInfo.mScore, dict)
             }
-            wordInfo.debugString = scoreInfoString
+            wordInfo.setDebugString(scoreInfoString)
         }
 
         @JvmStatic
@@ -469,7 +469,7 @@ class Suggest(private val mDictionaryFacilitator: DictionaryFacilitator) {
          * @return whether it's fine to auto-correct to this.
          */
         private fun isAllowedByAutoCorrectionWithSpaceFilter(info: SuggestedWordInfo): Boolean {
-            val locale = info.mSourceDict.mLocale ?: return true
+            val locale = info.mSourceDict!!.mLocale ?: return true
             val maximumLengthForThisLanguage = sLanguageToMaximumAutoCorrectionWithSpaceLength[locale.language]
                 ?: return true // This language does not enforce a maximum length to auto-correction
             return (info.mWord.length <= maximumLengthForThisLanguage
@@ -507,8 +507,8 @@ class Suggest(private val mDictionaryFacilitator: DictionaryFacilitator) {
 
         private fun makeFirstTwoSuggestionsNonEmoji(words: MutableList<SuggestedWordInfo>) {
             for (i in 0..1) {
-                if (words.size > 2 && words[i].isEmoji) {
-                    val relativeIndex = words.subList(2, words.size).indexOfFirst { !it.isEmoji }
+                if (words.size > 2 && words[i].isEmoji()) {
+                    val relativeIndex = words.subList(2, words.size).indexOfFirst { !it.isEmoji() }
                     if (relativeIndex < 0) break
                     val firstNonEmojiIndex = relativeIndex + 2
                     if (firstNonEmojiIndex > i) {
@@ -546,7 +546,7 @@ class Suggest(private val mDictionaryFacilitator: DictionaryFacilitator) {
             nextWordSuggestions: SuggestionResults, rejected: SuggestedWordInfo?
         ): SuggestedWordInfo? {
             if (pseudoTypedWordInfo == null || !Settings.getValues().mUsePersonalizedDicts
-                || pseudoTypedWordInfo.mSourceDict.mDictType != Dictionary.TYPE_MAIN || suggestionsContainer.size < 2
+                || pseudoTypedWordInfo.mSourceDict!!.mDictType != Dictionary.TYPE_MAIN || suggestionsContainer.size < 2
             ) return pseudoTypedWordInfo
             val goodNextSuggestions = nextWordSuggestions.filter { it.mScore >= 170 } // we only want reasonably often typed words, value may require tuning
             if (goodNextSuggestions.isEmpty()) return pseudoTypedWordInfo

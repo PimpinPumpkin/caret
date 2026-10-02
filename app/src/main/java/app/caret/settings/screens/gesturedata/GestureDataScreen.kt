@@ -469,7 +469,7 @@ fun GestureDataScreen(
         ExtendedFloatingActionButton(
             onClick = { nextWord(true) },
             // doesn't look good with the long text
-            text = { Text(stringResource(R.string.gesture_data_next_save, lastData?.suggestions?.firstOrNull()?.word.toString())) },
+            text = { Text(stringResource(R.string.gesture_data_next_save, lastData?.suggestions?.firstOrNull()?.getWord().toString())) },
             icon = { NextScreenIcon() },
             modifier = Modifier
                 .wrapContentSize(Alignment.BottomEnd)

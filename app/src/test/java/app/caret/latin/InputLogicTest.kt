@@ -1477,7 +1477,7 @@ class InputLogicTest {
     // only works when autocorrect is on, separator after word is required
     private fun getAutocorrectedWithSpaceAfter(suggestion: String, typedWord: String?) {
         val info = SuggestedWordInfo(suggestion, "", 0, 0, null, 0, 0)
-        val typedInfo = SuggestedWordInfo(typedWord, "", 0, 0, null, 0, 0)
+        val typedInfo = SuggestedWordInfo(typedWord!!, "", 0, 0, null, 0, 0)
         val sw = SuggestedWords(ArrayList(listOf(typedInfo, info)), null, typedInfo, false, true, false, 0, 0)
         latinIME.inputLogic.setSuggestedWords(sw) // this prepares for autocorrect
         input(' ')

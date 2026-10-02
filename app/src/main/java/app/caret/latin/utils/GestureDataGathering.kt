@@ -15,7 +15,7 @@ import app.caret.latin.R
 import app.caret.latin.RichInputMethodManager
 import app.caret.latin.SingleDictionaryFacilitator
 import app.caret.latin.SuggestedWords
-import app.caret.latin.SuggestedWords.SuggestedWordInfo.KIND_SHORTCUT
+import app.caret.latin.SuggestedWords.SuggestedWordInfo.Companion.KIND_SHORTCUT
 import app.caret.latin.common.ComposedData
 import app.caret.latin.common.Constants
 import app.caret.latin.common.InputPointers
@@ -57,7 +57,7 @@ object BackgroundGatheringCache {
 
     // used when pressing backspace or entering inline emoji search, because in this case the word is added before the internalAction is set
     fun removeLast(word: String) {
-        if (cachedWords.lastOrNull()?.topSuggestion?.word?.equals(word, true) != true) return
+        if (cachedWords.lastOrNull()?.topSuggestion?.getWord()?.equals(word, true) != true) return
         if (DEBUG) Log.i(TAG, "removing $word")
         cachedWords.removeAt(cachedWords.lastIndex)
         updateIcon()
@@ -65,9 +65,9 @@ object BackgroundGatheringCache {
 
     fun onPickSuggestionAfterGesturing(suggestion: SuggestedWords.SuggestedWordInfo, originalWord: String) {
         // replace the latest entry in cache, but do a sanity check
-        if (DEBUG) Log.i(TAG, "picked ${suggestion.word} instead of $originalWord after gesturing")
+        if (DEBUG) Log.i(TAG, "picked ${suggestion.getWord()} instead of $originalWord after gesturing")
         val lastEntry = cachedWords.lastOrNull()
-        if (lastEntry?.topSuggestion?.word?.equals(originalWord, true) != true) {
+        if (lastEntry?.topSuggestion?.getWord()?.equals(originalWord, true) != true) {
             if (DEBUG) Log.w(TAG, "...but our last word is ${lastEntry?.topSuggestion}, not $originalWord")
             return
         }
@@ -80,15 +80,15 @@ object BackgroundGatheringCache {
     fun onPickSuggestion(suggestion: SuggestedWords.SuggestedWordInfo, originalWord: String) {
         // this happens after tap-typing (new word or corrected gesture word), or when moving the cursor and then selecting a different suggestion
         // don't update anything if we have the word more than once
-        val word = cachedWords.singleOrNull { it.topSuggestion?.word?.equals(originalWord, true) == true } ?: return
+        val word = cachedWords.singleOrNull { it.topSuggestion?.getWord()?.equals(originalWord, true) == true } ?: return
         word.targetWord = word.suggestions.firstOrNull { it.mWord.equals(suggestion.mWord, true) }?.mWord
         if (DEBUG) Log.i(TAG, "picked ${word.targetWord} instead of $originalWord")
     }
 
     fun onRejectedSuggestion(suggestion: String) {
         if (DEBUG) Log.i(TAG, "rejected $suggestion")
-        if (cachedWords.lastOrNull()?.topSuggestion?.word?.equals(suggestion, true) != true) {
-            if (DEBUG) Log.w(TAG, "...but last word is ${cachedWords.lastOrNull()?.topSuggestion?.word}")
+        if (cachedWords.lastOrNull()?.topSuggestion?.getWord()?.equals(suggestion, true) != true) {
+            if (DEBUG) Log.w(TAG, "...but last word is ${cachedWords.lastOrNull()?.topSuggestion?.getWord()}")
             return
         }
         cachedWords.removeAt(cachedWords.lastIndex)
@@ -108,7 +108,7 @@ object BackgroundGatheringCache {
         // this is pretty aggressive, because repeated backspace might remove different words
         // but better remove a few % of the words instead of having potentially bad data
         if (DEBUG) Log.i(TAG, "edit something in $word")
-        cachedWords.removeAll { it.topSuggestion?.word?.equals(word, true) == true || it.targetWord?.equals(word, true) == true }
+        cachedWords.removeAll { it.topSuggestion?.getWord()?.equals(word, true) == true || it.targetWord?.equals(word, true) == true }
         updateIcon()
     }
 
@@ -240,14 +240,14 @@ class WordData(
             if (match != null) targetWord = match.mWord
         }
 
-        val topWord = targetWord ?: topSuggestion?.word
+        val topWord = targetWord ?: topSuggestion?.getWord()
         val filteredSuggestions = filterSuggestions(GestureDataGatheringSettings.getWordExclusions(context))
         // we want to store which dictionaries are used, and a dict index (in used dict list) for each suggestion
         var dictCount = 0
         val dictionariesInUsedSuggestions = LinkedHashMap<Dictionary, Int>().apply { // linked because we need the order (well, not any more...)
-            filteredSuggestions.forEach { if (!containsKey(it.mSourceDict)) put(it.mSourceDict, dictCount++) }
+            filteredSuggestions.forEach { if (!containsKey(it.mSourceDict)) put(it.mSourceDict!!, dictCount++) }
             // we always want all main known dictionaries
-            suggestions.forEach { if (!containsKey(it.mSourceDict) && it.isFromKnownMainDict(context)) put(it.mSourceDict, dictCount++) }
+            suggestions.forEach { if (!containsKey(it.mSourceDict) && it.isFromKnownMainDict(context)) put(it.mSourceDict!!, dictCount++) }
         }
 
         val data = GestureData(
@@ -292,13 +292,13 @@ class WordData(
             if (word.mWord in blockedWords)
                 continue // we should never come here, but better check twice
             filteredSuggestions.add(word)
-            if (word.mWord == (targetWord ?: topSuggestion?.word))
+            if (word.mWord == (targetWord ?: topSuggestion?.getWord()))
                 break // no use for suggestions after that
         }
         // redact words that don't match the top suggestion / target word
         if (!activeMode) {
             for (i in filteredSuggestions.indices) {
-                if (filteredSuggestions[i].mWord != (targetWord ?: topSuggestion?.word))
+                if (filteredSuggestions[i].mWord != (targetWord ?: topSuggestion?.getWord()))
                     filteredSuggestions[i] = filteredSuggestions[i].redact()
             }
         }
@@ -316,7 +316,7 @@ class WordData(
             return false // don't save in incognito mode
         if (!GestureDataGatheringSettings.isBackgroundGatheringEnabled(context.prefs()))
             return false
-        if ((targetWord ?: topSuggestion?.word)?.contains(' ') == true) // no support for SPACE_AWARE_GESTURE
+        if ((targetWord ?: topSuggestion?.getWord())?.contains(' ') == true) // no support for SPACE_AWARE_GESTURE
             return false
         if (GestureDataGatheringSettings.isForbiddenForDataGathering(packageName, context))
             return false // package ignored (we should never come here for blocked apps, but better be safe)
@@ -325,14 +325,14 @@ class WordData(
         if (inputAttributes.mIsPasswordField || inputAttributes.mNoLearning || isEmailField)
             return false // background gathering should not even be enabled, but better have this backup
 
-        val matchingSuggestions = suggestions.filter { it.mWord.equals(targetWord ?: topSuggestion?.word, true) }
+        val matchingSuggestions = suggestions.filter { it.mWord.equals(targetWord ?: topSuggestion?.getWord(), true) }
         if (matchingSuggestions.all { (it.mKindAndFlags and 0xFF) == KIND_SHORTCUT })
             return false // we want at least one non-shortcut
 
         // word and dict-based filtering
         if (matchingSuggestions.none { it.isFromKnownMainDict(context) })
             return false // we have no use if not in main dictionary, also potentially sensitive
-        if (matchingSuggestions.any { it.mSourceDict.mDictType == Dictionary.TYPE_CONTACTS })
+        if (matchingSuggestions.any { it.mSourceDict!!.mDictType == Dictionary.TYPE_CONTACTS })
             return false // if there is a suggestion from contacts -> never use it
         val ignoreWords = GestureDataGatheringSettings.getWordExclusions(context)
         // don't store if target word / first suggestion is blocked, the other suggestions will get redacted anyway

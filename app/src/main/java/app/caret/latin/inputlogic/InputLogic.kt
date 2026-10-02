@@ -308,7 +308,7 @@ class InputLogic(
             suggestionStripViewAccessor.setNeutralSuggestionStrip()
             inputTransaction.requireShiftUpdate(InputTransaction.SHIFT_UPDATE_NOW)
             resetComposingState(true /* alsoResetLastComposedWord */)
-            connection.commitCompletion(suggestionInfo.mApplicationSpecifiedCompletionInfo)
+            connection.commitCompletion(suggestionInfo.mApplicationSpecifiedCompletionInfo!!)
             connection.endBatchEdit()
             return inputTransaction
         }
