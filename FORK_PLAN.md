@@ -219,8 +219,8 @@ Next:
    including `Settings.values`, `Settings.instance` and `KeyboardSwitcher.keyboard`.
 
 Still open in the converted code:
-- 1 fields keep an `m`/`s` prefix, nearly all of them the public fields of `SettingsValues`
-  (read in hundreds of places; renaming them is mechanical but was left out of this pass).
+- One field keeps its prefix: `KeyboardBuilder.mParams`, because two subclasses have a local
+  named `params` right where they read it.
 - 82 no-argument `get...()`/`is...()` functions remain. They are overrides, interface members,
   redefined by test shadows, or compute something.
 - Not exercised by hand since the conversion: the spell checker service, contacts and apps
