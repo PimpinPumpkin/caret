@@ -378,7 +378,7 @@ class RichInputConnection(private val parent: InputMethodService) : PrivateComma
         // TODO: don't call #toString() here. Instead, all accesses to
         //  committedTextBeforeComposingText should be done on the main thread.
         return CapsModeUtils.getCapsMode(committedTextBeforeComposingText.toString(), inputType,
-                spacingAndPunctuations, hasSpaceBefore)
+                spacingAndPunctuations!!, hasSpaceBefore)
     }
 
     fun getCodePointBeforeCursor(): Int {
