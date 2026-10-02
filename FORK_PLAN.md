@@ -197,6 +197,9 @@ method but the function-key switch is longer than about 75 lines.
 Next:
 1. `OnGetSuggestedWordsCallback` in `Suggest.kt` could take a non-null parameter (removes four
    `!!` in `InputLogic.kt`).
-2. `WordComposer`, `MainKeyboardView` and `KeyboardSwitcher` are Kotlin now (straight
-   conversions). They still need the cleanup pass the first four files got: prefixes, `!!`,
-   getters to properties.
+2. `WordComposer`, `MainKeyboardView` and `KeyboardSwitcher` are Kotlin and cleaned the same way
+   (`!!` 184 to 15). `KeyboardSwitcher`'s views are `lateinit`, so a too-early access throws
+   `UninitializedPropertyAccessException` where Java threw a null pointer exception.
+3. Still to do: turn the trivial getters of these three into properties (`getKeyboard()`,
+   `getMainKeyboardView()` and `getTypedWord()` have 20 to 30 Kotlin callers each; two are
+   replaced by name in a test shadow), then the next Java files (`Key`, `KeyboardView`).

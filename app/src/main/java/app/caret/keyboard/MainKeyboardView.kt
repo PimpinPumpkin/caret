@@ -74,8 +74,8 @@ class MainKeyboardView @JvmOverloads constructor(context: Context, attrs: Attrib
     // Stuff to draw language name on spacebar.
     private val languageOnSpacebarFinalAlpha: Int
     private val languageOnSpacebarFadeoutAnimator: ObjectAnimator?
-    private var mLanguageOnSpacebarFormatType: Int = 0
-    private var mHasMultipleEnabledIMEsOrSubtypes: Boolean = false
+    private var languageOnSpacebarFormatType: Int = 0
+    private var hasMultipleEnabledIMEsOrSubtypes: Boolean = false
     private var languageOnSpacebarAnimAlpha: Int = Constants.Color.ALPHA_OPAQUE
     private val languageOnSpacebarTextRatio: Float
     private var languageOnSpacebarTextSize: Float = 0f
@@ -88,7 +88,7 @@ class MainKeyboardView @JvmOverloads constructor(context: Context, attrs: Attrib
     private val altCodeKeyWhileTypingFadeinAnimator: ObjectAnimator?
 
     // Drawing preview placer view
-    private val mDrawingPreviewPlacerView: DrawingPreviewPlacerView
+    private val drawingPreviewPlacerView: DrawingPreviewPlacerView
     private val originCoords: IntArray = CoordinateUtils.newInstance()
     private val gestureFloatingTextDrawingPreview: GestureFloatingTextDrawingPreview
     private val gestureTrailsDrawingPreview: GestureTrailsDrawingPreview
@@ -117,11 +117,11 @@ class MainKeyboardView @JvmOverloads constructor(context: Context, attrs: Attrib
     private val timerHandler: TimerHandler
     private val languageOnSpacebarHorizontalMargin: Int
 
-    private var mAccessibilityDelegate: MainKeyboardAccessibilityDelegate? = null
+    private var accessibilityDelegate: MainKeyboardAccessibilityDelegate? = null
 
     init {
 
-        val drawingPreviewPlacerView =
+        drawingPreviewPlacerView =
                 DrawingPreviewPlacerView(ContextThemeWrapper(context, R.style.platformActivityTheme), attrs)
 
         val mainKeyboardViewAttr = context.obtainStyledAttributes(
@@ -194,8 +194,6 @@ class MainKeyboardView @JvmOverloads constructor(context: Context, attrs: Attrib
         slidingKeyInputDrawingPreview.setDrawingView(drawingPreviewPlacerView)
         mainKeyboardViewAttr.recycle()
 
-        mDrawingPreviewPlacerView = drawingPreviewPlacerView
-
         val inflater = LayoutInflater.from(getContext())
         popupKeysKeyboardContainer = inflater.inflate(popupKeysKeyboardLayoutId, null)
         popupKeysKeyboardForActionContainer = inflater.inflate(popupKeysKeyboardForActionLayoutId, null)
@@ -213,7 +211,7 @@ class MainKeyboardView @JvmOverloads constructor(context: Context, attrs: Attrib
 
     override fun setHardwareAcceleratedDrawingEnabled(enabled: Boolean) {
         super.setHardwareAcceleratedDrawingEnabled(enabled)
-        mDrawingPreviewPlacerView.setHardwareAcceleratedDrawingEnabled(enabled)
+        drawingPreviewPlacerView.setHardwareAcceleratedDrawingEnabled(enabled)
     }
 
     private fun loadObjectAnimator(resId: Int, target: Any?): ObjectAnimator? {
@@ -286,12 +284,11 @@ class MainKeyboardView @JvmOverloads constructor(context: Context, attrs: Attrib
         languageOnSpacebarTextSize = keyHeight * languageOnSpacebarTextRatio
 
         if (AccessibilityUtils.instance.isAccessibilityEnabled) {
-            if (mAccessibilityDelegate == null) {
-                mAccessibilityDelegate = MainKeyboardAccessibilityDelegate(this, keyDetector)
-            }
-            mAccessibilityDelegate!!.keyboard = keyboard
+            val delegate = accessibilityDelegate
+                    ?: MainKeyboardAccessibilityDelegate(this, keyDetector).also { accessibilityDelegate = it }
+            delegate.keyboard = keyboard
         } else {
-            mAccessibilityDelegate = null
+            accessibilityDelegate = null
         }
     }
 
@@ -306,7 +303,7 @@ class MainKeyboardView @JvmOverloads constructor(context: Context, attrs: Attrib
 
     private fun locatePreviewPlacerView() {
         getLocationInWindow(originCoords)
-        mDrawingPreviewPlacerView.setKeyboardViewGeometry(originCoords, getWidth(), getHeight())
+        drawingPreviewPlacerView.setKeyboardViewGeometry(originCoords, getWidth(), getHeight())
     }
 
     private fun installPreviewPlacerView() {
@@ -316,15 +313,15 @@ class MainKeyboardView @JvmOverloads constructor(context: Context, attrs: Attrib
             return
         }
         val windowContentView: ViewGroup? = rootView.findViewById(android.R.id.content)
-        val vg = mDrawingPreviewPlacerView.getParent()
+        val vg = drawingPreviewPlacerView.getParent()
         if (vg is ViewGroup)
-            vg.removeView(mDrawingPreviewPlacerView) // when moving keyboard from input method content view to floating container
+            vg.removeView(drawingPreviewPlacerView) // when moving keyboard from input method content view to floating container
         // Note: It'd be very weird if we get null by android.R.id.content.
         if (windowContentView == null) {
             Log.w(TAG, "Cannot find android.R.id.content view to add DrawingPreviewPlacerView")
             return
         }
-        windowContentView.addView(mDrawingPreviewPlacerView)
+        windowContentView.addView(drawingPreviewPlacerView)
     }
 
     // Implements {@link DrawingProxy#onKeyPressed(Key,boolean)}.
@@ -338,15 +335,15 @@ class MainKeyboardView @JvmOverloads constructor(context: Context, attrs: Attrib
         }
         keyPreviewDrawParams.setVisibleOffset(-keyboard.mVerticalGap)
         if (withPreview && key.hasPreview() && keyPreviewDrawParams.isPopupEnabled()) {
-            showKeyPreview(key)
+            showKeyPreview(key, keyboard)
         }
     }
 
-    private fun showKeyPreview(key: Key) {
+    private fun showKeyPreview(key: Key, keyboard: Keyboard) {
         locatePreviewPlacerView()
         getLocationInWindow(originCoords)
-        keyPreviewChoreographer.placeAndShowKeyPreview(key, getKeyboard()!!.mIconsSet, getKeyDrawParams(),
-                KeyboardSwitcher.getInstance().getWrapperView()!!.getWidth(), originCoords, mDrawingPreviewPlacerView)
+        keyPreviewChoreographer.placeAndShowKeyPreview(key, keyboard.mIconsSet, getKeyDrawParams(),
+                KeyboardSwitcher.getInstance().getWrapperView()!!.getWidth(), originCoords, drawingPreviewPlacerView)
     }
 
     private fun dismissKeyPreviewWithoutDelay(key: Key) {
@@ -437,7 +434,7 @@ class MainKeyboardView @JvmOverloads constructor(context: Context, attrs: Attrib
 
     override fun onDetachedFromWindow() {
         super.onDetachedFromWindow()
-        mDrawingPreviewPlacerView.removeAllViews()
+        drawingPreviewPlacerView.removeAllViews()
     }
 
     // Implements {@link DrawingProxy@showPopupKeysKeyboard(Key,PointerTracker)}.
@@ -506,12 +503,12 @@ class MainKeyboardView @JvmOverloads constructor(context: Context, attrs: Attrib
         PointerTracker.setReleasedKeyGraphicsToAllKeys()
         // Dismiss sliding key input preview that may be being showed.
         slidingKeyInputDrawingPreview.dismissSlidingKeyInputPreview()
-        panel.showInParent(mDrawingPreviewPlacerView)
+        panel.showInParent(drawingPreviewPlacerView)
         popupKeysPanel = panel
     }
 
     fun isShowingPopupKeysPanel(): Boolean {
-        return popupKeysPanel != null && popupKeysPanel!!.isShowingInParent()
+        return popupKeysPanel?.isShowingInParent() == true
     }
 
     override fun onCancelPopupKeysPanel() {
@@ -519,8 +516,9 @@ class MainKeyboardView @JvmOverloads constructor(context: Context, attrs: Attrib
     }
 
     override fun onDismissPopupKeysPanel() {
-        if (isShowingPopupKeysPanel()) {
-            popupKeysPanel!!.removeFromParent()
+        val panel = popupKeysPanel
+        if (panel != null && panel.isShowingInParent()) {
+            panel.removeFromParent()
             popupKeysPanel = null
         }
     }
@@ -542,16 +540,17 @@ class MainKeyboardView @JvmOverloads constructor(context: Context, attrs: Attrib
         if (getKeyboard() == null) {
             return false
         }
+        val ev = event!!
         if (nonDistinctMultitouchHelper != null) {
-            if (event!!.getPointerCount() > 1 && timerHandler.isInKeyRepeat()) {
+            if (ev.getPointerCount() > 1 && timerHandler.isInKeyRepeat()) {
                 // Key repeating timer will be canceled if 2 or popup keys are in action.
                 timerHandler.cancelKeyRepeatTimers()
             }
             // Non distinct multitouch screen support
-            nonDistinctMultitouchHelper.processMotionEvent(event, keyDetector)
+            nonDistinctMultitouchHelper.processMotionEvent(ev, keyDetector)
             return true
         }
-        return processMotionEvent(event!!)
+        return processMotionEvent(ev)
     }
 
     fun processMotionEvent(event: MotionEvent): Boolean {
@@ -584,10 +583,10 @@ class MainKeyboardView @JvmOverloads constructor(context: Context, attrs: Attrib
 
     fun onHideWindow() {
         onDismissPopupKeysPanel()
-        val accessibilityDelegate = mAccessibilityDelegate
-        if (accessibilityDelegate != null
+        val delegate = accessibilityDelegate
+        if (delegate != null
                 && AccessibilityUtils.instance.isAccessibilityEnabled) {
-            accessibilityDelegate.onHideWindow()
+            delegate.onHideWindow()
         }
     }
 
@@ -595,10 +594,10 @@ class MainKeyboardView @JvmOverloads constructor(context: Context, attrs: Attrib
      * {@inheritDoc}
      */
     override fun onHoverEvent(event: MotionEvent?): Boolean {
-        val accessibilityDelegate = mAccessibilityDelegate
-        if (accessibilityDelegate != null
+        val delegate = accessibilityDelegate
+        if (delegate != null
                 && AccessibilityUtils.instance.isTouchExplorationEnabled) {
-            return accessibilityDelegate.onHoverEvent(event!!)
+            return delegate.onHoverEvent(event!!)
         }
         return super.onHoverEvent(event)
     }
@@ -636,11 +635,11 @@ class MainKeyboardView @JvmOverloads constructor(context: Context, attrs: Attrib
         if (subtypeChanged) {
             KeyPreviewView.clearTextCache()
         }
-        mLanguageOnSpacebarFormatType = languageOnSpacebarFormatType
-        mHasMultipleEnabledIMEsOrSubtypes = hasMultipleEnabledIMEsOrSubtypes
+        this.languageOnSpacebarFormatType = languageOnSpacebarFormatType
+        this.hasMultipleEnabledIMEsOrSubtypes = hasMultipleEnabledIMEsOrSubtypes
         val animator = languageOnSpacebarFadeoutAnimator
         if (animator == null) {
-            mLanguageOnSpacebarFormatType = LanguageOnSpacebarUtils.FORMAT_TYPE_NONE
+            this.languageOnSpacebarFormatType = LanguageOnSpacebarUtils.FORMAT_TYPE_NONE
         } else {
             if (subtypeChanged
                     && languageOnSpacebarFormatType != LanguageOnSpacebarUtils.FORMAT_TYPE_NONE) {
@@ -667,11 +666,11 @@ class MainKeyboardView @JvmOverloads constructor(context: Context, attrs: Attrib
         val code = key.getCode()
         if (code == Constants.CODE_SPACE) {
             // If input language are explicitly selected.
-            if (mLanguageOnSpacebarFormatType != LanguageOnSpacebarUtils.FORMAT_TYPE_NONE) {
+            if (languageOnSpacebarFormatType != LanguageOnSpacebarUtils.FORMAT_TYPE_NONE) {
                 drawLanguageOnSpacebar(key, canvas, paint)
             }
             // Whether space key needs to show the "..." popup hint for special purposes
-            if (key.isLongPressEnabled() && mHasMultipleEnabledIMEsOrSubtypes && Settings.getValues().mSpaceForLangChange) {
+            if (key.isLongPressEnabled() && hasMultipleEnabledIMEsOrSubtypes && Settings.getValues().mSpaceForLangChange) {
                 drawKeyPopupHint(key, canvas, paint, params)
             }
         } else if (code == KeyCode.LANGUAGE_SWITCH) {
@@ -727,7 +726,7 @@ class MainKeyboardView @JvmOverloads constructor(context: Context, attrs: Attrib
             }
         }
 
-        if (mLanguageOnSpacebarFormatType == LanguageOnSpacebarUtils.FORMAT_TYPE_FULL_LOCALE) {
+        if (languageOnSpacebarFormatType == LanguageOnSpacebarUtils.FORMAT_TYPE_FULL_LOCALE) {
             val fullText = subtype.fullDisplayName
             if (fitsTextIntoWidth(width, fullText, paint)) {
                 return fullText
@@ -802,7 +801,7 @@ class MainKeyboardView @JvmOverloads constructor(context: Context, attrs: Attrib
 
     override fun deallocateMemory() {
         super.deallocateMemory()
-        mDrawingPreviewPlacerView.deallocateMemory()
+        drawingPreviewPlacerView.deallocateMemory()
     }
 
     companion object {
