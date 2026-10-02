@@ -1444,8 +1444,8 @@ class InputLogicTest {
 
     // assumes we have nothing selected
     private fun getCursorPosition(): Int {
-        assertEquals(cursor, connection.expectedSelectionStart)
-        assertEquals(cursor, connection.expectedSelectionEnd)
+        assertEquals(cursor, connection.getExpectedSelectionStart())
+        assertEquals(cursor, connection.getExpectedSelectionEnd())
         return cursor
     }
 
@@ -1498,11 +1498,11 @@ class InputLogicTest {
         // RichInputConnection only returns text up to cursor
         val textBeforeComposingText = if (composingStart == -1) textBeforeCursor else text.substring(0, composingStart)
 
-        println("consistency: $selectionStart, ${connection.expectedSelectionStart}, $selectionEnd, ${connection.expectedSelectionEnd}, $textBeforeComposingText, " +
+        println("consistency: $selectionStart, ${connection.getExpectedSelectionStart()}, $selectionEnd, ${connection.getExpectedSelectionEnd()}, $textBeforeComposingText, " +
                 "$connectionTextBeforeComposingText, $composingText, $connectionComposingText, $textBeforeCursor, ${connection.getTextBeforeCursor(textBeforeCursor.length, 0)}" +
                 ", $textAfterCursor, ${connection.getTextAfterCursor(textAfterCursor.length, 0)}")
-        assertEquals(selectionStart, connection.expectedSelectionStart)
-        assertEquals(selectionEnd, connection.expectedSelectionEnd)
+        assertEquals(selectionStart, connection.getExpectedSelectionStart())
+        assertEquals(selectionEnd, connection.getExpectedSelectionEnd())
         assertEquals(textBeforeComposingText, connectionTextBeforeComposingText)
         assertEquals(expectedConnectionComposingText, connectionComposingText)
         assertEquals(textBeforeCursor, connection.getTextBeforeCursor(textBeforeCursor.length, 0).toString())
