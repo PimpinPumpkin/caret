@@ -1024,19 +1024,7 @@ public final class InputLogic {
             }
         }
 
-        // don't treat separators as for handling URLs and similar
-        //  otherwise it would work too, but whenever a separator is entered, the word is not selected
-        //  until the next character is entered, and the word is added to history
-        //  -> the changing selection would be confusing, and adding partial URLs to history is probably bad
-        if (Character.getType(codePoint) == Character.OTHER_SYMBOL
-                || (Character.getType(codePoint) == Character.UNASSIGNED && StringUtils.mightBeEmoji(codePoint)) // outdated java doesn't detect some emojis
-                || (sv.isWordSeparator(codePoint)
-                    && (Character.isWhitespace(codePoint) // whitespace is always a separator
-                        || !textBeforeCursorMayBeUrlOrSimilar(sv, false) // if text before is not URL or similar, it's a separator
-                        || (codePoint == '/' && mWordComposer.lastChar() == '/') // break composing at 2 consecutive slashes
-                    )
-                )
-        ) {
+        if (actsAsSeparatorHere(codePoint, sv)) {
             handleSeparatorEvent(event, inputTransaction, handler);
             addToHistoryIfEmoji(StringUtils.newSingleCodePointString(codePoint), sv);
         } else {
@@ -1062,26 +1050,30 @@ public final class InputLogic {
      * @param settingsValues The current settings values.
      * @param inputTransaction The transaction in progress.
      */
+    /**
+     * Whether this character ends a word where the cursor is. Symbols and emoji always do. A word
+     * separator does too, except inside something that looks like a URL or similar, where
+     * separators are part of the text: otherwise the word would not be selected until the next
+     * character is entered, the changing selection would be confusing, and partial URLs would be
+     * added to the history.
+     */
+    private boolean actsAsSeparatorHere(final int codePoint, final SettingsValues sv) {
+        if (Character.getType(codePoint) == Character.OTHER_SYMBOL) return true;
+        // outdated java doesn't detect some emojis
+        if (Character.getType(codePoint) == Character.UNASSIGNED && StringUtils.mightBeEmoji(codePoint)) return true;
+        if (!sv.isWordSeparator(codePoint)) return false;
+        return Character.isWhitespace(codePoint) // whitespace is always a separator
+                || !textBeforeCursorMayBeUrlOrSimilar(sv, false) // if text before is not URL or similar, it's a separator
+                || (codePoint == '/' && mWordComposer.lastChar() == '/'); // break composing at 2 consecutive slashes
+    }
+
     private void handleNonSeparatorEvent(final Event event, final SettingsValues settingsValues,
             final InputTransaction inputTransaction) {
         final int codePoint = event.getCodePoint();
-        // TODO: refactor this method to stop flipping isComposingWord around all the time, and
-        // make it shorter (possibly cut into several pieces). Also factor
-        // handleNonSpecialCharacterEvent which has the same name as other handle* methods but is
-        // not the same.
         boolean isComposingWord = mWordComposer.isComposingWord();
         mWordComposer.unsetBatchMode(); // relevant in case we continue a batch word with normal typing
 
-        // if we continue directly after a sometimesWordConnector, restart suggestions for the whole word
-        // (only with URL detection and suggestions enabled)
-        if (settingsValues.mUrlDetectionEnabled && settingsValues.needsToLookupSuggestions()
-                && !isComposingWord && SpaceState.NONE == inputTransaction.getSpaceState()
-                && settingsValues.mSpacingAndPunctuations.isSometimesWordConnector(mConnection.getCodePointBeforeCursor())
-                // but not if there are two consecutive sometimesWordConnectors (e.g. "...bla")
-                && !settingsValues.mSpacingAndPunctuations.isSometimesWordConnector(mConnection.getCharBeforeBeforeCursor())
-                // and not if there is no letter before the separator
-                && mConnection.hasLetterBeforeLastSpaceBeforeCursor()
-        ) {
+        if (!isComposingWord && continuesWordAfterConnector(settingsValues, inputTransaction)) {
             final CharSequence text = mConnection.textBeforeCursorUntilLastWhitespaceOrDoubleSlash();
             final TextRange range = new TextRange(text, 0, text.length(), text.length(), false);
             isComposingWord = true;
@@ -1114,27 +1106,8 @@ public final class InputLogic {
             resetEntireInputState(mConnection.getExpectedSelectionStart(), mConnection.getExpectedSelectionEnd(), true);
             isComposingWord = false;
         }
-        // We want to find out whether to start composing a new word with this character. If so,
-        // we need to reset the composing state and switch isComposingWord. The order of the
-        // tests is important for good performance.
         // We only start composing if we're not already composing.
-        if (!isComposingWord
-        // We only start composing if this is a word code point. Essentially that means it's a
-        // a letter or a word connector.
-                && settingsValues.isWordCodePoint(codePoint)
-        // We never go into composing state if suggestions are not requested.
-                && settingsValues.needsToLookupSuggestions() &&
-        // In languages with spaces, we only start composing a word when we are not already
-        // in the middle or at the end of a word. In languages without spaces, the above conditions are sufficient.
-        // NOTE: If the InputConnection is slow, we skip the text-after-cursor check since it
-        // can incur a very expensive getTextAfterCursor() lookup, potentially making the
-        // keyboard UI slow and non-responsive.
-        // TODO: Cache the text after the cursor so we don't need to go to the InputConnection
-        // each time. We are already doing this for getTextBeforeCursor().
-                (!settingsValues.mSpacingAndPunctuations.mCurrentLanguageHasSpaces
-                        || !mConnection.isCursorTouchingWord(settingsValues.mSpacingAndPunctuations,
-                                !mConnection.hasSlowInputConnection() /* checkTextAfter */)
-                        || isCursorAtStartOrAfterSeparator(settingsValues))) {
+        if (!isComposingWord && mayStartComposingWith(codePoint, settingsValues)) {
             // Reset entirely the composing state anyway, then start composing a new word unless
             // the character is a word connector. The idea here is, word connectors are not
             // separators and they should be treated as normal characters, except in the first
@@ -1157,21 +1130,66 @@ public final class InputLogic {
             }
             setComposingTextInternal(getTextWithUnderline(mWordComposer.getTypedWord()), 1);
         } else {
-            final boolean swapWeakSpace = tryStripSpaceAndReturnWhetherShouldSwapInstead(event, inputTransaction);
-
-            if (swapWeakSpace && trySwapSwapperAndSpace(event, inputTransaction)) {
-                mSpaceState = SpaceState.WEAK;
-            } else if ((settingsValues.mInputAttributes.mInputType & InputType.TYPE_MASK_CLASS) != InputType.TYPE_CLASS_TEXT
-                    && codePoint >= '0' && codePoint <= '9') {
-                // weird issue when committing text: https://github.com/HeliBorg/HeliBoard/issues/585
-                // but at the same time we don't always want to do it for numbers because it might interfere with url detection
-                // todo: consider always using sendDownUpKeyEvent for non-text-inputType
-                sendDownUpKeyEvent(codePoint - '0' + KeyEvent.KEYCODE_0);
-            } else {
-                mConnection.commitCodePoint(codePoint);
-            }
+            commitCharacterOutsideWord(event, settingsValues, inputTransaction);
         }
         inputTransaction.setRequiresUpdateSuggestions();
+    }
+
+    /**
+     * Whether a character typed right after a "sometimes word connector" (a period inside a URL, for
+     * example) continues the word in front of it, so that suggestions restart for the whole thing.
+     * Only with URL detection and suggestions enabled.
+     */
+    private boolean continuesWordAfterConnector(final SettingsValues settingsValues, final InputTransaction inputTransaction) {
+        return settingsValues.mUrlDetectionEnabled && settingsValues.needsToLookupSuggestions()
+                && SpaceState.NONE == inputTransaction.getSpaceState()
+                && settingsValues.mSpacingAndPunctuations.isSometimesWordConnector(mConnection.getCodePointBeforeCursor())
+                // but not if there are two consecutive sometimesWordConnectors (e.g. "...bla")
+                && !settingsValues.mSpacingAndPunctuations.isSometimesWordConnector(mConnection.getCharBeforeBeforeCursor())
+                // and not if there is no letter before the separator
+                && mConnection.hasLetterBeforeLastSpaceBeforeCursor();
+    }
+
+    /**
+     * Whether a new word may start composing with this character. The order of the tests is
+     * important for good performance.
+     */
+    private boolean mayStartComposingWith(final int codePoint, final SettingsValues settingsValues) {
+        // We only start composing if this is a word code point. Essentially that means it's a
+        // a letter or a word connector.
+        if (!settingsValues.isWordCodePoint(codePoint)) return false;
+        // We never go into composing state if suggestions are not requested.
+        if (!settingsValues.needsToLookupSuggestions()) return false;
+        // In languages with spaces, we only start composing a word when we are not already
+        // in the middle or at the end of a word. In languages without spaces, the above conditions are sufficient.
+        // NOTE: If the InputConnection is slow, we skip the text-after-cursor check since it
+        // can incur a very expensive getTextAfterCursor() lookup, potentially making the
+        // keyboard UI slow and non-responsive.
+        // TODO: Cache the text after the cursor so we don't need to go to the InputConnection
+        // each time. We are already doing this for getTextBeforeCursor().
+        return !settingsValues.mSpacingAndPunctuations.mCurrentLanguageHasSpaces
+                || !mConnection.isCursorTouchingWord(settingsValues.mSpacingAndPunctuations,
+                        !mConnection.hasSlowInputConnection() /* checkTextAfter */)
+                || isCursorAtStartOrAfterSeparator(settingsValues);
+    }
+
+    /** A character that is not part of a composing word goes straight into the text field. */
+    private void commitCharacterOutsideWord(final Event event, final SettingsValues settingsValues,
+            final InputTransaction inputTransaction) {
+        final int codePoint = event.getCodePoint();
+        final boolean swapWeakSpace = tryStripSpaceAndReturnWhetherShouldSwapInstead(event, inputTransaction);
+
+        if (swapWeakSpace && trySwapSwapperAndSpace(event, inputTransaction)) {
+            mSpaceState = SpaceState.WEAK;
+        } else if ((settingsValues.mInputAttributes.mInputType & InputType.TYPE_MASK_CLASS) != InputType.TYPE_CLASS_TEXT
+                && codePoint >= '0' && codePoint <= '9') {
+            // weird issue when committing text: https://github.com/HeliBorg/HeliBoard/issues/585
+            // but at the same time we don't always want to do it for numbers because it might interfere with url detection
+            // todo: consider always using sendDownUpKeyEvent for non-text-inputType
+            sendDownUpKeyEvent(codePoint - '0' + KeyEvent.KEYCODE_0);
+        } else {
+            mConnection.commitCodePoint(codePoint);
+        }
     }
 
     private boolean isCursorAtStartOrAfterSeparator(SettingsValues settingsValues) {
