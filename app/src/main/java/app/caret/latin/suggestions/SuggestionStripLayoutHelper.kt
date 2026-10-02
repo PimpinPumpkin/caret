@@ -15,6 +15,9 @@ import android.graphics.Paint
 import android.graphics.Paint.Align
 import android.graphics.Rect
 import android.graphics.Typeface
+import android.graphics.drawable.LayerDrawable
+import android.graphics.drawable.InsetDrawable
+import android.graphics.drawable.GradientDrawable
 import android.graphics.drawable.BitmapDrawable
 import android.graphics.drawable.Drawable
 import android.text.Spannable
@@ -387,6 +390,22 @@ class SuggestionStripLayoutHelper(
         return (1.0f - centerSuggestionWeight) / (suggestionsCountInStrip - 1)
     }
 
+    // Caret: the word that space will put in sits in a pill, so a correction is seen before it happens
+    private val plainBackgrounds = HashMap<TextView, Drawable?>()
+    private val pillInsetX = (4 * context.resources.displayMetrics.density).toInt()
+    private val pillInsetY = (7 * context.resources.displayMetrics.density).toInt()
+
+    private fun markAsNextWord(wordView: TextView) {
+        val plain = plainBackgrounds.getOrPut(wordView) { wordView.background }
+        val pill = GradientDrawable().apply {
+            shape = GradientDrawable.RECTANGLE
+            cornerRadius = wordView.resources.displayMetrics.density * 100
+            setColor(applyAlpha(colorAutoCorrect, 0.13f))
+        }
+        val inset = InsetDrawable(pill, pillInsetX, pillInsetY, pillInsetX, pillInsetY)
+        wordView.background = if (plain == null) inset else LayerDrawable(arrayOf(plain, inset))
+    }
+
     private fun setupWordViewsAndReturnStartIndexOfMoreSuggestions(
         suggestedWords: SuggestedWords, maxSuggestionInStrip: Int
     ): Int {
@@ -395,6 +414,7 @@ class SuggestionStripLayoutHelper(
             val wordView = wordViews.get(positionInStrip)
             wordView.setText(null as CharSequence?)
             wordView.setTag(null)
+            plainBackgrounds[wordView]?.let { wordView.background = it }
             // Make this inactive for touches in {@link #layoutWord(int,int)}.
             if (SuggestionStripView.DEBUG_SUGGESTIONS) {
                 debugInfoViews.get(positionInStrip).setText(null as CharSequence?)
@@ -418,6 +438,8 @@ class SuggestionStripLayoutHelper(
             wordView.setText(getStyledSuggestedWord(suggestedWords, indexInSuggestedWords))
             wordView.setTextColor(getSuggestionTextColor(suggestedWords, indexInSuggestedWords))
             KeyboardTypeface.applyToTextView(wordView)
+            if (indexInSuggestedWords == SuggestedWords.INDEX_OF_AUTO_CORRECTION && suggestedWords.willAutoCorrect)
+                markAsNextWord(wordView)
             if (SuggestionStripView.DEBUG_SUGGESTIONS) {
                 debugInfoViews.get(positionInStrip).setText(suggestedWords.getDebugString(indexInSuggestedWords))
             }
@@ -442,6 +464,7 @@ class SuggestionStripLayoutHelper(
             // {@link TextView#getTag()} is used to get the index in suggestedWords at
             // {@link SuggestionStripView#onClick(View)}.
             wordView.setTag(positionInStrip)
+            plainBackgrounds[wordView]?.let { wordView.background = it }
             wordView.setText(punctuation)
             wordView.setContentDescription(punctuation)
             wordView.setTextScaleX(1.0f)

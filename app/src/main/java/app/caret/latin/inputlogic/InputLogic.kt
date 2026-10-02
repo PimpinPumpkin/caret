@@ -54,6 +54,7 @@ import app.caret.latin.define.DebugFlags
 import app.caret.latin.dictionary.Dictionary
 import app.caret.latin.dictionary.DictionaryFactory
 import app.caret.latin.settings.Settings
+import app.caret.latin.swipe.FutoSwipe
 import app.caret.latin.settings.SettingsValues
 import app.caret.latin.settings.SpacingAndPunctuations
 import app.caret.latin.suggestions.SuggestionStripViewAccessor
@@ -2236,6 +2237,14 @@ class InputLogic(
     private val currentInputEditorInfo: EditorInfo?
         get() = latinIME.getCurrentInputEditorInfo()
 
+    /** The text in front of the word being typed or swiped, for the swipe models. */
+    private fun textBeforeWord(): String? {
+        val text = connection.getTextBeforeCursor(FutoSwipe.CONTEXT_LENGTH, 0)?.toString() ?: return null
+        // a word typed key by key is already in the text field, a swiped one is not there yet
+        val typed = if (wordComposer.isComposingWord && !wordComposer.isBatchMode) wordComposer.typedWord else ""
+        return if (typed.isNotEmpty() && text.endsWith(typed)) text.dropLast(typed.length) else text
+    }
+
     /**
      * Get n-gram context from the nth previous word before the cursor as context
      * for the suggestion process.
@@ -2656,6 +2665,7 @@ class InputLogic(
         val settingsValues = Settings.values
         wordComposer.adviseCapitalizedModeBeforeFetchingSuggestions(
                 getActualCapsMode(settingsValues, KeyboardSwitcher.getInstance().getKeyboardCapsMode()))
+        FutoSwipe.textBeforeWord = textBeforeWord()
         try {
             val words = suggest.getSuggestedWords(wordComposer.copy(),
                     getNgramContextFromNthPreviousWordForSuggestion(

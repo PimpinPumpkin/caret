@@ -5,6 +5,7 @@ import android.content.Context
 import com.android.inputmethod.latin.BinaryDictionary
 import app.caret.keyboard.Keyboard
 import app.caret.latin.NgramContext
+import app.caret.latin.define.DebugFlags
 import app.caret.latin.SuggestedWords.SuggestedWordInfo
 import app.caret.latin.common.ComposedData
 import app.caret.latin.dictionary.Dictionary
@@ -33,7 +34,8 @@ object FutoSwipe {
     const val DECODER_EN_QWERTY = "magic_macaw"
     const val CONTEXT_LM_EN = "hungry_jellyfish"
     private const val MAX_LETTERS = 48 // limit of the library's trie
-    private const val MAX_CONTEXT_WORDS = 8
+    private const val MAX_CONTEXT_WORDS = 16
+    private const val CONTEXT_CHARS = 240
     private const val TOP_SCORE = 1_000_000
     // half a point of engine score is about as far as "close enough to prefer a known word" goes
     private const val SCORE_PER_UNIT = 140_000f
@@ -157,7 +159,9 @@ object FutoSwipe {
         val y = FloatArray(size) { swipeLayout.normalizeY(ys[it]) }
         val t = FloatArray(size) { (times[it] - times[0]).toFloat() }
 
-        engine.setContext(contextWords(ngramContext))
+        val before = contextWords(ngramContext)
+        if (DebugFlags.DEBUG_ENABLED) Log.d(TAG, "swipe after ${before.size} words")
+        engine.setContext(before)
         val results = try {
             engine.recognize(x, y, t, topK = 8)
         } catch (e: Exception) {
@@ -251,13 +255,35 @@ object FutoSwipe {
         }
     }
 
+    /**
+     * The text before the word being entered, set by the input logic right before it asks for
+     * suggestions. The n-gram context only carries three words and stops at any punctuation, while
+     * the models were trained on the whole sentence so far.
+     */
+    @Volatile
+    var textBeforeWord: String? = null
+
+    /** How much text before the cursor is worth handing over in [textBeforeWord]. */
+    const val CONTEXT_LENGTH = CONTEXT_CHARS
+
     private fun contextWords(ngramContext: NgramContext): List<String> {
+        textBeforeWord?.let { return sentenceWords(it, MAX_CONTEXT_WORDS) }
         val words = ArrayList<String>()
         for (n in minOf(ngramContext.prevWordCount, MAX_CONTEXT_WORDS) downTo 1) {
             val word = ngramContext.getNthPrevWord(n)?.toString() ?: continue
             if (word.isNotEmpty() && word != NgramContext.BEGINNING_OF_SENTENCE_TAG) words.add(word)
         }
         return words
+    }
+
+    /** The last [max] words of the sentence that [text] ends in, without punctuation. */
+    fun sentenceWords(text: String, max: Int): List<String> {
+        val trimmed = text.trimEnd { it == ' ' }
+        val sentenceStart = trimmed.indexOfLast { it == '.' || it == '!' || it == '?' || it == '\n' } + 1
+        return trimmed.substring(sentenceStart).split(' ', '\t')
+            .map { word -> word.trim { !it.isLetterOrDigit() } }
+            .filter { it.isNotEmpty() }
+            .takeLast(max)
     }
 
     /**
@@ -325,7 +351,7 @@ object FutoSwipe {
             return null
         }
         if (newDictionary)
-            Log.i(TAG, "ready for $locale, ${swipeLayout.letters.length} letters, decoder=${decoderPath.isNotEmpty()}, lm=$useLm")
+            Log.i(TAG, "ready for $locale, ${swipeLayout.letters.length} letters, decoder=${decoderPath.isNotEmpty()}, lm=$useLm, scoring=${engine.scoring}")
         loadedLocale = locale
         layout = swipeLayout
         return swipeLayout

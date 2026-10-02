@@ -375,6 +375,7 @@
     <string name="resize_reset">Reset</string>
     <string name="resize_done">Done</string>
     <string name="split" tools:keep="@string/split">Split keyboard</string>
+    <string name="language_switch" tools:keep="@string/language_switch">Switch language</string>
     <string name="full_left" tools:keep="@string/full_left">Full left</string>
     <string name="full_right" tools:keep="@string/full_right">Full right</string>
     <string name="page_start" tools:keep="@string/page_start">Page start</string>

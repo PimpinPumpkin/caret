@@ -64,6 +64,7 @@ private fun setToolbarButtonActivatedState(button: ImageButton) {
 
 fun getCodeForToolbarKey(key: ToolbarKey) = Settings.instance.getCustomToolbarKeyCode(key) ?: when (key) {
     VOICE -> KeyCode.VOICE_INPUT
+    LANGUAGE_SWITCH -> KeyCode.LANGUAGE_SWITCH
     CLIPBOARD -> KeyCode.CLIPBOARD
     NUMPAD -> KeyCode.NUMPAD
     DPAD -> KeyCode.DPAD
@@ -124,7 +125,7 @@ fun getCodeForToolbarKeyLongClick(key: ToolbarKey) = Settings.instance.getCustom
 enum class ToolbarKey {
     VOICE, CLIPBOARD, NUMPAD, DPAD, UNDO, REDO, SETTINGS, SELECT_ALL, SELECT_WORD, COPY, CUT, PASTE, ONE_HANDED, FLOATING, SPLIT,
     INCOGNITO, AUTOCORRECT, CLEAR_CLIPBOARD, CLOSE_HISTORY, EMOJI, LEFT, RIGHT, UP, DOWN, WORD_LEFT, WORD_RIGHT,
-    PAGE_UP, PAGE_DOWN, FULL_LEFT, FULL_RIGHT, PAGE_START, PAGE_END, BACKGROUND_GATHERING, RESIZE, MORE
+    PAGE_UP, PAGE_DOWN, FULL_LEFT, FULL_RIGHT, PAGE_START, PAGE_END, BACKGROUND_GATHERING, RESIZE, MORE, LANGUAGE_SWITCH
 }
 
 enum class ToolbarMode {
@@ -141,7 +142,8 @@ val defaultToolbarPref by lazy {
 }
 
 val defaultPinnedToolbarPref = entries.filterNot { it == CLOSE_HISTORY }.joinToString(Separators.ENTRY) {
-    it.name + Separators.KV + (it == VOICE) // Caret: the microphone sits on the strip by default
+    // Caret: the microphone and the language key sit on the strip by default
+    it.name + Separators.KV + (it == VOICE || it == LANGUAGE_SWITCH)
 }
 
 val defaultClipboardToolbarPref by lazy {
@@ -164,8 +166,10 @@ private fun upgradeToolbarPref(prefs: SharedPreferences, pref: String, default: 
     val splitDefault = defaultToolbarPref.split(Separators.ENTRY)
     splitDefault.forEach { entry ->
         val keyWithSeparator = entry.substringBefore(Separators.KV) + Separators.KV
+        // Caret: the language key arrives pinned, it only shows with more than one language anyway
+        val enabled = pref == Settings.PREF_PINNED_TOOLBAR_KEYS && keyWithSeparator == LANGUAGE_SWITCH.name + Separators.KV
         if (list.none { it.startsWith(keyWithSeparator) })
-            list.add("${keyWithSeparator}false")
+            list.add("$keyWithSeparator$enabled")
     }
     // likely not needed, but better prepare for possibility of key removal
     list.removeAll {

@@ -4,6 +4,7 @@
 # Needs scripts/build-swipe.sh and scripts/swipe-models.sh install to have run, and one swipe typed
 # in Caret on the device so the word list exists.
 #   scripts/swipe-benchmark.sh [swipes]     default 2000; device from ANDROID_SERIAL
+#   CONTEXT_WORDS=3 limits the words given as context in front of each swipe
 # Fails when top-1 accuracy is more than one point under swipe/benchmark-baseline.txt.
 set -e
 cd "$(dirname "$0")/.."
@@ -23,6 +24,23 @@ fi
 LINES=$(($(wc -l < "$DATA/test_head.jsonl")))
 [ "$N" -lt "$LINES" ] || N=$((LINES - 1))
 head -n "$N" "$DATA/test_head.jsonl" > "$DATA/bench.jsonl"
+if [ -n "$CONTEXT_WORDS" ]; then
+    # keep only that many words in front of each swiped word, to see what the context is worth
+    python3 - "$DATA/bench.jsonl" "$CONTEXT_WORDS" <<'P'
+import json, sys
+path, keep = sys.argv[1], int(sys.argv[2])
+out = []
+for line in open(path):
+    j = json.loads(line)
+    if "sentence" in j and "word_idx" in j:
+        words = j["sentence"].split()
+        before = words[max(0, j["word_idx"] - keep):j["word_idx"]] if keep > 0 else []
+        j["sentence"] = " ".join(before + words[j["word_idx"]:])
+        j["word_idx"] = len(before)
+    out.append(json.dumps(j))
+open(path, "w").write("\n".join(out) + "\n")
+P
+fi
 
 WORDS=$(adb shell "run-as $PKG sh -c 'ls cache/swipe_words/en-US_*.combined'" | tr -d '\r' | head -1)
 [ -n "$WORDS" ] || { echo "no word list on the device: swipe one word in Caret first" >&2; exit 1; }

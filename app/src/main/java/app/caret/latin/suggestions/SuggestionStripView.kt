@@ -52,6 +52,7 @@ import app.caret.latin.utils.addPinnedKey
 import app.caret.latin.utils.createToolbarKey
 import app.caret.latin.utils.dpToPx
 import app.caret.latin.utils.getEnabledToolbarKeys
+import app.caret.latin.RichInputMethodManager
 import app.caret.latin.utils.getPinnedToolbarKeys
 import app.caret.latin.utils.prefs
 import app.caret.latin.utils.removeFirst
@@ -177,6 +178,11 @@ class SuggestionStripView(context: Context, attrs: AttributeSet?, defStyle: Int)
                 (button.layoutParams as LinearLayout.LayoutParams).weight = 0f
                 if (context.prefs().getBoolean(PREF_MIC_ON_LEFT, false)) pinnedKeysStart.addView(button)
                 else pinnedKeys.addView(button)
+            } else if (pinnedKey == ToolbarKey.LANGUAGE_SWITCH) {
+                // Caret: one tap on the far left changes the language
+                button.layoutParams = toolbarKeyLayoutParams
+                setupKey(button, colors)
+                pinnedKeysStart.addView(button, 0)
             } else {
                 button.layoutParams = toolbarKeyLayoutParams
                 setupKey(button, colors)
@@ -549,6 +555,10 @@ class SuggestionStripView(context: Context, attrs: AttributeSet?, defStyle: Int)
         toolbar.findViewWithTag<View>(ToolbarKey.VOICE)?.isVisible = show
         pinnedKeys.findViewWithTag<View>(ToolbarKey.VOICE)?.isVisible = show
         pinnedKeysStart.findViewWithTag<View>(ToolbarKey.VOICE)?.isVisible = show
+        // nothing to switch to with a single language
+        val languages = RichInputMethodManager.getInstance().hasMultipleEnabledSubtypesInThisIme(true)
+        toolbar.findViewWithTag<View>(ToolbarKey.LANGUAGE_SWITCH)?.isVisible = languages
+        pinnedKeysStart.findViewWithTag<View>(ToolbarKey.LANGUAGE_SWITCH)?.isVisible = languages
     }
 
     private fun updateKeys() {
