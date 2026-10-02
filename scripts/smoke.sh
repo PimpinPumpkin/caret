@@ -57,18 +57,19 @@ check "tap typing" "caret" "$(field_text | tr 'A-Z' 'a-z')"
 
 if adb shell "run-as $PKG ls files/swipe_models/honorable_sturgeon/model_fp32.pte" >/dev/null 2>&1; then
     clear_field
-    # straight-line swipes are crude: these words read reliably, accuracy on real swipes is the benchmark's job
-    python3 scripts/keys.py swipe hello this is working
-    # Injected swipes arrive with uneven timing, so now and then one word reads wrong.
-    # Three of four right still shows the engine is wired up; accuracy is the benchmark's job.
+    # Straight-line swipes with uneven timing, yet the engine reads them. When the letters were
+    # once handed to it in the wrong order, the first four words still passed and the last four
+    # did not, so the harder words are here on purpose.
+    WORDS="hello this is working would love some coffee"
+    python3 scripts/keys.py swipe $WORDS
     got=$(field_text | tr 'A-Z' 'a-z')
     right=0
     set -- $got
-    for want in hello this is working; do
+    for want in $WORDS; do
         [ "$1" = "$want" ] && right=$((right + 1))
         [ $# -gt 0 ] && shift
     done
-    if [ "$right" -ge 3 ]; then echo "ok   swipe typing ($right of 4 words): $got"; else echo "FAIL swipe typing ($right of 4 words): $got"; fail=1; fi
+    if [ "$right" -ge 7 ]; then echo "ok   swipe typing ($right of 8 words): $got"; else echo "FAIL swipe typing ($right of 8 words): $got"; fail=1; fi
 else
     echo "skip swipe typing: models are not installed"
 fi

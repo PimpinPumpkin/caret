@@ -25,10 +25,20 @@ class SwipeLayoutTest {
         return keys
     }
 
-    @Test fun lettersAreInReadingOrder() {
+    @Test fun lettersAreInAlphabeticalOrderAsTheLibraryCountsThem() {
         val layout = assertNotNull(SwipeLayout.fromKeys(qwerty(164).shuffled(), 1080, 48))
-        assertEquals("qwertyuiopasdfghjklzxcvbnm", layout.letters)
+        assertEquals("abcdefghijklmnopqrstuvwxyz", layout.letters)
         assertTrue(layout.isQwerty)
+    }
+
+    @Test fun anotherArrangementOfTheLettersIsNotQwerty() {
+        // y and z change places, as on a German keyboard
+        val qwertz = qwerty(164).map {
+            when (it.code) { 'y'.code -> it.copy(code = 'z'.code); 'z'.code -> it.copy(code = 'y'.code); else -> it }
+        }
+        val layout = assertNotNull(SwipeLayout.fromKeys(qwertz, 1080, 48))
+        assertEquals("abcdefghijklmnopqrstuvwxyz", layout.letters)
+        assertTrue(!layout.isQwerty)
     }
 
     @Test fun centersMatchTheLibrarysQwertyLayout() {
@@ -63,7 +73,7 @@ class SwipeLayoutTest {
 
     @Test fun shiftedKeysCountOnce() {
         val upper = qwerty(164).map { if (Character.isLetter(it.code)) it.copy(code = Character.toUpperCase(it.code)) else it }
-        assertEquals("qwertyuiopasdfghjklzxcvbnm", assertNotNull(SwipeLayout.fromKeys(upper, 1080, 48)).letters)
+        assertEquals("abcdefghijklmnopqrstuvwxyz", assertNotNull(SwipeLayout.fromKeys(upper, 1080, 48)).letters)
     }
 
     @Test fun keyboardsWithoutLettersGiveNoLayout() {

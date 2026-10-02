@@ -55,6 +55,7 @@ import app.caret.latin.dictionary.Dictionary
 import app.caret.latin.dictionary.DictionaryFactory
 import app.caret.latin.settings.Settings
 import app.caret.latin.swipe.FutoSwipe
+import app.caret.latin.swipe.SwipeRecorder
 import app.caret.latin.settings.SettingsValues
 import app.caret.latin.settings.SpacingAndPunctuations
 import app.caret.latin.suggestions.SuggestionStripViewAccessor
@@ -282,6 +283,7 @@ class InputLogic(
             val event = Event.createPunctuationSuggestionPickedEvent(suggestionInfo)
             return onCodeInput(settingsValues, event, keyboardCapsMode, currentKeyboardScript, handler)
         }
+        if (wordComposer.isBatchMode) SwipeRecorder.onPicked(latinIME, suggestionInfo.word)
         if (useBackgroundGathering) {
             if (wordComposer.isBatchMode)
                 // should only happen selecting different suggestion for gesture typed word
@@ -1451,6 +1453,7 @@ class InputLogic(
     private fun backspaceInComposingWord(event: Event, inputTransaction: InputTransaction) {
         if (wordComposer.isBatchMode) {
             val rejectedSuggestion = wordComposer.typedWord
+            SwipeRecorder.onDeleted(latinIME)
             if (useBackgroundGathering)
                 BackgroundGatheringCache.onRejectedSuggestion(rejectedSuggestion)
             wordComposer.reset()

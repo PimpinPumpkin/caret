@@ -168,6 +168,7 @@ object FutoSwipe {
             Log.w(TAG, "recognize failed", e)
             return emptyList()
         }
+        SwipeRecorder.onRecognized(context, swipeLayout, locale, xs, ys, times, size, before, results)
         // Scores keep the engine's gaps. Suggest prefers a candidate that was typed before in this
         // context when it is within 7% of the best score, so a clearly worse candidate must also
         // be clearly lower here, or one bad swipe keeps coming back.
@@ -358,10 +359,11 @@ object FutoSwipe {
     }
 }
 
-/** Letter keys of a keyboard in the coordinates the library wants: 0..1 over the letter area. */
+/** Letter keys of a keyboard, in alphabetical order and in the coordinates the library wants: 0..1 over the letter area. */
 class SwipeLayout(val letters: String, val cx: FloatArray, val cy: FloatArray,
-                  private val width: Float, private val top: Float, private val height: Float) {
-    val isQwerty get() = letters.startsWith("qwertyuiop") && letters.length == 26
+                  val width: Float, val top: Float, val height: Float,
+                  /** The keys are the 26 letters in QWERTY order, which is what the English decoder model was trained on. */
+                  val isQwerty: Boolean = false) {
 
     fun sameAs(other: SwipeLayout) = letters == other.letters && width == other.width && top == other.top
         && height == other.height && cx.contentEquals(other.cx) && cy.contentEquals(other.cy)
@@ -374,7 +376,7 @@ class SwipeLayout(val letters: String, val cx: FloatArray, val cy: FloatArray,
             fromKeys(keyboard.getSortedKeys().map { KeyBox(it.code, it.getX(), it.getY(), it.width, it.height) }, keyboard.occupiedWidth, maxLetters)
 
         /**
-         * Letters in reading order with their centers. x runs 0..1 over the keyboard width, y runs
+         * Letters with their centers. x runs 0..1 over the keyboard width, y runs
          * 0..1 from the top of the first letter row to the bottom of the last one, so a number row
          * above or a bottom row below does not shift the letters.
          */
@@ -390,12 +392,17 @@ class SwipeLayout(val letters: String, val cx: FloatArray, val cy: FloatArray,
             val width = keyboardWidth.toFloat()
             val height = bottom - top
             if (width <= 0f || height <= 0f) return null
-            val letters = String(CharArray(keys.size) { Character.toLowerCase(keys[it].code).toChar() })
+            val reading = String(CharArray(keys.size) { Character.toLowerCase(keys[it].code).toChar() })
+            // The library takes the letters in alphabetical order, as its own layout files have
+            // them: its decoder model counts letters that way. Handed over in keyboard order the
+            // decoder reads every letter as another one, and swipes come out as near misses.
+            val sorted = keys.sortedBy { Character.toLowerCase(it.code) }
             return SwipeLayout(
-                letters,
-                FloatArray(keys.size) { (keys[it].x + keys[it].width / 2f) / width },
-                FloatArray(keys.size) { (keys[it].y + keys[it].height / 2f - top) / height },
-                width, top, height
+                String(CharArray(sorted.size) { Character.toLowerCase(sorted[it].code).toChar() }),
+                FloatArray(sorted.size) { (sorted[it].x + sorted[it].width / 2f) / width },
+                FloatArray(sorted.size) { (sorted[it].y + sorted[it].height / 2f - top) / height },
+                width, top, height,
+                isQwerty = reading == "qwertyuiopasdfghjklzxcvbnm"
             )
         }
     }

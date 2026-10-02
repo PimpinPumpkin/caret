@@ -20,6 +20,10 @@ import app.caret.settings.Setting
 import app.caret.settings.SettingsWithoutKey
 import app.caret.settings.preferences.SwipeModelsPreference
 import app.caret.latin.swipe.FutoSwipe
+import app.caret.latin.swipe.SwipeRecorder
+import app.caret.settings.preferences.SwipePracticePreference
+import app.caret.settings.preferences.SwipeRecordingDeletePreference
+import app.caret.settings.preferences.SwipeRecordingSavePreference
 import app.caret.settings.SearchSettingsScreen
 import app.caret.settings.SettingsActivity
 import app.caret.settings.preferences.SliderPreference
@@ -44,7 +48,7 @@ fun GestureTypingScreen(
     val items = listOf(
         if (FutoSwipe.hasLibrary()) SettingsWithoutKey.SWIPE_MODELS else null,
         if (FutoSwipe.isInstalled(ctx) && FutoSwipe.hasOtherLibrary) FutoSwipe.PREF_ENABLED else null,
-    ) + if (!haveGestures) emptyList() else listOf(
+    ) + (if (!haveGestures) emptyList() else listOf(
         Settings.PREF_GESTURE_INPUT,
         if (gestureEnabled)
             Settings.PREF_GESTURE_PREVIEW_TRAIL else null,
@@ -59,6 +63,12 @@ fun GestureTypingScreen(
         if (gestureEnabled &&
             (prefs.getBoolean(Settings.PREF_GESTURE_PREVIEW_TRAIL, Defaults.PREF_GESTURE_PREVIEW_TRAIL) || gestureFloatingPreviewEnabled))
             Settings.PREF_GESTURE_TRAIL_FADEOUT_DURATION else null
+        )) + if (!FutoSwipe.isActive(ctx)) emptyList() else listOf(
+            R.string.swipe_recording_category,
+            SwipeRecorder.PREF_ENABLED,
+            SettingsWithoutKey.SWIPE_PRACTICE,
+            SettingsWithoutKey.SWIPE_RECORDING_SAVE,
+            SettingsWithoutKey.SWIPE_RECORDING_DELETE,
         )
     SearchSettingsScreen(
         onClickBack = onClickBack,
@@ -74,6 +84,18 @@ fun createGestureTypingSettings(context: Context) = listOf(
     Setting(context, FutoSwipe.PREF_ENABLED, R.string.swipe_engine_futo, R.string.swipe_engine_futo_summary) {
         val ctx = LocalContext.current
         SwitchPreference(it, true) { FutoSwipe.refreshAvailability(ctx) }
+    },
+    Setting(context, SwipeRecorder.PREF_ENABLED, R.string.swipe_recording, R.string.swipe_recording_summary) {
+        SwitchPreference(it, false)
+    },
+    Setting(context, SettingsWithoutKey.SWIPE_PRACTICE, R.string.swipe_practice, R.string.swipe_practice_summary) {
+        SwipePracticePreference(it)
+    },
+    Setting(context, SettingsWithoutKey.SWIPE_RECORDING_SAVE, R.string.swipe_recording_save) {
+        SwipeRecordingSavePreference(it)
+    },
+    Setting(context, SettingsWithoutKey.SWIPE_RECORDING_DELETE, R.string.swipe_recording_delete) {
+        SwipeRecordingDeletePreference(it)
     },
     Setting(context, Settings.PREF_GESTURE_INPUT, R.string.gesture_input, R.string.gesture_input_summary) {
         SwitchPreference(it, Defaults.PREF_GESTURE_INPUT)

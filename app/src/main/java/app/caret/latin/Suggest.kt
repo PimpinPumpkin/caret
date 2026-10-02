@@ -21,6 +21,7 @@ import app.caret.latin.dictionary.Dictionary
 import app.caret.latin.settings.Settings
 import app.caret.latin.settings.SettingsValuesForSuggestion
 import app.caret.latin.suggestions.SuggestionStripView
+import app.caret.latin.swipe.SwipeRecorder
 import app.caret.latin.utils.AutoCorrectionUtils
 import app.caret.latin.utils.Log
 import app.caret.latin.utils.BackgroundGatheringCache
@@ -335,6 +336,7 @@ class Suggest(private val dictionaryFacilitator: DictionaryFacilitator) {
             suggestionsContainer
         }
 
+        if (inputStyle == SuggestedWords.INPUT_STYLE_TAIL_BATCH) SwipeRecorder.onCommitted(pseudoTypedWordInfo?.word)
         if (useBackgroundGathering && inputStyle == SuggestedWords.INPUT_STYLE_TAIL_BATCH) {
             val wordData = WordData(null, suggestionResults, wordComposer.getComposedDataSnapshot(),
                 ngramContext, keyboard, inputStyle, false, pseudoTypedWordInfo)
