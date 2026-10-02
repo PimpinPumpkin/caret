@@ -137,3 +137,26 @@ well, and hands dictation to Alyo through the microphone key.
 5. Gboard look for the keyboard surface. Screenshot tests land with it.
 6. M3 Expressive settings.
 7. Refactor the legacy core in small pieces, only where tests cover it.
+
+## Refactoring the legacy core
+
+Rules:
+- Tests first. Before a piece is touched, every branch of it has a test in `InputLogicTest` (or a
+  new test file), including the misbehaving-field cases where they apply.
+- One piece per commit, and a commit that moves code does not change behavior.
+- After each piece: `scripts/test.sh`, then `scripts/smoke.sh` on the emulator, then try the
+  touched behavior by hand on the emulator.
+- Converting a file to Kotlin is its own commit, after the file has been split into pieces small
+  enough to review.
+
+Done:
+- Backspace (`handleBackspaceEvent`): six new tests, then split into `backspaceInComposingWord`,
+  `revertOnBackspace`, `backspaceSelection`, `backspaceWithKeyEvents`, `backspaceBeforeCursor`.
+
+Next, in this order:
+1. Picking a suggestion and committing a word (`onPickSuggestionManually`, `commitChosenWord`).
+2. Space and separators (`handleSeparatorEvent`), including autospace and double-space period.
+3. Plain character input (`handleNonSeparatorEvent`).
+4. Swipe input (`onStartBatchInput` to `onEndBatchInput`).
+5. `RichInputConnection`: the cached picture of the text field.
+6. `LatinIME` and `PointerTracker`.
