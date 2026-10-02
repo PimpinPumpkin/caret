@@ -26,7 +26,7 @@ import app.caret.keyboard.KeyboardView
  * To implement accessibility mode, the target keyboard view has to:
  *
  *
- * - Call [.setKeyboard] when a new keyboard is set to the keyboard view.
+ * - Set [keyboard] when a new keyboard is set to the keyboard view.
  * - Dispatch a hover event by calling [.onHoverEnter].
  *
  * @param <KV> The keyboard view class type.
@@ -50,7 +50,6 @@ open class KeyboardAccessibilityDelegate<KV : KeyboardView>(
             if (keyboard == null) {
                 return
             }
-            cachedNodeProvider?.setKeyboard(keyboard)
             field = keyboard
         }
 

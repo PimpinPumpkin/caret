@@ -49,17 +49,13 @@ class KeyboardAccessibilityNodeProvider<KV : KeyboardView>(
     private var accessibilityFocusedView = UNDEFINED
     /** The virtual view identifier for the hovering node.  */
     private var hoveringNodeId = UNDEFINED
-    /** The current keyboard.  */
-    private var keyboard: Keyboard? = keyboardView.keyboard
-
     /**
-     * Sets the keyboard represented by this node provider.
-     *
-     * @param keyboard The keyboard that is being set to the keyboard view.
+     * The current keyboard, read from the view on every use. The provider outlives keyboard
+     * changes, and the view can get a new keyboard while accessibility is off, when nobody tells
+     * the delegate.
      */
-    fun setKeyboard(keyboard: Keyboard?) {
-        this.keyboard = keyboard
-    }
+    private val keyboard: Keyboard?
+        get() = keyboardView.keyboard
 
     private fun getKeyOf(virtualViewId: Int): Key? {
         val currentKeyboard = keyboard ?: return null
