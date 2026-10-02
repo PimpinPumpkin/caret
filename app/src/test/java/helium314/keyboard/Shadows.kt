@@ -252,8 +252,9 @@ class ShadowInputMethodService {
             return false
         }
         override fun setSelection(p0: Int, p1: Int): Boolean {
-            selectionStart = p0
-            selectionEnd = p1
+            // a real field keeps the selection inside its text
+            selectionStart = p0.coerceIn(0, text.length)
+            selectionEnd = p1.coerceIn(0, text.length)
             // todo: call InputMethodService.onUpdateSelection(int, int, int, int, int, int), but only after batch edit is done!
             return true
         }
@@ -331,7 +332,12 @@ class ShadowInputMethodService {
         override fun deleteSurroundingTextInCodePoints(p0: Int, p1: Int): Boolean = TODO("Not yet implemented")
         override fun commitCompletion(p0: CompletionInfo?): Boolean = TODO("Not yet implemented")
         override fun performEditorAction(p0: Int): Boolean = TODO("Not yet implemented")
-        override fun performContextMenuAction(p0: Int): Boolean = TODO("Not yet implemented")
+        override fun performContextMenuAction(p0: Int): Boolean {
+            if (p0 != android.R.id.selectAll) TODO("Not yet implemented")
+            selectionStart = 0
+            selectionEnd = text.length
+            return true
+        }
         override fun clearMetaKeyStates(p0: Int): Boolean = TODO("Not yet implemented")
         override fun reportFullscreenMode(p0: Boolean): Boolean = TODO("Not yet implemented")
         override fun performPrivateCommand(p0: String?, p1: Bundle?): Boolean = TODO("Not yet implemented")

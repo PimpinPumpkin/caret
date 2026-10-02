@@ -914,6 +914,74 @@ class InputLogicTest {
         assertEquals("hello there", text)
     }
 
+    // ------- function keys, which had no test (Caret) -------
+
+    /**
+     * For keys that move the selection through the text field: a real field then reports the new
+     * selection to the keyboard, the fake one does not, so the test does it.
+     */
+    private fun selectionKeyPress(keyCode: Int) {
+        val oldStart = selectionStart
+        val oldEnd = selectionEnd
+        rawKey(keyCode)
+        latinIME.onUpdateSelection(oldStart, oldEnd, selectionStart, selectionEnd, composingStart, composingEnd)
+        handleMessages()
+        checkConnectionConsistency()
+    }
+
+    @Test fun `select all selects the whole text`() {
+        setText("hello there")
+        selectionKeyPress(KeyCode.CLIPBOARD_SELECT_ALL)
+        assertEquals(0, selectionStart)
+        assertEquals(11, selectionEnd)
+    }
+
+    @Test fun `select word selects the word at the cursor`() {
+        setText("hello there")
+        selectionKeyPress(KeyCode.CLIPBOARD_SELECT_WORD)
+        assertEquals("there", selectedText)
+    }
+
+    @Test fun `cut removes the selection`() {
+        setText("hello there")
+        setCursorPosition(6, 11)
+        functionalKeyPress(KeyCode.CLIPBOARD_CUT)
+        assertEquals("hello ", text)
+    }
+
+    @Test fun `cut without a selection changes nothing`() {
+        setText("hello there")
+        functionalKeyPress(KeyCode.CLIPBOARD_CUT)
+        assertEquals("hello there", text)
+    }
+
+    // In a field that ignores the key event for this (Compose text fields do), the keyboard moves
+    // the cursor itself. It used to keep composing the old word, so the next letter landed in that
+    // word instead of at the cursor.
+    @Test fun `typing after move to start of page goes to the start`() {
+        setText("hello there")
+        assertEquals("there", composingText)
+        selectionKeyPress(KeyCode.MOVE_START_OF_PAGE)
+        assertEquals(0, cursor)
+        rawType("x")
+        assertEquals("xhello there", text)
+    }
+
+    @Test fun `typing after move to end of page goes to the end`() {
+        setText("hello there")
+        setCursorPosition(3)
+        selectionKeyPress(KeyCode.MOVE_END_OF_PAGE)
+        assertEquals(11, cursor)
+        rawType("x")
+        assertEquals("hello therex", text)
+    }
+
+    @Test fun `shift and enter adds a line break`() {
+        chainInput("hello")
+        functionalKeyPress(KeyCode.SHIFT_ENTER)
+        assertEquals("hello\n", text)
+    }
+
     // ------- separators, branches that had no test (Caret) -------
 
     private fun pickPunctuation(mark: String) {

@@ -887,6 +887,9 @@ public final class InputLogic {
                 if (mConnection.getExpectedSelectionStart() == selectionStart1 && mConnection.getExpectedSelectionEnd() == selectionEnd1) {
                     // unchanged -> try a different method (necessary for compose fields)
                     final int newEnd = (event.getMetaState() & KeyEvent.META_SHIFT_MASK) != 0 ? selectionEnd1 : 0;
+                    // Caret: let go of the word being composed first, or the next letter is
+                    // added to that word at its old place instead of at the cursor
+                    finishInput();
                     mConnection.setSelection(0, newEnd);
                 }
                 break;
@@ -900,6 +903,7 @@ public final class InputLogic {
                     // getting the actual length of the text for setting the correct position can be tricky for some apps...
                     try {
                         final int newStart = (event.getMetaState() & KeyEvent.META_SHIFT_MASK) != 0 ? selectionStart2 : Integer.MAX_VALUE;
+                        finishInput(); // Caret: as for the start of the page
                         mConnection.setSelection(newStart, Integer.MAX_VALUE);
                     } catch (Exception e) {
                         // better catch potential errors and just do nothing in this case
