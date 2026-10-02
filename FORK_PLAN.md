@@ -197,4 +197,6 @@ method but the function-key switch is longer than about 75 lines.
 Next:
 1. `OnGetSuggestedWordsCallback` in `Suggest.kt` could take a non-null parameter (removes four
    `!!` in `InputLogic.kt`).
-2. The remaining Java in the core path: `KeyboardSwitcher`, `MainKeyboardView`, `WordComposer`.
+2. `WordComposer`, `MainKeyboardView` and `KeyboardSwitcher` are Kotlin now (straight
+   conversions). They still need the cleanup pass the first four files got: prefixes, `!!`,
+   getters to properties.

@@ -84,7 +84,7 @@ class KeyboardActionListenerImpl(private val latinIME: LatinIME, private val inp
 
         val event: Event
         if (settings.current.mLocale.language == "ko") { // todo: this does not appear to be the right place
-            val subtype = keyboardSwitcher.keyboard?.mId?.subtype ?: RichInputMethodManager.getInstance().currentSubtype
+            val subtype = keyboardSwitcher.getKeyboard()?.mId?.subtype ?: RichInputMethodManager.getInstance().currentSubtype
             event = HangulEventDecoder.decodeHardwareKeyEvent(subtype, keyEvent) {
                 getHardwareKeyEventDecoder(keyEvent.deviceId).decodeHardwareKey(keyEvent)
             }
@@ -135,7 +135,7 @@ class KeyboardActionListenerImpl(private val latinIME: LatinIME, private val inp
         }
         if (Settings.getValues().mIsLocked && KeyCode.isIsBlockedWhenLocked(primaryCode))
             return
-        val mkv = keyboardSwitcher.mainKeyboardView
+        val mkv = keyboardSwitcher.getMainKeyboardView()!!
 
         // checking if the character is a combining accent
         val event = if (primaryCode in combiningRange) { // todo: should this be done later, maybe in inputLogic?
@@ -182,11 +182,11 @@ class KeyboardActionListenerImpl(private val latinIME: LatinIME, private val inp
     override fun onCustomRequest(request: KeyboardActionListener.CustomAction) = when (request) {
         KeyboardActionListener.CustomAction.SHOW_INPUT_METHOD_PICKER -> latinIME.showInputPickerDialog()
         KeyboardActionListener.CustomAction.TOUCHPAD_ON -> {
-            keyboardSwitcher.mainKeyboardView?.alpha = 0.5f
+            keyboardSwitcher.getMainKeyboardView()?.alpha = 0.5f
             true
         }
         KeyboardActionListener.CustomAction.TOUCHPAD_OFF -> {
-            keyboardSwitcher.mainKeyboardView?.alpha = 1f
+            keyboardSwitcher.getMainKeyboardView()?.alpha = 1f
             true
         }
         KeyboardActionListener.CustomAction.PERFORM_HAPTIC -> {
@@ -387,7 +387,7 @@ class KeyboardActionListenerImpl(private val latinIME: LatinIME, private val inp
         inputLogic.finishInput()
         val newPosition = connection.expectedSelectionStart + moveSteps
         connection.setSelection(newPosition, newPosition)
-        inputLogic.restartSuggestionsOnWordTouchedByCursor(settings.current, keyboardSwitcher.currentKeyboardScript)
+        inputLogic.restartSuggestionsOnWordTouchedByCursor(settings.current, keyboardSwitcher.getCurrentKeyboardScript())
         return true
     }
 
@@ -405,7 +405,7 @@ class KeyboardActionListenerImpl(private val latinIME: LatinIME, private val inp
     }
 
     private fun performHapticFeedback(hapticEvent: HapticEvent) {
-        audioAndHapticFeedbackManager.performHapticFeedback(keyboardSwitcher.visibleKeyboardView, hapticEvent)
+        audioAndHapticFeedbackManager.performHapticFeedback(keyboardSwitcher.getVisibleKeyboardView(), hapticEvent)
     }
 
     private fun getHardwareKeyEventDecoder(deviceId: Int): HardwareEventDecoder {
@@ -444,7 +444,7 @@ class KeyboardActionListenerImpl(private val latinIME: LatinIME, private val inp
             // if unset -> lock, otherwise set to UNSET_ON_RELEASE so it's unset on release
             if (metaPressStates[primaryCode] != MetaPressState.LOCKED) {
                 metaPressStates[primaryCode] = MetaPressState.LOCKED
-                keyboardSwitcher.mainKeyboardView?.updateLockState(primaryCode, true)
+                keyboardSwitcher.getMainKeyboardView()?.updateLockState(primaryCode, true)
                 metaState = metaState or metaCode
             } else {
                 metaPressStates[primaryCode] = MetaPressState.UNSET_ON_RELEASE
@@ -467,7 +467,7 @@ class KeyboardActionListenerImpl(private val latinIME: LatinIME, private val inp
         if (metaPressStates[primaryCode] != MetaPressState.PRESSED) return
         // we long-pressed a meta key that has popups -> disable so the meta state is not used for the popup
         metaPressStates[primaryCode] = MetaPressState.UNSET
-        keyboardSwitcher.mainKeyboardView?.updateLockState(primaryCode, false)
+        keyboardSwitcher.getMainKeyboardView()?.updateLockState(primaryCode, false)
         val metaCode = primaryCode.toMetaState() ?: return
         metaState = metaState and metaCode.inv()
     }
@@ -478,10 +478,10 @@ class KeyboardActionListenerImpl(private val latinIME: LatinIME, private val inp
         if (metaPressState == MetaPressState.UNSET_ON_RELEASE) {
             metaPressStates[primaryCode] = MetaPressState.UNSET
             metaState = metaState and metaCode.inv()
-            keyboardSwitcher.mainKeyboardView?.updateLockState(primaryCode, false)
+            keyboardSwitcher.getMainKeyboardView()?.updateLockState(primaryCode, false)
         } else if (metaPressState == MetaPressState.PRESSED) {
             metaPressStates[primaryCode] = MetaPressState.RELEASED_BUT_ACTIVE
-            keyboardSwitcher.mainKeyboardView?.updateLockState(primaryCode, true)
+            keyboardSwitcher.getMainKeyboardView()?.updateLockState(primaryCode, true)
         }
     }
 
@@ -493,18 +493,18 @@ class KeyboardActionListenerImpl(private val latinIME: LatinIME, private val inp
             if (metaPressState == MetaPressState.UNSET) {
                 metaPressStates[primaryCode] = MetaPressState.SET
                 metaState = metaState or metaCode
-                keyboardSwitcher.mainKeyboardView?.updateLockState(primaryCode, true)
+                keyboardSwitcher.getMainKeyboardView()?.updateLockState(primaryCode, true)
             } else if (metaPressState == MetaPressState.SET) {
                 metaPressStates[primaryCode] = MetaPressState.UNSET
                 metaState = metaState and metaCode.inv()
-                keyboardSwitcher.mainKeyboardView?.updateLockState(primaryCode, false)
+                keyboardSwitcher.getMainKeyboardView()?.updateLockState(primaryCode, false)
             }
         } else if (metaState != 0) {
             // non-meta key -> unset all set / released_but_active, and mark pressed as UNSET_ON_RELEASE
             metaPressStates.forEach { key, value ->
                 if (value == MetaPressState.RELEASED_BUT_ACTIVE || value == MetaPressState.SET) {
                     metaPressStates[key] = MetaPressState.UNSET
-                    keyboardSwitcher.mainKeyboardView?.updateLockState(key, false)
+                    keyboardSwitcher.getMainKeyboardView()?.updateLockState(key, false)
                     val metaCode = key.toMetaState() ?: return@forEach
                     metaState = metaState and metaCode.inv()
                 } else if (value == MetaPressState.PRESSED) {

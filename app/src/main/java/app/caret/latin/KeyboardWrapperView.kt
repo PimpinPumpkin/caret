@@ -176,7 +176,7 @@ class KeyboardWrapperView @JvmOverloads constructor(
 
         val isLeftGravity = oneHandedGravity == Gravity.LEFT
         val width = right - left
-        val keyboardView = KeyboardSwitcher.getInstance().visibleKeyboardView
+        val keyboardView = KeyboardSwitcher.getInstance().getVisibleKeyboardView()!!
         val spareWidth = width - keyboardView.measuredWidth
 
         val keyboardLeft = if (isLeftGravity) 0 else spareWidth

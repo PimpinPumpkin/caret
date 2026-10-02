@@ -1200,7 +1200,7 @@ class LatinIME : InputMethodService(),
             insetsUpdater.setInsets(insets)
             return
         }
-        val stripHeight = if (keyboardSwitcher.isShowingStripContainer()) keyboardSwitcher.getStripContainer().getHeight() else 0
+        val stripHeight = if (keyboardSwitcher.isShowingStripContainer()) keyboardSwitcher.getStripContainer()!!.getHeight() else 0
         var visibleTopY = inputHeight - visibleKeyboardView.getHeight() - stripHeight
         if (Settings.getValues().mIsFloatingKeyboard)
             visibleTopY = getResources().getDisplayMetrics().heightPixels
@@ -1280,7 +1280,7 @@ class LatinIME : InputMethodService(),
             if (noExtractUi || noFullscreen) return false
             val stripView = suggestionStripView
             if (keyboardSwitcher.getVisibleKeyboardView() == null || stripView == null) return false
-            val usedHeight = keyboardSwitcher.getVisibleKeyboardView().getHeight() + stripView.getHeight()
+            val usedHeight = keyboardSwitcher.getVisibleKeyboardView()!!.getHeight() + stripView.getHeight()
             val availableHeight = getResources().getDisplayMetrics().heightPixels
             return usedHeight > availableHeight * 0.6 // if we have less than 40% available, use fullscreen mode
         }
@@ -1352,7 +1352,7 @@ class LatinIME : InputMethodService(),
     fun showInputPickerDialog(): Boolean {
         if (isShowingOptionDialog()) return false
         if (richImm.hasMultipleEnabledIMEsOrSubtypes(true)) {
-            val dialog = createInputMethodPickerDialog(this, richImm, keyboardSwitcher.getMainKeyboardView().getWindowToken())
+            val dialog = createInputMethodPickerDialog(this, richImm, keyboardSwitcher.getMainKeyboardView()!!.getWindowToken())
             optionsDialog = dialog
             dialog.show()
             return true
@@ -1464,7 +1464,7 @@ class LatinIME : InputMethodService(),
                                               dismissGestureFloatingPreviewText: Boolean) {
         setSuggestions(suggestedWords)
         val mainKeyboardView = keyboardSwitcher.getMainKeyboardView()
-        mainKeyboardView.showGestureFloatingPreviewText(suggestedWords,
+        mainKeyboardView!!.showGestureFloatingPreviewText(suggestedWords,
                 dismissGestureFloatingPreviewText /* dismissDelayed */)
     }
 

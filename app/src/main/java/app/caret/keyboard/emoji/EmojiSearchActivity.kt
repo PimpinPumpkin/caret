@@ -155,7 +155,7 @@ class EmojiSearchActivity : ComponentActivity() {
                             val bottom = it.localToScreen(Offset(0f, it.size.height.toFloat())).y.toInt()
                             imeVisible = bottom < screenHeight - 100
                             Log.d(TAG, "imeVisible: $imeVisible, firstSearchDone: $firstSearchDone, imeOpened: $imeOpened, " +
-                                "bottom: $bottom, keyboardState: ${KeyboardSwitcher.getInstance().keyboardSwitchState}")
+                                "bottom: $bottom, keyboardState: ${KeyboardSwitcher.getInstance().getKeyboardSwitchState()}")
                             if (imeOpened && !imeVisible) {
                                 Handler(this@EmojiSearchActivity.mainLooper).postDelayed(closer, 200)
                             }
@@ -331,7 +331,7 @@ class EmojiSearchActivity : ComponentActivity() {
         Log.d(TAG, "init end")
     }
 
-    private fun isAlphaKeyboard() = KeyboardSwitcher.getInstance().keyboardSwitchState !in
+    private fun isAlphaKeyboard() = KeyboardSwitcher.getInstance().getKeyboardSwitchState() !in
         setOf(KeyboardSwitcher.KeyboardSwitchState.EMOJI, KeyboardSwitcher.KeyboardSwitchState.CLIPBOARD)
 
     private fun search(text: String) {
@@ -345,7 +345,7 @@ class EmojiSearchActivity : ComponentActivity() {
             return
         }
 
-        if (KeyboardSwitcher.getInstance().keyboard == null) {
+        if (KeyboardSwitcher.getInstance().getKeyboard() == null) {
             /** Avoid crash in [SingleDictionaryFacilitator.getSuggestions] */
             return
         }

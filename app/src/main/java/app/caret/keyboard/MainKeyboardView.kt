@@ -346,7 +346,7 @@ class MainKeyboardView @JvmOverloads constructor(context: Context, attrs: Attrib
         locatePreviewPlacerView()
         getLocationInWindow(mOriginCoords)
         mKeyPreviewChoreographer.placeAndShowKeyPreview(key, getKeyboard()!!.mIconsSet, getKeyDrawParams(),
-                KeyboardSwitcher.getInstance().getWrapperView().getWidth(), mOriginCoords, mDrawingPreviewPlacerView)
+                KeyboardSwitcher.getInstance().getWrapperView()!!.getWidth(), mOriginCoords, mDrawingPreviewPlacerView)
     }
 
     private fun dismissKeyPreviewWithoutDelay(key: Key) {
