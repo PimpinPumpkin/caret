@@ -3,11 +3,13 @@
 # installs the debug build, types by tapping and by swiping, and compares what lands in a text field.
 # Needs the swipe models (scripts/swipe-models.sh install) for the swipe part.
 #   ANDROID_SERIAL=emulator-5570 scripts/smoke.sh
+# For the release build: CARET_PKG=app.caret CARET_APK=app/build/outputs/apk/release/Caret_<version>-release.apk
 set -e
 cd "$(dirname "$0")/.."
-PKG=app.caret.debug
-IME=$PKG/app.caret.latin.LatinIME
-APK=app/build/outputs/apk/debug/Caret_4.1-debug.apk
+PKG=${CARET_PKG:-app.caret.debug}
+# the system shortens the class name when it starts with the package name
+case "$PKG" in app.caret) IME=app.caret/.latin.LatinIME;; *) IME=$PKG/app.caret.latin.LatinIME;; esac
+APK=${CARET_APK:-$(ls app/build/outputs/apk/debug/Caret_*-debug.apk 2>/dev/null | head -1)}
 [ -f "$APK" ] || ./gradlew --console=plain assembleDebug >/dev/null
 adb wait-for-device
 adb install -r "$APK" >/dev/null

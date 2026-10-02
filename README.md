@@ -35,7 +35,13 @@ yourself: the swipe models and an emoji font. Offensive words are not filtered b
 
 ```
 ./gradlew assembleDebug
+./gradlew assembleRelease
 ```
+
+The release build is signed when a key is found at `~/.android/caret-release.jks` (password in
+`~/.android/caret-release.password`, alias `caret`) or given through `CARET_KEYSTORE_FILE` and
+`CARET_KEYSTORE_PASSWORD`. Without one it is left unsigned. The debug build installs next to the
+release build as `app.caret.debug`.
 
 - `scripts/test.sh` runs the unit tests (needs Java 21).
 - `scripts/smoke.sh` types and swipes on an emulator and checks the result.

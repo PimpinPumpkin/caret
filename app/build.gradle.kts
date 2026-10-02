@@ -13,8 +13,10 @@ android {
         applicationId = "app.caret"
         minSdk = 24
         targetSdk = 37
-        versionCode = 4101
-        versionName = "4.1"
+        // Caret's own numbering. The code stays above the 4101 inherited from HeliBoard so builds
+        // install over older ones: 5000 + release number.
+        versionCode = 5001
+        versionName = "0.1.0"
         ndk {
             abiFilters.clear()
             abiFilters.addAll(listOf("armeabi-v7a", "arm64-v8a", "x86", "x86_64"))
@@ -22,8 +24,26 @@ android {
         proguardFiles(getDefaultProguardFile("proguard-android-optimize.txt"), "proguard-rules.pro")
     }
 
+    // The release key lives outside the repository: ~/.android/caret-release.jks with its password in
+    // ~/.android/caret-release.password, or CARET_KEYSTORE_FILE / CARET_KEYSTORE_PASSWORD in the
+    // environment. Without a key the release build is left unsigned.
+    val releaseKeystore = System.getenv("CARET_KEYSTORE_FILE")?.let { File(it) }
+        ?: File(System.getProperty("user.home"), ".android/caret-release.jks")
+    val releaseKeystorePassword = System.getenv("CARET_KEYSTORE_PASSWORD")
+        ?: File(System.getProperty("user.home"), ".android/caret-release.password").takeIf { it.isFile }?.readText()?.trim()
+    val hasReleaseKey = releaseKeystore.isFile && !releaseKeystorePassword.isNullOrEmpty()
+    signingConfigs {
+        if (hasReleaseKey) create("release") {
+            storeFile = releaseKeystore
+            storePassword = releaseKeystorePassword
+            keyAlias = System.getenv("CARET_KEY_ALIAS") ?: "caret"
+            keyPassword = releaseKeystorePassword
+        }
+    }
+
     buildTypes {
         release {
+            if (hasReleaseKey) signingConfig = signingConfigs.getByName("release")
             isMinifyEnabled = true
             isShrinkResources = false
             isDebuggable = false
