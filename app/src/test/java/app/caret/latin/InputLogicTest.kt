@@ -1359,7 +1359,7 @@ class InputLogicTest {
         val oldAfter = textAfterCursor
         val insert = StringUtils.newSingleCodePointString(codePoint)
         val phantomSpaceToInsert = if (spaceState == SpaceState.PHANTOM) " " else ""
-        val oldIsAtEnd = !composer.isCursorFrontOrMiddleOfComposingWord
+        val oldIsAtEnd = !composer.isCursorFrontOrMiddleOfComposingWord()
 
         latinIME.onEvent(Event.createEventForCodePointFromUnknownSource(codePoint))
         handleMessages()
@@ -1375,8 +1375,8 @@ class InputLogicTest {
         }
         assertEquals(oldAfter, textAfterCursor)
         assertEquals(textBeforeCursor + textAfterCursor, getTextFromConnection())
-        if (composer.isComposingWord) // if we're not composing any more cursor is always at the end
-            assertEquals(oldIsAtEnd, !composer.isCursorFrontOrMiddleOfComposingWord)
+        if (composer.isComposingWord()) // if we're not composing any more cursor is always at the end
+            assertEquals(oldIsAtEnd, !composer.isCursorFrontOrMiddleOfComposingWord())
         checkConnectionConsistency()
     }
 

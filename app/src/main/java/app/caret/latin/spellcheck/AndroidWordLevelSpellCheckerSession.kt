@@ -175,7 +175,7 @@ abstract class AndroidWordLevelSpellCheckerSession(private val mService: Android
             composer.setComposingWord(codePoints, keyboard.getCoordinates(codePoints))
             // TODO: Don't gather suggestions if the limit is <= 0 unless necessary
             val suggestionResults = mService
-                .getSuggestionResults(locale, composer.composedDataSnapshot, ngramContext, keyboard)
+                .getSuggestionResults(locale, composer.getComposedDataSnapshot(), ngramContext, keyboard)
             val result = getResult(capitalizeType, locale, suggestionsLimit, mService.recommendedThreshold, text, suggestionResults)
             if (DebugFlags.DEBUG_ENABLED && !result.mSuggestions.isNullOrEmpty()) {
                 val builder = StringBuilder()
