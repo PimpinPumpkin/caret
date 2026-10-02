@@ -1212,6 +1212,95 @@ class InputLogicTest {
         assertEquals("yo", text)
     }
 
+    // ------- the keyboard's picture of the text field, when the app changes things (Caret) -------
+
+    private fun appReportsSelection(oldStart: Int, oldEnd: Int = oldStart) {
+        latinIME.onUpdateSelection(oldStart, oldEnd, selectionStart, selectionEnd, composingStart, composingEnd)
+        handleMessages()
+    }
+
+    // HeliBoard issue 1141: the app ends the composition on its own
+    @Test fun `typing goes on after the app ended the composition itself`() {
+        rawType("hello")
+        composingStart = -1
+        composingEnd = -1
+        appReportsSelection(5)
+        rawType("s there")
+        assertEquals("hellos there", text)
+    }
+
+    @Test fun `late reports of the keyboard's own typing change nothing`() {
+        rawType("hel")
+        // the app only now tells about each letter
+        latinIME.onUpdateSelection(0, 0, 1, 1, 0, 1); handleMessages()
+        latinIME.onUpdateSelection(1, 1, 2, 2, 0, 2); handleMessages()
+        latinIME.onUpdateSelection(2, 2, 3, 3, 0, 3); handleMessages()
+        assertEquals("hel", composingText)
+        rawType("lo")
+        assertEquals("hello", text)
+        assertEquals("hello", composingText)
+    }
+
+    @Test fun `a field that reformats what is typed does not get letters twice`() {
+        ShadowInputMethodService.afterEdit = { ShadowInputMethodService.text = ShadowInputMethodService.text.uppercase() }
+        rawType("hello there")
+        assertEquals("HELLO THERE", text.uppercase())
+        assertEquals(11, text.length)
+    }
+
+    // like a card number field that adds a dash after four digits and moves the cursor past it
+    @Test fun `typing goes on after the app added a character and moved the cursor`() {
+        setInputType(InputType.TYPE_CLASS_NUMBER)
+        rawType("1234")
+        ShadowInputMethodService.text = "1234-"
+        selectionStart = 5
+        selectionEnd = 5
+        appReportsSelection(4)
+        rawType("56")
+        assertEquals("1234-56", text)
+    }
+
+    private fun startInputAtEndOf(newText: String) {
+        // not setText(): its checks compare the whole text with the keyboard's cache, which only holds the last part
+        ShadowInputMethodService.text = newText
+        selectionStart = newText.length
+        selectionEnd = newText.length
+        val ei = EditorInfo()
+        ei.inputType = currentInputType
+        ei.initialSelStart = newText.length
+        ei.initialSelEnd = newText.length
+        latinIME.mHandler.onStartInput(ei, false)
+        latinIME.mHandler.onStartInputView(ei, false)
+        handleMessages()
+    }
+
+    @Test fun `typing and deleting at the end of a text longer than the cache`() {
+        val long = "word ".repeat(700) // 3500 characters
+        startInputAtEndOf(long)
+        rawType("end")
+        assertEquals(long + "end", text)
+        rawKey(KeyCode.DELETE)
+        assertEquals(long + "en", text)
+        rawType(" more")
+        assertEquals(long + "en more", text)
+    }
+
+    // the app says the cursor is at 0 although the field has text and the cursor is at its end
+    @Test fun `typing lands at the real cursor when the app reported a wrong position at start`() {
+        ShadowInputMethodService.text = "hello "
+        selectionStart = 6
+        selectionEnd = 6
+        val ei = EditorInfo()
+        ei.inputType = currentInputType
+        ei.initialSelStart = 0
+        ei.initialSelEnd = 0
+        latinIME.mHandler.onStartInput(ei, false)
+        latinIME.mHandler.onStartInputView(ei, false)
+        handleMessages()
+        rawType("there")
+        assertEquals("hello there", text)
+    }
+
     private fun chainInput(text: String) = text.forEach { input(it.code) }
 
     private fun input(char: Char) = input(char.code)
