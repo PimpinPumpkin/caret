@@ -733,6 +733,7 @@ class LatinIME : InputMethodService(),
     }
 
     override fun onDestroy() {
+        inlineDictation.coolDown()
         clipboardHistoryManager.onDestroy()
         dictionaryFacilitator.closeDictionaries()
         settings.onDestroy()
@@ -910,6 +911,8 @@ class LatinIME : InputMethodService(),
             loadSettings()
             suggestionStripView?.updateVoiceKey()
         }
+        // the microphone key is there to be tapped: have the speech app ready for it
+        if (settings.current.inlineDictation && settings.current.showsVoiceInputKey) inlineDictation.warmUp()
 
         switcher.updateKeyboardTheme(displayContext)
         val mainKeyboardView: MainKeyboardView? = switcher.getMainKeyboardView()
@@ -1082,6 +1085,7 @@ class LatinIME : InputMethodService(),
 
     fun onFinishInputViewInternal(finishingInput: Boolean) {
         inlineDictation.cancel()
+        inlineDictation.coolDown()
         remoteNavigation.reset()
         super.onFinishInputView(finishingInput)
         Log.i(TAG, "onFinishInputView")

@@ -15,8 +15,8 @@ android {
         targetSdk = 37
         // Caret's own numbering. The code stays above the 4101 inherited from HeliBoard so builds
         // install over older ones: 5000 + release number.
-        versionCode = 5006
-        versionName = "0.1.5"
+        versionCode = 5007
+        versionName = "0.1.6"
         ndk {
             abiFilters.clear()
             abiFilters.addAll(listOf("armeabi-v7a", "arm64-v8a", "x86", "x86_64"))

@@ -5,8 +5,10 @@ import android.Manifest
 import android.content.ComponentName
 import android.content.Context
 import android.content.Intent
+import android.content.ServiceConnection
 import android.content.pm.PackageManager
 import android.os.Bundle
+import android.os.IBinder
 import android.speech.RecognitionListener
 import android.speech.RecognitionService
 import android.speech.RecognizerIntent
@@ -87,6 +89,39 @@ class InlineDictation(private val context: Context, private val host: Host) {
             .putExtra(RecognizerIntent.EXTRA_CALLING_PACKAGE, context.packageName)
             .putExtra(RecognizerIntent.EXTRA_LANGUAGE, host.locale().toLanguageTag())
         recognizer?.startListening(intent)
+    }
+
+    private var warmConnection: ServiceConnection? = null
+
+    /**
+     * Holds on to the speech service while the keyboard is up, without listening. That starts its
+     * app, which can then load its model, so the first tap on the microphone does not wait for it.
+     */
+    fun warmUp() {
+        if (warmConnection != null || !hasPermission(context)) return
+        val service = findService(context) ?: return
+        val connection = object : ServiceConnection {
+            override fun onServiceConnected(name: ComponentName?, binder: IBinder?) = Unit
+            override fun onServiceDisconnected(name: ComponentName?) = Unit
+        }
+        try {
+            val intent = Intent(RecognitionService.SERVICE_INTERFACE).setComponent(service)
+            if (context.bindService(intent, connection, Context.BIND_AUTO_CREATE)) warmConnection = connection
+            else context.unbindService(connection)
+        } catch (e: Exception) {
+            Log.w(TAG, "cannot warm up $service", e)
+        }
+    }
+
+    /** Lets go of the speech service again. It decides for itself how long to keep its model. */
+    fun coolDown() {
+        val connection = warmConnection ?: return
+        warmConnection = null
+        try {
+            context.unbindService(connection)
+        } catch (e: Exception) {
+            Log.w(TAG, "cannot let go of the speech service", e)
+        }
     }
 
     /** Finishes the current utterance and stops after it. */
