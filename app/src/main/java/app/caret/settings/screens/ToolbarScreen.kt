@@ -70,6 +70,7 @@ fun ToolbarScreen(
         if (prefs.getBoolean(Settings.PREF_INLINE_DICTATION, Defaults.PREF_INLINE_DICTATION)) Settings.PREF_DICTATION_SOUND else null,
         if (clipboardToolbarVisible) Settings.PREF_CLIPBOARD_TOOLBAR_KEYS else null,
         if (clipboardToolbarVisible) Settings.PREF_TOOLBAR_CUSTOM_KEY_CODES else null,
+        if (toolbarMode == ToolbarMode.EXPANDABLE) Settings.PREF_TOOLBAR_ABOVE_SUGGESTIONS else null,
         if (toolbarMode == ToolbarMode.EXPANDABLE) Settings.PREF_QUICK_PIN_TOOLBAR_KEYS else null,
         if (toolbarMode == ToolbarMode.EXPANDABLE) Settings.PREF_AUTO_SHOW_TOOLBAR else null,
         if (toolbarMode == ToolbarMode.EXPANDABLE) Settings.PREF_AUTO_HIDE_TOOLBAR else null,
@@ -164,6 +165,11 @@ fun createToolbarSettings(context: Context) = listOf(
                 key = it.key,
                 onDismissRequest = { showDialog = false }
             )
+    },
+    Setting(context, Settings.PREF_TOOLBAR_ABOVE_SUGGESTIONS,
+        R.string.toolbar_above_suggestions, R.string.toolbar_above_suggestions_summary)
+    {
+        SwitchPreference(it, Defaults.PREF_TOOLBAR_ABOVE_SUGGESTIONS) { KeyboardSwitcher.getInstance().setThemeNeedsReload() }
     },
     Setting(context, Settings.PREF_QUICK_PIN_TOOLBAR_KEYS,
         R.string.quick_pin_toolbar_keys, R.string.quick_pin_toolbar_keys_summary)

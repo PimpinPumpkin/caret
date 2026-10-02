@@ -72,7 +72,7 @@ class KeyboardSwitcher private constructor() {
     private var clipboardStripView: LinearLayout? = null
     private lateinit var clipboardStripScrollView: HorizontalScrollView
     private lateinit var suggestionStripView: SuggestionStripView
-    private lateinit var stripContainer: FrameLayout
+    private lateinit var stripContainer: View
     private lateinit var clipboardHistoryView: ClipboardHistoryView
     private lateinit var fakeToastView: TextView
     private lateinit var backgroundGatheringIndicator: ImageView
@@ -492,7 +492,7 @@ class KeyboardSwitcher private constructor() {
         return keyboardView
     }
 
-    fun getStripContainer(): FrameLayout? { return if (::stripContainer.isInitialized) stripContainer else null }
+    fun getStripContainer(): View? { return if (::stripContainer.isInitialized) stripContainer else null }
 
     fun deallocateMemory() {
         keyboardView?.let {

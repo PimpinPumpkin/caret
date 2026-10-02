@@ -135,7 +135,8 @@ enum class ToolbarMode {
 val toolbarKeyStrings = entries.associateWithTo(EnumMap(ToolbarKey::class.java)) { it.toString().lowercase(Locale.US) }
 
 val defaultToolbarPref by lazy {
-    val default = listOf(SETTINGS, CLIPBOARD, UNDO, REDO, SELECT_WORD, COPY, PASTE, RESIZE, MORE) // Caret: favorites, then the panel with everything
+    // Caret: the language key (only there with more than one language), favorites, then the panel with everything
+    val default = listOf(LANGUAGE_SWITCH, SETTINGS, CLIPBOARD, UNDO, REDO, SELECT_WORD, COPY, PASTE, RESIZE, MORE)
     val others = entries.filterNot { it in default || it == CLOSE_HISTORY }
     default.joinToString(Separators.ENTRY) { it.name + Separators.KV + true } + Separators.ENTRY +
             others.joinToString(Separators.ENTRY) { it.name + Separators.KV + false }

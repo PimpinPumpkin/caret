@@ -128,6 +128,8 @@ class SettingsValues(context: Context, prefs: SharedPreferences, res: Resources,
     @JvmField val isSplitKeyboardEnabled: Boolean
     @JvmField val splitKeyboardSpacerRelativeWidth: Float
     @JvmField val quickPinToolbarKeys: Boolean
+    /** The toolbar opens as a row of its own above the suggestions, which stay where they are. */
+    @JvmField val toolbarAboveSuggestions: Boolean
     @JvmField val addToPersonalDictionary: Boolean
     @JvmField val useContactsDictionary: Boolean
     @JvmField val useAppsDictionary: Boolean
@@ -264,6 +266,7 @@ class SettingsValues(context: Context, prefs: SharedPreferences, res: Resources,
                 Math.min(Math.max((displayWidthDp - 600) / 600f + 0.15f, 0.15f), 0.35f) * Settings.readSplitSpacerScale(prefs, isLandscape, isFolded)
             else 0f
         quickPinToolbarKeys = toolbarMode == ToolbarMode.EXPANDABLE && prefs.getBoolean(Settings.PREF_QUICK_PIN_TOOLBAR_KEYS, Defaults.PREF_QUICK_PIN_TOOLBAR_KEYS)
+        toolbarAboveSuggestions = toolbarMode == ToolbarMode.EXPANDABLE && prefs.getBoolean(Settings.PREF_TOOLBAR_ABOVE_SUGGESTIONS, Defaults.PREF_TOOLBAR_ABOVE_SUGGESTIONS)
 
         // Compute other readable settings
         keyLongpressTimeout = prefs.getInt(Settings.PREF_KEY_LONGPRESS_TIMEOUT, Defaults.PREF_KEY_LONGPRESS_TIMEOUT)

@@ -5,8 +5,19 @@
     SPDX-License-Identifier: Apache-2.0 AND GPL-3.0-only
 -->
 
-<FrameLayout
+<LinearLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="vertical">
+    <!-- Caret: the toolbar opens here, above the suggestions, when that is how it is set up -->
+    <FrameLayout
+        android:id="@+id/toolbar_row"
+        android:layout_width="match_parent"
+        android:layout_height="@dimen/config_suggestions_strip_height"
+        android:visibility="gone"
+        style="?attr/suggestionStripViewStyle" />
+    <FrameLayout
     android:layout_width="match_parent"
     android:layout_height="@dimen/config_suggestions_strip_height">
     <!-- To ensure that key preview popup is correctly placed when the current system locale is
@@ -43,3 +54,4 @@
         </LinearLayout>
     </HorizontalScrollView>
 </FrameLayout>
+</LinearLayout>

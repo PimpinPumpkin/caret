@@ -218,7 +218,7 @@ class SuggestionStripView(context: Context, attrs: AttributeSet?, defStyle: Int)
                     return true
                 }
 
-                return if (!isExternalSuggestionVisible && toolbarContainer.visibility != VISIBLE && deltaY > 0 && dy < (-10).dpToPx(resources)) showMoreSuggestions()
+                return if (!isExternalSuggestionVisible && !toolbarOpen && deltaY > 0 && dy < (-10).dpToPx(resources)) showMoreSuggestions()
                 else false
             }
         }
@@ -243,13 +243,44 @@ class SuggestionStripView(context: Context, attrs: AttributeSet?, defStyle: Int)
         else {
             newLayoutDirection = if (isRtlLanguage) LAYOUT_DIRECTION_RTL else LAYOUT_DIRECTION_LTR
             direction = if (isRtlLanguage) -1 else 1
-            toolbarExpandKey.scaleX = (if (toolbarContainer.visibility != VISIBLE) 1f else -1f) * direction
+            if (toolbarRow == null) toolbarExpandKey.scaleX = (if (!toolbarOpen) 1f else -1f) * direction
         }
         layoutDirection = newLayoutDirection
         suggestionsStrip.layoutDirection = newLayoutDirection
     }
 
+    /**
+     * The row above the suggestions that the toolbar opens in, when it is set up that way. Null
+     * while the toolbar takes the place of the suggestions instead.
+     */
+    private var toolbarRow: ViewGroup? = null
+    private var toolbarWanted = false
+    private val toolbarOpen get() = if (toolbarRow != null) toolbarWanted else toolbarContainer.isVisible
+
+    override fun onAttachedToWindow() {
+        super.onAttachedToWindow()
+        if (toolbarRow != null || !Settings.values.toolbarAboveSuggestions) return
+        val row = (parent?.parent as? ViewGroup)?.findViewById<ViewGroup>(R.id.toolbar_row) ?: return
+        (toolbarContainer.parent as? ViewGroup)?.removeView(toolbarContainer)
+        row.removeAllViews()
+        row.addView(toolbarContainer, LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.MATCH_PARENT))
+        toolbarContainer.isVisible = true
+        toolbarContainer.doOnNextLayout { toolbar.minimumWidth = toolbarContainer.width }
+        Settings.values.colors.setBackground(row, ColorType.STRIP_BACKGROUND)
+        toolbarRow = row
+        // the arrow points to where the toolbar will come out
+        toolbarExpandKey.scaleX = 1f
+        toolbarExpandKey.rotation = -90f
+    }
+
     fun setToolbarVisibility(toolbarVisible: Boolean) {
+        val row = toolbarRow
+        if (row != null) {
+            toolbarWanted = toolbarVisible
+            row.isVisible = toolbarVisible && isVisible
+            toolbarExpandKey.rotation = if (toolbarVisible) 90f else -90f
+            return
+        }
         pinnedKeys.isVisible = !toolbarVisible
         pinnedKeysStart.isVisible = !toolbarVisible
         suggestionsStrip.isVisible = !toolbarVisible
@@ -347,8 +378,11 @@ class SuggestionStripView(context: Context, attrs: AttributeSet?, defStyle: Int)
     override fun onVisibilityChanged(view: View, visibility: Int) {
         super.onVisibilityChanged(view, visibility)
         // workaround for a bug with inline suggestions views that just keep showing up otherwise, https://github.com/HeliBorg/HeliBoard/pull/386
-        if (view === this)
+        if (view === this) {
             suggestionsStrip.visibility = visibility
+            // the emoji and clipboard views put their own strip here; the toolbar row leaves with the suggestions
+            toolbarRow?.isVisible = toolbarWanted && visibility == VISIBLE
+        }
     }
 
     override fun onDetachedFromWindow() {
@@ -385,7 +419,7 @@ class SuggestionStripView(context: Context, attrs: AttributeSet?, defStyle: Int)
         }
         AudioAndHapticFeedbackManager.getInstance().performHapticAndAudioFeedback(KeyCode.NOT_SPECIFIED, this, HapticEvent.KEY_PRESS)
         if (view === toolbarExpandKey) {
-            setToolbarVisibility(toolbarContainer.visibility != VISIBLE)
+            setToolbarVisibility(!toolbarOpen)
         }
 
         // tag for word views is set in SuggestionStripLayoutHelper (setupWordViewsTextAndColor, layoutPunctuationSuggestions)
@@ -533,7 +567,7 @@ class SuggestionStripView(context: Context, attrs: AttributeSet?, defStyle: Int)
     private fun clear() {
         suggestionsStrip.removeAllViews()
         if (DEBUG_SUGGESTIONS) removeAllDebugInfoViews()
-        if (!toolbarContainer.isVisible)
+        if (!toolbarOpen || toolbarRow != null)
             suggestionsStrip.isVisible = true
         dismissMoreSuggestionsPanel()
         for (word in wordViews) {

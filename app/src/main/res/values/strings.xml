@@ -409,6 +409,8 @@
     <!-- Title of the setting to set pinned toolbar keys -->
     <string name="pinned_toolbar_keys">Select pinned toolbar keys</string>
     <!-- Title of the setting to quick-pin toolbar keys -->
+    <string name="toolbar_above_suggestions">Open the toolbar above the suggestions</string>
+    <string name="toolbar_above_suggestions_summary">The suggestions and pinned keys stay visible while the toolbar is open. Off shows the toolbar in their place.</string>
     <string name="quick_pin_toolbar_keys">Pin toolbar key on long press</string>
     <!-- Description of the setting to quick-pin toolbar keys -->
     <string name="quick_pin_toolbar_keys_summary">This will disable other long press actions for toolbar keys that are not pinned</string>
