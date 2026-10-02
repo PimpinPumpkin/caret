@@ -24,6 +24,9 @@ import app.caret.latin.RichInputMethodSubtype
 import app.caret.latin.utils.LayoutUtilsCustom
 import app.caret.latin.utils.POPUP_KEYS_LAYOUT
 import app.caret.latin.utils.SubtypeUtilsAdditional
+import app.caret.latin.settings.Settings
+import app.caret.latin.utils.prefs
+import androidx.core.content.edit
 import org.junit.runner.RunWith
 import org.robolectric.Robolectric
 import org.robolectric.RobolectricTestRunner
@@ -597,6 +600,29 @@ f""", // no newline at the end
         builder.load(id)
         @Suppress("UNCHECKED_CAST")
         return builder.build() to keysInRowsField.get(builder) as ArrayList<ArrayList<KeyParams>>
+    }
+
+    // The split setting has to reach the keyboard id, or the builder never adds the gap.
+    @Test fun `split keyboard setting splits the alphabet layout`() {
+        fun gapAfterG(): Int {
+            val layoutParams = KeyboardLayoutSet.Params()
+            layoutParams.editorInfo = EditorInfo()
+            layoutParams.subtype = RichInputMethodSubtype.get(SubtypeUtilsAdditional.createEmojiCapableAdditionalSubtype(Locale.ENGLISH, "qwerty", true))
+            layoutParams.keyboardWidth = 1000
+            layoutParams.keyboardHeight = 300
+            layoutParams.settingsValues = Settings.values
+            val builder = KeyboardBuilder(latinIME, KeyboardParams(UniqueKeysCache.NO_CACHE))
+            builder.load(KeyboardId(KeyboardElement.ALPHABET, layoutParams))
+            val keys = builder.build().getSortedKeys()
+            val g = keys.first { it.label == "g" }
+            val h = keys.first { it.label == "h" }
+            return h.getX() - (g.getX() + g.width)
+        }
+        val joined = gapAfterG()
+        latinIME.prefs().edit { putBoolean(Settings.PREF_ENABLE_SPLIT_KEYBOARD, true) }
+        val split = gapAfterG()
+        latinIME.prefs().edit { putBoolean(Settings.PREF_ENABLE_SPLIT_KEYBOARD, false) }
+        assertTrue(split > joined + 50, "gap between g and h was $joined, with split on $split")
     }
 
     @Test fun placeholderAsOnlyPopup() { // https://github.com/HeliBorg/HeliBoard/issues/1324

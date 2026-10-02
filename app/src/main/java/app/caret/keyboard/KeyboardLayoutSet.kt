@@ -121,9 +121,6 @@ class KeyboardLayoutSet internal constructor(private val context: Context, priva
         var script = ScriptUtils.SCRIPT_LATIN
         var internalAction: InternalAction? = null
         var emojiSearchAvailable = false
-
-        // Indicates if the user has enabled the split-layout preference and the required ProductionFlags are enabled.
-        var isSplitLayoutEnabled = false
     }
 
     class Builder(private val context: Context, ei: EditorInfo?, settingsValues: SettingsValues?) {
