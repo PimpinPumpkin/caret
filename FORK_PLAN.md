@@ -223,5 +223,13 @@ Still open in the converted code:
   named `params` right where they read it.
 - 82 no-argument `get...()`/`is...()` functions remain. They are overrides, interface members,
   redefined by test shadows, or compute something.
-- Not exercised by hand since the conversion: the spell checker service, contacts and apps
-  dictionaries, Korean input, hardware keyboards, one-handed, split and floating modes.
+- Exercised on the emulator after the conversion (2026-10-02), all working: one-handed mode
+  (both sides), split keyboard in landscape, floating mode (typing and dragging), hardware key
+  events, the spell checker service, contacts and apps dictionaries, Korean (syllables combine,
+  delete removes one letter at a time), and the accessibility node tree. Two inherited bugs
+  turned up and are fixed: the split setting never took effect, and the accessibility node
+  provider was rebuilt on every request.
+- Not tested: TalkBack itself (not on the emulator image, so explore-by-touch and spoken
+  feedback are unverified), split mode in portrait, foldables, and anything on a real phone.
+- Useful for emulator tests: `uiautomator dump --windows` includes the keyboard window, so keys
+  and toolbar buttons can be found and tapped by label instead of by coordinates.
