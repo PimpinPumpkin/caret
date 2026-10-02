@@ -30,10 +30,12 @@ class InlineDictationTest {
     private val context: Context = ApplicationProvider.getApplicationContext<App>()
     private val typed = StringBuilder()
     private var status: String? = null
+    private var partial = ""
     private var listening = false
     private var level = -1f
     private val host = object : InlineDictation.Host {
-        override fun insertText(text: String) { typed.append(text) }
+        override fun insertText(text: String) { typed.append(text); partial = "" }
+        override fun showPartial(text: String) { partial = text }
         override fun showStatus(text: String?) { status = text }
         override fun codePointBeforeCursor() = typed.lastOrNull()?.code ?: -1
         override fun locale(): Locale = Locale.US
@@ -76,15 +78,21 @@ class InlineDictationTest {
         assertEquals(ComponentName("app.alyo", "app.alyo.Recognizer"), InlineDictation.findService(context))
     }
 
-    @Test fun `spoken words show while speaking and are typed when the utterance ends`() {
+    @Test fun `spoken words show at the cursor while speaking and are typed when the utterance ends`() {
         assertTrue(dictation.toggle())
         val speech = recognizer()
         speech.triggerOnReadyForSpeech(Bundle())
         speech.triggerOnPartialResults(results("hello wor"))
-        assertEquals("hello wor", status)
+        assertEquals("hello wor", partial)
         assertEquals("", typed.toString())
         speech.triggerOnResults(results("hello world"))
         assertEquals("hello world", typed.toString())
+        assertEquals("", partial)
+        // the next utterance is set off from the last by a space, from its first word on
+        recognizer().triggerOnPartialResults(results("and"))
+        assertEquals(" and", partial)
+        recognizer().triggerOnResults(results("and more"))
+        assertEquals("hello world and more", typed.toString())
         assertTrue(dictation.isActive, "it keeps listening for the next utterance")
     }
 
@@ -139,6 +147,7 @@ class InlineDictationTest {
     @Test fun `leaving the field drops what was being said`() {
         dictation.toggle()
         recognizer().triggerOnPartialResults(results("half a sent"))
+        assertEquals("half a sent", partial)
         dictation.cancel()
         assertFalse(dictation.isActive)
         assertNull(status)

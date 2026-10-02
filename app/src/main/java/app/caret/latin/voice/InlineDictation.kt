@@ -19,8 +19,8 @@ import java.util.Locale
 
 /**
  * Dictation without leaving the keyboard: the microphone key starts a speech recognition service
- * on the phone (Alyo's when it offers one), the words show in the suggestion strip while they are
- * spoken, and each finished utterance is typed into the field. Listening goes on, one utterance
+ * on the phone (Alyo's when it offers one), the words appear at the cursor while they are spoken,
+ * underlined like a word being typed, and each finished utterance replaces them for good. Listening goes on, one utterance
  * after the other, until the key is tapped again, nothing is heard, or the field goes away.
  */
 class InlineDictation(private val context: Context, private val host: Host) {
@@ -28,6 +28,8 @@ class InlineDictation(private val context: Context, private val host: Host) {
     interface Host {
         /** Types [text] at the cursor. */
         fun insertText(text: String)
+        /** Shows [text] at the cursor as text still in the making; it replaces what was shown before. Empty takes it away. */
+        fun showPartial(text: String)
         /** Shows [text] in place of the suggestions; null puts the suggestions back. */
         fun showStatus(text: String?)
         /** The character before the cursor, or a value below zero when there is none or it is unknown. */
@@ -51,6 +53,8 @@ class InlineDictation(private val context: Context, private val host: Host) {
     private var stopAfterResult = false
     /** True once the service has said the microphone is open, until dictation ends. */
     private var listening = false
+    /** What goes in front of the utterance being spoken, set once its first words are shown at the cursor. */
+    private var prefix: String? = null
 
     /**
      * Starts listening, or stops when it is listening already. False when dictation cannot run
@@ -135,10 +139,16 @@ class InlineDictation(private val context: Context, private val host: Host) {
     fun cancel() {
         if (!isActive && recognizer == null) return
         recognizer?.cancel()
+        // the field is gone, and with it the words that were shown there
+        prefix = null
         end()
     }
 
     private fun end() {
+        if (prefix != null) {
+            prefix = null
+            host.showPartial("")
+        }
         if (listening) {
             listening = false
             host.onListening(false)
@@ -163,15 +173,20 @@ class InlineDictation(private val context: Context, private val host: Host) {
         }
 
         override fun onPartialResults(partialResults: Bundle?) {
-            val text = firstResult(partialResults)
-            // the end of a long utterance is what the speaker wants to check
-            if (isActive && text.isNotEmpty()) host.showStatus(text.takeLast(MAX_STATUS_LENGTH))
+            val text = firstResult(partialResults).trim()
+            if (!isActive || text.isEmpty()) return
+            // decided before the first words go in, since after that they are what is before the cursor
+            val before = prefix ?: spaceBefore().also { prefix = it }
+            host.showPartial(before + text)
         }
 
         override fun onResults(results: Bundle?) {
             if (!isActive) return
             val text = firstResult(results).trim()
-            if (text.isNotEmpty()) host.insertText(withSpaceBefore(text))
+            val before = prefix
+            prefix = null
+            if (text.isNotEmpty()) host.insertText((before ?: spaceBefore()) + text)
+            else if (before != null) host.showPartial("")
             if (stopAfterResult) {
                 end()
             } else {
@@ -209,16 +224,14 @@ class InlineDictation(private val context: Context, private val host: Host) {
     private fun firstResult(bundle: Bundle?): String =
         bundle?.getStringArrayList(SpeechRecognizer.RESULTS_RECOGNITION)?.firstOrNull() ?: ""
 
-    /** A space in front unless the text starts a line or follows a space or an opening bracket or quote. */
-    private fun withSpaceBefore(text: String): String {
+    /** A space, unless what is said starts a line or follows a space or an opening bracket or quote. */
+    private fun spaceBefore(): String {
         val before = host.codePointBeforeCursor()
-        if (before < 0 || Character.isWhitespace(before) || before in NO_SPACE_AFTER) return text
-        return " $text"
+        return if (before < 0 || Character.isWhitespace(before) || before in NO_SPACE_AFTER) "" else " "
     }
 
     companion object {
         private const val TAG = "InlineDictation"
-        private const val MAX_STATUS_LENGTH = 60
         private const val RMS_SILENCE = -2f
         private const val RMS_LOUD = 10f
         private const val ERROR_MESSAGE_MILLIS = 3000L

@@ -31,6 +31,7 @@ import app.caret.settings.screens.PreferencesScreen
 import app.caret.settings.screens.SecondaryLayoutScreen
 import app.caret.settings.screens.SubtypeScreen
 import app.caret.settings.screens.TextCorrectionScreen
+import app.caret.settings.screens.ToolbarArrangeScreen
 import app.caret.settings.screens.ToolbarScreen
 import app.caret.settings.screens.gesturedata.GestureDataScreen
 import app.caret.settings.screens.gesturedata.ReviewScreen
@@ -93,6 +94,9 @@ fun SettingsNavHost(
         composable(SettingsDestination.Toolbar) {
             ToolbarScreen(onClickBack = ::goBack)
         }
+        composable(SettingsDestination.ToolbarArrange) {
+            ToolbarArrangeScreen(onClickBack = ::goBack)
+        }
         composable(SettingsDestination.GestureTyping) {
             GestureTypingScreen(onClickBack = ::goBack)
         }
@@ -150,6 +154,7 @@ object SettingsDestination {
     const val TextCorrection = "text_correction"
     const val Preferences = "preferences"
     const val Toolbar = "toolbar"
+    const val ToolbarArrange = "toolbar_arrange"
     const val GestureTyping = "gesture_typing"
     const val DataGathering = "data_gathering" // remove when data gathering phase is done (end of 2026 latest)
     const val DataReview = "data_review" // remove when data gathering phase is done (end of 2026 latest)

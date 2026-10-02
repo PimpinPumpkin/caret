@@ -144,6 +144,12 @@ private constructor(val themeId: Int, @JvmField val styleId: Int) {
             return getThemeColors(themeName!!, themeStyle!!, context, prefs, isNight)
         }
 
+        /** The colors of [themeName] with the style and borders now in use, for showing a theme that is not on the keyboard. */
+        fun getColorsForTheme(context: Context, themeName: String, isNight: Boolean): Colors {
+            val prefs = context.prefs()
+            return getThemeColors(themeName, prefs.getString(Settings.PREF_THEME_STYLE, Defaults.PREF_THEME_STYLE)!!, context, prefs, isNight)
+        }
+
         private fun getThemeColors(themeName: String, themeStyle: String, context: Context, prefs: SharedPreferences, isNight: Boolean): Colors {
             val hasBorders = prefs.getBoolean(Settings.PREF_THEME_KEY_BORDERS, Defaults.PREF_THEME_KEY_BORDERS)
             val backgroundImage = Settings.readUserBackgroundImage(context, isNight)

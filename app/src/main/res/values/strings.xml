@@ -356,6 +356,17 @@
     <string name="toolbar_hiding_global">Hide clipboard and emoji toolbars too</string>
     <!-- Title of the setting to set toolbar keys -->
     <string name="toolbar_keys">Select toolbar keys</string>
+    <!-- Title of the page where all toolbar keys are arranged by dragging -->
+    <string name="toolbar_arrange">Arrange the toolbar</string>
+    <string name="toolbar_arrange_summary">Hold a key and drag it to where it belongs</string>
+    <string name="toolbar_place_pinned">Always on the strip</string>
+    <string name="toolbar_place_pinned_summary">Next to the suggestions, whether the toolbar is open or not</string>
+    <string name="toolbar_place_toolbar">In the toolbar</string>
+    <string name="toolbar_place_toolbar_summary">Shown when the toolbar is opened</string>
+    <string name="toolbar_place_rest">Only under All actions</string>
+    <string name="toolbar_place_rest_summary">Still there when you open All actions</string>
+    <!-- Label of the card that makes a new color theme -->
+    <string name="theme_new">New</string>
     <!-- Names of the toolbar keys-->
     <string name="paste" tools:keep="@string/paste" translatable="false">@android:string/paste</string>
     <string name="copy" tools:keep="@string/copy" translatable="false">@android:string/copy</string>

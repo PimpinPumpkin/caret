@@ -127,6 +127,14 @@ fun ColorThemePickerDialog(
             }
         },
     )
+    LoadColorsDialog(showLoadDialog) { showLoadDialog = false }
+}
+
+/** Asks where to load a color theme from, a file or the clipboard, and stores it as a theme of the user's own. */
+@Composable
+fun LoadColorsDialog(show: Boolean, onDismissRequest: () -> Unit) {
+    val ctx = LocalContext.current
+    val prefs = ctx.prefs()
     var errorDialog by remember { mutableStateOf(false) }
     val scope = rememberCoroutineScope()
     val loadFilePicker = filePicker { uri ->
@@ -136,9 +144,9 @@ fun ColorThemePickerDialog(
             scope.launch { errorDialog = !loadColorString(text, prefs) }
         }
     }
-    if (showLoadDialog) {
+    if (show) {
         ConfirmationDialog(
-            onDismissRequest = { showLoadDialog = false },
+            onDismissRequest = onDismissRequest,
             title = { Text(stringResource(R.string.load)) },
             content = {
                 val link = stringResource(R.string.discussion_section_link).withHtmlLink(Links.CUSTOM_COLORS)
@@ -154,7 +162,7 @@ fun ColorThemePickerDialog(
             },
             confirmButtonText = stringResource(R.string.button_load_custom),
             onNeutral = {
-                showLoadDialog = false
+                onDismissRequest()
                 val cm = ctx.getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
                 val clip = cm.primaryClip?.takeIf { it.itemCount > 0 } ?: return@ConfirmationDialog
                 val text = clip.getItemAt(0).text

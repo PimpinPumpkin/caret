@@ -185,10 +185,31 @@ class LatinIME : InputMethodService(),
     val clipboardHistoryManager: ClipboardHistoryManager = ClipboardHistoryManager(this)
 
     private val inlineDictation: InlineDictation = InlineDictation(this, object : InlineDictation.Host {
-        override fun insertText(text: String) = onTextInput(text)
+        override fun insertText(text: String) {
+            if (!dictationComposing) {
+                onTextInput(text)
+                return
+            }
+            // takes the place of the words shown while they were spoken; nothing here is a word
+            // being typed, so the typing logic is kept out of it
+            dictationComposing = false
+            handler.cancelResumeSuggestions()
+            inputLogic.connection.commitText(text, 1)
+            keyboardSwitcher.updateShiftState(getCurrentAutoCapsState(), getCurrentRecapitalizeState())
+        }
+        override fun showPartial(text: String) {
+            handler.cancelResumeSuggestions()
+            // a word half typed is finished first, or the spoken words would take its place
+            if (!dictationComposing && inputLogic.wordComposer.isComposingWord) inputLogic.commitTyped(settings.current, "")
+            dictationComposing = text.isNotEmpty()
+            inputLogic.connection.setComposingText(text, 1)
+        }
         override fun codePointBeforeCursor() = inputLogic.connection.getCodePointBeforeCursor()
         override fun locale(): Locale = richImm.currentSubtypeLocale
-        override fun onListening(listening: Boolean) { suggestionStripView?.setMicListening(listening) }
+        override fun onListening(listening: Boolean) {
+            if (!listening) dictationComposing = false
+            suggestionStripView?.setMicListening(listening)
+        }
         override fun onLevel(level: Float) { suggestionStripView?.setMicLevel(level) }
         override fun soundsEnabled() = settings.current.dictationSound
         override fun showStatus(text: String?) {
@@ -217,6 +238,8 @@ class LatinIME : InputMethodService(),
     })
 
     private var dictationText: TextView? = null
+    /** True while spoken words that are not final yet are shown at the cursor. */
+    private var dictationComposing = false
 
     private val remoteNavigation = RemoteNavigation { keyboardSwitcher.getMainKeyboardView() }
 
@@ -1114,6 +1137,8 @@ class LatinIME : InputMethodService(),
                     + ", nss=" + newSelStart + ", nse=" + newSelEnd
                     + ", cs=" + composingSpanStart + ", ce=" + composingSpanEnd)
         }
+        // the cursor moves with every word that is heard; that is no reason to start correcting them
+        if (dictationComposing) return
 
         // This call happens whether our view is displayed or not, but if it's not then we should
         // not attempt recorrection. This is true even with a hardware keyboard connected: if the

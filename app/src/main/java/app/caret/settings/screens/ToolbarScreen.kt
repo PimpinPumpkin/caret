@@ -36,6 +36,8 @@ import app.caret.latin.utils.prefs
 import app.caret.settings.SearchSettingsScreen
 import app.caret.settings.Setting
 import app.caret.settings.SettingsActivity
+import app.caret.settings.SettingsDestination
+import app.caret.latin.utils.NextScreenIcon
 import app.caret.latin.utils.Theme
 import app.caret.settings.dialogs.ToolbarKeysCustomizer
 import app.caret.settings.initPreview
@@ -57,18 +59,11 @@ fun ToolbarScreen(
     val clipboardToolbarVisible = toolbarMode != ToolbarMode.HIDDEN
         || !prefs.getBoolean(Settings.PREF_TOOLBAR_HIDING_GLOBAL, Defaults.PREF_TOOLBAR_HIDING_GLOBAL)
     val items = listOf(
-        KeyLabel.PREF_ACTION_KEY,
         Settings.PREF_TOOLBAR_MODE,
         if (toolbarMode == ToolbarMode.HIDDEN) Settings.PREF_TOOLBAR_HIDING_GLOBAL else null,
         if (toolbarMode != ToolbarMode.HIDDEN) Settings.PREF_TOOLBAR_SWIPE_DOWN_TO_HIDE else null,
-        when (toolbarMode) {
-             ToolbarMode.EXPANDABLE, ToolbarMode.TOOLBAR_KEYS -> Settings.PREF_TOOLBAR_KEYS
-             else -> null
-        },
-        when (toolbarMode) {
-            ToolbarMode.EXPANDABLE, ToolbarMode.SUGGESTION_STRIP -> Settings.PREF_PINNED_TOOLBAR_KEYS
-            else -> null
-        },
+        if (toolbarMode != ToolbarMode.HIDDEN) Settings.PREF_TOOLBAR_KEYS else null,
+        KeyLabel.PREF_ACTION_KEY,
         if (toolbarMode == ToolbarMode.EXPANDABLE || toolbarMode == ToolbarMode.SUGGESTION_STRIP) SuggestionStripView.PREF_MIC_ON_LEFT else null,
         if (toolbarMode == ToolbarMode.EXPANDABLE || toolbarMode == ToolbarMode.SUGGESTION_STRIP) SuggestionStripView.PREF_MIC_SIZE else null,
         Settings.PREF_INLINE_DICTATION,
@@ -147,13 +142,12 @@ fun createToolbarSettings(context: Context) = listOf(
     Setting(context, Settings.PREF_TOOLBAR_SWIPE_DOWN_TO_HIDE, R.string.toolbar_swipe_down_to_hide, R.string.toolbar_swipe_down_to_hide_summary) {
         SwitchPreference(it, Defaults.PREF_TOOLBAR_SWIPE_DOWN_TO_HIDE)
     },
-    Setting(context, Settings.PREF_TOOLBAR_KEYS, R.string.toolbar_keys) {
-        val keys = Defaults.PREF_TOOLBAR_KEYS.filterBackgroundGatheringToolbarKeys(LocalContext.current.prefs())
-        ReorderSwitchPreference(it, keys)
-    },
-    Setting(context, Settings.PREF_PINNED_TOOLBAR_KEYS, R.string.pinned_toolbar_keys) {
-        val keys = Defaults.PREF_PINNED_TOOLBAR_KEYS.filterBackgroundGatheringToolbarKeys(LocalContext.current.prefs())
-        ReorderSwitchPreference(it, keys)
+    Setting(context, Settings.PREF_TOOLBAR_KEYS, R.string.toolbar_arrange, R.string.toolbar_arrange_summary) {
+        Preference(
+            name = it.title,
+            description = it.description,
+            onClick = { SettingsDestination.navigateTo(SettingsDestination.ToolbarArrange) },
+        ) { NextScreenIcon() }
     },
     Setting(context, Settings.PREF_CLIPBOARD_TOOLBAR_KEYS, R.string.clipboard_toolbar_keys) {
         val keys = Defaults.PREF_CLIPBOARD_TOOLBAR_KEYS.filterBackgroundGatheringToolbarKeys(LocalContext.current.prefs())
