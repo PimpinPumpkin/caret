@@ -42,7 +42,7 @@ object JniUtils {
     }
 
     @JvmField
-    var sHaveGestureLib = false
+    var haveGestureLib = false
     init {
         // hardcoded default path, may not work on all phones
         @SuppressLint("SdCardPath") var filesDir = "/data/data/" + BuildConfig.APPLICATION_ID + "/files"
@@ -79,13 +79,13 @@ object JniUtils {
                 if (TextUtils.equals(wantedChecksum, checksum)) {
                     // try loading the library
                     System.load(userSuppliedLibrary.getAbsolutePath())
-                    sHaveGestureLib = true // this is an assumption, any way to actually check?
+                    haveGestureLib = true // this is an assumption, any way to actually check?
                 } else {
                     // delete if checksum doesn't match
                     // this is bad if we can't get the application and the user has a different library than expected...
                     //noinspection ResultOfMethodCallIgnored
                     userSuppliedLibrary.delete()
-                    sHaveGestureLib = false
+                    haveGestureLib = false
                 }
             } catch (t: Throwable) { // catch everything, maybe provided library simply doesn't work
                 if (t !is IllegalStateException || "SharedPreferences in credential encrypted storage are not available until after user is unlocked" != t.message)
@@ -94,16 +94,16 @@ object JniUtils {
             }
         }
 
-        if (!sHaveGestureLib) {
+        if (!haveGestureLib) {
             // try loading google library, will fail unless the library is in system and this is a system app
             try {
                 System.loadLibrary(JNI_LIB_NAME_GOOGLE)
-                sHaveGestureLib = true
+                haveGestureLib = true
             } catch (ul: UnsatisfiedLinkError) {
                 Log.w(TAG, "Could not load system glide typing library " + JNI_LIB_NAME_GOOGLE + ": " + ul.message)
             }
         }
-        if (!sHaveGestureLib) {
+        if (!haveGestureLib) {
             // try loading built-in library
             try {
                 System.loadLibrary(JNI_LIB_NAME)

@@ -76,7 +76,7 @@ class NgramContext {
     // WordComposer was reset and before starting a new composing word, but we should never be
     // calling getSuggetions* in this situation.
     private val mPrevWordsInfo: Array<WordInfo?>
-    private val mPrevWordsCount: Int
+    private val prevWordsCount: Int
 
     private val mMaxPrevWordCount: Int
 
@@ -86,20 +86,20 @@ class NgramContext {
     @Suppress("UNCHECKED_CAST")
     constructor(vararg prevWordsInfo: WordInfo?) {
         mPrevWordsInfo = prevWordsInfo as Array<WordInfo?>
-        mPrevWordsCount = prevWordsInfo.size
+        prevWordsCount = prevWordsInfo.size
         mMaxPrevWordCount = DecoderSpecificConstants.MAX_PREV_WORD_COUNT_FOR_N_GRAM
     }
 
     @Suppress("UNCHECKED_CAST")
     constructor(maxPrevWordCount: Int, vararg prevWordsInfo: WordInfo?) {
         mPrevWordsInfo = prevWordsInfo as Array<WordInfo?>
-        mPrevWordsCount = prevWordsInfo.size
+        prevWordsCount = prevWordsInfo.size
         mMaxPrevWordCount = maxPrevWordCount
     }
 
     fun changeWordIfAfterBeginningOfSentence(from: String?, to: String?): Boolean {
         var beginning = false
-        for (i in mPrevWordsCount - 1 downTo 0) {
+        for (i in prevWordsCount - 1 downTo 0) {
             val info = mPrevWordsInfo[i]!!
             if (beginning && TextUtils.equals(info.mWord, from)) {
                 mPrevWordsInfo[i] = WordInfo(to)
@@ -114,7 +114,7 @@ class NgramContext {
      * Create next prevWordsInfo using current prevWordsInfo.
      */
     fun getNextNgramContext(wordInfo: WordInfo?): NgramContext {
-        val nextPrevWordCount = Math.min(mMaxPrevWordCount, mPrevWordsCount + 1)
+        val nextPrevWordCount = Math.min(mMaxPrevWordCount, prevWordsCount + 1)
         val prevWordsInfo = arrayOfNulls<WordInfo>(nextPrevWordCount)
         prevWordsInfo[0] = wordInfo
         System.arraycopy(mPrevWordsInfo, 0, prevWordsInfo, 1, nextPrevWordCount - 1)
@@ -169,17 +169,17 @@ class NgramContext {
     }
 
     fun isValid(): Boolean {
-        return mPrevWordsCount > 0 && mPrevWordsInfo[0]!!.isValid()
+        return prevWordsCount > 0 && mPrevWordsInfo[0]!!.isValid()
     }
 
     fun isBeginningOfSentenceContext(): Boolean {
-        return mPrevWordsCount > 0 && mPrevWordsInfo[0]!!.mIsBeginningOfSentence
+        return prevWordsCount > 0 && mPrevWordsInfo[0]!!.mIsBeginningOfSentence
     }
 
     // n is 1-indexed.
     // TODO: Remove
     fun getNthPrevWord(n: Int): CharSequence? {
-        if (n <= 0 || n > mPrevWordsCount) {
+        if (n <= 0 || n > prevWordsCount) {
             return null
         }
         return mPrevWordsInfo[n - 1]!!.mWord
@@ -187,7 +187,7 @@ class NgramContext {
 
     // n is 1-indexed.
     fun isNthPrevWordBeginningOfSentence(n: Int): Boolean {
-        if (n <= 0 || n > mPrevWordsCount) {
+        if (n <= 0 || n > prevWordsCount) {
             return false
         }
         return mPrevWordsInfo[n - 1]!!.mIsBeginningOfSentence
@@ -195,7 +195,7 @@ class NgramContext {
 
     fun outputToArray(codePointArrays: Array<IntArray?>,
             isBeginningOfSentenceArray: BooleanArray) {
-        for (i in 0 until mPrevWordsCount) {
+        for (i in 0 until prevWordsCount) {
             val wordInfo = mPrevWordsInfo[i]
             if (wordInfo == null || !wordInfo.isValid()) {
                 codePointArrays[i] = IntArray(0)
@@ -208,7 +208,7 @@ class NgramContext {
     }
 
     fun getPrevWordCount(): Int {
-        return mPrevWordsCount
+        return prevWordsCount
     }
 
     override fun hashCode(): Int {
@@ -227,7 +227,7 @@ class NgramContext {
         if (o !is NgramContext) return false
         val prevWordsInfo: NgramContext = o
 
-        val minLength = Math.min(mPrevWordsCount, prevWordsInfo.mPrevWordsCount)
+        val minLength = Math.min(prevWordsCount, prevWordsInfo.prevWordsCount)
         for (i in 0 until minLength) {
             if (mPrevWordsInfo[i]!! != prevWordsInfo.mPrevWordsInfo[i]) {
                 return false
@@ -235,12 +235,12 @@ class NgramContext {
         }
         val longerWordsInfo: Array<WordInfo?>
         val longerWordsInfoCount: Int
-        if (mPrevWordsCount > prevWordsInfo.mPrevWordsCount) {
+        if (prevWordsCount > prevWordsInfo.prevWordsCount) {
             longerWordsInfo = mPrevWordsInfo
-            longerWordsInfoCount = mPrevWordsCount
+            longerWordsInfoCount = prevWordsCount
         } else {
             longerWordsInfo = prevWordsInfo.mPrevWordsInfo
-            longerWordsInfoCount = prevWordsInfo.mPrevWordsCount
+            longerWordsInfoCount = prevWordsInfo.prevWordsCount
         }
         for (i in minLength until longerWordsInfoCount) {
             if (longerWordsInfo[i] != null
@@ -253,7 +253,7 @@ class NgramContext {
 
     override fun toString(): String {
         val builder = StringBuilder()
-        for (i in 0 until mPrevWordsCount) {
+        for (i in 0 until prevWordsCount) {
             val wordInfo = mPrevWordsInfo[i]
             builder.append("PrevWord[")
             builder.append(i)

@@ -17,7 +17,7 @@ import app.caret.latin.utils.Log
  * A class for detecting Emoji-Alt physical key.
  */
 class EmojiAltPhysicalKeyDetector(resources: Resources) {
-    private val mHotKeysList: MutableList<EmojiHotKeys>
+    private val hotKeysList: MutableList<EmojiHotKeys>
 
     private class HotKeySet : HashSet<Pair<Int, Int>>()
 
@@ -25,13 +25,13 @@ class EmojiAltPhysicalKeyDetector(resources: Resources) {
         private val mName: String
         private val mKeySet: HotKeySet
 
-        var mCanFire: Boolean
+        var canFire: Boolean
         var mMetaState: Int = 0
 
         init {
             mName = name
             mKeySet = keySet
-            mCanFire = false
+            canFire = false
         }
 
         fun onKeyDown(keyEvent: KeyEvent) {
@@ -45,13 +45,13 @@ class EmojiAltPhysicalKeyDetector(resources: Resources) {
                 if (DEBUG) {
                    Log.d(TAG, "EmojiHotKeys.onKeyDown() - " + mName + " - enabling action")
                 }
-                mCanFire = true
+                canFire = true
                 mMetaState = keyEvent.metaState
-            } else if (mCanFire) {
+            } else if (canFire) {
                 if (DEBUG) {
                    Log.d(TAG, "EmojiHotKeys.onKeyDown() - " + mName + " - disabling action")
                 }
-                mCanFire = false
+                canFire = false
             }
         }
 
@@ -71,7 +71,7 @@ class EmojiAltPhysicalKeyDetector(resources: Resources) {
 
             val key: Pair<Int, Int> = Pair.create(keyCode, metaState)
             if (mKeySet.contains(key)) {
-                if (mCanFire) {
+                if (canFire) {
                     if (!keyEvent.isCanceled) {
                         if (DEBUG) {
                             Log.d(TAG, "EmojiHotKeys.onKeyUp() - " + mName + " - firing action")
@@ -84,15 +84,15 @@ class EmojiAltPhysicalKeyDetector(resources: Resources) {
                             Log.d(TAG, "EmojiHotKeys.onKeyUp() - " + mName + " - canceled, ignoring action")
                         }
                     }
-                    mCanFire = false
+                    canFire = false
                 }
             }
 
-            if (mCanFire) {
+            if (canFire) {
                 if (DEBUG) {
                     Log.d(TAG, "EmojiHotKeys.onKeyUp() - " + mName + " - disabling action")
                 }
-                mCanFire = false
+                canFire = false
             }
         }
 
@@ -100,7 +100,7 @@ class EmojiAltPhysicalKeyDetector(resources: Resources) {
     }
 
     init {
-        mHotKeysList = ArrayList()
+        hotKeysList = ArrayList()
 
         val emojiSwitchSet = parseHotKeys(
                 resources, R.array.keyboard_switcher_emoji)
@@ -110,7 +110,7 @@ class EmojiAltPhysicalKeyDetector(resources: Resources) {
                 switcher.onToggleKeyboard(KeyboardSwitcher.KeyboardSwitchState.EMOJI)
             }
         }
-        mHotKeysList.add(emojiHotKeys)
+        hotKeysList.add(emojiHotKeys)
 
         val symbolsSwitchSet = parseHotKeys(
                 resources, R.array.keyboard_switcher_symbols_shifted)
@@ -120,7 +120,7 @@ class EmojiAltPhysicalKeyDetector(resources: Resources) {
                 switcher.onToggleKeyboard(KeyboardSwitcher.KeyboardSwitchState.SYMBOLS_SHIFTED)
             }
         }
-        mHotKeysList.add(symbolsHotKeys)
+        hotKeysList.add(symbolsHotKeys)
     }
 
     fun onKeyDown(keyEvent: KeyEvent) {
@@ -129,7 +129,7 @@ class EmojiAltPhysicalKeyDetector(resources: Resources) {
         }
 
         if (shouldProcessEvent(keyEvent)) {
-            for (hotKeys in mHotKeysList) {
+            for (hotKeys in hotKeysList) {
                 hotKeys.onKeyDown(keyEvent)
             }
         }
@@ -141,7 +141,7 @@ class EmojiAltPhysicalKeyDetector(resources: Resources) {
         }
 
         if (shouldProcessEvent(keyEvent)) {
-            for (hotKeys in mHotKeysList) {
+            for (hotKeys in hotKeysList) {
                 hotKeys.onKeyUp(keyEvent)
             }
         }
@@ -152,7 +152,7 @@ class EmojiAltPhysicalKeyDetector(resources: Resources) {
         private const val DEBUG = false
 
         private fun shouldProcessEvent(keyEvent: KeyEvent): Boolean {
-            if (!Settings.getValues().mEnableEmojiAltPhysicalKey) {
+            if (!Settings.getValues().enableEmojiAltPhysicalKey) {
                 // The feature is disabled.
                 if (DEBUG) {
                     Log.d(TAG, "shouldProcessEvent(): Disabled")

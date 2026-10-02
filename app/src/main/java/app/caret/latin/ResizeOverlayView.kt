@@ -135,8 +135,8 @@ class ResizeOverlayView(context: Context, private val onDone: () -> Unit) : View
 
     private fun prefKey(prefix: String, dimensions: Int): Pair<String, Int> {
         val values = Settings.getValues()
-        val landscape = values.mDisplayOrientation == Configuration.ORIENTATION_LANDSCAPE
-        val index = if (dimensions == 3) findIndexOfDefaultSetting(landscape, values.mIsSplitKeyboardEnabled, FoldableUtils.isFolded)
+        val landscape = values.displayOrientation == Configuration.ORIENTATION_LANDSCAPE
+        val index = if (dimensions == 3) findIndexOfDefaultSetting(landscape, values.isSplitKeyboardEnabled, FoldableUtils.isFolded)
             else findIndexOfDefaultSetting(landscape, FoldableUtils.isFolded)
         return createPrefKeyForBooleanSettings(prefix, index, dimensions) to index
     }

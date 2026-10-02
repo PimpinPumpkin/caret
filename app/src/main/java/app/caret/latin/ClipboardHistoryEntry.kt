@@ -29,7 +29,7 @@ class ClipboardHistoryEntry(
     override fun compareTo(other: ClipboardHistoryEntry): Int {
         val result = other.isPinned.compareTo(isPinned)
         if (result == 0) return other.timeStamp.compareTo(timeStamp)
-        if (Settings.getValues()?.mClipboardHistoryPinnedFirst == false) return -result
+        if (Settings.getValues()?.clipboardHistoryPinnedFirst == false) return -result
         return result
     }
 

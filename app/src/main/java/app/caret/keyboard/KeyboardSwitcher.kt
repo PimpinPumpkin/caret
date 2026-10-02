@@ -107,7 +107,7 @@ class KeyboardSwitcher private constructor() {
             if (keyboardView != null)
                 latinIME.setInputView(onCreateInputView(displayContext, isHardwareAcceleratedDrawingEnabled))
         } else if (currentInputView != null && latinIME.hasSuggestionStripView()
-                    == (Settings.getValues().mToolbarMode == ToolbarMode.HIDDEN || latinIME.isEmojiSearch())) {
+                    == (Settings.getValues().toolbarMode == ToolbarMode.HIDDEN || latinIME.isEmojiSearch())) {
             latinIME.updateSuggestionStripView(currentInputView)
         }
     }
@@ -144,7 +144,7 @@ class KeyboardSwitcher private constructor() {
                 .setInternalAction(internalAction)
                 .build()
         try {
-            state.onLoadKeyboard(currentAutoCapsState, currentRecapitalizeState, settingsValues.mOneHandedModeEnabled)
+            state.onLoadKeyboard(currentAutoCapsState, currentRecapitalizeState, settingsValues.oneHandedModeEnabled)
         } catch (e: KeyboardLayoutSet.Companion.KeyboardLayoutSetException) {
             Log.e(TAG, "loading keyboard failed: " + e.keyboardId, e.cause)
             try {
@@ -206,7 +206,7 @@ class KeyboardSwitcher private constructor() {
     fun isImeSuppressedByHardwareKeyboard(
             settingsValues: SettingsValues,
             toggleState: KeyboardSwitchState): Boolean {
-        return settingsValues.mHasHardwareKeyboard && toggleState == KeyboardSwitchState.HIDDEN
+        return settingsValues.hasHardwareKeyboard && toggleState == KeyboardSwitchState.HIDDEN
     }
 
     private fun setMainKeyboardFrame(
@@ -313,10 +313,10 @@ class KeyboardSwitcher private constructor() {
         }
         val settings = Settings.getInstance()
         wrapper.oneHandedModeEnabled = enabled
-        wrapper.oneHandedGravity = settings.getCurrent().mOneHandedModeGravity
+        wrapper.oneHandedGravity = settings.getCurrent().oneHandedModeGravity
 
         // oneHandeMode is always disabled when floating, and we shouldn't mess up the setting
-        if (enabled != settings.getCurrent().mOneHandedModeEnabled)
+        if (enabled != settings.getCurrent().oneHandedModeEnabled)
             settings.writeOneHandedModeEnabled(enabled)
         reloadKeyboard()
     }
@@ -324,11 +324,11 @@ class KeyboardSwitcher private constructor() {
     fun toggleSplitKeyboardMode() {
         val settings = Settings.getInstance()
         settings.writeSplitKeyboardEnabled(
-            !settings.getCurrent().mIsSplitKeyboardEnabled,
+            !settings.getCurrent().isSplitKeyboardEnabled,
             currentOrientation == Configuration.ORIENTATION_LANDSCAPE,
             FoldableUtils.isFolded
         )
-        setOneHandedModeEnabled(settings.getCurrent().mOneHandedModeEnabled, true)
+        setOneHandedModeEnabled(settings.getCurrent().oneHandedModeEnabled, true)
         reloadKeyboard()
     }
 
@@ -426,7 +426,7 @@ class KeyboardSwitcher private constructor() {
         if (margin is ViewGroup.MarginLayoutParams) {
             val kb = keyboardView!!.getKeyboard()
             if (kb != null)
-                margin.topMargin = kb.mOccupiedHeight - 16.dpToPx(currentInputView!!.resources)
+                margin.topMargin = kb.occupiedHeight - 16.dpToPx(currentInputView!!.resources)
             backgroundGatheringIndicator.layoutParams = backgroundGatheringIndicator.layoutParams
         }
     }
@@ -446,7 +446,7 @@ class KeyboardSwitcher private constructor() {
         val keyboard = view.getKeyboard()
         if (keyboard == null) // may happen when using hardware keyboard
             return false
-        val activeKeyboardId = keyboard.mId.element
+        val activeKeyboardId = keyboard.id.element
         for (keyboardElement in keyboardElements) {
             if (activeKeyboardId == keyboardElement) {
                 return true
@@ -570,7 +570,7 @@ class KeyboardSwitcher private constructor() {
         if (keyboard == null) {
             return CapsMode.OFF
         }
-        return keyboard.mId.element.capsMode
+        return keyboard.id.element.capsMode
     }
 
     fun getCurrentKeyboardScript(): String {
@@ -713,7 +713,7 @@ class KeyboardSwitcher private constructor() {
         }
 
         override fun setFloatingKeyboardEnabled(enabled: Boolean) {
-            if (enabled != Settings.getValues().mIsFloatingKeyboard)
+            if (enabled != Settings.getValues().isFloatingKeyboard)
                 // mIsFloatingKeyboard is always disabled when device is locked, and we shouldn't mess up the setting
                 setFloatingKeyboardEnabled(themeContext, enabled)
             if (enabled) FloatingKeyboardUtils.setFloating(currentInputView)
@@ -741,16 +741,16 @@ class KeyboardSwitcher private constructor() {
             val oldKeyboard = view.getKeyboard()
             val newKeyboard = keyboardLayoutSet!!.getKeyboard(keyboardElement)
             view.setKeyboard(newKeyboard)
-            currentInputView!!.setKeyboardTopPadding(newKeyboard.mTopPadding)
-            view.setKeyPreviewPopupEnabled(currentSettingsValues.mKeyPreviewPopupOn)
+            currentInputView!!.setKeyboardTopPadding(newKeyboard.topPadding)
+            view.setKeyPreviewPopupEnabled(currentSettingsValues.keyPreviewPopupOn)
             view.updateShortcutKey(richImm.isShortcutImeReady)
-            val subtypeChanged = (oldKeyboard == null) || newKeyboard.mId.subtype != oldKeyboard.mId.subtype
-            val languageOnSpacebarFormatType = LanguageOnSpacebarUtils.getLanguageOnSpacebarFormatType(newKeyboard.mId.subtype)
+            val subtypeChanged = (oldKeyboard == null) || newKeyboard.id.subtype != oldKeyboard.id.subtype
+            val languageOnSpacebarFormatType = LanguageOnSpacebarUtils.getLanguageOnSpacebarFormatType(newKeyboard.id.subtype)
             val hasMultipleEnabledIMEsOrSubtypes = richImm.hasMultipleEnabledIMEsOrSubtypes(true)
             view.startDisplayLanguageOnSpacebar(subtypeChanged, languageOnSpacebarFormatType, hasMultipleEnabledIMEsOrSubtypes)
 
             if (currentSettingsValues.needsToLookupSuggestions()
-                && (currentSettingsValues.mInlineEmojiSearch || currentSettingsValues.mSuggestEmojis)) {
+                && (currentSettingsValues.inlineEmojiSearch || currentSettingsValues.suggestEmojis)) {
                 loadEmojiDefaultVersionsAndPopupSpecs(themeContext)
             }
         }

@@ -200,6 +200,20 @@ Next:
 2. `WordComposer`, `MainKeyboardView` and `KeyboardSwitcher` are Kotlin and cleaned the same way
    (`!!` 184 to 15). `KeyboardSwitcher`'s views are `lateinit`, so a too-early access throws
    `UninitializedPropertyAccessException` where Java threw a null pointer exception.
-3. Still to do: turn the trivial getters of these three into properties (`getKeyboard()`,
-   `getMainKeyboardView()` and `getTypedWord()` have 20 to 30 Kotlin callers each; two are
-   replaced by name in a test shadow), then the next Java files (`Key`, `KeyboardView`).
+3. All of `app.caret` is Kotlin (2026-10-02). The last 136 Java files were converted in 35
+   batches, each compiled and unit-tested before its commit, with the emulator smoke test at
+   checkpoints and the swipe benchmark at the end (92.4% top-1, baseline 92.3%). The five files
+   under `com.android.inputmethod` stay Java on purpose: the native library registers its methods
+   on those class names and reads fields of `WordInputEventForPersonalization` by name, and
+   Google's optional swipe library binds to the same names.
+4. A repo-wide pass then dropped the `m`/`s` prefix from 450 fields where the plain name was free
+   in the declaring file. Fields whose plain name clashes with a local, parameter or method in
+   their file keep the prefix (about 290).
+
+Still open in the converted code:
+- Getters that only return a field are still functions in most classes (`getKeyboard()`,
+  `getMainKeyboardView()`, `getTypedWord()`, `Settings.getValues()` and so on).
+- About 400 `!!` remain across the app. Many were added mechanically at call sites where Java
+  dereferenced a value that the converted callee now types as nullable; they keep the old
+  behavior but deserve the same per-file review the first seven files got.
+- The remaining prefixed fields.

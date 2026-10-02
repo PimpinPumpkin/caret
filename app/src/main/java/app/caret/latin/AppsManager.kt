@@ -11,7 +11,7 @@ import android.content.pm.ResolveInfo
 import android.graphics.drawable.Drawable
 
 class AppsManager(val context: Context) : BroadcastReceiver() {
-    private val mPackageManager: PackageManager = context.packageManager
+    private val packageManager: PackageManager = context.packageManager
     private var listener: AppsChangedListener? = null
 
     /**
@@ -20,10 +20,10 @@ class AppsManager(val context: Context) : BroadcastReceiver() {
     fun getNames(): HashSet<String> {
         val filter = Intent(Intent.ACTION_MAIN).addCategory(Intent.CATEGORY_LAUNCHER)
         // activities with an entry/icon for the launcher
-        val launcherApps: List<ResolveInfo> = mPackageManager.queryIntentActivities(filter, 0)
+        val launcherApps: List<ResolveInfo> = packageManager.queryIntentActivities(filter, 0)
 
         return launcherApps.mapTo(HashSet(launcherApps.size)) {
-            it.activityInfo.loadLabel(mPackageManager).toString()
+            it.activityInfo.loadLabel(packageManager).toString()
         }
     }
 
@@ -52,8 +52,8 @@ class AppsManager(val context: Context) : BroadcastReceiver() {
 
     fun getPackagesWithNameAndIcon(): List<Triple<String, String, Drawable?>> {
         val filter = Intent(Intent.ACTION_MAIN).addCategory(Intent.CATEGORY_LAUNCHER)
-        return mPackageManager.queryIntentActivities(filter, 0).distinctBy { it.activityInfo.packageName }.map {
-            Triple(it.activityInfo.packageName, it.activityInfo.loadLabel(mPackageManager).toString(), it.activityInfo.loadIcon(mPackageManager))
+        return packageManager.queryIntentActivities(filter, 0).distinctBy { it.activityInfo.packageName }.map {
+            Triple(it.activityInfo.packageName, it.activityInfo.loadLabel(packageManager).toString(), it.activityInfo.loadIcon(packageManager))
         }
     }
 }

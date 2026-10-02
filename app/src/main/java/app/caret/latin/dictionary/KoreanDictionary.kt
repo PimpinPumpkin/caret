@@ -39,8 +39,8 @@ class KoreanDictionary(dictionary: Dictionary) : Dictionary(dictionary.mDictType
                   ngramContext: NgramContext?, proximityInfoHandle: Long, settingsValuesForSuggestion: SettingsValuesForSuggestion?,
                   sessionId: Int, weightForLocale: Float, inOutWeightOfLangModelVsSpatialModel: FloatArray?): ArrayList<SuggestedWords.SuggestedWordInfo> {
         @Suppress("NAME_SHADOWING")
-        val composedData = ComposedData(composedData!!.mInputPointers,
-                composedData!!.mIsBatchMode, processInput(composedData!!.mTypedWord))
+        val composedData = ComposedData(composedData!!.inputPointers,
+                composedData!!.isBatchMode, processInput(composedData!!.typedWord))
         val suggestions: ArrayList<SuggestedWords.SuggestedWordInfo>? = mDictionary.getSuggestions(composedData,
                 ngramContext, proximityInfoHandle, settingsValuesForSuggestion, sessionId,
                 weightForLocale, inOutWeightOfLangModelVsSpatialModel)

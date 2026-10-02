@@ -8,7 +8,7 @@ package app.caret.latin.utils
  */
 class SpacedTokens(phrase: String) : Iterable<String> {
     private val mPhrase = phrase
-    private val mLength = phrase.length
+    private val length = phrase.length
     private val mStartPos = phrase.indexOfFirst { !Character.isWhitespace(it) }
     // the iterator should start at the first non-whitespace character
 
@@ -16,18 +16,18 @@ class SpacedTokens(phrase: String) : Iterable<String> {
         private var startPos = mStartPos
 
         override fun hasNext(): Boolean {
-            return startPos < mLength && startPos != -1
+            return startPos < length && startPos != -1
         }
 
         override fun next(): String {
             var endPos = startPos
 
-            do if (++endPos >= mLength) break
+            do if (++endPos >= length) break
             while (!Character.isWhitespace(mPhrase[endPos]))
             val word = mPhrase.substring(startPos, endPos)
 
-            if (endPos < mLength) {
-                do if (++endPos >= mLength) break
+            if (endPos < length) {
+                do if (++endPos >= length) break
                 while (Character.isWhitespace(mPhrase[endPos]))
             }
             startPos = endPos

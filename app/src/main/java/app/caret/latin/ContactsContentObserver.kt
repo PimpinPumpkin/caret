@@ -29,7 +29,7 @@ class ContactsContentObserver(manager: ContactsManager, context: Context) : Runn
     private val mRunning = AtomicBoolean(false)
 
     private var mContentObserver: ContentObserver? = null
-    private var mContactsChangedListener: ContactsChangedListener? = null
+    private var contactsChangedListener: ContactsChangedListener? = null
 
     init {
         mManager = manager
@@ -47,7 +47,7 @@ class ContactsContentObserver(manager: ContactsManager, context: Context) : Runn
         if (DebugFlags.DEBUG_ENABLED) {
             Log.d(TAG, "registerObserver()")
         }
-        mContactsChangedListener = listener
+        contactsChangedListener = listener
         val contentObserver = object : ContentObserver(null /* handler */) {
             override fun onChange(self: Boolean) {
                 ExecutorUtils.getBackgroundExecutor(ExecutorUtils.KEYBOARD)
@@ -77,7 +77,7 @@ class ContactsContentObserver(manager: ContactsManager, context: Context) : Runn
             if (DebugFlags.DEBUG_ENABLED) {
                 Log.d(TAG, "run() : Contacts have changed. Notifying listeners.")
             }
-            mContactsChangedListener!!.onContactsChange()
+            contactsChangedListener!!.onContactsChange()
         }
         mRunning.set(false)
     }

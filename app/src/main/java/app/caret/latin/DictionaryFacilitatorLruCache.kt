@@ -18,7 +18,7 @@ import java.util.concurrent.TimeUnit
 class DictionaryFacilitatorLruCache(context: Context, dictionaryNamePrefix: String) {
     private val mContext: Context
     private val mDictionaryNamePrefix: String
-    private val mLock = Any()
+    private val lock = Any()
     private val mDictionaryFacilitator: DictionaryFacilitator
     private var mUseContactsDictionary = false
     private var mUseAppsDictionary = false
@@ -42,7 +42,7 @@ class DictionaryFacilitatorLruCache(context: Context, dictionaryNamePrefix: Stri
     }
 
     fun setUseContactsDictionary(useContactsDictionary: Boolean) {
-        synchronized(mLock) {
+        synchronized(lock) {
             if (mUseContactsDictionary == useContactsDictionary) {
                 // The value has not been changed.
                 return
@@ -54,7 +54,7 @@ class DictionaryFacilitatorLruCache(context: Context, dictionaryNamePrefix: Stri
     }
 
     fun setUseAppsDictionary(useAppsDictionary: Boolean) {
-        synchronized(mLock) {
+        synchronized(lock) {
             if (mUseAppsDictionary == useAppsDictionary) {
                 // The value has not been changed.
                 return
@@ -66,7 +66,7 @@ class DictionaryFacilitatorLruCache(context: Context, dictionaryNamePrefix: Stri
     }
 
     fun get(locale: Locale): DictionaryFacilitator {
-        synchronized(mLock) {
+        synchronized(lock) {
             if (!mDictionaryFacilitator.isForLocale(locale)) {
                 mLocale = locale
                 resetDictionariesForLocaleLocked()
@@ -77,7 +77,7 @@ class DictionaryFacilitatorLruCache(context: Context, dictionaryNamePrefix: Stri
     }
 
     fun closeDictionaries() {
-        synchronized(mLock) {
+        synchronized(lock) {
             mDictionaryFacilitator.closeDictionaries()
         }
     }

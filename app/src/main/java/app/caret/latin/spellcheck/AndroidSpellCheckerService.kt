@@ -43,21 +43,21 @@ class AndroidSpellCheckerService : SpellCheckerService(),
         SharedPreferences.OnSharedPreferenceChangeListener {
 
     private val MAX_NUM_OF_THREADS_READ_DICTIONARY = 2
-    private val mSemaphore = Semaphore(MAX_NUM_OF_THREADS_READ_DICTIONARY, true)
+    private val semaphore = Semaphore(MAX_NUM_OF_THREADS_READ_DICTIONARY, true)
     // TODO: Make each spell checker session has its own session id.
-    private val mSessionIdPool = ConcurrentLinkedQueue<Int>()
+    private val sessionIdPool = ConcurrentLinkedQueue<Int>()
 
-    private val mDictionaryFacilitatorCache =
+    private val dictionaryFacilitatorCache =
             DictionaryFacilitatorLruCache(this, DICTIONARY_NAME_PREFIX)
-    private val mKeyboardCache = ConcurrentHashMap<Locale, Keyboard>()
+    private val keyboardCache = ConcurrentHashMap<Locale, Keyboard>()
 
     // The threshold for a suggestion to be considered "recommended".
     private var mRecommendedThreshold = 0f
-    private lateinit var mSettingsValuesForSuggestion: SettingsValuesForSuggestion
+    private lateinit var settingsValuesForSuggestion: SettingsValuesForSuggestion
 
     init {
         for (i in 0 until MAX_NUM_OF_THREADS_READ_DICTIONARY) {
-            mSessionIdPool.add(i)
+            sessionIdPool.add(i)
         }
     }
 
@@ -69,7 +69,7 @@ class AndroidSpellCheckerService : SpellCheckerService(),
         onSharedPreferenceChanged(prefs, Settings.PREF_USE_CONTACTS)
         onSharedPreferenceChanged(prefs, Settings.PREF_USE_APPS)
         val blockOffensive = prefs.getBoolean(Settings.PREF_BLOCK_POTENTIALLY_OFFENSIVE, Defaults.PREF_BLOCK_POTENTIALLY_OFFENSIVE)
-        mSettingsValuesForSuggestion = SettingsValuesForSuggestion(blockOffensive, false)
+        settingsValuesForSuggestion = SettingsValuesForSuggestion(blockOffensive, false)
     }
 
     fun getRecommendedThreshold(): Float {
@@ -80,15 +80,15 @@ class AndroidSpellCheckerService : SpellCheckerService(),
         if (key != null) when (key) {
             Settings.PREF_USE_CONTACTS -> {
                 val useContactsDictionary = prefs!!.getBoolean(Settings.PREF_USE_CONTACTS, Defaults.PREF_USE_CONTACTS)
-                mDictionaryFacilitatorCache.setUseContactsDictionary(useContactsDictionary)
+                dictionaryFacilitatorCache.setUseContactsDictionary(useContactsDictionary)
             }
             Settings.PREF_USE_APPS -> {
                 val useAppsDictionary = prefs!!.getBoolean(Settings.PREF_USE_APPS, Defaults.PREF_USE_APPS)
-                mDictionaryFacilitatorCache.setUseAppsDictionary(useAppsDictionary)
+                dictionaryFacilitatorCache.setUseAppsDictionary(useAppsDictionary)
             }
             Settings.PREF_BLOCK_POTENTIALLY_OFFENSIVE -> {
                 val blockOffensive = prefs!!.getBoolean(Settings.PREF_BLOCK_POTENTIALLY_OFFENSIVE, Defaults.PREF_BLOCK_POTENTIALLY_OFFENSIVE)
-                mSettingsValuesForSuggestion = SettingsValuesForSuggestion(blockOffensive, false)
+                settingsValuesForSuggestion = SettingsValuesForSuggestion(blockOffensive, false)
             }
         }
     }
@@ -100,12 +100,12 @@ class AndroidSpellCheckerService : SpellCheckerService(),
     }
 
     fun isValidWord(locale: Locale, word: String): Boolean {
-        mSemaphore.acquireUninterruptibly()
+        semaphore.acquireUninterruptibly()
         try {
-            val dictionaryFacilitatorForLocale = mDictionaryFacilitatorCache.get(locale)
+            val dictionaryFacilitatorForLocale = dictionaryFacilitatorCache.get(locale)
             return dictionaryFacilitatorForLocale.isValidSpellingWord(word)
         } finally {
-            mSemaphore.release()
+            semaphore.release()
         }
     }
 
@@ -113,48 +113,48 @@ class AndroidSpellCheckerService : SpellCheckerService(),
             composedData: ComposedData, ngramContext: NgramContext,
             keyboard: Keyboard): SuggestionResults {
         var sessionId: Int? = null
-        mSemaphore.acquireUninterruptibly()
+        semaphore.acquireUninterruptibly()
         try {
-            sessionId = mSessionIdPool.poll()
-            val dictionaryFacilitatorForLocale = mDictionaryFacilitatorCache.get(locale)
+            sessionId = sessionIdPool.poll()
+            val dictionaryFacilitatorForLocale = dictionaryFacilitatorCache.get(locale)
             return dictionaryFacilitatorForLocale.getSuggestionResults(composedData, ngramContext,
-                    keyboard, mSettingsValuesForSuggestion,
+                    keyboard, settingsValuesForSuggestion,
                     sessionId!!, SuggestedWords.INPUT_STYLE_TYPING)
         } finally {
             if (sessionId != null) {
-                mSessionIdPool.add(sessionId)
+                sessionIdPool.add(sessionId)
             }
-            mSemaphore.release()
+            semaphore.release()
         }
     }
 
     fun hasMainDictionaryForLocale(locale: Locale): Boolean {
-        mSemaphore.acquireUninterruptibly()
+        semaphore.acquireUninterruptibly()
         try {
             val dictionaryFacilitator =
-                    mDictionaryFacilitatorCache.get(locale)
+                    dictionaryFacilitatorCache.get(locale)
             return dictionaryFacilitator.hasAtLeastOneInitializedMainDictionary()
         } finally {
-            mSemaphore.release()
+            semaphore.release()
         }
     }
 
     override fun onUnbind(intent: Intent?): Boolean {
-        mSemaphore.acquireUninterruptibly(MAX_NUM_OF_THREADS_READ_DICTIONARY)
+        semaphore.acquireUninterruptibly(MAX_NUM_OF_THREADS_READ_DICTIONARY)
         try {
-            mDictionaryFacilitatorCache.closeDictionaries()
+            dictionaryFacilitatorCache.closeDictionaries()
         } finally {
-            mSemaphore.release(MAX_NUM_OF_THREADS_READ_DICTIONARY)
+            semaphore.release(MAX_NUM_OF_THREADS_READ_DICTIONARY)
         }
-        mKeyboardCache.clear()
+        keyboardCache.clear()
         return false
     }
 
     fun getKeyboardForLocale(locale: Locale): Keyboard {
-        var keyboard = mKeyboardCache[locale]
+        var keyboard = keyboardCache[locale]
         if (keyboard == null) {
             keyboard = createKeyboardForLocale(locale)
-            mKeyboardCache.put(locale, keyboard)
+            keyboardCache.put(locale, keyboard)
         }
         return keyboard
     }

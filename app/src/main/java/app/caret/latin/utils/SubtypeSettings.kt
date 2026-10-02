@@ -29,7 +29,7 @@ object SubtypeSettings {
     fun getEnabledSubtypes(fallback: Boolean = false): List<InputMethodSubtype> {
         val enabled = if (fallback && enabledSubtypes.isEmpty()) getDefaultEnabledSubtypes()
             else enabledSubtypes
-        return if (Settings.getValues()?.mIsLocked != true) enabled // on app start SettingsValues are null
+        return if (Settings.getValues()?.isLocked != true) enabled // on app start SettingsValues are null
         else enabled + SettingsSubtype.fallbackSubtype.toAdditionalSubtype()
     }
 

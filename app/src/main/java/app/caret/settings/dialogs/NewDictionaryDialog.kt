@@ -48,7 +48,7 @@ fun NewDictionaryDialog(
         cachedFile.delete()
     } else if (header != null) {
         val ctx = LocalContext.current
-        val dictLocale = header.mLocaleString.constructLocale()
+        val dictLocale = header.localeString.constructLocale()
         val enabledLocales = SubtypeSettings.getEnabledSubtypes().map { it.locale() }
         val enabledLanguages = enabledLocales.map { it.language }
         val comparer = compareBy<Locale>(
@@ -68,8 +68,8 @@ fun NewDictionaryDialog(
                 ?: locales.first())
         }
         val cacheDir = DictionaryInfoUtils.getCacheDirectoryForLocale(locale, ctx)
-        val dictFile = File(cacheDir, header.mIdString.substringBefore(":") + "_" + DictionaryInfoUtils.USER_DICTIONARY_SUFFIX)
-        val type = header.mIdString.substringBefore(":")
+        val dictFile = File(cacheDir, header.idString.substringBefore(":") + "_" + DictionaryInfoUtils.USER_DICTIONARY_SUFFIX)
+        val type = header.idString.substringBefore(":")
         val info = header.info(LocalConfiguration.current.locale())
         ThreeButtonAlertDialog(
             onDismissRequest = { onDismissRequest(); cachedFile.delete() },
@@ -126,7 +126,7 @@ private fun checkDict(file: File): Pair<Int?, DictionaryHeader?> {
     val newHeader = DictionaryInfoUtils.getDictionaryFileHeaderOrNull(file)
         ?: return R.string.dictionary_file_error to null
 
-    val locale = newHeader.mLocaleString.constructLocale()
+    val locale = newHeader.localeString.constructLocale()
     val dict = ReadOnlyBinaryDictionary(file.absolutePath, 0, file.length(), false, locale, "test")
     if (!dict.isValidDictionary()) {
         dict.close()

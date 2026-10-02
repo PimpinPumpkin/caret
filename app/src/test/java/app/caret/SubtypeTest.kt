@@ -33,8 +33,8 @@ class SubtypeTest {
     init {
         ShadowLog.setupLogging()
         ShadowLog.stream = System.out
-        params.mId = KeyboardLayoutSet.getFakeKeyboardId(KeyboardElement.ALPHABET)
-        params.mPopupKeyOrder.add(POPUP_KEYS_LAYOUT)
+        params.id = KeyboardLayoutSet.getFakeKeyboardId(KeyboardElement.ALPHABET)
+        params.popupKeyOrder.add(POPUP_KEYS_LAYOUT)
         LocaleKeyboardInfos.addLocaleKeyTextsToParams(latinIME, params, LocaleKeyboardInfos.POPUP_KEYS_NORMAL)
     }
 

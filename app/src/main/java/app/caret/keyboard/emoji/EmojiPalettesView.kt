@@ -292,7 +292,7 @@ class EmojiPalettesView(context: Context, attrs: AttributeSet?, defStyle: Int) :
             mKeyboardActionListener.onCodeInput(code, NOT_A_COORDINATE, NOT_A_COORDINATE, false)
         }
         mKeyboardActionListener.onReleaseKey(code, false)
-        if (Settings.getValues().mAlphaAfterEmojiInEmojiView)
+        if (Settings.getValues().alphaAfterEmojiInEmojiView)
             mKeyboardActionListener.onCodeInput(KeyCode.ALPHA, NOT_A_COORDINATE, NOT_A_COORDINATE, false)
     }
 
@@ -310,11 +310,11 @@ class EmojiPalettesView(context: Context, attrs: AttributeSet?, defStyle: Int) :
     }
 
     override fun getDescription(emoji: String?): String? {
-        if (sDictionaryFacilitator == null) {
+        if (dictionaryFacilitator == null) {
             return null
         }
 
-        val wordProperty = sDictionaryFacilitator!!.getWordProperty(getEmojiNeutralVersion(emoji!!))
+        val wordProperty = dictionaryFacilitator!!.getWordProperty(getEmojiNeutralVersion(emoji!!))
         if (wordProperty == null || !wordProperty.mHasShortcuts) {
             return null
         }
@@ -342,7 +342,7 @@ class EmojiPalettesView(context: Context, attrs: AttributeSet?, defStyle: Int) :
     }
 
     private fun addRecentKey(key: Key) {
-        if (Settings.getValues().mIncognitoModeEnabled) {
+        if (Settings.getValues().incognitoModeEnabled) {
             // We do not want to log recent keys while being in incognito
             return
         }
@@ -369,9 +369,9 @@ class EmojiPalettesView(context: Context, attrs: AttributeSet?, defStyle: Int) :
         val keyboardAttr = getContext().obtainStyledAttributes(
                 null, R.styleable.Keyboard, R.attr.keyboardStyle, R.style.Keyboard)
         val leftPadding = keyboardAttr.getFraction(R.styleable.Keyboard_keyboardLeftPadding,
-                keyboardWidth, keyboardWidth, 0f) * sv.mSidePaddingScale
+                keyboardWidth, keyboardWidth, 0f) * sv.sidePaddingScale
         val rightPadding = keyboardAttr.getFraction(R.styleable.Keyboard_keyboardRightPadding,
-                keyboardWidth, keyboardWidth, 0f) * sv.mSidePaddingScale
+                keyboardWidth, keyboardWidth, 0f) * sv.sidePaddingScale
         keyboardAttr.recycle()
         mPager.setPadding(
                 leftPadding.toInt(),
@@ -449,13 +449,13 @@ class EmojiPalettesView(context: Context, attrs: AttributeSet?, defStyle: Int) :
     }
 
     private fun initDictionaryFacilitator() {
-        if (Settings.getValues().mShowEmojiDescriptions) {
+        if (Settings.getValues().showEmojiDescriptions) {
             val locale = RichInputMethodManager.getInstance().currentSubtype.locale
-            if (sDictionaryFacilitator == null || !sDictionaryFacilitator!!.isForLocale(locale)) {
+            if (dictionaryFacilitator == null || !dictionaryFacilitator!!.isForLocale(locale)) {
                 closeDictionaryFacilitator()
                 val dictFile = DictionaryInfoUtils.getCachedDictForLocaleAndType(locale, Dictionary.TYPE_EMOJI, getContext())
                 val dictionary = if (dictFile != null) DictionaryFactory.getDictionary(dictFile, locale) else null
-                sDictionaryFacilitator = if (dictionary != null) SingleDictionaryFacilitator(dictionary) else null
+                dictionaryFacilitator = if (dictionary != null) SingleDictionaryFacilitator(dictionary) else null
             }
         } else {
             closeDictionaryFacilitator()
@@ -463,13 +463,13 @@ class EmojiPalettesView(context: Context, attrs: AttributeSet?, defStyle: Int) :
     }
 
     companion object {
-        private var sDictionaryFacilitator: SingleDictionaryFacilitator? = null
+        private var dictionaryFacilitator: SingleDictionaryFacilitator? = null
 
         @JvmStatic
         fun closeDictionaryFacilitator() {
-            if (sDictionaryFacilitator != null) {
-                sDictionaryFacilitator!!.closeDictionaries()
-                sDictionaryFacilitator = null
+            if (dictionaryFacilitator != null) {
+                dictionaryFacilitator!!.closeDictionaries()
+                dictionaryFacilitator = null
             }
         }
     }

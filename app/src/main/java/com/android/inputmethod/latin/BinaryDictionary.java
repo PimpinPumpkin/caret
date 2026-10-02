@@ -261,8 +261,8 @@ public final class BinaryDictionary extends Dictionary {
         Arrays.fill(session.mInputCodePoints, Constants.NOT_A_CODE);
         ngramContext.outputToArray(session.mPrevWordCodePointArrays,
                 session.mIsBeginningOfSentenceArray);
-        final InputPointers inputPointers = composedData.mInputPointers;
-        final boolean isGesture = composedData.mIsBatchMode;
+        final InputPointers inputPointers = composedData.inputPointers;
+        final boolean isGesture = composedData.isBatchMode;
         final int inputSize;
         if (!isGesture) {
             inputSize =
@@ -320,7 +320,7 @@ public final class BinaryDictionary extends Dictionary {
                     this /* sourceDict */,
                     session.mSpaceIndices[j] /* indexOfTouchPointOfSecondWord */,
                     session.mOutputAutoCommitFirstWordConfidence[0]);
-                info.mOriginalScore = session.mOutputScores[j]; // no locale weight!
+                info.originalScore = session.mOutputScores[j]; // no locale weight!
                 suggestions.add(info);
             }
         }

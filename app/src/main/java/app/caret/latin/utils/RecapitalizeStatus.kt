@@ -15,9 +15,9 @@ class RecapitalizeStatus {
     // We store the location of the cursor and the string that was there before the recapitalize
     // action was done, and the location of the cursor and the string that was there after.
     private lateinit var mText: String
-    private lateinit var mTextPlacement: TextPlacement
+    private lateinit var textPlacement: TextPlacement
     private lateinit var mCurrentMode: RecapitalizeMode
-    private var mSkipOriginalMixedCaseMode = false
+    private var skipOriginalMixedCaseMode = false
     private lateinit var mLocale: Locale
     private lateinit var mSortedSeparators: IntArray
     private var mIsStarted = false
@@ -34,9 +34,9 @@ class RecapitalizeStatus {
             return
         }
         mText = text
-        mTextPlacement = TextPlacement(text, cursorStart)
+        textPlacement = TextPlacement(text, cursorStart)
         mCurrentMode = RecapitalizeMode.of(mText, sortedSeparators)
-        mSkipOriginalMixedCaseMode = RecapitalizeMode.ORIGINAL_MIXED_CASE != mCurrentMode
+        skipOriginalMixedCaseMode = RecapitalizeMode.ORIGINAL_MIXED_CASE != mCurrentMode
         mLocale = locale
         mSortedSeparators = sortedSeparators
         mIsStarted = true
@@ -63,7 +63,7 @@ class RecapitalizeStatus {
     }
 
     fun isSetAt(cursorStart: Int, cursorEnd: Int): Boolean {
-        return cursorStart == mTextPlacement.startPosition && cursorEnd == mTextPlacement.endPosition()
+        return cursorStart == textPlacement.startPosition && cursorEnd == textPlacement.endPosition()
     }
 
     /**
@@ -74,15 +74,15 @@ class RecapitalizeStatus {
         var replacement: String
         var i = 0 // Protection against infinite loop.
         do {
-            mCurrentMode = mCurrentMode.rotate(mSkipOriginalMixedCaseMode)
+            mCurrentMode = mCurrentMode.rotate(skipOriginalMixedCaseMode)
             replacement = mCurrentMode.apply(mText, mSortedSeparators, mLocale)
             ++i
-        } while (replacement == mTextPlacement.text && i <= modeCount)
-        mTextPlacement.text = replacement
+        } while (replacement == textPlacement.text && i <= modeCount)
+        textPlacement.text = replacement
     }
 
     fun textReplacement(): TextPlacement {
-        return mTextPlacement
+        return textPlacement
     }
 
     fun getCurrentMode(): RecapitalizeMode {

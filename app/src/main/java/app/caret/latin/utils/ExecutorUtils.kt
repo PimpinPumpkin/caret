@@ -63,8 +63,8 @@ class ExecutorUtils {
         const val KEYBOARD = "Keyboard"
         const val SPELLING = "Spelling"
 
-        private var sKeyboardExecutorService: ScheduledExecutorService = newExecutorService(KEYBOARD)
-        private var sSpellingExecutorService: ScheduledExecutorService = newExecutorService(SPELLING)
+        private var keyboardExecutorService: ScheduledExecutorService = newExecutorService(KEYBOARD)
+        private var spellingExecutorService: ScheduledExecutorService = newExecutorService(SPELLING)
 
         private fun newExecutorService(name: String): ScheduledExecutorService {
             // use more than a single thread, to reduce the occasional wait (mostly relevant when using multiple languages)
@@ -97,8 +97,8 @@ class ExecutorUtils {
                 return executorServiceForTests
             }
             return when (name) {
-                KEYBOARD -> sKeyboardExecutorService
-                SPELLING -> sSpellingExecutorService
+                KEYBOARD -> keyboardExecutorService
+                SPELLING -> spellingExecutorService
                 else -> throw IllegalArgumentException("Invalid executor: " + name)
             }
         }
@@ -119,9 +119,9 @@ class ExecutorUtils {
             }
             when (name) {
                 KEYBOARD ->
-                    sKeyboardExecutorService = newExecutorService(KEYBOARD)
+                    keyboardExecutorService = newExecutorService(KEYBOARD)
                 SPELLING ->
-                    sSpellingExecutorService = newExecutorService(SPELLING)
+                    spellingExecutorService = newExecutorService(SPELLING)
                 else ->
                     throw IllegalArgumentException("Invalid executor: " + name)
             }

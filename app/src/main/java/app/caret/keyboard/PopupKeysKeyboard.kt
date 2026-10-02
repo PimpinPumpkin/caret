@@ -18,7 +18,7 @@ class PopupKeysKeyboard(params: PopupKeysKeyboardParams) : Keyboard(params) {
     private val defaultKeyCoordX: Int
 
     init {
-        defaultKeyCoordX = params.getDefaultKeyCoordX() + params.mAbsolutePopupKeyWidth / 2
+        defaultKeyCoordX = params.getDefaultKeyCoordX() + params.absolutePopupKeyWidth / 2
     }
 
     fun getDefaultCoordX(): Int {
@@ -29,9 +29,9 @@ class PopupKeysKeyboard(params: PopupKeysKeyboardParams) : Keyboard(params) {
         @JvmField
         var mIsPopupKeysFixedOrder: Boolean = false
         /* package */@JvmField
-        var mTopRowAdjustment: Int = 0
+        var topRowAdjustment: Int = 0
         @JvmField
-        var mNumRows: Int = 0
+        var numRows: Int = 0
         @JvmField
         var mNumColumns: Int = 0
         @JvmField
@@ -43,7 +43,7 @@ class PopupKeysKeyboard(params: PopupKeysKeyboardParams) : Keyboard(params) {
         @JvmField
         var mDividerWidth: Int = 0
         @JvmField
-        var mColumnWidth: Int = 0
+        var columnWidth: Int = 0
 
         /**
          * Set keyboard parameters of popup keys keyboard.
@@ -71,10 +71,10 @@ class PopupKeysKeyboard(params: PopupKeysKeyboardParams) : Keyboard(params) {
                 throw IllegalArgumentException("Keyboard is too small to hold popup keys: "
                         + parentKeyboardWidth + " " + keyWidth + " " + numKeys + " " + numColumn)
             }
-            mDefaultAbsoluteKeyWidth = keyWidth
-            mDefaultAbsoluteRowHeight = rowHeight
+            this.defaultAbsoluteKeyWidth = keyWidth
+            this.defaultAbsoluteRowHeight = rowHeight
 
-            mNumRows = (numKeys + numColumn - 1) / numColumn
+            numRows = (numKeys + numColumn - 1) / numColumn
             val numColumns = if (isPopupKeysFixedColumn) Math.min(numKeys, numColumn)
                     else getOptimizedColumns(numKeys, numColumn)
             mNumColumns = numColumns
@@ -114,20 +114,20 @@ class PopupKeysKeyboard(params: PopupKeysKeyboardParams) : Keyboard(params) {
             mRightKeys = rightKeys
 
             // Adjustment of the top row.
-            mTopRowAdjustment = if (isPopupKeysFixedOrder) getFixedOrderTopRowAdjustment()
+            topRowAdjustment = if (isPopupKeysFixedOrder) getFixedOrderTopRowAdjustment()
                     else getAutoOrderTopRowAdjustment()
             mDividerWidth = dividerWidth
-            mColumnWidth = mDefaultAbsoluteKeyWidth + mDividerWidth
-            mOccupiedWidth = mNumColumns * mColumnWidth - mDividerWidth
-            mBaseWidth = mOccupiedWidth
+            columnWidth = this.defaultAbsoluteKeyWidth + mDividerWidth
+            this.occupiedWidth = mNumColumns * columnWidth - mDividerWidth
+            mBaseWidth = this.occupiedWidth
             // Need to subtract the bottom row's gutter only.
-            mOccupiedHeight = mNumRows * mDefaultAbsoluteRowHeight - mVerticalGap +
-                    mTopPadding + mBottomPadding
-            mBaseHeight = mOccupiedHeight
+            this.occupiedHeight = numRows * this.defaultAbsoluteRowHeight - this.verticalGap +
+                    this.topPadding + this.bottomPadding
+            mBaseHeight = this.occupiedHeight
         }
 
         private fun getFixedOrderTopRowAdjustment(): Int {
-            if (mNumRows == 1 || mTopKeys % 2 == 1 || mTopKeys == mNumColumns
+            if (numRows == 1 || mTopKeys % 2 == 1 || mTopKeys == mNumColumns
                     || mLeftKeys == 0  || mRightKeys == 1) {
                 return 0
             }
@@ -135,7 +135,7 @@ class PopupKeysKeyboard(params: PopupKeysKeyboardParams) : Keyboard(params) {
         }
 
         private fun getAutoOrderTopRowAdjustment(): Int {
-            if (mNumRows == 1 || mTopKeys == 1 || mNumColumns % 2 == mTopKeys % 2
+            if (numRows == 1 || mTopKeys == 1 || mNumColumns % 2 == mTopKeys % 2
                     || mLeftKeys == 0 || mRightKeys == 1) {
                 return 0
             }
@@ -156,7 +156,7 @@ class PopupKeysKeyboard(params: PopupKeysKeyboardParams) : Keyboard(params) {
             val rightSideKeys = mTopKeys / 2
             val leftSideKeys = mTopKeys - (rightSideKeys + 1)
             val pos = col - leftSideKeys
-            val numLeftKeys = mLeftKeys + mTopRowAdjustment
+            val numLeftKeys = mLeftKeys + topRowAdjustment
             val numRightKeys = mRightKeys - 1
             if (numRightKeys >= rightSideKeys && numLeftKeys >= leftSideKeys) {
                 return pos
@@ -172,7 +172,7 @@ class PopupKeysKeyboard(params: PopupKeysKeyboardParams) : Keyboard(params) {
             val row = n / mNumColumns
             var leftKeys = mLeftKeys
             if (isTopRow(row)) {
-                leftKeys += mTopRowAdjustment
+                leftKeys += topRowAdjustment
             }
             if (col == 0) {
                 // default position.
@@ -206,26 +206,26 @@ class PopupKeysKeyboard(params: PopupKeysKeyboardParams) : Keyboard(params) {
 
         private fun getOptimizedColumns(numKeys: Int, maxColumns: Int): Int {
             var numColumns = Math.min(numKeys, maxColumns)
-            while (getTopRowEmptySlots(numKeys, numColumns) >= mNumRows) {
+            while (getTopRowEmptySlots(numKeys, numColumns) >= numRows) {
                 numColumns--
             }
             return numColumns
         }
 
         fun getDefaultKeyCoordX(): Int {
-            return mLeftKeys * mColumnWidth + mLeftPadding
+            return mLeftKeys * columnWidth + this.leftPadding
         }
 
         fun getX(n: Int, row: Int): Int {
-            val x = getColumnPos(n) * mColumnWidth + getDefaultKeyCoordX()
+            val x = getColumnPos(n) * columnWidth + getDefaultKeyCoordX()
             if (isTopRow(row)) {
-                return x + mTopRowAdjustment * (mColumnWidth / 2)
+                return x + topRowAdjustment * (columnWidth / 2)
             }
             return x
         }
 
         fun getY(row: Int): Int {
-            return (mNumRows - 1 - row) * mDefaultAbsoluteRowHeight + mTopPadding
+            return (numRows - 1 - row) * this.defaultAbsoluteRowHeight + this.topPadding
         }
 
         fun markAsEdgeKey(key: Key, row: Int) {
@@ -236,7 +236,7 @@ class PopupKeysKeyboard(params: PopupKeysKeyboardParams) : Keyboard(params) {
         }
 
         private fun isTopRow(rowCount: Int): Boolean {
-            return mNumRows > 1 && rowCount == mNumRows - 1
+            return numRows > 1 && rowCount == numRows - 1
         }
 
         companion object {
@@ -266,12 +266,12 @@ class PopupKeysKeyboard(params: PopupKeysKeyboardParams) : Keyboard(params) {
         private val mParentKey: Key
 
         init {
-            mParams.mId = keyboard!!.mId
-            readAttributes(keyboard.mPopupKeysTemplate)
+            mParams.id = keyboard!!.id
+            readAttributes(keyboard.popupKeysTemplate)
 
             // TODO: Popup keys keyboard's vertical gap is currently calculated heuristically.
             // Should revise the algorithm.
-            mParams.mVerticalGap = keyboard.mVerticalGap / 2
+            mParams.verticalGap = keyboard.mVerticalGap / 2
             // This {@link PopupKeysKeyboard} is invoked from the <code>key</code>.
             mParentKey = key
 
@@ -286,14 +286,14 @@ class PopupKeysKeyboard(params: PopupKeysKeyboardParams) : Keyboard(params) {
                 // be considered because the vertical positions of both backgrounds were already
                 // adjusted with their bottom paddings deducted.
                 keyWidth = keyPreviewVisibleWidth
-                rowHeight = keyPreviewVisibleHeight + mParams.mVerticalGap
+                rowHeight = keyPreviewVisibleHeight + mParams.verticalGap
             } else {
                 val padding = context.resources.getDimension(
                         R.dimen.config_popup_keys_keyboard_key_horizontal_padding) +
                         (if (key.hasLabelsInPopupKeys())
-                                mParams.mAbsolutePopupKeyWidth * LABEL_PADDING_RATIO else 0.0f)
-                keyWidth = getMaxKeyWidth(key, mParams.mAbsolutePopupKeyWidth, padding, paintToMeasure)
-                rowHeight = keyboard.mMostCommonKeyHeight
+                                mParams.absolutePopupKeyWidth * LABEL_PADDING_RATIO else 0.0f)
+                keyWidth = getMaxKeyWidth(key, mParams.absolutePopupKeyWidth, padding, paintToMeasure)
+                rowHeight = keyboard.mostCommonKeyHeight
             }
             val dividerWidth: Int
             if (key.needsDividersInPopupKeys()) {
@@ -303,13 +303,13 @@ class PopupKeysKeyboard(params: PopupKeysKeyboardParams) : Keyboard(params) {
             }
             val popupKeys = key.getPopupKeys()
             val defaultColumns = key.getPopupKeysColumnNumber()
-            val spaceForKeys = keyboard.mId.width / keyWidth
+            val spaceForKeys = keyboard.id.width / keyWidth
             var finalNumColumns = if (spaceForKeys >= Math.min(popupKeys!!.size, defaultColumns))
                     defaultColumns
                     else (if (spaceForKeys > 0) spaceForKeys else defaultColumns)
             if (finalNumColumns < 1) finalNumColumns = 1 // avoid exception in setParameters
             mParams.setParameters(popupKeys.size, finalNumColumns, keyWidth,
-                    rowHeight, key.getX() + key.getWidth() / 2, keyboard.mId.width,
+                    rowHeight, key.getX() + key.getWidth() / 2, keyboard.id.width,
                     key.isPopupKeysFixedColumn(), key.isPopupKeysFixedOrder(), dividerWidth)
         }
 
@@ -332,9 +332,9 @@ class PopupKeysKeyboard(params: PopupKeysKeyboardParams) : Keyboard(params) {
                 // left of the default position.
                 if (params.mDividerWidth > 0 && pos != 0) {
                     val dividerX = if (pos > 0) x - params.mDividerWidth
-                            else x + params.mAbsolutePopupKeyWidth
+                            else x + params.absolutePopupKeyWidth
                     val divider: Key = PopupKeyDivider(
-                            params, dividerX, y, params.mDividerWidth, params.mDefaultAbsoluteRowHeight)
+                            params, dividerX, y, params.mDividerWidth, params.defaultAbsoluteRowHeight)
                     params.onAddKey(divider)
                 }
             }

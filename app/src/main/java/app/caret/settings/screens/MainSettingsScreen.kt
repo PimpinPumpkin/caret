@@ -61,9 +61,9 @@ fun MainSettingsScreen(
             Column(
                 Modifier.verticalScroll(rememberScrollState()).then(Modifier.padding(innerPadding))
             ) {
-                val showGesture = JniUtils.sHaveGestureLib || FutoSwipe.hasLibrary()
+                val showGesture = JniUtils.haveGestureLib || FutoSwipe.hasLibrary()
                 // we don't even show the menu if data gathering phase ended more than 2 weeks ago
-                val showDataGathering = JniUtils.sHaveGestureLib && GestureDataGatheringSettings.isContributionEnabled(LocalContext.current.prefs())
+                val showDataGathering = JniUtils.haveGestureLib && GestureDataGatheringSettings.isContributionEnabled(LocalContext.current.prefs())
                     && System.currentTimeMillis() < END_DATE_EPOCH_MILLIS + TWO_WEEKS_IN_MILLIS
                 @Composable
                 fun Entry(name: Int, icon: Int, description: String? = null, onClick: () -> Unit) =

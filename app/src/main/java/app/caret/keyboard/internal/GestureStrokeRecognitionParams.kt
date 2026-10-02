@@ -17,69 +17,69 @@ import app.caret.latin.utils.ResourceUtils
  */
 class GestureStrokeRecognitionParams {
     // Static threshold for gesture after fast typing
-    @JvmField val mStaticTimeThresholdAfterFastTyping: Int // msec
+    @JvmField val staticTimeThresholdAfterFastTyping: Int // msec
     // Static threshold for starting gesture detection
-    @JvmField val mDetectFastMoveSpeedThreshold: Float // keyWidth/sec
+    @JvmField val detectFastMoveSpeedThreshold: Float // keyWidth/sec
     // Dynamic threshold for gesture after fast typing
-    @JvmField val mDynamicThresholdDecayDuration: Int // msec
+    @JvmField val dynamicThresholdDecayDuration: Int // msec
     // Time based threshold values
-    @JvmField val mDynamicTimeThresholdFrom: Int // msec
-    @JvmField val mDynamicTimeThresholdTo: Int // msec
+    @JvmField val dynamicTimeThresholdFrom: Int // msec
+    @JvmField val dynamicTimeThresholdTo: Int // msec
     // Distance based threshold values
-    @JvmField val mDynamicDistanceThresholdFrom: Float // keyWidth
-    @JvmField val mDynamicDistanceThresholdTo: Float // keyWidth
+    @JvmField val dynamicDistanceThresholdFrom: Float // keyWidth
+    @JvmField val dynamicDistanceThresholdTo: Float // keyWidth
     // Parameters for gesture sampling
-    @JvmField val mSamplingMinimumDistance: Float // keyWidth
+    @JvmField val samplingMinimumDistance: Float // keyWidth
     // Parameters for gesture recognition
-    @JvmField val mRecognitionMinimumTime: Int // msec
-    @JvmField val mRecognitionSpeedThreshold: Float // keyWidth/sec
+    @JvmField val recognitionMinimumTime: Int // msec
+    @JvmField val recognitionSpeedThreshold: Float // keyWidth/sec
 
     private constructor() {
         // These parameter values are default and intended for testing.
-        mStaticTimeThresholdAfterFastTyping = 500 // msec
-        mDetectFastMoveSpeedThreshold = 1.5f // keyWidth/sec
-        mDynamicThresholdDecayDuration = 450 // msec
-        mDynamicTimeThresholdFrom = 300 // msec
-        mDynamicTimeThresholdTo = 20 // msec
-        mDynamicDistanceThresholdFrom = 6.0f // keyWidth
-        mDynamicDistanceThresholdTo = 0.35f // keyWidth
+        staticTimeThresholdAfterFastTyping = 500 // msec
+        detectFastMoveSpeedThreshold = 1.5f // keyWidth/sec
+        dynamicThresholdDecayDuration = 450 // msec
+        dynamicTimeThresholdFrom = 300 // msec
+        dynamicTimeThresholdTo = 20 // msec
+        dynamicDistanceThresholdFrom = 6.0f // keyWidth
+        dynamicDistanceThresholdTo = 0.35f // keyWidth
         // The following parameters' change will affect the result of regression test.
-        mSamplingMinimumDistance = 1.0f / 6.0f // keyWidth
-        mRecognitionMinimumTime = 100 // msec
-        mRecognitionSpeedThreshold = 5.5f // keyWidth/sec
+        samplingMinimumDistance = 1.0f / 6.0f // keyWidth
+        recognitionMinimumTime = 100 // msec
+        recognitionSpeedThreshold = 5.5f // keyWidth/sec
     }
 
     constructor(mainKeyboardViewAttr: TypedArray) {
-        mStaticTimeThresholdAfterFastTyping = mainKeyboardViewAttr.getInt(
+        staticTimeThresholdAfterFastTyping = mainKeyboardViewAttr.getInt(
                 R.styleable.MainKeyboardView_gestureStaticTimeThresholdAfterFastTyping,
-                DEFAULT.mStaticTimeThresholdAfterFastTyping)
-        mDetectFastMoveSpeedThreshold = ResourceUtils.getFraction(mainKeyboardViewAttr,
+                DEFAULT.staticTimeThresholdAfterFastTyping)
+        detectFastMoveSpeedThreshold = ResourceUtils.getFraction(mainKeyboardViewAttr,
                 R.styleable.MainKeyboardView_gestureDetectFastMoveSpeedThreshold,
-                DEFAULT.mDetectFastMoveSpeedThreshold)
-        mDynamicThresholdDecayDuration = mainKeyboardViewAttr.getInt(
+                DEFAULT.detectFastMoveSpeedThreshold)
+        dynamicThresholdDecayDuration = mainKeyboardViewAttr.getInt(
                 R.styleable.MainKeyboardView_gestureDynamicThresholdDecayDuration,
-                DEFAULT.mDynamicThresholdDecayDuration)
-        mDynamicTimeThresholdFrom = mainKeyboardViewAttr.getInt(
+                DEFAULT.dynamicThresholdDecayDuration)
+        dynamicTimeThresholdFrom = mainKeyboardViewAttr.getInt(
                 R.styleable.MainKeyboardView_gestureDynamicTimeThresholdFrom,
-                DEFAULT.mDynamicTimeThresholdFrom)
-        mDynamicTimeThresholdTo = mainKeyboardViewAttr.getInt(
+                DEFAULT.dynamicTimeThresholdFrom)
+        dynamicTimeThresholdTo = mainKeyboardViewAttr.getInt(
                 R.styleable.MainKeyboardView_gestureDynamicTimeThresholdTo,
-                DEFAULT.mDynamicTimeThresholdTo)
-        mDynamicDistanceThresholdFrom = ResourceUtils.getFraction(mainKeyboardViewAttr,
+                DEFAULT.dynamicTimeThresholdTo)
+        dynamicDistanceThresholdFrom = ResourceUtils.getFraction(mainKeyboardViewAttr,
                 R.styleable.MainKeyboardView_gestureDynamicDistanceThresholdFrom,
-                DEFAULT.mDynamicDistanceThresholdFrom)
-        mDynamicDistanceThresholdTo = ResourceUtils.getFraction(mainKeyboardViewAttr,
+                DEFAULT.dynamicDistanceThresholdFrom)
+        dynamicDistanceThresholdTo = ResourceUtils.getFraction(mainKeyboardViewAttr,
                 R.styleable.MainKeyboardView_gestureDynamicDistanceThresholdTo,
-                DEFAULT.mDynamicDistanceThresholdTo)
-        mSamplingMinimumDistance = ResourceUtils.getFraction(mainKeyboardViewAttr,
+                DEFAULT.dynamicDistanceThresholdTo)
+        samplingMinimumDistance = ResourceUtils.getFraction(mainKeyboardViewAttr,
                 R.styleable.MainKeyboardView_gestureSamplingMinimumDistance,
-                DEFAULT.mSamplingMinimumDistance)
-        mRecognitionMinimumTime = mainKeyboardViewAttr.getInt(
+                DEFAULT.samplingMinimumDistance)
+        recognitionMinimumTime = mainKeyboardViewAttr.getInt(
                 R.styleable.MainKeyboardView_gestureRecognitionMinimumTime,
-                DEFAULT.mRecognitionMinimumTime)
-        mRecognitionSpeedThreshold = ResourceUtils.getFraction(mainKeyboardViewAttr,
+                DEFAULT.recognitionMinimumTime)
+        recognitionSpeedThreshold = ResourceUtils.getFraction(mainKeyboardViewAttr,
                 R.styleable.MainKeyboardView_gestureRecognitionSpeedThreshold,
-                DEFAULT.mRecognitionSpeedThreshold)
+                DEFAULT.recognitionSpeedThreshold)
     }
 
     companion object {

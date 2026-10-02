@@ -40,56 +40,56 @@ import java.util.Collections
  */
 open class Keyboard {
     @JvmField
-    val mId: KeyboardId
+    val id: KeyboardId
     @JvmField
-    val mThemeId: Int
+    val themeId: Int
 
     /** Total height of the keyboard, including the padding and keys */
     @JvmField
-    val mOccupiedHeight: Int
+    val occupiedHeight: Int
     /** Total width of the keyboard, including the padding and keys */
     @JvmField
-    var mOccupiedWidth: Int
+    var occupiedWidth: Int
 
     /** Base height of the keyboard, used to calculate rows' height */
     @JvmField
-    val mBaseHeight: Int
+    val baseHeight: Int
     /** Base width of the keyboard, used to calculate keys' width */
     @JvmField
-    var mBaseWidth: Int
+    var baseWidth: Int
 
     /** The padding above the keyboard */
     @JvmField
-    val mTopPadding: Int
+    val topPadding: Int
     /** Default gap between rows */
     @JvmField
     val mVerticalGap: Int
 
     /** Per keyboard key visual parameters */
     @JvmField
-    val mKeyVisualAttributes: KeyVisualAttributes?
+    val keyVisualAttributes: KeyVisualAttributes?
 
     @JvmField
-    val mMostCommonKeyHeight: Int
+    val mostCommonKeyHeight: Int
     @JvmField
-    val mMostCommonKeyWidth: Int
+    val mostCommonKeyWidth: Int
 
     /** Popup keys keyboard template */
     @JvmField
-    val mPopupKeysTemplate: Int
+    val popupKeysTemplate: Int
 
     /** Maximum column for popup keys keyboard */
     @JvmField
-    val mMaxPopupKeysKeyboardColumn: Int
+    val maxPopupKeysKeyboardColumn: Int
 
     /** List of keys in this keyboard */
     private val mSortedKeys: List<Key>
     @JvmField
-    val mShiftKeys: List<Key>
+    val shiftKeys: List<Key>
     @JvmField
-    val mAltCodeKeysWhileTyping: List<Key>
+    val altCodeKeysWhileTyping: List<Key>
     @JvmField
-    val mIconsSet: KeyboardIconsSet
+    val iconsSet: KeyboardIconsSet
 
     private val keyCache = SparseArray<Key?>()
 
@@ -98,50 +98,50 @@ open class Keyboard {
     private val proximityCharsCorrectionEnabled: Boolean
 
     constructor(params: KeyboardParams) {
-        mId = params.mId
-        mThemeId = params.mThemeId
-        mOccupiedHeight = params.mOccupiedHeight
-        mOccupiedWidth = params.mOccupiedWidth
-        mBaseHeight = params.mBaseHeight
-        mBaseWidth = params.mBaseWidth
-        mMostCommonKeyHeight = params.mMostCommonKeyHeight
-        mMostCommonKeyWidth = params.mMostCommonKeyWidth
-        mPopupKeysTemplate = params.mPopupKeysTemplate
-        mMaxPopupKeysKeyboardColumn = params.mMaxPopupKeysKeyboardColumn
-        mKeyVisualAttributes = params.mKeyVisualAttributes
-        mTopPadding = params.mTopPadding
-        mVerticalGap = params.mVerticalGap
+        id = params.id
+        themeId = params.themeId
+        occupiedHeight = params.occupiedHeight
+        occupiedWidth = params.occupiedWidth
+        baseHeight = params.mBaseHeight
+        baseWidth = params.mBaseWidth
+        mostCommonKeyHeight = params.mostCommonKeyHeight
+        mostCommonKeyWidth = params.mostCommonKeyWidth
+        popupKeysTemplate = params.popupKeysTemplate
+        maxPopupKeysKeyboardColumn = params.maxPopupKeysKeyboardColumn
+        keyVisualAttributes = params.keyVisualAttributes
+        topPadding = params.topPadding
+        mVerticalGap = params.verticalGap
 
-        mSortedKeys = Collections.unmodifiableList(ArrayList(params.mSortedKeys))
-        mShiftKeys = Collections.unmodifiableList(params.mShiftKeys)
-        mAltCodeKeysWhileTyping = Collections.unmodifiableList(params.mAltCodeKeysWhileTyping)
-        mIconsSet = params.mIconsSet
+        mSortedKeys = Collections.unmodifiableList(ArrayList(params.sortedKeys))
+        shiftKeys = Collections.unmodifiableList(params.shiftKeys)
+        altCodeKeysWhileTyping = Collections.unmodifiableList(params.altCodeKeysWhileTyping)
+        iconsSet = params.iconsSet
 
         mProximityInfo = ProximityInfo(params.GRID_WIDTH, params.GRID_HEIGHT,
-                mOccupiedWidth, mOccupiedHeight, mMostCommonKeyWidth, mMostCommonKeyHeight,
-                mSortedKeys, params.mTouchPositionCorrection)
-        proximityCharsCorrectionEnabled = params.mProximityCharsCorrectionEnabled
+                occupiedWidth, occupiedHeight, mostCommonKeyWidth, mostCommonKeyHeight,
+                mSortedKeys, params.touchPositionCorrection)
+        proximityCharsCorrectionEnabled = params.proximityCharsCorrectionEnabled
     }
 
     protected constructor(keyboard: Keyboard) {
-        mId = keyboard.mId
-        mThemeId = keyboard.mThemeId
-        mOccupiedHeight = keyboard.mOccupiedHeight
-        mOccupiedWidth = keyboard.mOccupiedWidth
-        mBaseHeight = keyboard.mBaseHeight
-        mBaseWidth = keyboard.mBaseWidth
-        mMostCommonKeyHeight = keyboard.mMostCommonKeyHeight
-        mMostCommonKeyWidth = keyboard.mMostCommonKeyWidth
-        mPopupKeysTemplate = keyboard.mPopupKeysTemplate
-        mMaxPopupKeysKeyboardColumn = keyboard.mMaxPopupKeysKeyboardColumn
-        mKeyVisualAttributes = keyboard.mKeyVisualAttributes
-        mTopPadding = keyboard.mTopPadding
+        id = keyboard.id
+        themeId = keyboard.themeId
+        occupiedHeight = keyboard.occupiedHeight
+        occupiedWidth = keyboard.occupiedWidth
+        baseHeight = keyboard.baseHeight
+        baseWidth = keyboard.baseWidth
+        mostCommonKeyHeight = keyboard.mostCommonKeyHeight
+        mostCommonKeyWidth = keyboard.mostCommonKeyWidth
+        popupKeysTemplate = keyboard.popupKeysTemplate
+        maxPopupKeysKeyboardColumn = keyboard.maxPopupKeysKeyboardColumn
+        keyVisualAttributes = keyboard.keyVisualAttributes
+        topPadding = keyboard.topPadding
         mVerticalGap = keyboard.mVerticalGap
 
         mSortedKeys = keyboard.mSortedKeys
-        mShiftKeys = keyboard.mShiftKeys
-        mAltCodeKeysWhileTyping = keyboard.mAltCodeKeysWhileTyping
-        mIconsSet = keyboard.mIconsSet
+        shiftKeys = keyboard.shiftKeys
+        altCodeKeysWhileTyping = keyboard.altCodeKeysWhileTyping
+        iconsSet = keyboard.iconsSet
 
         mProximityInfo = keyboard.mProximityInfo
         proximityCharsCorrectionEnabled = keyboard.proximityCharsCorrectionEnabled
@@ -154,8 +154,8 @@ open class Keyboard {
         // Note: The native code has the main keyboard layout only at this moment.
         // TODO: Figure out how to handle proximity characters information of all layouts.
         val canAssumeNativeHasProximityCharsInfoOfAllKeys = (
-                mId.element == KeyboardElement.ALPHABET
-                || mId.element == KeyboardElement.ALPHABET_AUTOMATIC_SHIFTED)
+                id.element == KeyboardElement.ALPHABET
+                || id.element == KeyboardElement.ALPHABET_AUTOMATIC_SHIFTED)
         return canAssumeNativeHasProximityCharsInfoOfAllKeys || Character.isLetter(code)
     }
 
@@ -209,7 +209,7 @@ open class Keyboard {
     }
 
     override fun toString(): String {
-        return mId.toString()
+        return id.toString()
     }
 
     /**
@@ -221,8 +221,8 @@ open class Keyboard {
      */
     open fun getNearestKeys(x: Int, y: Int): List<Key> {
         // Avoid dead pixels at edges of the keyboard
-        val adjustedX = Math.max(0, Math.min(x, mOccupiedWidth - 1))
-        val adjustedY = Math.max(0, Math.min(y, mOccupiedHeight - 1))
+        val adjustedX = Math.max(0, Math.min(x, occupiedWidth - 1))
+        val adjustedY = Math.max(0, Math.min(y, occupiedHeight - 1))
         return mProximityInfo.getNearestKeys(adjustedX, adjustedY)
     }
 

@@ -184,7 +184,7 @@ object GestureDataGatheringSettings {
         val reminderShowNext = ctx.prefs().getLong(PREF_SHOW_REMINDER_DIALOG_NEXT, 0)
         val neverShow = promotionShowNext == Long.MAX_VALUE || reminderShowNext == Long.MAX_VALUE // user selected "don't show again"
             // we only show the dialog if the use actively loaded the gesture typing library (as opposed to having the lib in the system and HeliBoard as a system app)
-            || ctx.protectedPrefs().getString(Settings.PREF_LIBRARY_CHECKSUM, "").isNullOrEmpty() || !JniUtils.sHaveGestureLib
+            || ctx.protectedPrefs().getString(Settings.PREF_LIBRARY_CHECKSUM, "").isNullOrEmpty() || !JniUtils.haveGestureLib
         var shouldShowReminder by remember { mutableStateOf(
             !neverShow && reminderShowNext < System.currentTimeMillis() && reminderShowNext > 0L
         ) }

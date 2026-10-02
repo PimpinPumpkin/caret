@@ -51,7 +51,7 @@ class ClipboardHistoryManager(
         clipboardManager = latinIME.getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
         clipboardManager.addPrimaryClipChangedListener(this)
         clipboardDao = ClipboardDao.getInstance(latinIME)
-        if (latinIME.settings.getCurrent().mClipboardHistoryEnabled)
+        if (latinIME.settings.getCurrent().clipboardHistoryEnabled)
             fetchPrimaryClip()
     }
 
@@ -61,7 +61,7 @@ class ClipboardHistoryManager(
 
     override fun onPrimaryClipChanged() {
         // Make sure we read clipboard content only if history settings is set
-        if (latinIME.settings.getCurrent().mClipboardHistoryEnabled) {
+        if (latinIME.settings.getCurrent().clipboardHistoryEnabled) {
             fetchPrimaryClip()
             dontShowCurrentSuggestion = false
         }
@@ -184,7 +184,7 @@ class ClipboardHistoryManager(
         clipboardSuggestionView = null
 
         // get the content, or return null
-        if (!latinIME.settings.getCurrent().mSuggestClipboardContent) return null
+        if (!latinIME.settings.getCurrent().suggestClipboardContent) return null
         if (dontShowCurrentSuggestion) return null
         if (parent == null) return null
         val clipData = clipboardManager.primaryClip ?: return null

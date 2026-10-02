@@ -33,11 +33,11 @@ class ContactsManager(context: Context) {
         @JvmField
         val mName: String
         @JvmField
-        val mLastContactedTime: Long
+        val lastContactedTime: Long
         @JvmField
         val mTimesContacted: Int
         @JvmField
-        val mInVisibleGroup: Boolean
+        val inVisibleGroup: Boolean
 
         private var mAffinity = 0.0f
 
@@ -46,9 +46,9 @@ class ContactsManager(context: Context) {
                     ContactsDictionaryConstants.NAME_INDEX)
             mTimesContacted = cursor.getInt(
                     ContactsDictionaryConstants.TIMES_CONTACTED_INDEX)
-            mLastContactedTime = cursor.getLong(
+            lastContactedTime = cursor.getLong(
                     ContactsDictionaryConstants.LAST_TIME_CONTACTED_INDEX)
-            mInVisibleGroup = cursor.getInt(
+            inVisibleGroup = cursor.getInt(
                     ContactsDictionaryConstants.IN_VISIBLE_GROUP_INDEX) == 1
         }
 
@@ -69,11 +69,11 @@ class ContactsManager(context: Context) {
         fun computeAffinity(maxTimesContacted: Int, currentTime: Long) {
             val timesWeight = (mTimesContacted.toFloat() + 1) / (maxTimesContacted + 1)
             val timeSinceLastContact = Math.min(
-                    Math.max(0L, currentTime - mLastContactedTime),
+                    Math.max(0L, currentTime - lastContactedTime),
                     TimeUnit.MILLISECONDS.convert(180, TimeUnit.DAYS))
             val lastTimeWeight = Math.pow(0.5,
                     (timeSinceLastContact / (TimeUnit.MILLISECONDS.convert(10, TimeUnit.DAYS))).toDouble()).toFloat()
-            val visibleWeight = if (mInVisibleGroup) 1.0f else 0.0f
+            val visibleWeight = if (inVisibleGroup) 1.0f else 0.0f
             mAffinity = (timesWeight + lastTimeWeight + visibleWeight) / 3
         }
     }
@@ -105,16 +105,16 @@ class ContactsManager(context: Context) {
     private val mHashCodeAtLastRebuild = AtomicInteger(0)
 
     private val mContext: Context
-    private val mObserver: ContactsContentObserver
+    private val observer: ContactsContentObserver
 
     init {
         mContext = context
-        mObserver = ContactsContentObserver(this /* ContactsManager */, context)
+        observer = ContactsContentObserver(this /* ContactsManager */, context)
     }
 
     // TODO: This was synchronized in previous version. Why?
     fun registerForUpdates(listener: ContactsChangedListener?) {
-        mObserver.registerObserver(listener)
+        observer.registerObserver(listener)
     }
 
     fun getContactCountAtLastRebuild(): Int {
@@ -208,7 +208,7 @@ class ContactsManager(context: Context) {
      * Performs any necessary cleanup.
      */
     fun close() {
-        mObserver.unregister()
+        observer.unregister()
     }
 
     companion object {

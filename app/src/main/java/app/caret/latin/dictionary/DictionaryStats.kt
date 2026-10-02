@@ -19,7 +19,7 @@ class DictionaryStats {
     @JvmField
     val mDictFileName: String?
     @JvmField
-    val mDictFileSize: Long
+    val dictFileSize: Long
     @JvmField
     val mContentVersion: Int
     @JvmField
@@ -33,7 +33,7 @@ class DictionaryStats {
             contentVersion: Int) {
         mLocale = locale
         mDictType = dictType
-        mDictFileSize = if (dictFile == null || !dictFile.exists()) 0L else dictFile.length()
+        dictFileSize = if (dictFile == null || !dictFile.exists()) 0L else dictFile.length()
         mDictFileName = dictFileName
         mContentVersion = contentVersion
         mWordCount = -1
@@ -45,14 +45,14 @@ class DictionaryStats {
             wordCount: Int) {
         mLocale = locale
         mDictType = dictType
-        mDictFileSize = wordCount.toLong()
+        dictFileSize = wordCount.toLong()
         mDictFileName = null
         mContentVersion = 0
         mWordCount = wordCount
     }
 
     fun getFileSizeString(): String {
-        val bytes = BigDecimal(mDictFileSize)
+        val bytes = BigDecimal(dictFileSize)
         val kb = bytes.divide(BigDecimal(1024), 2, RoundingMode.HALF_UP)
         if (kb.toLong() == 0L) {
             return bytes.toString() + " bytes"

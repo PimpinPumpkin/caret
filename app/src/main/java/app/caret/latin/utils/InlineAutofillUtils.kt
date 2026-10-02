@@ -59,10 +59,10 @@ class InlineAutofillUtils {
         constructor(context: Context) : this(context, /*attrs*/ null, /*defStyleAttr*/ 0)
         constructor(context: Context, attrs: AttributeSet?,
                     @AttrRes defStyleAttr: Int) : super(context, attrs, defStyleAttr) {
-            val mBackgroundView = SurfaceView(context)
-            mBackgroundView.setZOrderOnTop(true)
-            mBackgroundView.getHolder().setFormat(PixelFormat.TRANSPARENT)
-            addView(mBackgroundView)
+            val backgroundView = SurfaceView(context)
+            backgroundView.setZOrderOnTop(true)
+            backgroundView.getHolder().setFormat(PixelFormat.TRANSPARENT)
+            addView(backgroundView)
         }
         override fun onAttachedToWindow() {
             super.onAttachedToWindow()

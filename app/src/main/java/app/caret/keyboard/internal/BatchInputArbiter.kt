@@ -39,7 +39,7 @@ class BatchInputArbiter(pointerId: Int, params: GestureStrokeRecognitionParams) 
      * @return the elapsed time in millisecond from the first gesture down.
      */
     fun getElapsedTimeSinceFirstDown(eventTime: Long): Int {
-        return (eventTime - sGestureFirstDownTime).toInt()
+        return (eventTime - gestureFirstDownTime).toInt()
     }
 
     /**
@@ -53,7 +53,7 @@ class BatchInputArbiter(pointerId: Int, params: GestureStrokeRecognitionParams) 
     fun addDownEventPoint(x: Int, y: Int, downEventTime: Long,
             lastLetterTypingTime: Long, activePointerCount: Int) {
         if (activePointerCount == 1) {
-            sGestureFirstDownTime = downEventTime
+            gestureFirstDownTime = downEventTime
         }
         val elapsedTimeSinceFirstDown = getElapsedTimeSinceFirstDown(downEventTime)
         val elapsedTimeSinceLastTyping = (downEventTime - lastLetterTypingTime).toInt()
@@ -94,8 +94,8 @@ class BatchInputArbiter(pointerId: Int, params: GestureStrokeRecognitionParams) 
         }
         synchronized(sAggregatedPointers) {
             sAggregatedPointers.reset()
-            sLastRecognitionPointSize = 0
-            sLastRecognitionTime = 0
+            lastRecognitionPointSize = 0
+            lastRecognitionTime = 0
             listener.onStartBatchInput()
         }
         return true
@@ -128,14 +128,14 @@ class BatchInputArbiter(pointerId: Int, params: GestureStrokeRecognitionParams) 
         synchronized(sAggregatedPointers) {
             recognitionPoints.appendIncrementalBatchPoints(sAggregatedPointers)
             val size = sAggregatedPointers.getPointerSize()
-            if (size > sLastRecognitionPointSize && recognitionPoints.hasRecognitionTimePast(
-                    moveEventTime, sLastRecognitionTime)) {
+            if (size > lastRecognitionPointSize && recognitionPoints.hasRecognitionTimePast(
+                    moveEventTime, lastRecognitionTime)) {
                 listener.onUpdateBatchInput(sAggregatedPointers, moveEventTime)
                 listener.onStartUpdateBatchInputTimer()
                 // The listener may change the size of the pointers (when auto-committing
                 // for example), so we need to get the size from the pointers again.
-                sLastRecognitionPointSize = sAggregatedPointers.getPointerSize()
-                sLastRecognitionTime = moveEventTime
+                lastRecognitionPointSize = sAggregatedPointers.getPointerSize()
+                lastRecognitionTime = moveEventTime
             }
         }
     }
@@ -162,11 +162,11 @@ class BatchInputArbiter(pointerId: Int, params: GestureStrokeRecognitionParams) 
 
     companion object {
         // The starting time of the first stroke of a gesture input.
-        private var sGestureFirstDownTime: Long = 0
+        private var gestureFirstDownTime: Long = 0
         // The {@link InputPointers} that includes all events of a gesture input.
         private val sAggregatedPointers = InputPointers(
                 Constants.DEFAULT_GESTURE_POINTS_CAPACITY)
-        private var sLastRecognitionPointSize = 0 // synchronized using sAggregatedPointers
-        private var sLastRecognitionTime: Long = 0 // synchronized using sAggregatedPointers
+        private var lastRecognitionPointSize = 0 // synchronized using sAggregatedPointers
+        private var lastRecognitionTime: Long = 0 // synchronized using sAggregatedPointers
     }
 }

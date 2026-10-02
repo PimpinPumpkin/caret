@@ -20,43 +20,43 @@ import app.caret.latin.settings.Settings
  * gesture trail and animated on the screen.
  */
 class GestureTrailDrawingParams(mainKeyboardViewAttr: TypedArray) {
-    @JvmField val mTrailColor: Int
-    @JvmField val mTrailStartWidth: Float
-    @JvmField val mTrailEndWidth: Float
-    @JvmField val mTrailBodyRatio: Float
-    @JvmField val mTrailShadowEnabled: Boolean
-    @JvmField val mTrailShadowRatio: Float
-    @JvmField val mFadeoutStartDelay: Int
-    @JvmField val mFadeoutDuration: Int
-    @JvmField val mUpdateInterval: Int
+    @JvmField val trailColor: Int
+    @JvmField val trailStartWidth: Float
+    @JvmField val trailEndWidth: Float
+    @JvmField val trailBodyRatio: Float
+    @JvmField val trailShadowEnabled: Boolean
+    @JvmField val trailShadowRatio: Float
+    @JvmField val fadeoutStartDelay: Int
+    @JvmField val fadeoutDuration: Int
+    @JvmField val updateInterval: Int
 
-    @JvmField val mTrailLingerDuration: Int
+    @JvmField val trailLingerDuration: Int
 
     init {
-        mTrailColor = Settings.getValues().mColors.get(ColorType.GESTURE_TRAIL)
-        mTrailStartWidth = mainKeyboardViewAttr.getDimension(
+        trailColor = Settings.getValues().mColors.get(ColorType.GESTURE_TRAIL)
+        trailStartWidth = mainKeyboardViewAttr.getDimension(
                 R.styleable.MainKeyboardView_gestureTrailStartWidth, 0.0f)
-        mTrailEndWidth = mainKeyboardViewAttr.getDimension(
+        trailEndWidth = mainKeyboardViewAttr.getDimension(
                 R.styleable.MainKeyboardView_gestureTrailEndWidth, 0.0f)
         val PERCENTAGE_INT = 100
-        mTrailBodyRatio = mainKeyboardViewAttr.getInt(
+        trailBodyRatio = mainKeyboardViewAttr.getInt(
                 R.styleable.MainKeyboardView_gestureTrailBodyRatio, PERCENTAGE_INT).toFloat() /
                 PERCENTAGE_INT.toFloat()
         val trailShadowRatioInt = mainKeyboardViewAttr.getInt(
                 R.styleable.MainKeyboardView_gestureTrailShadowRatio, 0)
-        mTrailShadowEnabled = (trailShadowRatioInt > 0)
-        mTrailShadowRatio = trailShadowRatioInt.toFloat() / PERCENTAGE_INT.toFloat()
-        mFadeoutStartDelay = if (GestureTrailDrawingPoints.DEBUG_SHOW_POINTS)
+        trailShadowEnabled = (trailShadowRatioInt > 0)
+        trailShadowRatio = trailShadowRatioInt.toFloat() / PERCENTAGE_INT.toFloat()
+        fadeoutStartDelay = if (GestureTrailDrawingPoints.DEBUG_SHOW_POINTS)
             FADEOUT_START_DELAY_FOR_DEBUG
         else
             mainKeyboardViewAttr.getInt(
                     R.styleable.MainKeyboardView_gestureTrailFadeoutStartDelay, 0)
-        mFadeoutDuration = if (GestureTrailDrawingPoints.DEBUG_SHOW_POINTS)
+        fadeoutDuration = if (GestureTrailDrawingPoints.DEBUG_SHOW_POINTS)
             FADEOUT_DURATION_FOR_DEBUG
         else
-            Settings.getValues().mGestureTrailFadeoutDuration
-        mTrailLingerDuration = mFadeoutStartDelay + mFadeoutDuration
-        mUpdateInterval = mainKeyboardViewAttr.getInt(
+            Settings.getValues().gestureTrailFadeoutDuration
+        trailLingerDuration = fadeoutStartDelay + fadeoutDuration
+        updateInterval = mainKeyboardViewAttr.getInt(
                 R.styleable.MainKeyboardView_gestureTrailUpdateInterval, 0)
     }
 

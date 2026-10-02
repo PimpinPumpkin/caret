@@ -12,60 +12,60 @@ import app.caret.latin.utils.ResourceUtils
 
 class KeyDrawParams {
     @JvmField
-    var mTypeface: Typeface = Typeface.DEFAULT
+    var typeface: Typeface = Typeface.DEFAULT
 
-    @JvmField var mLetterSize = 0
-    @JvmField var mLabelSize = 0
-    @JvmField var mLargeLetterSize = 0
-    @JvmField var mHintLetterSize = 0
-    @JvmField var mShiftedLetterHintSize = 0
-    @JvmField var mHintLabelSize = 0
-    @JvmField var mPreviewTextSize = 0
+    @JvmField var letterSize = 0
+    @JvmField var labelSize = 0
+    @JvmField var largeLetterSize = 0
+    @JvmField var hintLetterSize = 0
+    @JvmField var shiftedLetterHintSize = 0
+    @JvmField var hintLabelSize = 0
+    @JvmField var previewTextSize = 0
 
-    @JvmField var mTextColor = 0
-    @JvmField var mTextInactivatedColor = 0
-    @JvmField var mTextShadowColor = 0
-    @JvmField var mFunctionalTextColor = 0
-    @JvmField var mHintLetterColor = 0
-    @JvmField var mHintLabelColor = 0
-    @JvmField var mShiftedLetterHintInactivatedColor = 0
-    @JvmField var mShiftedLetterHintActivatedColor = 0
-    @JvmField var mPreviewTextColor = 0
+    @JvmField var textColor = 0
+    @JvmField var textInactivatedColor = 0
+    @JvmField var textShadowColor = 0
+    @JvmField var functionalTextColor = 0
+    @JvmField var hintLetterColor = 0
+    @JvmField var hintLabelColor = 0
+    @JvmField var shiftedLetterHintInactivatedColor = 0
+    @JvmField var shiftedLetterHintActivatedColor = 0
+    @JvmField var previewTextColor = 0
 
-    @JvmField var mHintLabelVerticalAdjustment = 0f
-    @JvmField var mLabelOffCenterRatio = 0f
-    @JvmField var mHintLabelOffCenterRatio = 0f
+    @JvmField var hintLabelVerticalAdjustment = 0f
+    @JvmField var labelOffCenterRatio = 0f
+    @JvmField var hintLabelOffCenterRatio = 0f
 
-    @JvmField var mAnimAlpha = 0
+    @JvmField var animAlpha = 0
 
     constructor()
 
     private constructor(copyFrom: KeyDrawParams) {
-        mTypeface = copyFrom.mTypeface
+        typeface = copyFrom.typeface
 
-        mLetterSize = copyFrom.mLetterSize
-        mLabelSize = copyFrom.mLabelSize
-        mLargeLetterSize = copyFrom.mLargeLetterSize
-        mHintLetterSize = copyFrom.mHintLetterSize
-        mShiftedLetterHintSize = copyFrom.mShiftedLetterHintSize
-        mHintLabelSize = copyFrom.mHintLabelSize
-        mPreviewTextSize = copyFrom.mPreviewTextSize
+        letterSize = copyFrom.letterSize
+        labelSize = copyFrom.labelSize
+        largeLetterSize = copyFrom.largeLetterSize
+        hintLetterSize = copyFrom.hintLetterSize
+        shiftedLetterHintSize = copyFrom.shiftedLetterHintSize
+        hintLabelSize = copyFrom.hintLabelSize
+        previewTextSize = copyFrom.previewTextSize
 
-        mTextColor = copyFrom.mTextColor
-        mTextInactivatedColor = copyFrom.mTextInactivatedColor
-        mTextShadowColor = copyFrom.mTextShadowColor
-        mFunctionalTextColor = copyFrom.mFunctionalTextColor
-        mHintLetterColor = copyFrom.mHintLetterColor
-        mHintLabelColor = copyFrom.mHintLabelColor
-        mShiftedLetterHintInactivatedColor = copyFrom.mShiftedLetterHintInactivatedColor
-        mShiftedLetterHintActivatedColor = copyFrom.mShiftedLetterHintActivatedColor
-        mPreviewTextColor = copyFrom.mPreviewTextColor
+        textColor = copyFrom.textColor
+        textInactivatedColor = copyFrom.textInactivatedColor
+        textShadowColor = copyFrom.textShadowColor
+        functionalTextColor = copyFrom.functionalTextColor
+        hintLetterColor = copyFrom.hintLetterColor
+        hintLabelColor = copyFrom.hintLabelColor
+        shiftedLetterHintInactivatedColor = copyFrom.shiftedLetterHintInactivatedColor
+        shiftedLetterHintActivatedColor = copyFrom.shiftedLetterHintActivatedColor
+        previewTextColor = copyFrom.previewTextColor
 
-        mHintLabelVerticalAdjustment = copyFrom.mHintLabelVerticalAdjustment
-        mLabelOffCenterRatio = copyFrom.mLabelOffCenterRatio
-        mHintLabelOffCenterRatio = copyFrom.mHintLabelOffCenterRatio
+        hintLabelVerticalAdjustment = copyFrom.hintLabelVerticalAdjustment
+        labelOffCenterRatio = copyFrom.labelOffCenterRatio
+        hintLabelOffCenterRatio = copyFrom.hintLabelOffCenterRatio
 
-        mAnimAlpha = copyFrom.mAnimAlpha
+        animAlpha = copyFrom.animAlpha
     }
 
     fun updateParams(keySize: Int, attr: KeyVisualAttributes?) {
@@ -73,40 +73,40 @@ class KeyDrawParams {
             return
         }
 
-        val attrTypeface = attr.mTypeface
+        val attrTypeface = attr.typeface
         if (attrTypeface != null) {
-            mTypeface = attrTypeface
+            typeface = attrTypeface
         }
 
-        mLetterSize = selectTextSizeFromDimensionOrRatio(keySize,
-                attr.mLetterSize, attr.mLetterRatio, mLetterSize)
-        mLabelSize = selectTextSizeFromDimensionOrRatio(keySize,
-                attr.mLabelSize, attr.mLabelRatio, mLabelSize)
-        mLargeLetterSize = selectTextSize(keySize, attr.mLargeLetterRatio, mLargeLetterSize)
-        mHintLetterSize = selectTextSize(keySize, attr.mHintLetterRatio, mHintLetterSize)
-        mShiftedLetterHintSize = selectTextSize(keySize,
-                attr.mShiftedLetterHintRatio, mShiftedLetterHintSize)
-        mHintLabelSize = selectTextSize(keySize, attr.mHintLabelRatio, mHintLabelSize)
-        mPreviewTextSize = selectTextSize(keySize, attr.mPreviewTextRatio, mPreviewTextSize)
+        letterSize = selectTextSizeFromDimensionOrRatio(keySize,
+                attr.letterSize, attr.letterRatio, letterSize)
+        labelSize = selectTextSizeFromDimensionOrRatio(keySize,
+                attr.labelSize, attr.labelRatio, labelSize)
+        largeLetterSize = selectTextSize(keySize, attr.largeLetterRatio, largeLetterSize)
+        hintLetterSize = selectTextSize(keySize, attr.hintLetterRatio, hintLetterSize)
+        shiftedLetterHintSize = selectTextSize(keySize,
+                attr.shiftedLetterHintRatio, shiftedLetterHintSize)
+        hintLabelSize = selectTextSize(keySize, attr.hintLabelRatio, hintLabelSize)
+        previewTextSize = selectTextSize(keySize, attr.previewTextRatio, previewTextSize)
 
-        mTextColor = selectColor(attr.mTextColor, mTextColor)
-        mTextInactivatedColor = selectColor(attr.mTextInactivatedColor, mTextInactivatedColor)
-        mTextShadowColor = selectColor(attr.mTextShadowColor, mTextShadowColor)
-        mFunctionalTextColor = selectColor(attr.mFunctionalTextColor, mFunctionalTextColor)
-        mHintLetterColor = selectColor(attr.mHintLetterColor, mHintLetterColor)
-        mHintLabelColor = selectColor(attr.mHintLabelColor, mHintLabelColor)
-        mShiftedLetterHintInactivatedColor = selectColor(
-                attr.mShiftedLetterHintInactivatedColor, mShiftedLetterHintInactivatedColor)
-        mShiftedLetterHintActivatedColor = selectColor(
-                attr.mShiftedLetterHintActivatedColor, mShiftedLetterHintActivatedColor)
-        mPreviewTextColor = selectColor(attr.mPreviewTextColor, mPreviewTextColor)
+        textColor = selectColor(attr.textColor, textColor)
+        textInactivatedColor = selectColor(attr.textInactivatedColor, textInactivatedColor)
+        textShadowColor = selectColor(attr.textShadowColor, textShadowColor)
+        functionalTextColor = selectColor(attr.functionalTextColor, functionalTextColor)
+        hintLetterColor = selectColor(attr.hintLetterColor, hintLetterColor)
+        hintLabelColor = selectColor(attr.hintLabelColor, hintLabelColor)
+        shiftedLetterHintInactivatedColor = selectColor(
+                attr.shiftedLetterHintInactivatedColor, shiftedLetterHintInactivatedColor)
+        shiftedLetterHintActivatedColor = selectColor(
+                attr.shiftedLetterHintActivatedColor, shiftedLetterHintActivatedColor)
+        previewTextColor = selectColor(attr.previewTextColor, previewTextColor)
 
-        mHintLabelVerticalAdjustment = selectFloatIfNonZero(
-                attr.mHintLabelVerticalAdjustment, mHintLabelVerticalAdjustment)
-        mLabelOffCenterRatio = selectFloatIfNonZero(
-                attr.mLabelOffCenterRatio, mLabelOffCenterRatio)
-        mHintLabelOffCenterRatio = selectFloatIfNonZero(
-                attr.mHintLabelOffCenterRatio, mHintLabelOffCenterRatio)
+        hintLabelVerticalAdjustment = selectFloatIfNonZero(
+                attr.hintLabelVerticalAdjustment, hintLabelVerticalAdjustment)
+        labelOffCenterRatio = selectFloatIfNonZero(
+                attr.labelOffCenterRatio, labelOffCenterRatio)
+        hintLabelOffCenterRatio = selectFloatIfNonZero(
+                attr.hintLabelOffCenterRatio, hintLabelOffCenterRatio)
     }
 
     fun mayCloneAndUpdateParams(keySize: Int, attr: KeyVisualAttributes?): KeyDrawParams {

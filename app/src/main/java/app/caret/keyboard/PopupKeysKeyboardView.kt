@@ -31,17 +31,17 @@ import app.caret.latin.common.CoordinateUtils
 open class PopupKeysKeyboardView : KeyboardView, PopupKeysPanel {
     private val mCoordinates: IntArray = CoordinateUtils.newInstance()
 
-    private val mDivider: Drawable?
+    private val divider: Drawable?
     @JvmField
-    protected val mKeyDetector: KeyDetector
+    protected val keyDetector: KeyDetector
     private var mController: PopupKeysPanel.Controller = PopupKeysPanel.EMPTY_CONTROLLER
     protected var mListener: KeyboardActionListener? = null
     protected var mOnReleaseKey: ((Key) -> Unit)? = null
-    private var mOriginX: Int = 0
-    private var mOriginY: Int = 0
+    private var originX: Int = 0
+    private var originY: Int = 0
     private var mCurrentKey: Key? = null
 
-    private var mActivePointerId: Int = 0
+    private var activePointerId: Int = 0
 
     @JvmField
     protected var mAccessibilityDelegate: PopupKeysKeyboardAccessibilityDelegate? = null
@@ -53,17 +53,17 @@ open class PopupKeysKeyboardView : KeyboardView, PopupKeysPanel {
                 defStyle: Int) : super(context, attrs, defStyle) {
         val popupKeysKeyboardViewAttr = context.obtainStyledAttributes(attrs,
                 R.styleable.PopupKeysKeyboardView, defStyle, R.style.PopupKeysKeyboardView)
-        mDivider = popupKeysKeyboardViewAttr.getDrawable(R.styleable.PopupKeysKeyboardView_divider)
+        divider = popupKeysKeyboardViewAttr.getDrawable(R.styleable.PopupKeysKeyboardView_divider)
         popupKeysKeyboardViewAttr.recycle()
-        mKeyDetector = PopupKeysDetector(resources.getDimension(
+        keyDetector = PopupKeysDetector(resources.getDimension(
                 R.dimen.config_popup_keys_keyboard_slide_allowance))
     }
 
     override fun onMeasure(widthMeasureSpec: Int, heightMeasureSpec: Int) {
         val keyboard = getKeyboard()
         if (keyboard != null) {
-            val width = keyboard.mOccupiedWidth + paddingLeft + paddingRight
-            val height = keyboard.mOccupiedHeight + paddingTop + paddingBottom
+            val width = keyboard.occupiedWidth + paddingLeft + paddingRight
+            val height = keyboard.occupiedHeight + paddingTop + paddingBottom
             setMeasuredDimension(width, height)
         } else {
             super.onMeasure(widthMeasureSpec, heightMeasureSpec)
@@ -73,27 +73,27 @@ open class PopupKeysKeyboardView : KeyboardView, PopupKeysPanel {
     override fun onDrawKeyTopVisuals(key: Key, canvas: Canvas,
             paint: Paint, params: KeyDrawParams) {
         if (!key.isSpacer() || key !is PopupKeysKeyboard.PopupKeyDivider
-                || mDivider == null) {
+                || divider == null) {
             super.onDrawKeyTopVisuals(key, canvas, paint, params)
             return
         }
         val keyWidth = key.getDrawWidth()
         val keyHeight = key.getHeight()
-        val iconWidth = Math.min(mDivider.intrinsicWidth, keyWidth)
-        val iconHeight = mDivider.intrinsicHeight
+        val iconWidth = Math.min(divider.intrinsicWidth, keyWidth)
+        val iconHeight = divider.intrinsicHeight
         val iconX = (keyWidth - iconWidth) / 2 // Align horizontally center
         val iconY = (keyHeight - iconHeight) / 2 // Align vertically center
-        drawIcon(canvas, mDivider, iconX, iconY, iconWidth, iconHeight)
+        drawIcon(canvas, divider, iconX, iconY, iconWidth, iconHeight)
     }
 
     override fun setKeyboard(keyboard: Keyboard) {
         super.setKeyboard(keyboard)
-        mKeyDetector.setKeyboard(
+        keyDetector.setKeyboard(
                 keyboard, -paddingLeft.toFloat(), -paddingTop + getVerticalCorrection())
         if (AccessibilityUtils.instance.isAccessibilityEnabled) {
             if (mAccessibilityDelegate == null) {
                 mAccessibilityDelegate = PopupKeysKeyboardAccessibilityDelegate(
-                        this, mKeyDetector)
+                        this, keyDetector)
                 mAccessibilityDelegate!!.setOpenAnnounce(R.string.spoken_open_popup_keys_keyboard)
                 mAccessibilityDelegate!!.setCloseAnnounce(R.string.spoken_close_popup_keys_keyboard)
             }
@@ -147,8 +147,8 @@ open class PopupKeysKeyboardView : KeyboardView, PopupKeysPanel {
         val panelMaxX = parentView.measuredWidth - measuredWidth
         val panelFinalX = Math.max(0, Math.min(panelMaxX, x))
         val center = panelFinalX + measuredWidth / 2
-        val layoutGravity = if (center < pointX - getKeyboard()!!.mMostCommonKeyWidth / 2)
-                        Gravity.RIGHT else if (center > pointX + getKeyboard()!!.mMostCommonKeyWidth / 2) Gravity.LEFT else Gravity.CENTER_HORIZONTAL
+        val layoutGravity = if (center < pointX - getKeyboard()!!.mostCommonKeyWidth / 2)
+                        Gravity.RIGHT else if (center > pointX + getKeyboard()!!.mostCommonKeyWidth / 2) Gravity.LEFT else Gravity.CENTER_HORIZONTAL
 
         var containerAdjustedX = x
         if (measuredWidth < container.measuredWidth) {
@@ -165,8 +165,8 @@ open class PopupKeysKeyboardView : KeyboardView, PopupKeysPanel {
         translationX = (panelFinalX - containerFinalX).toFloat()
         controller.setLayoutGravity(layoutGravity)
 
-        mOriginX = panelFinalX
-        mOriginY = y + container.paddingTop + this.y.toInt()
+        originX = panelFinalX
+        originY = y + container.paddingTop + this.y.toInt()
         controller.onShowPopupKeysPanel(this)
         val accessibilityDelegate = mAccessibilityDelegate
         if (accessibilityDelegate != null
@@ -183,12 +183,12 @@ open class PopupKeysKeyboardView : KeyboardView, PopupKeysPanel {
     }
 
     override fun onDownEvent(x: Int, y: Int, pointerId: Int, eventTime: Long) {
-        mActivePointerId = pointerId
+        activePointerId = pointerId
         mCurrentKey = detectKey(x, y)
     }
 
     override fun onMoveEvent(x: Int, y: Int, pointerId: Int, eventTime: Long) {
-        if (mActivePointerId != pointerId) {
+        if (activePointerId != pointerId) {
             return
         }
         val hasOldKey = (mCurrentKey != null)
@@ -200,7 +200,7 @@ open class PopupKeysKeyboardView : KeyboardView, PopupKeysPanel {
     }
 
     override fun onUpEvent(x: Int, y: Int, pointerId: Int, eventTime: Long) {
-        if (mActivePointerId != pointerId) {
+        if (activePointerId != pointerId) {
             return
         }
         // Calling {@link #detectKey(int,int,int)} here is harmless because the last move event and
@@ -239,7 +239,7 @@ open class PopupKeysKeyboardView : KeyboardView, PopupKeysPanel {
 
     private fun detectKey(x: Int, y: Int): Key? {
         val oldKey = mCurrentKey
-        val newKey = mKeyDetector.detectHitKey(x, y)
+        val newKey = keyDetector.detectHitKey(x, y)
         if (newKey === oldKey) {
             return newKey
         }
@@ -278,11 +278,11 @@ open class PopupKeysKeyboardView : KeyboardView, PopupKeysPanel {
     }
 
     override fun translateX(x: Int): Int {
-        return x - mOriginX
+        return x - originX
     }
 
     override fun translateY(y: Int): Int {
-        return y - mOriginY
+        return y - originY
     }
 
     @SuppressLint("ClickableViewAccessibility")

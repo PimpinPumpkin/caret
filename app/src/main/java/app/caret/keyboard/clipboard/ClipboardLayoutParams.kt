@@ -25,18 +25,18 @@ class ClipboardLayoutParams(ctx: Context) {
         val defaultKeyboardWidth = ResourceUtils.getKeyboardWidth(ctx, sv)
 
         keyVerticalGap = (res.getFraction(R.fraction.config_key_vertical_gap_holo,
-            defaultKeyboardHeight, defaultKeyboardHeight) * sv.mKeyGapScale).toInt()
+            defaultKeyboardHeight, defaultKeyboardHeight) * sv.keyGapScale).toInt()
         keyHorizontalGap = (res.getFraction(R.fraction.config_key_horizontal_gap_holo,
-            defaultKeyboardWidth, defaultKeyboardWidth) * sv.mKeyGapScale).toInt()
+            defaultKeyboardWidth, defaultKeyboardWidth) * sv.keyGapScale).toInt()
         val bottomPadding = (res.getFraction(R.fraction.config_keyboard_bottom_padding_holo,
-                defaultKeyboardHeight, defaultKeyboardHeight) * sv.mBottomPaddingScale).toInt()
+                defaultKeyboardHeight, defaultKeyboardHeight) * sv.bottomPaddingScale).toInt()
         val topPadding = res.getFraction(R.fraction.config_keyboard_top_padding_holo,
                 defaultKeyboardHeight, defaultKeyboardHeight).toInt()
 
-        val rowCount = KeyboardParams.DEFAULT_KEYBOARD_ROWS + if (sv.mShowsNumberRow) 1 else 0
+        val rowCount = KeyboardParams.DEFAULT_KEYBOARD_ROWS + if (sv.showsNumberRow) 1 else 0
         bottomRowKeyboardHeight = (defaultKeyboardHeight - bottomPadding - topPadding) / rowCount - keyVerticalGap / 2
         // height calculation is not good enough, probably also because keyboard top padding might be off by a pixel (see KeyboardParser)
-        val offset = 1.25f * res.displayMetrics.density * sv.mKeyboardHeightScale
+        val offset = 1.25f * res.displayMetrics.density * sv.keyboardHeightScale
         listHeight = defaultKeyboardHeight - bottomRowKeyboardHeight - bottomPadding + offset.toInt()
     }
 

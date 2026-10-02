@@ -135,7 +135,7 @@ object LocaleUtils {
         return best
     }
 
-    private val sLocaleCache = HashMap<String, Locale>()
+    private val localeCache = HashMap<String, Locale>()
 
     /**
      * Creates a locale from a string specification or language tag.
@@ -149,12 +149,12 @@ object LocaleUtils {
      */
     @JvmStatic
     fun String.constructLocale(): Locale {
-        synchronized(sLocaleCache) {
-            sLocaleCache[this]?.let { return it }
+        synchronized(localeCache) {
+            localeCache[this]?.let { return it }
             if (contains("-")) {
                 // looks like it's actually a language tag, and not a locale string
                 val locale = Locale.forLanguageTag(this)
-                sLocaleCache[this] = locale
+                localeCache[this] = locale
                 return locale
             }
             val elements = split("_", limit = 3)
@@ -173,7 +173,7 @@ object LocaleUtils {
             } else {
                 Locale(language, region!!, elements[2])
             }
-            sLocaleCache[this] = locale
+            localeCache[this] = locale
             return locale
         }
     }

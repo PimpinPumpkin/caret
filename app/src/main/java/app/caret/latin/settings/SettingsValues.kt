@@ -49,338 +49,338 @@ import java.util.Locale
 class SettingsValues(context: Context, prefs: SharedPreferences, res: Resources,
                      inputAttributes: InputAttributes) {
     // From resources:
-    @JvmField val mSpacingAndPunctuations: SpacingAndPunctuations
-    @JvmField val mDoubleSpacePeriodTimeout: Long
+    @JvmField val spacingAndPunctuations: SpacingAndPunctuations
+    @JvmField val doubleSpacePeriodTimeout: Long
     // From configuration:
     @JvmField val mLocale: Locale
-    @JvmField val mHasHardwareKeyboard: Boolean
-    @JvmField val mDisplayOrientation: Int
+    @JvmField val hasHardwareKeyboard: Boolean
+    @JvmField val displayOrientation: Int
     // From preferences
-    @JvmField val mAutoCap: Boolean
-    @JvmField val mVibrateOn: Boolean
-    @JvmField val mVibrateInDndMode: Boolean
-    @JvmField val mSoundOn: Boolean
-    @JvmField val mSuggestEmojis: Boolean
-    @JvmField val mInlineEmojiSearch: Boolean
-    @JvmField val mShowEmojiDescriptions: Boolean
-    @JvmField val mKeyPreviewPopupOn: Boolean
-    @JvmField val mShowsVoiceInputKey: Boolean
-    @JvmField val mLanguageSwitchKeyToOtherImes: Boolean
-    @JvmField val mLanguageSwitchKeyToOtherSubtypes: Boolean
-    private val mShowsLanguageSwitchKey: Boolean
-    @JvmField val mShowsNumberRow: Boolean
-    @JvmField val mShowsNumberRowInSymbols: Boolean
-    @JvmField val mLocalizedNumberRow: Boolean
-    @JvmField val mShowNumberRowHints: Boolean
-    @JvmField val mShowsHints: Boolean
-    @JvmField val mShowsPopupHints: Boolean
-    @JvmField val mShowTldPopupKeys: Boolean
-    @JvmField val mUrlEmailLayout: Boolean
-    @JvmField val mSpaceForLangChange: Boolean
-    @JvmField val mShowsEmojiKey: Boolean
-    @JvmField val mShowsDpadKey: Boolean
-    @JvmField val mVarToolbarDirection: Boolean
-    @JvmField val mUsePersonalizedDicts: Boolean
-    @JvmField val mUseDoubleSpacePeriod: Boolean
-    @JvmField val mBlockPotentiallyOffensive: Boolean
-    @JvmField val mSpaceSwipeHorizontal: KeyboardActionListener.SwipeAction
-    @JvmField val mSpaceSwipeVertical: KeyboardActionListener.SwipeAction
-    @JvmField val mLanguageSwipeDistance: Int
-    @JvmField val mTouchpadSensitivity: Int
-    @JvmField val mTouchpadEdgeScroll: Boolean
-    @JvmField val mDeleteSwipeEnabled: Boolean
-    @JvmField val mSwipeDeleteByWord: Boolean
-    @JvmField val mHoldDeleteByWord: Boolean
-    @JvmField val mAutospaceAfterPunctuation: Boolean
-    @JvmField val mAutospaceAfterSuggestion: Boolean
-    @JvmField val mAutospaceAfterGestureTyping: Boolean
-    @JvmField val mAutospaceBeforeGestureTyping: Boolean
-    @JvmField val mShiftRemovesAutospace: Boolean
-    @JvmField val mClipboardHistoryEnabled: Boolean
-    @JvmField val mClipboardHistoryRetentionTime: Long
-    @JvmField val mClipboardHistoryPinnedFirst: Boolean
-    @JvmField val mOneHandedModeEnabled: Boolean
-    @JvmField val mOneHandedModeGravity: Int
-    @JvmField val mOneHandedModeScale: Float
-    @JvmField val mKeyGapScale: Float
-    @JvmField val mShowMorePopupKeys: String
-    @JvmField val mPopupKeyOrder: List<String>
-    @JvmField val mPopupKeyHintOrder: List<String>
-    @JvmField val mSecondaryLocales: List<Locale>
-    @JvmField val mBigramPredictionEnabled: Boolean // Use bigrams to predict the next word when there is no input for it yet
-    @JvmField val mSuggestPunctuation: Boolean
-    @JvmField val mCenterSuggestionTextToEnter: Boolean
-    @JvmField val mGestureInputEnabled: Boolean
-    @JvmField val mGestureTrailEnabled: Boolean
-    @JvmField val mGestureFloatingPreviewTextEnabled: Boolean
-    @JvmField val mGestureFloatingPreviewDynamicEnabled: Boolean
-    @JvmField val mGestureFastTypingCooldown: Int
-    @JvmField val mGestureTrailFadeoutDuration: Int
-    @JvmField val mSlidingKeyInputPreviewEnabled: Boolean
-    @JvmField val mKeyLongpressTimeout: Int
-    @JvmField val mEnableEmojiAltPhysicalKey: Boolean
-    @JvmField val mIsSplitKeyboardEnabled: Boolean
-    @JvmField val mSplitKeyboardSpacerRelativeWidth: Float
-    @JvmField val mQuickPinToolbarKeys: Boolean
-    @JvmField val mAddToPersonalDictionary: Boolean
-    @JvmField val mUseContactsDictionary: Boolean
-    @JvmField val mUseAppsDictionary: Boolean
-    @JvmField val mCustomNavBarColor: Boolean
-    @JvmField val mKeyboardHeightScale: Float
-    @JvmField val mBottomRowScale: Float
-    @JvmField val mUrlDetectionEnabled: Boolean
-    @JvmField val mBottomPaddingScale: Float
-    @JvmField val mSidePaddingScale: Float
-    @JvmField val mToolbarMode: ToolbarMode
-    @JvmField val mToolbarSwipeDownToHide: Boolean
-    @JvmField val mToolbarHidingGlobal: Boolean
-    @JvmField val mAutoShowToolbar: Boolean
-    @JvmField val mAutoHideToolbar: Boolean
-    @JvmField val mAlphaAfterEmojiInEmojiView: Boolean
-    @JvmField val mAlphaAfterClipHistoryEntry: Boolean
-    @JvmField val mAlphaAfterSpace: EnumSet<KeyboardState.Mode> = EnumSet.noneOf(KeyboardState.Mode::class.java)
-    @JvmField val mRemoveRedundantPopups: Boolean
-    @JvmField val mSpaceBarText: String
-    @JvmField val mFontSizeMultiplier: Float
-    @JvmField val mHintFontSizeMultiplier: Float
-    @JvmField val mFontSizeMultiplierEmoji: Float
-    @JvmField val mEmojiKeyFit: Boolean
-    @JvmField val mPunctuationSuggestions: PunctuationSuggestions
-    @JvmField val mIsFloatingKeyboard: Boolean
-    @JvmField val mFloatingWidth: Int
-    @JvmField val mFloatingHeight: Int
-    @JvmField val mKeypressVibrationDuration: Int
-    @JvmField val mKeypressSoundVolume: Float
-    @JvmField val mAutoCorrectionEnabledPerUserSettings: Boolean
-    @JvmField val mAutoCorrectCapitalizedSuggestion: Boolean
-    @JvmField val mBackspaceRevertsAutocorrect: Boolean
-    @JvmField val mAutoCorrectShortcuts: Boolean
-    @JvmField val mSuggestionsEnabled: Boolean
-    private val mOverrideShowingSuggestions: Boolean
-    @JvmField val mSuggestClipboardContent: Boolean
-    @JvmField val mIncognitoModeEnabled: Boolean
-    @JvmField val mLongPressSymbolsForNumpad: Boolean
+    @JvmField val autoCap: Boolean
+    @JvmField val vibrateOn: Boolean
+    @JvmField val vibrateInDndMode: Boolean
+    @JvmField val soundOn: Boolean
+    @JvmField val suggestEmojis: Boolean
+    @JvmField val inlineEmojiSearch: Boolean
+    @JvmField val showEmojiDescriptions: Boolean
+    @JvmField val keyPreviewPopupOn: Boolean
+    @JvmField val showsVoiceInputKey: Boolean
+    @JvmField val languageSwitchKeyToOtherImes: Boolean
+    @JvmField val languageSwitchKeyToOtherSubtypes: Boolean
+    private val showsLanguageSwitchKey: Boolean
+    @JvmField val showsNumberRow: Boolean
+    @JvmField val showsNumberRowInSymbols: Boolean
+    @JvmField val localizedNumberRow: Boolean
+    @JvmField val showNumberRowHints: Boolean
+    @JvmField val showsHints: Boolean
+    @JvmField val showsPopupHints: Boolean
+    @JvmField val showTldPopupKeys: Boolean
+    @JvmField val urlEmailLayout: Boolean
+    @JvmField val spaceForLangChange: Boolean
+    @JvmField val showsEmojiKey: Boolean
+    @JvmField val showsDpadKey: Boolean
+    @JvmField val varToolbarDirection: Boolean
+    @JvmField val usePersonalizedDicts: Boolean
+    @JvmField val useDoubleSpacePeriod: Boolean
+    @JvmField val blockPotentiallyOffensive: Boolean
+    @JvmField val spaceSwipeHorizontal: KeyboardActionListener.SwipeAction
+    @JvmField val spaceSwipeVertical: KeyboardActionListener.SwipeAction
+    @JvmField val languageSwipeDistance: Int
+    @JvmField val touchpadSensitivity: Int
+    @JvmField val touchpadEdgeScroll: Boolean
+    @JvmField val deleteSwipeEnabled: Boolean
+    @JvmField val swipeDeleteByWord: Boolean
+    @JvmField val holdDeleteByWord: Boolean
+    @JvmField val autospaceAfterPunctuation: Boolean
+    @JvmField val autospaceAfterSuggestion: Boolean
+    @JvmField val autospaceAfterGestureTyping: Boolean
+    @JvmField val autospaceBeforeGestureTyping: Boolean
+    @JvmField val shiftRemovesAutospace: Boolean
+    @JvmField val clipboardHistoryEnabled: Boolean
+    @JvmField val clipboardHistoryRetentionTime: Long
+    @JvmField val clipboardHistoryPinnedFirst: Boolean
+    @JvmField val oneHandedModeEnabled: Boolean
+    @JvmField val oneHandedModeGravity: Int
+    @JvmField val oneHandedModeScale: Float
+    @JvmField val keyGapScale: Float
+    @JvmField val showMorePopupKeys: String
+    @JvmField val popupKeyOrder: List<String>
+    @JvmField val popupKeyHintOrder: List<String>
+    @JvmField val secondaryLocales: List<Locale>
+    @JvmField val bigramPredictionEnabled: Boolean // Use bigrams to predict the next word when there is no input for it yet
+    @JvmField val suggestPunctuation: Boolean
+    @JvmField val centerSuggestionTextToEnter: Boolean
+    @JvmField val gestureInputEnabled: Boolean
+    @JvmField val gestureTrailEnabled: Boolean
+    @JvmField val gestureFloatingPreviewTextEnabled: Boolean
+    @JvmField val gestureFloatingPreviewDynamicEnabled: Boolean
+    @JvmField val gestureFastTypingCooldown: Int
+    @JvmField val gestureTrailFadeoutDuration: Int
+    @JvmField val slidingKeyInputPreviewEnabled: Boolean
+    @JvmField val keyLongpressTimeout: Int
+    @JvmField val enableEmojiAltPhysicalKey: Boolean
+    @JvmField val isSplitKeyboardEnabled: Boolean
+    @JvmField val splitKeyboardSpacerRelativeWidth: Float
+    @JvmField val quickPinToolbarKeys: Boolean
+    @JvmField val addToPersonalDictionary: Boolean
+    @JvmField val useContactsDictionary: Boolean
+    @JvmField val useAppsDictionary: Boolean
+    @JvmField val customNavBarColor: Boolean
+    @JvmField val keyboardHeightScale: Float
+    @JvmField val bottomRowScale: Float
+    @JvmField val urlDetectionEnabled: Boolean
+    @JvmField val bottomPaddingScale: Float
+    @JvmField val sidePaddingScale: Float
+    @JvmField val toolbarMode: ToolbarMode
+    @JvmField val toolbarSwipeDownToHide: Boolean
+    @JvmField val toolbarHidingGlobal: Boolean
+    @JvmField val autoShowToolbar: Boolean
+    @JvmField val autoHideToolbar: Boolean
+    @JvmField val alphaAfterEmojiInEmojiView: Boolean
+    @JvmField val alphaAfterClipHistoryEntry: Boolean
+    @JvmField val alphaAfterSpace: EnumSet<KeyboardState.Mode> = EnumSet.noneOf(KeyboardState.Mode::class.java)
+    @JvmField val removeRedundantPopups: Boolean
+    @JvmField val spaceBarText: String
+    @JvmField val fontSizeMultiplier: Float
+    @JvmField val hintFontSizeMultiplier: Float
+    @JvmField val fontSizeMultiplierEmoji: Float
+    @JvmField val emojiKeyFit: Boolean
+    @JvmField val punctuationSuggestions: PunctuationSuggestions
+    @JvmField val isFloatingKeyboard: Boolean
+    @JvmField val floatingWidth: Int
+    @JvmField val floatingHeight: Int
+    @JvmField val keypressVibrationDuration: Int
+    @JvmField val keypressSoundVolume: Float
+    @JvmField val autoCorrectionEnabledPerUserSettings: Boolean
+    @JvmField val autoCorrectCapitalizedSuggestion: Boolean
+    @JvmField val backspaceRevertsAutocorrect: Boolean
+    @JvmField val autoCorrectShortcuts: Boolean
+    @JvmField val suggestionsEnabled: Boolean
+    private val overrideShowingSuggestions: Boolean
+    @JvmField val suggestClipboardContent: Boolean
+    @JvmField val incognitoModeEnabled: Boolean
+    @JvmField val longPressSymbolsForNumpad: Boolean
 
     // From the input box
     @JvmField val mInputAttributes: InputAttributes
 
     // Deduced settings
-    @JvmField val mSuggestionStripHiddenPerUserSettings: Boolean
-    @JvmField val mAutoCorrectEnabled: Boolean
-    @JvmField val mAutoCorrectionThreshold: Float
-    @JvmField val mScoreLimitForAutocorrect: Int
-    @JvmField val mSettingsValuesForSuggestion: SettingsValuesForSuggestion
-    @JvmField val mIsLocked: Boolean
+    @JvmField val suggestionStripHiddenPerUserSettings: Boolean
+    @JvmField val autoCorrectEnabled: Boolean
+    @JvmField val autoCorrectionThreshold: Float
+    @JvmField val scoreLimitForAutocorrect: Int
+    @JvmField val settingsValuesForSuggestion: SettingsValuesForSuggestion
+    @JvmField val isLocked: Boolean
 
     // User-defined colors
     @JvmField val mColors: Colors
 
     init {
         mLocale = res.configuration.locale()
-        mDisplayOrientation = res.configuration.orientation
+        displayOrientation = res.configuration.orientation
         val selectedSubtype = SubtypeSettings.getSelectedSubtype(prefs)
 
         // Store the input attributes
         mInputAttributes = inputAttributes
 
         // Get the settings preferences
-        mIsLocked = isDeviceLocked(context)
+        isLocked = isDeviceLocked(context)
         // we want to hide the toolbar / suggestion strip entirely if device is locked
-        mToolbarMode = if (mIsLocked) ToolbarMode.HIDDEN else Settings.readToolbarMode(prefs)
-        mToolbarSwipeDownToHide = prefs.getBoolean(Settings.PREF_TOOLBAR_SWIPE_DOWN_TO_HIDE, Defaults.PREF_TOOLBAR_SWIPE_DOWN_TO_HIDE)
-        mToolbarHidingGlobal = mIsLocked || prefs.getBoolean(Settings.PREF_TOOLBAR_HIDING_GLOBAL, Defaults.PREF_TOOLBAR_HIDING_GLOBAL)
-        mAutoCap = prefs.getBoolean(Settings.PREF_AUTO_CAP, Defaults.PREF_AUTO_CAP) && ScriptUtils.scriptSupportsUppercase(mLocale)
-        mVibrateOn = Settings.readVibrationEnabled(prefs)
-        mVibrateInDndMode = prefs.getBoolean(Settings.PREF_VIBRATE_IN_DND_MODE, Defaults.PREF_VIBRATE_IN_DND_MODE)
-        mSoundOn = prefs.getBoolean(Settings.PREF_SOUND_ON, Defaults.PREF_SOUND_ON)
-        mSuggestEmojis = prefs.getBoolean(Settings.PREF_SUGGEST_EMOJIS, Defaults.PREF_SUGGEST_EMOJIS)
-        mInlineEmojiSearch = prefs.getBoolean(Settings.PREF_INLINE_EMOJI_SEARCH, Defaults.PREF_INLINE_EMOJI_SEARCH)
-        mShowEmojiDescriptions = prefs.getBoolean(Settings.PREF_SHOW_EMOJI_DESCRIPTIONS, Defaults.PREF_SHOW_EMOJI_DESCRIPTIONS)
-        mKeyPreviewPopupOn = prefs.getBoolean(Settings.PREF_POPUP_ON, Defaults.PREF_POPUP_ON)
-        mSlidingKeyInputPreviewEnabled = prefs.getBoolean(
+        toolbarMode = if (isLocked) ToolbarMode.HIDDEN else Settings.readToolbarMode(prefs)
+        toolbarSwipeDownToHide = prefs.getBoolean(Settings.PREF_TOOLBAR_SWIPE_DOWN_TO_HIDE, Defaults.PREF_TOOLBAR_SWIPE_DOWN_TO_HIDE)
+        toolbarHidingGlobal = isLocked || prefs.getBoolean(Settings.PREF_TOOLBAR_HIDING_GLOBAL, Defaults.PREF_TOOLBAR_HIDING_GLOBAL)
+        autoCap = prefs.getBoolean(Settings.PREF_AUTO_CAP, Defaults.PREF_AUTO_CAP) && ScriptUtils.scriptSupportsUppercase(mLocale)
+        vibrateOn = Settings.readVibrationEnabled(prefs)
+        vibrateInDndMode = prefs.getBoolean(Settings.PREF_VIBRATE_IN_DND_MODE, Defaults.PREF_VIBRATE_IN_DND_MODE)
+        soundOn = prefs.getBoolean(Settings.PREF_SOUND_ON, Defaults.PREF_SOUND_ON)
+        suggestEmojis = prefs.getBoolean(Settings.PREF_SUGGEST_EMOJIS, Defaults.PREF_SUGGEST_EMOJIS)
+        inlineEmojiSearch = prefs.getBoolean(Settings.PREF_INLINE_EMOJI_SEARCH, Defaults.PREF_INLINE_EMOJI_SEARCH)
+        showEmojiDescriptions = prefs.getBoolean(Settings.PREF_SHOW_EMOJI_DESCRIPTIONS, Defaults.PREF_SHOW_EMOJI_DESCRIPTIONS)
+        keyPreviewPopupOn = prefs.getBoolean(Settings.PREF_POPUP_ON, Defaults.PREF_POPUP_ON)
+        slidingKeyInputPreviewEnabled = prefs.getBoolean(
                 DebugSettings.PREF_SLIDING_KEY_INPUT_PREVIEW, Defaults.PREF_SLIDING_KEY_INPUT_PREVIEW)
-        mShowsVoiceInputKey = mInputAttributes.mShouldShowVoiceInputKey
+        showsVoiceInputKey = mInputAttributes.shouldShowVoiceInputKey
         val languagePref = prefs.getString(Settings.PREF_LANGUAGE_SWITCH_KEY, Defaults.PREF_LANGUAGE_SWITCH_KEY)
-        mLanguageSwitchKeyToOtherImes = languagePref!! == "input_method" || languagePref == "both"
-        mLanguageSwitchKeyToOtherSubtypes = mIsLocked || languagePref == "internal" || languagePref == "both"
-        mShowsLanguageSwitchKey = prefs.getBoolean(Settings.PREF_SHOW_LANGUAGE_SWITCH_KEY, Defaults.PREF_SHOW_LANGUAGE_SWITCH_KEY)
-        mShowsNumberRow = prefs.getBoolean(Settings.PREF_SHOW_NUMBER_ROW, Defaults.PREF_SHOW_NUMBER_ROW)
-        mShowsNumberRowInSymbols = prefs.getBoolean(Settings.PREF_SHOW_NUMBER_ROW_IN_SYMBOLS, Defaults.PREF_SHOW_NUMBER_ROW_IN_SYMBOLS)
-        mLocalizedNumberRow = getHasLocalizedNumberRow(selectedSubtype, prefs)
-        mShowNumberRowHints = prefs.getBoolean(Settings.PREF_SHOW_NUMBER_ROW_HINTS, Defaults.PREF_SHOW_NUMBER_ROW_HINTS)
-        mShowsHints = prefs.getBoolean(Settings.PREF_SHOW_HINTS, Defaults.PREF_SHOW_HINTS)
-        mShowsPopupHints = prefs.getBoolean(Settings.PREF_SHOW_POPUP_HINTS, Defaults.PREF_SHOW_POPUP_HINTS)
-        mShowTldPopupKeys = prefs.getBoolean(Settings.PREF_SHOW_TLD_POPUP_KEYS, Defaults.PREF_SHOW_TLD_POPUP_KEYS)
-        mUrlEmailLayout = prefs.getBoolean(Settings.PREF_URL_EMAIL_LAYOUT, Defaults.PREF_URL_EMAIL_LAYOUT)
-        mSpaceForLangChange = prefs.getBoolean(Settings.PREF_SPACE_TO_CHANGE_LANG, Defaults.PREF_SPACE_TO_CHANGE_LANG)
-        mShowsEmojiKey = prefs.getBoolean(Settings.PREF_SHOW_EMOJI_KEY, Defaults.PREF_SHOW_EMOJI_KEY)
-        mShowsDpadKey = prefs.getBoolean(Settings.PREF_SHOW_DPAD_KEY, Defaults.PREF_SHOW_DPAD_KEY)
-        mVarToolbarDirection = mToolbarMode != ToolbarMode.HIDDEN && prefs.getBoolean(Settings.PREF_VARIABLE_TOOLBAR_DIRECTION, Defaults.PREF_VARIABLE_TOOLBAR_DIRECTION)
-        mUsePersonalizedDicts = prefs.getBoolean(Settings.PREF_KEY_USE_PERSONALIZED_DICTS, Defaults.PREF_KEY_USE_PERSONALIZED_DICTS)
-        mUseDoubleSpacePeriod = prefs.getBoolean(Settings.PREF_KEY_USE_DOUBLE_SPACE_PERIOD, Defaults.PREF_KEY_USE_DOUBLE_SPACE_PERIOD)
-                && inputAttributes.mIsGeneralTextInput
-        mBlockPotentiallyOffensive = prefs.getBoolean(Settings.PREF_BLOCK_POTENTIALLY_OFFENSIVE, Defaults.PREF_BLOCK_POTENTIALLY_OFFENSIVE)
-        mUrlDetectionEnabled = prefs.getBoolean(Settings.PREF_URL_DETECTION, Defaults.PREF_URL_DETECTION)
-        mAutoCorrectionEnabledPerUserSettings = prefs.getBoolean(Settings.PREF_AUTO_CORRECTION, Defaults.PREF_AUTO_CORRECTION)
-        mAutoCorrectEnabled = mAutoCorrectionEnabledPerUserSettings
-                && (mInputAttributes.mInputTypeShouldAutoCorrect || prefs.getBoolean(Settings.PREF_MORE_AUTO_CORRECTION, Defaults.PREF_MORE_AUTO_CORRECTION))
-                && (mUrlDetectionEnabled || !InputTypeUtils.isUriOrEmailType(mInputAttributes.mInputType))
-        mCenterSuggestionTextToEnter = prefs.getBoolean(Settings.PREF_CENTER_SUGGESTION_TEXT_TO_ENTER, Defaults.PREF_CENTER_SUGGESTION_TEXT_TO_ENTER)
+        languageSwitchKeyToOtherImes = languagePref!! == "input_method" || languagePref == "both"
+        languageSwitchKeyToOtherSubtypes = isLocked || languagePref == "internal" || languagePref == "both"
+        showsLanguageSwitchKey = prefs.getBoolean(Settings.PREF_SHOW_LANGUAGE_SWITCH_KEY, Defaults.PREF_SHOW_LANGUAGE_SWITCH_KEY)
+        showsNumberRow = prefs.getBoolean(Settings.PREF_SHOW_NUMBER_ROW, Defaults.PREF_SHOW_NUMBER_ROW)
+        showsNumberRowInSymbols = prefs.getBoolean(Settings.PREF_SHOW_NUMBER_ROW_IN_SYMBOLS, Defaults.PREF_SHOW_NUMBER_ROW_IN_SYMBOLS)
+        localizedNumberRow = getHasLocalizedNumberRow(selectedSubtype, prefs)
+        showNumberRowHints = prefs.getBoolean(Settings.PREF_SHOW_NUMBER_ROW_HINTS, Defaults.PREF_SHOW_NUMBER_ROW_HINTS)
+        showsHints = prefs.getBoolean(Settings.PREF_SHOW_HINTS, Defaults.PREF_SHOW_HINTS)
+        showsPopupHints = prefs.getBoolean(Settings.PREF_SHOW_POPUP_HINTS, Defaults.PREF_SHOW_POPUP_HINTS)
+        showTldPopupKeys = prefs.getBoolean(Settings.PREF_SHOW_TLD_POPUP_KEYS, Defaults.PREF_SHOW_TLD_POPUP_KEYS)
+        urlEmailLayout = prefs.getBoolean(Settings.PREF_URL_EMAIL_LAYOUT, Defaults.PREF_URL_EMAIL_LAYOUT)
+        spaceForLangChange = prefs.getBoolean(Settings.PREF_SPACE_TO_CHANGE_LANG, Defaults.PREF_SPACE_TO_CHANGE_LANG)
+        showsEmojiKey = prefs.getBoolean(Settings.PREF_SHOW_EMOJI_KEY, Defaults.PREF_SHOW_EMOJI_KEY)
+        showsDpadKey = prefs.getBoolean(Settings.PREF_SHOW_DPAD_KEY, Defaults.PREF_SHOW_DPAD_KEY)
+        varToolbarDirection = toolbarMode != ToolbarMode.HIDDEN && prefs.getBoolean(Settings.PREF_VARIABLE_TOOLBAR_DIRECTION, Defaults.PREF_VARIABLE_TOOLBAR_DIRECTION)
+        usePersonalizedDicts = prefs.getBoolean(Settings.PREF_KEY_USE_PERSONALIZED_DICTS, Defaults.PREF_KEY_USE_PERSONALIZED_DICTS)
+        useDoubleSpacePeriod = prefs.getBoolean(Settings.PREF_KEY_USE_DOUBLE_SPACE_PERIOD, Defaults.PREF_KEY_USE_DOUBLE_SPACE_PERIOD)
+                && inputAttributes.isGeneralTextInput
+        blockPotentiallyOffensive = prefs.getBoolean(Settings.PREF_BLOCK_POTENTIALLY_OFFENSIVE, Defaults.PREF_BLOCK_POTENTIALLY_OFFENSIVE)
+        urlDetectionEnabled = prefs.getBoolean(Settings.PREF_URL_DETECTION, Defaults.PREF_URL_DETECTION)
+        autoCorrectionEnabledPerUserSettings = prefs.getBoolean(Settings.PREF_AUTO_CORRECTION, Defaults.PREF_AUTO_CORRECTION)
+        autoCorrectEnabled = autoCorrectionEnabledPerUserSettings
+                && (mInputAttributes.inputTypeShouldAutoCorrect || prefs.getBoolean(Settings.PREF_MORE_AUTO_CORRECTION, Defaults.PREF_MORE_AUTO_CORRECTION))
+                && (urlDetectionEnabled || !InputTypeUtils.isUriOrEmailType(mInputAttributes.mInputType))
+        centerSuggestionTextToEnter = prefs.getBoolean(Settings.PREF_CENTER_SUGGESTION_TEXT_TO_ENTER, Defaults.PREF_CENTER_SUGGESTION_TEXT_TO_ENTER)
         val autoCorrectConfidence = prefs.getFloat(Settings.PREF_AUTO_CORRECT_CONFIDENCE, Defaults.PREF_AUTO_CORRECT_CONFIDENCE)
         // confidence -> threshold and score limit are just some formulas that give something similar to the old values, so that confidence can be in a nice 0-1 range
-        mAutoCorrectionThreshold = if (mAutoCorrectEnabled)
+        autoCorrectionThreshold = if (autoCorrectEnabled)
                 0.5f - 0.5f * Math.pow(autoCorrectConfidence.toDouble(), 0.33).toFloat()
             else Float.MAX_VALUE
-        mScoreLimitForAutocorrect = ((1.14 - 0.2 * Math.pow(autoCorrectConfidence + 0.47, 3.5)) * 900000).toInt()
-        mAutoCorrectCapitalizedSuggestion = prefs.getBoolean(Settings.PREF_AUTOCORRECT_CAPITALIZED_SUGGESTION, Defaults.PREF_AUTOCORRECT_CAPITALIZED_SUGGESTION)
-        mAutoCorrectShortcuts = prefs.getBoolean(Settings.PREF_AUTOCORRECT_SHORTCUTS, Defaults.PREF_AUTOCORRECT_SHORTCUTS)
-        mBackspaceRevertsAutocorrect = prefs.getBoolean(Settings.PREF_BACKSPACE_REVERTS_AUTOCORRECT, Defaults.PREF_BACKSPACE_REVERTS_AUTOCORRECT)
-        mBigramPredictionEnabled = prefs.getBoolean(Settings.PREF_BIGRAM_PREDICTIONS, Defaults.PREF_BIGRAM_PREDICTIONS)
-        mSuggestPunctuation = prefs.getBoolean(Settings.PREF_SUGGEST_PUNCTUATION, Defaults.PREF_SUGGEST_PUNCTUATION)
-        mSuggestClipboardContent = prefs.getBoolean(Settings.PREF_SUGGEST_CLIPBOARD_CONTENT, Defaults.PREF_SUGGEST_CLIPBOARD_CONTENT)
-        mDoubleSpacePeriodTimeout = 1100 // ms
-        mHasHardwareKeyboard = Settings.readHasHardwareKeyboard(res.configuration)
-        val isLandscape = mDisplayOrientation == Configuration.ORIENTATION_LANDSCAPE
+        scoreLimitForAutocorrect = ((1.14 - 0.2 * Math.pow(autoCorrectConfidence + 0.47, 3.5)) * 900000).toInt()
+        autoCorrectCapitalizedSuggestion = prefs.getBoolean(Settings.PREF_AUTOCORRECT_CAPITALIZED_SUGGESTION, Defaults.PREF_AUTOCORRECT_CAPITALIZED_SUGGESTION)
+        autoCorrectShortcuts = prefs.getBoolean(Settings.PREF_AUTOCORRECT_SHORTCUTS, Defaults.PREF_AUTOCORRECT_SHORTCUTS)
+        backspaceRevertsAutocorrect = prefs.getBoolean(Settings.PREF_BACKSPACE_REVERTS_AUTOCORRECT, Defaults.PREF_BACKSPACE_REVERTS_AUTOCORRECT)
+        bigramPredictionEnabled = prefs.getBoolean(Settings.PREF_BIGRAM_PREDICTIONS, Defaults.PREF_BIGRAM_PREDICTIONS)
+        suggestPunctuation = prefs.getBoolean(Settings.PREF_SUGGEST_PUNCTUATION, Defaults.PREF_SUGGEST_PUNCTUATION)
+        suggestClipboardContent = prefs.getBoolean(Settings.PREF_SUGGEST_CLIPBOARD_CONTENT, Defaults.PREF_SUGGEST_CLIPBOARD_CONTENT)
+        doubleSpacePeriodTimeout = 1100 // ms
+        hasHardwareKeyboard = Settings.readHasHardwareKeyboard(res.configuration)
+        val isLandscape = displayOrientation == Configuration.ORIENTATION_LANDSCAPE
         val displayWidthDp = TypedValueCompat.pxToDp(res.displayMetrics.widthPixels.toFloat(), res.displayMetrics)
         val isFolded = FoldableUtils.isFolded
-        mIsSplitKeyboardEnabled = Settings.readSplitKeyboardEnabled(prefs, isLandscape, isFolded)
+        isSplitKeyboardEnabled = Settings.readSplitKeyboardEnabled(prefs, isLandscape, isFolded)
         // determine spacerWidth from display width and scale setting
-        mSplitKeyboardSpacerRelativeWidth = if (mIsSplitKeyboardEnabled)
+        splitKeyboardSpacerRelativeWidth = if (isSplitKeyboardEnabled)
                 Math.min(Math.max((displayWidthDp - 600) / 600f + 0.15f, 0.15f), 0.35f) * Settings.readSplitSpacerScale(prefs, isLandscape, isFolded)
             else 0f
-        mQuickPinToolbarKeys = mToolbarMode == ToolbarMode.EXPANDABLE && prefs.getBoolean(Settings.PREF_QUICK_PIN_TOOLBAR_KEYS, Defaults.PREF_QUICK_PIN_TOOLBAR_KEYS)
+        quickPinToolbarKeys = toolbarMode == ToolbarMode.EXPANDABLE && prefs.getBoolean(Settings.PREF_QUICK_PIN_TOOLBAR_KEYS, Defaults.PREF_QUICK_PIN_TOOLBAR_KEYS)
 
         // Compute other readable settings
-        mKeyLongpressTimeout = prefs.getInt(Settings.PREF_KEY_LONGPRESS_TIMEOUT, Defaults.PREF_KEY_LONGPRESS_TIMEOUT)
-        mKeypressVibrationDuration = prefs.getInt(Settings.PREF_VIBRATION_DURATION_SETTINGS, Defaults.PREF_VIBRATION_DURATION_SETTINGS)
-        mKeypressSoundVolume = prefs.getFloat(Settings.PREF_KEYPRESS_SOUND_VOLUME, Defaults.PREF_KEYPRESS_SOUND_VOLUME)
-        mEnableEmojiAltPhysicalKey = prefs.getBoolean(Settings.PREF_ENABLE_EMOJI_ALT_PHYSICAL_KEY, Defaults.PREF_ENABLE_EMOJI_ALT_PHYSICAL_KEY)
-        mGestureInputEnabled = JniUtils.sHaveGestureLib && prefs.getBoolean(Settings.PREF_GESTURE_INPUT, Defaults.PREF_GESTURE_INPUT)
-        mGestureTrailEnabled = prefs.getBoolean(Settings.PREF_GESTURE_PREVIEW_TRAIL, Defaults.PREF_GESTURE_PREVIEW_TRAIL)
-        mGestureFloatingPreviewTextEnabled = !mInputAttributes.mDisableGestureFloatingPreviewText
+        keyLongpressTimeout = prefs.getInt(Settings.PREF_KEY_LONGPRESS_TIMEOUT, Defaults.PREF_KEY_LONGPRESS_TIMEOUT)
+        keypressVibrationDuration = prefs.getInt(Settings.PREF_VIBRATION_DURATION_SETTINGS, Defaults.PREF_VIBRATION_DURATION_SETTINGS)
+        keypressSoundVolume = prefs.getFloat(Settings.PREF_KEYPRESS_SOUND_VOLUME, Defaults.PREF_KEYPRESS_SOUND_VOLUME)
+        enableEmojiAltPhysicalKey = prefs.getBoolean(Settings.PREF_ENABLE_EMOJI_ALT_PHYSICAL_KEY, Defaults.PREF_ENABLE_EMOJI_ALT_PHYSICAL_KEY)
+        gestureInputEnabled = JniUtils.haveGestureLib && prefs.getBoolean(Settings.PREF_GESTURE_INPUT, Defaults.PREF_GESTURE_INPUT)
+        gestureTrailEnabled = prefs.getBoolean(Settings.PREF_GESTURE_PREVIEW_TRAIL, Defaults.PREF_GESTURE_PREVIEW_TRAIL)
+        gestureFloatingPreviewTextEnabled = !mInputAttributes.disableGestureFloatingPreviewText
                 && prefs.getBoolean(Settings.PREF_GESTURE_FLOATING_PREVIEW_TEXT, Defaults.PREF_GESTURE_FLOATING_PREVIEW_TEXT)
-        mGestureFloatingPreviewDynamicEnabled = Settings.readGestureDynamicPreviewEnabled(prefs)
-        mGestureFastTypingCooldown = prefs.getInt(Settings.PREF_GESTURE_FAST_TYPING_COOLDOWN, Defaults.PREF_GESTURE_FAST_TYPING_COOLDOWN)
-        mGestureTrailFadeoutDuration = prefs.getInt(Settings.PREF_GESTURE_TRAIL_FADEOUT_DURATION, Defaults.PREF_GESTURE_TRAIL_FADEOUT_DURATION)
-        mSuggestionStripHiddenPerUserSettings = mToolbarMode == ToolbarMode.HIDDEN || mToolbarMode == ToolbarMode.TOOLBAR_KEYS
-        mOverrideShowingSuggestions = mInputAttributes.mMayOverrideShowingSuggestions
+        gestureFloatingPreviewDynamicEnabled = Settings.readGestureDynamicPreviewEnabled(prefs)
+        gestureFastTypingCooldown = prefs.getInt(Settings.PREF_GESTURE_FAST_TYPING_COOLDOWN, Defaults.PREF_GESTURE_FAST_TYPING_COOLDOWN)
+        gestureTrailFadeoutDuration = prefs.getInt(Settings.PREF_GESTURE_TRAIL_FADEOUT_DURATION, Defaults.PREF_GESTURE_TRAIL_FADEOUT_DURATION)
+        suggestionStripHiddenPerUserSettings = toolbarMode == ToolbarMode.HIDDEN || toolbarMode == ToolbarMode.TOOLBAR_KEYS
+        overrideShowingSuggestions = mInputAttributes.mayOverrideShowingSuggestions
                 && prefs.getBoolean(Settings.PREF_ALWAYS_SHOW_SUGGESTIONS, Defaults.PREF_ALWAYS_SHOW_SUGGESTIONS)
                 && ((inputAttributes.mInputType and InputType.TYPE_MASK_VARIATION) != InputType.TYPE_TEXT_VARIATION_WEB_EDIT_TEXT
                   || !prefs.getBoolean(Settings.PREF_ALWAYS_SHOW_SUGGESTIONS_EXCEPT_WEB_TEXT, Defaults.PREF_ALWAYS_SHOW_SUGGESTIONS_EXCEPT_WEB_TEXT))
-        mSuggestionsEnabled = prefs.getBoolean(Settings.PREF_SHOW_SUGGESTIONS, Defaults.PREF_SHOW_SUGGESTIONS)
-            && (mInputAttributes.mShouldShowSuggestions || mOverrideShowingSuggestions) && !mSuggestionStripHiddenPerUserSettings
-        mIncognitoModeEnabled = prefs.getBoolean(Settings.PREF_ALWAYS_INCOGNITO_MODE, Defaults.PREF_ALWAYS_INCOGNITO_MODE) || mInputAttributes.mNoLearning
-                || mInputAttributes.mIsPasswordField
-        mBottomRowScale = Settings.readBottomRowScale(prefs, isLandscape, isFolded)
-        mSpaceSwipeHorizontal = Settings.readHorizontalSpaceSwipe(prefs)
-        mSpaceSwipeVertical = Settings.readVerticalSpaceSwipe(prefs)
-        mLanguageSwipeDistance = prefs.getInt(Settings.PREF_LANGUAGE_SWIPE_DISTANCE, Defaults.PREF_LANGUAGE_SWIPE_DISTANCE)
-        mTouchpadSensitivity = prefs.getInt(Settings.PREF_TOUCHPAD_SENSITIVITY,
+        suggestionsEnabled = prefs.getBoolean(Settings.PREF_SHOW_SUGGESTIONS, Defaults.PREF_SHOW_SUGGESTIONS)
+            && (mInputAttributes.mShouldShowSuggestions || overrideShowingSuggestions) && !suggestionStripHiddenPerUserSettings
+        incognitoModeEnabled = prefs.getBoolean(Settings.PREF_ALWAYS_INCOGNITO_MODE, Defaults.PREF_ALWAYS_INCOGNITO_MODE) || mInputAttributes.noLearning
+                || mInputAttributes.isPasswordField
+        bottomRowScale = Settings.readBottomRowScale(prefs, isLandscape, isFolded)
+        spaceSwipeHorizontal = Settings.readHorizontalSpaceSwipe(prefs)
+        spaceSwipeVertical = Settings.readVerticalSpaceSwipe(prefs)
+        languageSwipeDistance = prefs.getInt(Settings.PREF_LANGUAGE_SWIPE_DISTANCE, Defaults.PREF_LANGUAGE_SWIPE_DISTANCE)
+        touchpadSensitivity = prefs.getInt(Settings.PREF_TOUCHPAD_SENSITIVITY,
             Defaults.PREF_TOUCHPAD_SENSITIVITY)
-        mTouchpadEdgeScroll = prefs.getBoolean(Settings.PREF_TOUCHPAD_EDGE_SCROLL, Defaults.PREF_TOUCHPAD_EDGE_SCROLL)
-        mDeleteSwipeEnabled = prefs.getBoolean(Settings.PREF_DELETE_SWIPE, Defaults.PREF_DELETE_SWIPE)
-        mSwipeDeleteByWord = prefs.getBoolean(Settings.PREF_SWIPE_DELETE_BY_WORD, Defaults.PREF_SWIPE_DELETE_BY_WORD)
-        mHoldDeleteByWord = prefs.getBoolean(Settings.PREF_HOLD_DELETE_BY_WORD, Defaults.PREF_HOLD_DELETE_BY_WORD)
-        mAutospaceAfterPunctuation = prefs.getBoolean(Settings.PREF_AUTOSPACE_AFTER_PUNCTUATION, Defaults.PREF_AUTOSPACE_AFTER_PUNCTUATION)
-        mAutospaceAfterSuggestion = prefs.getBoolean(Settings.PREF_AUTOSPACE_AFTER_SUGGESTION, Defaults.PREF_AUTOSPACE_AFTER_SUGGESTION)
-        mAutospaceAfterGestureTyping = prefs.getBoolean(Settings.PREF_AUTOSPACE_AFTER_GESTURE_TYPING, Defaults.PREF_AUTOSPACE_AFTER_GESTURE_TYPING)
-        mAutospaceBeforeGestureTyping = prefs.getBoolean(Settings.PREF_AUTOSPACE_BEFORE_GESTURE_TYPING, Defaults.PREF_AUTOSPACE_BEFORE_GESTURE_TYPING)
-        mShiftRemovesAutospace = prefs.getBoolean(Settings.PREF_SHIFT_REMOVES_AUTOSPACE, Defaults.PREF_SHIFT_REMOVES_AUTOSPACE)
-        mClipboardHistoryEnabled = prefs.getBoolean(Settings.PREF_ENABLE_CLIPBOARD_HISTORY, Defaults.PREF_ENABLE_CLIPBOARD_HISTORY)
-        mClipboardHistoryRetentionTime = prefs.getInt(Settings.PREF_CLIPBOARD_HISTORY_RETENTION_TIME, Defaults.PREF_CLIPBOARD_HISTORY_RETENTION_TIME).toLong()
-        mClipboardHistoryPinnedFirst = prefs.getBoolean(Settings.PREF_CLIPBOARD_HISTORY_PINNED_FIRST, Defaults.PREF_CLIPBOARD_HISTORY_PINNED_FIRST)
+        touchpadEdgeScroll = prefs.getBoolean(Settings.PREF_TOUCHPAD_EDGE_SCROLL, Defaults.PREF_TOUCHPAD_EDGE_SCROLL)
+        deleteSwipeEnabled = prefs.getBoolean(Settings.PREF_DELETE_SWIPE, Defaults.PREF_DELETE_SWIPE)
+        swipeDeleteByWord = prefs.getBoolean(Settings.PREF_SWIPE_DELETE_BY_WORD, Defaults.PREF_SWIPE_DELETE_BY_WORD)
+        holdDeleteByWord = prefs.getBoolean(Settings.PREF_HOLD_DELETE_BY_WORD, Defaults.PREF_HOLD_DELETE_BY_WORD)
+        autospaceAfterPunctuation = prefs.getBoolean(Settings.PREF_AUTOSPACE_AFTER_PUNCTUATION, Defaults.PREF_AUTOSPACE_AFTER_PUNCTUATION)
+        autospaceAfterSuggestion = prefs.getBoolean(Settings.PREF_AUTOSPACE_AFTER_SUGGESTION, Defaults.PREF_AUTOSPACE_AFTER_SUGGESTION)
+        autospaceAfterGestureTyping = prefs.getBoolean(Settings.PREF_AUTOSPACE_AFTER_GESTURE_TYPING, Defaults.PREF_AUTOSPACE_AFTER_GESTURE_TYPING)
+        autospaceBeforeGestureTyping = prefs.getBoolean(Settings.PREF_AUTOSPACE_BEFORE_GESTURE_TYPING, Defaults.PREF_AUTOSPACE_BEFORE_GESTURE_TYPING)
+        shiftRemovesAutospace = prefs.getBoolean(Settings.PREF_SHIFT_REMOVES_AUTOSPACE, Defaults.PREF_SHIFT_REMOVES_AUTOSPACE)
+        clipboardHistoryEnabled = prefs.getBoolean(Settings.PREF_ENABLE_CLIPBOARD_HISTORY, Defaults.PREF_ENABLE_CLIPBOARD_HISTORY)
+        clipboardHistoryRetentionTime = prefs.getInt(Settings.PREF_CLIPBOARD_HISTORY_RETENTION_TIME, Defaults.PREF_CLIPBOARD_HISTORY_RETENTION_TIME).toLong()
+        clipboardHistoryPinnedFirst = prefs.getBoolean(Settings.PREF_CLIPBOARD_HISTORY_PINNED_FIRST, Defaults.PREF_CLIPBOARD_HISTORY_PINNED_FIRST)
 
-        mIsFloatingKeyboard = !mIsLocked && isFloatingKeyboardEnabled(context)
-        mFloatingWidth = readFloatingWidth(context)
-        mFloatingHeight = if (mIsFloatingKeyboard && mHasHardwareKeyboard && prefs.getBoolean(Settings.PREF_SHOW_ONLY_TOOLBAR_WITH_HARDWARE_KEYBOARD, Defaults.PREF_SHOW_ONLY_TOOLBAR_WITH_HARDWARE_KEYBOARD))
+        isFloatingKeyboard = !isLocked && isFloatingKeyboardEnabled(context)
+        floatingWidth = readFloatingWidth(context)
+        floatingHeight = if (isFloatingKeyboard && hasHardwareKeyboard && prefs.getBoolean(Settings.PREF_SHOW_ONLY_TOOLBAR_WITH_HARDWARE_KEYBOARD, Defaults.PREF_SHOW_ONLY_TOOLBAR_WITH_HARDWARE_KEYBOARD))
                           0 else readFloatingHeight(context)
-        mKeyboardHeightScale = if (mIsFloatingKeyboard) 1f else Settings.readHeightScale(prefs, isLandscape, isFolded)
-        mOneHandedModeEnabled = !mIsFloatingKeyboard && Settings.readOneHandedModeEnabled(prefs, isLandscape, mIsSplitKeyboardEnabled, isFolded)
-        mOneHandedModeGravity = Settings.readOneHandedModeGravity(prefs, isLandscape, mIsSplitKeyboardEnabled, isFolded)
-        if (mOneHandedModeEnabled) {
+        keyboardHeightScale = if (isFloatingKeyboard) 1f else Settings.readHeightScale(prefs, isLandscape, isFolded)
+        oneHandedModeEnabled = !isFloatingKeyboard && Settings.readOneHandedModeEnabled(prefs, isLandscape, isSplitKeyboardEnabled, isFolded)
+        oneHandedModeGravity = Settings.readOneHandedModeGravity(prefs, isLandscape, isSplitKeyboardEnabled, isFolded)
+        if (oneHandedModeEnabled) {
             val baseScale = res.getFraction(R.fraction.config_one_handed_mode_width, 1, 1)
-            val extraScale = Settings.readOneHandedModeScale(prefs, isLandscape, mIsSplitKeyboardEnabled, isFolded)
-            mOneHandedModeScale = 1 - (1 - baseScale) * extraScale
+            val extraScale = Settings.readOneHandedModeScale(prefs, isLandscape, isSplitKeyboardEnabled, isFolded)
+            oneHandedModeScale = 1 - (1 - baseScale) * extraScale
         } else
-            mOneHandedModeScale = 1f
-        mSecondaryLocales = getSecondaryLocales(selectedSubtype.extraValue)
-        mShowMorePopupKeys = getMoreKeys(selectedSubtype, prefs,
+            oneHandedModeScale = 1f
+        secondaryLocales = getSecondaryLocales(selectedSubtype.extraValue)
+        showMorePopupKeys = getMoreKeys(selectedSubtype, prefs,
             if (selectedSubtype.isAsciiCapable) Defaults.PREF_MORE_POPUP_KEYS else LocaleKeyboardInfos.POPUP_KEYS_NORMAL)
         mColors = KeyboardTheme.getColorsForCurrentTheme(context)
 
-        mPopupKeyOrder = getPopupKeyOrder(selectedSubtype, prefs)
-        mPopupKeyHintOrder = getPopupKeyHintOrder(selectedSubtype, prefs)
-        mAddToPersonalDictionary = prefs.getBoolean(Settings.PREF_ADD_TO_PERSONAL_DICTIONARY, Defaults.PREF_ADD_TO_PERSONAL_DICTIONARY)
-        mUseContactsDictionary = readUseContactsEnabled(prefs, context)
-        mUseAppsDictionary = prefs.getBoolean(Settings.PREF_USE_APPS, Defaults.PREF_USE_APPS)
-        mCustomNavBarColor = prefs.getBoolean(Settings.PREF_NAVBAR_COLOR, Defaults.PREF_NAVBAR_COLOR)
-        mKeyGapScale = Settings.readKeyGapScale(prefs, isLandscape, isFolded)
-        mSettingsValuesForSuggestion = SettingsValuesForSuggestion(
-                mBlockPotentiallyOffensive,
+        popupKeyOrder = getPopupKeyOrder(selectedSubtype, prefs)
+        popupKeyHintOrder = getPopupKeyHintOrder(selectedSubtype, prefs)
+        addToPersonalDictionary = prefs.getBoolean(Settings.PREF_ADD_TO_PERSONAL_DICTIONARY, Defaults.PREF_ADD_TO_PERSONAL_DICTIONARY)
+        useContactsDictionary = readUseContactsEnabled(prefs, context)
+        useAppsDictionary = prefs.getBoolean(Settings.PREF_USE_APPS, Defaults.PREF_USE_APPS)
+        customNavBarColor = prefs.getBoolean(Settings.PREF_NAVBAR_COLOR, Defaults.PREF_NAVBAR_COLOR)
+        keyGapScale = Settings.readKeyGapScale(prefs, isLandscape, isFolded)
+        settingsValuesForSuggestion = SettingsValuesForSuggestion(
+                blockPotentiallyOffensive,
                 prefs.getBoolean(Settings.PREF_GESTURE_SPACE_AWARE, Defaults.PREF_GESTURE_SPACE_AWARE)
         )
-        mSpacingAndPunctuations = SpacingAndPunctuations(res, mUrlDetectionEnabled)
-        mBottomPaddingScale = if (mIsFloatingKeyboard) 0f else Settings.readBottomPaddingScale(prefs, isLandscape, isFolded)
-        mSidePaddingScale = Settings.readSidePaddingScale(prefs, isLandscape, mIsSplitKeyboardEnabled, isFolded)
-        mLongPressSymbolsForNumpad = prefs.getBoolean(Settings.PREFS_LONG_PRESS_SYMBOLS_FOR_NUMPAD, Defaults.PREFS_LONG_PRESS_SYMBOLS_FOR_NUMPAD)
-        mAutoShowToolbar = mToolbarMode == ToolbarMode.EXPANDABLE && prefs.getBoolean(Settings.PREF_AUTO_SHOW_TOOLBAR, Defaults.PREF_AUTO_SHOW_TOOLBAR)
-        mAutoHideToolbar = mSuggestionsEnabled && prefs.getBoolean(Settings.PREF_AUTO_HIDE_TOOLBAR, Defaults.PREF_AUTO_HIDE_TOOLBAR)
-        mAlphaAfterEmojiInEmojiView = prefs.getBoolean(Settings.PREF_ABC_AFTER_EMOJI, Defaults.PREF_ABC_AFTER_EMOJI)
-        mAlphaAfterClipHistoryEntry = prefs.getBoolean(Settings.PREF_ABC_AFTER_CLIP, Defaults.PREF_ABC_AFTER_CLIP)
+        spacingAndPunctuations = SpacingAndPunctuations(res, urlDetectionEnabled)
+        bottomPaddingScale = if (isFloatingKeyboard) 0f else Settings.readBottomPaddingScale(prefs, isLandscape, isFolded)
+        sidePaddingScale = Settings.readSidePaddingScale(prefs, isLandscape, isSplitKeyboardEnabled, isFolded)
+        longPressSymbolsForNumpad = prefs.getBoolean(Settings.PREFS_LONG_PRESS_SYMBOLS_FOR_NUMPAD, Defaults.PREFS_LONG_PRESS_SYMBOLS_FOR_NUMPAD)
+        autoShowToolbar = toolbarMode == ToolbarMode.EXPANDABLE && prefs.getBoolean(Settings.PREF_AUTO_SHOW_TOOLBAR, Defaults.PREF_AUTO_SHOW_TOOLBAR)
+        autoHideToolbar = suggestionsEnabled && prefs.getBoolean(Settings.PREF_AUTO_HIDE_TOOLBAR, Defaults.PREF_AUTO_HIDE_TOOLBAR)
+        alphaAfterEmojiInEmojiView = prefs.getBoolean(Settings.PREF_ABC_AFTER_EMOJI, Defaults.PREF_ABC_AFTER_EMOJI)
+        alphaAfterClipHistoryEntry = prefs.getBoolean(Settings.PREF_ABC_AFTER_CLIP, Defaults.PREF_ABC_AFTER_CLIP)
         if (prefs.getBoolean(Settings.PREF_ABC_AFTER_SYMBOL_SPACE, Defaults.PREF_ABC_AFTER_SYMBOL_SPACE)) {
-            mAlphaAfterSpace.add(KeyboardState.Mode.SYMBOLS)
-            mAlphaAfterSpace.add(KeyboardState.Mode.SYMBOLS_SHIFTED)
+            alphaAfterSpace.add(KeyboardState.Mode.SYMBOLS)
+            alphaAfterSpace.add(KeyboardState.Mode.SYMBOLS_SHIFTED)
         }
         if (prefs.getBoolean(Settings.PREF_ABC_AFTER_NUMPAD_SPACE, Defaults.PREF_ABC_AFTER_NUMPAD_SPACE)) {
-            mAlphaAfterSpace.add(KeyboardState.Mode.NUMPAD)
+            alphaAfterSpace.add(KeyboardState.Mode.NUMPAD)
         }
-        mRemoveRedundantPopups = prefs.getBoolean(Settings.PREF_REMOVE_REDUNDANT_POPUPS, Defaults.PREF_REMOVE_REDUNDANT_POPUPS)
-        mSpaceBarText = prefs.getString(Settings.PREF_SPACE_BAR_TEXT, Defaults.PREF_SPACE_BAR_TEXT)!!
-        mFontSizeMultiplier = prefs.getFloat(Settings.PREF_FONT_SCALE, Defaults.PREF_FONT_SCALE)
-        mHintFontSizeMultiplier = if (mShowsHints) prefs.getFloat(Settings.PREF_HINT_FONT_SCALE, Defaults.PREF_HINT_FONT_SCALE) else 1f
-        mFontSizeMultiplierEmoji = prefs.getFloat(Settings.PREF_EMOJI_FONT_SCALE, Defaults.PREF_EMOJI_FONT_SCALE)
-        mEmojiKeyFit = prefs.getBoolean(Settings.PREF_EMOJI_KEY_FIT, Defaults.PREF_EMOJI_KEY_FIT)
-        mPunctuationSuggestions = Settings.readPunctuationSuggestions(context)
+        removeRedundantPopups = prefs.getBoolean(Settings.PREF_REMOVE_REDUNDANT_POPUPS, Defaults.PREF_REMOVE_REDUNDANT_POPUPS)
+        spaceBarText = prefs.getString(Settings.PREF_SPACE_BAR_TEXT, Defaults.PREF_SPACE_BAR_TEXT)!!
+        fontSizeMultiplier = prefs.getFloat(Settings.PREF_FONT_SCALE, Defaults.PREF_FONT_SCALE)
+        hintFontSizeMultiplier = if (showsHints) prefs.getFloat(Settings.PREF_HINT_FONT_SCALE, Defaults.PREF_HINT_FONT_SCALE) else 1f
+        fontSizeMultiplierEmoji = prefs.getFloat(Settings.PREF_EMOJI_FONT_SCALE, Defaults.PREF_EMOJI_FONT_SCALE)
+        emojiKeyFit = prefs.getBoolean(Settings.PREF_EMOJI_KEY_FIT, Defaults.PREF_EMOJI_KEY_FIT)
+        punctuationSuggestions = Settings.readPunctuationSuggestions(context)
     }
 
     fun needsToLookupSuggestions(): Boolean {
-        return (mInputAttributes.mShouldShowSuggestions || mOverrideShowingSuggestions)
-                && (mAutoCorrectEnabled || mSuggestionsEnabled)
+        return (mInputAttributes.mShouldShowSuggestions || overrideShowingSuggestions)
+                && (autoCorrectEnabled || suggestionsEnabled)
     }
 
     fun isWordSeparator(code: Int): Boolean {
-        return mSpacingAndPunctuations.isWordSeparator(code)
+        return spacingAndPunctuations.isWordSeparator(code)
     }
 
     fun isWordConnector(code: Int): Boolean {
-        return mSpacingAndPunctuations.isWordConnector(code)
+        return spacingAndPunctuations.isWordConnector(code)
     }
 
     fun isWordCodePoint(code: Int): Boolean {
-        return mSpacingAndPunctuations.isWordCodePoint(code)
+        return spacingAndPunctuations.isWordCodePoint(code)
     }
 
     fun isUsuallyPrecededBySpace(code: Int): Boolean {
-        return mSpacingAndPunctuations.isUsuallyPrecededBySpace(code)
+        return spacingAndPunctuations.isUsuallyPrecededBySpace(code)
     }
 
     fun isUsuallyFollowedBySpace(code: Int): Boolean {
-        return mSpacingAndPunctuations.isUsuallyFollowedBySpace(code)
+        return spacingAndPunctuations.isUsuallyFollowedBySpace(code)
     }
 
     fun shouldInsertSpacesAutomatically(): Boolean {
-        return mInputAttributes.mShouldInsertSpacesAutomatically
+        return mInputAttributes.shouldInsertSpacesAutomatically
     }
 
     fun isLanguageSwitchKeyEnabled(): Boolean {
-        if (!mShowsLanguageSwitchKey) {
+        if (!showsLanguageSwitchKey) {
             return false
         }
         val imm = RichInputMethodManager.getInstance()
-        if (!mLanguageSwitchKeyToOtherSubtypes) {
+        if (!languageSwitchKeyToOtherSubtypes) {
             return imm.hasMultipleEnabledIMEsOrSubtypes(false /* include aux subtypes */)
         }
-        if (!mLanguageSwitchKeyToOtherImes) {
+        if (!languageSwitchKeyToOtherImes) {
             return imm.hasMultipleEnabledSubtypesInThisIme(true /* include aux subtypes */)
         }
         return imm.hasMultipleEnabledSubtypesInThisIme(false /* include aux subtypes */)
@@ -392,67 +392,67 @@ class SettingsValues(context: Context, prefs: SharedPreferences, res: Resources,
     }
 
     fun hasSameOrientation(configuration: Configuration): Boolean {
-        return mDisplayOrientation == configuration.orientation
+        return displayOrientation == configuration.orientation
     }
 
     fun isSecondaryStripVisible(): Boolean {
-        return mToolbarMode != ToolbarMode.HIDDEN || !mToolbarHidingGlobal
+        return toolbarMode != ToolbarMode.HIDDEN || !toolbarHidingGlobal
     }
 
     fun dump(): String {
         val sb = StringBuilder("Current settings :")
-        sb.append("\n   mSpacingAndPunctuations = ")
-        sb.append("" + mSpacingAndPunctuations.dump())
-        sb.append("\n   mAutoCap = ")
-        sb.append("" + mAutoCap)
-        sb.append("\n   mVibrateOn = ")
-        sb.append("" + mVibrateOn)
-        sb.append("\n   mSoundOn = ")
-        sb.append("" + mSoundOn)
-        sb.append("\n   mKeyPreviewPopupOn = ")
-        sb.append("" + mKeyPreviewPopupOn)
-        sb.append("\n   mShowsVoiceInputKey = ")
-        sb.append("" + mShowsVoiceInputKey)
-        sb.append("\n   mLanguageSwitchKeyToOtherImes = ")
-        sb.append("" + mLanguageSwitchKeyToOtherImes)
-        sb.append("\n   mLanguageSwitchKeyToOtherSubtypes = ")
-        sb.append("" + mLanguageSwitchKeyToOtherSubtypes)
-        sb.append("\n   mUsePersonalizedDicts = ")
-        sb.append("" + mUsePersonalizedDicts)
-        sb.append("\n   mUseDoubleSpacePeriod = ")
-        sb.append("" + mUseDoubleSpacePeriod)
-        sb.append("\n   mBlockPotentiallyOffensive = ")
-        sb.append("" + mBlockPotentiallyOffensive)
-        sb.append("\n   mBigramPredictionEnabled = ")
-        sb.append("" + mBigramPredictionEnabled)
-        sb.append("\n   mGestureInputEnabled = ")
-        sb.append("" + mGestureInputEnabled)
-        sb.append("\n   mGestureTrailEnabled = ")
-        sb.append("" + mGestureTrailEnabled)
-        sb.append("\n   mGestureFloatingPreviewTextEnabled = ")
-        sb.append("" + mGestureFloatingPreviewTextEnabled)
-        sb.append("\n   mSlidingKeyInputPreviewEnabled = ")
-        sb.append("" + mSlidingKeyInputPreviewEnabled)
-        sb.append("\n   mKeyLongpressTimeout = ")
-        sb.append("" + mKeyLongpressTimeout)
+        sb.append("\n   spacingAndPunctuations = ")
+        sb.append("" + spacingAndPunctuations.dump())
+        sb.append("\n   autoCap = ")
+        sb.append("" + autoCap)
+        sb.append("\n   vibrateOn = ")
+        sb.append("" + vibrateOn)
+        sb.append("\n   soundOn = ")
+        sb.append("" + soundOn)
+        sb.append("\n   keyPreviewPopupOn = ")
+        sb.append("" + keyPreviewPopupOn)
+        sb.append("\n   showsVoiceInputKey = ")
+        sb.append("" + showsVoiceInputKey)
+        sb.append("\n   languageSwitchKeyToOtherImes = ")
+        sb.append("" + languageSwitchKeyToOtherImes)
+        sb.append("\n   languageSwitchKeyToOtherSubtypes = ")
+        sb.append("" + languageSwitchKeyToOtherSubtypes)
+        sb.append("\n   usePersonalizedDicts = ")
+        sb.append("" + usePersonalizedDicts)
+        sb.append("\n   useDoubleSpacePeriod = ")
+        sb.append("" + useDoubleSpacePeriod)
+        sb.append("\n   blockPotentiallyOffensive = ")
+        sb.append("" + blockPotentiallyOffensive)
+        sb.append("\n   bigramPredictionEnabled = ")
+        sb.append("" + bigramPredictionEnabled)
+        sb.append("\n   gestureInputEnabled = ")
+        sb.append("" + gestureInputEnabled)
+        sb.append("\n   gestureTrailEnabled = ")
+        sb.append("" + gestureTrailEnabled)
+        sb.append("\n   gestureFloatingPreviewTextEnabled = ")
+        sb.append("" + gestureFloatingPreviewTextEnabled)
+        sb.append("\n   slidingKeyInputPreviewEnabled = ")
+        sb.append("" + slidingKeyInputPreviewEnabled)
+        sb.append("\n   keyLongpressTimeout = ")
+        sb.append("" + keyLongpressTimeout)
         sb.append("\n   mLocale = ")
         sb.append("" + mLocale)
         sb.append("\n   mInputAttributes = ")
         sb.append("" + mInputAttributes)
-        sb.append("\n   mKeypressVibrationDuration = ")
-        sb.append("" + mKeypressVibrationDuration)
-        sb.append("\n   mKeypressSoundVolume = ")
-        sb.append("" + mKeypressSoundVolume)
-        sb.append("\n   mAutoCorrectEnabled = ")
-        sb.append("" + mAutoCorrectEnabled)
-        sb.append("\n   mAutoCorrectionThreshold = ")
-        sb.append("" + mAutoCorrectionThreshold)
-        sb.append("\n   mAutoCorrectionEnabledPerUserSettings = ")
-        sb.append("" + mAutoCorrectionEnabledPerUserSettings)
+        sb.append("\n   keypressVibrationDuration = ")
+        sb.append("" + keypressVibrationDuration)
+        sb.append("\n   keypressSoundVolume = ")
+        sb.append("" + keypressSoundVolume)
+        sb.append("\n   autoCorrectEnabled = ")
+        sb.append("" + autoCorrectEnabled)
+        sb.append("\n   autoCorrectionThreshold = ")
+        sb.append("" + autoCorrectionThreshold)
+        sb.append("\n   autoCorrectionEnabledPerUserSettings = ")
+        sb.append("" + autoCorrectionEnabledPerUserSettings)
         sb.append("\n   mSuggestionsEnabledPerUserSettings = ")
-        sb.append("" + mSuggestionsEnabled)
-        sb.append("\n   mDisplayOrientation = ")
-        sb.append("" + mDisplayOrientation)
+        sb.append("" + suggestionsEnabled)
+        sb.append("\n   displayOrientation = ")
+        sb.append("" + displayOrientation)
         sb.append("\n   mAppWorkarounds = ")
         return sb.toString()
     }

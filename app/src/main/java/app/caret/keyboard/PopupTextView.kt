@@ -38,7 +38,7 @@ class PopupTextView : TextView, PopupKeysPanel {
     fun setKeyDrawParams(key: Key, drawParams: KeyDrawParams) {
         mKey = key
         Settings.getValues().mColors.setBackground(this, ColorType.KEY_PREVIEW_BACKGROUND)
-        setTextColor(drawParams.mPreviewTextColor)
+        setTextColor(drawParams.previewTextColor)
         setTextSize(TypedValue.COMPLEX_UNIT_PX, (key.selectHintTextSize(drawParams) shl 1).toFloat())
         KeyboardTypeface.applyToTextView(this, this.text, key.selectTypeface(drawParams))
     }

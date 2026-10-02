@@ -28,36 +28,36 @@ class DynamicGridKeyboard private constructor(
     prefs: SharedPreferences, templateKeyboard: Keyboard,
     maxCount: Int, isRecents: Boolean, width: Int, fixedRowCount: Boolean
 ) : Keyboard(templateKeyboard) {
-    private val mLock = Any()
+    private val lock = Any()
 
     private val mHorizontalStep: Int
     private val mHorizontalGap: Int
-    private val mVerticalStep: Int
+    private val verticalStep: Int
     private val mColumnsNum: Int
     private val mMaxKeyCount: Int
     private val mFixedRowCount: Boolean
     private val mIsRecents: Boolean
-    private val mGridKeys = ArrayDeque<GridKey>()
-    private val mPendingKeys = ArrayDeque<Key>()
+    private val gridKeys = ArrayDeque<GridKey>()
+    private val pendingKeys = ArrayDeque<Key>()
 
     private var mCachedGridKeys: List<Key>? = null
-    private val mEmptyColumnIndices = ArrayList<Int>(4)
+    private val emptyColumnIndices = ArrayList<Int>(4)
 
     init {
         // todo: would be better to keep them final and not require width, but how to properly set width of the template keyboard?
         //  an alternative would be to always create the templateKeyboard with full width
-        val paddingWidth = mOccupiedWidth - mBaseWidth
-        mBaseWidth = width - paddingWidth
-        mOccupiedWidth = width
-        val spacerWidth = Settings.getValues().mSplitKeyboardSpacerRelativeWidth * mBaseWidth
+        val paddingWidth = this.occupiedWidth - this.baseWidth
+        this.baseWidth = width - paddingWidth
+        this.occupiedWidth = width
+        val spacerWidth = Settings.getValues().splitKeyboardSpacerRelativeWidth * this.baseWidth
         val key0 = getTemplateKey(Constants.RECENTS_TEMPLATE_KEY_CODE_0)
         val key1 = getTemplateKey(Constants.RECENTS_TEMPLATE_KEY_CODE_1)
         val horizontalGap = Math.abs(key1.getX() - key0.getX()) - key0.getWidth()
         val widthScale = determineWidthScale((key0.getWidth() + horizontalGap).toFloat())
         mHorizontalGap = (horizontalGap * widthScale).toInt()
         mHorizontalStep = ((key0.getWidth() + horizontalGap) * widthScale).toInt()
-        mVerticalStep = ((key0.getHeight() + mVerticalGap) / Math.sqrt(Settings.getValues().mKeyboardHeightScale.toDouble())).toInt()
-        mColumnsNum = mBaseWidth / mHorizontalStep
+        verticalStep = ((key0.getHeight() + mVerticalGap) / Math.sqrt(Settings.getValues().keyboardHeightScale.toDouble())).toInt()
+        mColumnsNum = this.baseWidth / mHorizontalStep
         if (spacerWidth > 0)
             setSpacerColumns(spacerWidth)
         mMaxKeyCount = if (fixedRowCount) maxCount * getOccupiedColumnCount() else maxCount
@@ -83,14 +83,14 @@ class DynamicGridKeyboard private constructor(
         }
         var i = leftmost
         while (i <= rightmost) {
-            mEmptyColumnIndices.add(i - 1)
+            emptyColumnIndices.add(i - 1)
             i++
         }
     }
 
     // determine a width scale so emojis evenly fill the entire width
     private fun determineWidthScale(horizontalStep: Float): Float {
-        val columnsNumRaw = mBaseWidth / horizontalStep
+        val columnsNumRaw = this.baseWidth / horizontalStep
         val columnsNum = Math.round(columnsNumRaw).toFloat()
         return columnsNumRaw / columnsNum
     }
@@ -106,18 +106,18 @@ class DynamicGridKeyboard private constructor(
 
     // height is dynamic if we don't have a fixed row count
     fun getOccupiedHeight(): Int {
-        val count = if (mFixedRowCount) mMaxKeyCount else mGridKeys.size
+        val count = if (mFixedRowCount) mMaxKeyCount else gridKeys.size
         val row = (count - 1) / getOccupiedColumnCount() + 1
-        return row * mVerticalStep
+        return row * verticalStep
     }
 
     fun getOccupiedColumnCount(): Int {
-        return mColumnsNum - mEmptyColumnIndices.size
+        return mColumnsNum - emptyColumnIndices.size
     }
 
     fun addPendingKey(usedKey: Key) {
-        synchronized(mLock) {
-            mPendingKeys.addLast(usedKey)
+        synchronized(lock) {
+            pendingKeys.addLast(usedKey)
         }
     }
 
@@ -130,17 +130,17 @@ class DynamicGridKeyboard private constructor(
         if (outputText != null) RecentEmojis.remove(outputText)
         else RecentEmojis.removeCodepoint(key.getCode())
         if (key !is GridKey) return
-        synchronized(mLock) {
-            mGridKeys.remove(key)
+        synchronized(lock) {
+            gridKeys.remove(key)
             mCachedGridKeys = null
             updateCoordinates()
         }
     }
 
     fun flushPendingRecentKeys() {
-        synchronized(mLock) {
-            while (!mPendingKeys.isEmpty()) {
-                val key: Key? = mPendingKeys.pollFirst()
+        synchronized(lock) {
+            while (!pendingKeys.isEmpty()) {
+                val key: Key? = pendingKeys.pollFirst()
                 addKey(key, true)
                 saveRecentKey(key)
             }
@@ -160,9 +160,9 @@ class DynamicGridKeyboard private constructor(
     }
 
     fun removeAllKeys() {
-        synchronized(mLock) {
-            mGridKeys.clear()
-            mPendingKeys.clear()
+        synchronized(lock) {
+            gridKeys.clear()
+            pendingKeys.clear()
             mCachedGridKeys = null
         }
     }
@@ -171,7 +171,7 @@ class DynamicGridKeyboard private constructor(
         if (usedKey == null) {
             return
         }
-        synchronized(mLock) {
+        synchronized(lock) {
             mCachedGridKeys = null
             // When a key is added to recents keyboard, we don't want to keep its popup keys
             // neither its hint label. Also, we make sure its background type is matching our keyboard
@@ -182,16 +182,16 @@ class DynamicGridKeyboard private constructor(
                     if (mIsRecents) REMOVE_RECENT_POPUP_KEYS else usedKey.getPopupKeys(),
                     if (dropHintLabel) null else usedKey.getHintLabel(),
                     if (mIsRecents) Key.BACKGROUND_TYPE_EMPTY else usedKey.getBackgroundType())
-            while (mGridKeys.remove(key)) {
+            while (gridKeys.remove(key)) {
                 // Remove duplicate keys.
             }
             if (addFirst) {
-                mGridKeys.addFirst(key)
+                gridKeys.addFirst(key)
             } else {
-                mGridKeys.addLast(key)
+                gridKeys.addLast(key)
             }
-            while (mGridKeys.size > mMaxKeyCount) {
-                mGridKeys.removeLast()
+            while (gridKeys.size > mMaxKeyCount) {
+                gridKeys.removeLast()
             }
             updateCoordinates()
         }
@@ -199,8 +199,8 @@ class DynamicGridKeyboard private constructor(
 
     private fun updateCoordinates() {
         var index = 0
-        for (gridKey in mGridKeys) {
-            while (mEmptyColumnIndices.contains(index % mColumnsNum)) {
+        for (gridKey in gridKeys) {
+            while (emptyColumnIndices.contains(index % mColumnsNum)) {
                 index++
             }
             val keyX0 = getKeyX0(index)
@@ -273,21 +273,21 @@ class DynamicGridKeyboard private constructor(
 
     private fun getKeyY0(index: Int): Int {
         val row = index / mColumnsNum
-        return row * mVerticalStep + mVerticalGap / 2
+        return row * verticalStep + mVerticalGap / 2
     }
 
     private fun getKeyY1(index: Int): Int {
         val row = index / mColumnsNum + 1
-        return row * mVerticalStep + mVerticalGap / 2
+        return row * verticalStep + mVerticalGap / 2
     }
 
     override fun getSortedKeys(): List<Key> {
-        synchronized(mLock) {
+        synchronized(lock) {
             val cachedGridKeys = mCachedGridKeys
             if (cachedGridKeys != null) {
                 return cachedGridKeys
             }
-            val cachedKeys = ArrayList<Key>(mGridKeys)
+            val cachedKeys = ArrayList<Key>(gridKeys)
             val newCachedGridKeys = Collections.unmodifiableList(cachedKeys)
             mCachedGridKeys = newCachedGridKeys
             return newCachedGridKeys
@@ -295,28 +295,28 @@ class DynamicGridKeyboard private constructor(
     }
 
     override fun getNearestKeys(x: Int, y: Int): List<Key> {
-        // TODO: Calculate the nearest key index in mGridKeys from x and y.
+        // TODO: Calculate the nearest key index in gridKeys from x and y.
         return getSortedKeys()
     }
 
     class GridKey(originalKey: Key, popupKeys: Array<PopupKeySpec>?,
             labelHint: String?, backgroundType: Int
     ) : Key(originalKey, popupKeys, labelHint, backgroundType) {
-        private var mCurrentX = 0
-        private var mCurrentY = 0
+        private var currentX = 0
+        private var currentY = 0
 
         fun updateCoordinates(x0: Int, y0: Int, x1: Int, y1: Int) {
-            mCurrentX = x0
-            mCurrentY = y0
+            currentX = x0
+            currentY = y0
             getHitBox().set(x0, y0, x1, y1)
         }
 
         override fun getX(): Int {
-            return mCurrentX
+            return currentX
         }
 
         override fun getY(): Int {
-            return mCurrentY
+            return currentY
         }
 
         override fun equals(o: Any?): Boolean {

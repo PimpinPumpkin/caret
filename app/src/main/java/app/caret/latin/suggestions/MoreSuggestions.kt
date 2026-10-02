@@ -30,20 +30,20 @@ class MoreSuggestions(params: MoreSuggestionsParam, suggestedWords: SuggestedWor
 
     // not private as in Java: it is the type argument of the public Builder's supertype
     class MoreSuggestionsParam : KeyboardParams() {
-        private val mWidths = IntArray(SuggestedWords.MAX_SUGGESTIONS)
-        private val mRowNumbers = IntArray(SuggestedWords.MAX_SUGGESTIONS)
-        private val mColumnOrders = IntArray(SuggestedWords.MAX_SUGGESTIONS)
-        private val mNumColumnsInRow = IntArray(SuggestedWords.MAX_SUGGESTIONS)
-        private var mNumRows = 0
+        private val widths = IntArray(SuggestedWords.MAX_SUGGESTIONS)
+        private val rowNumbers = IntArray(SuggestedWords.MAX_SUGGESTIONS)
+        private val columnOrders = IntArray(SuggestedWords.MAX_SUGGESTIONS)
+        private val numColumnsInRow = IntArray(SuggestedWords.MAX_SUGGESTIONS)
+        private var numRows = 0
         var mDivider: Drawable? = null
-        var mDividerWidth = 0
+        var dividerWidth = 0
 
         fun layout(suggestedWords: SuggestedWords, fromIndex: Int,
                 maxWidth: Int, minWidth: Int, maxRow: Int, paint: Paint,
                 context: Context): Int {
             clearKeys()
             mDivider = ContextCompat.getDrawable(context, R.drawable.more_suggestions_divider)
-            mDividerWidth = if (mDivider == null) 0 else mDivider!!.intrinsicWidth
+            dividerWidth = if (mDivider == null) 0 else mDivider!!.intrinsicWidth
             val padding = context.resources.getDimension(R.dimen.config_more_suggestions_key_horizontal_padding)
 
             var row = 0
@@ -58,36 +58,36 @@ class MoreSuggestions(params: MoreSuggestionsParam, suggestedWords: SuggestedWor
                     suggestedWords.getLabel(index)
                 }
                 // TODO: Should take care of text x-scaling.
-                mWidths[index] = (TypefaceUtils.getStringWidth(word, paint) + padding).toInt()
+                widths[index] = (TypefaceUtils.getStringWidth(word, paint) + padding).toInt()
                 val numColumn = index - rowStartIndex + 1
                 val columnWidth =
-                        (maxWidth - mDividerWidth * (numColumn - 1)) / numColumn
+                        (maxWidth - dividerWidth * (numColumn - 1)) / numColumn
                 if (numColumn > MAX_COLUMNS_IN_ROW
                         || !fitInWidth(rowStartIndex, index + 1, columnWidth)) {
                     if ((row + 1) >= maxRow) {
                         break
                     }
-                    mNumColumnsInRow[row] = index - rowStartIndex
+                    numColumnsInRow[row] = index - rowStartIndex
                     rowStartIndex = index
                     row++
                 }
-                mColumnOrders[index] = index - rowStartIndex
-                mRowNumbers[index] = row
+                columnOrders[index] = index - rowStartIndex
+                rowNumbers[index] = row
                 index++
             }
-            mNumColumnsInRow[row] = index - rowStartIndex
-            mNumRows = row + 1
-            mOccupiedWidth = Math.max(
+            numColumnsInRow[row] = index - rowStartIndex
+            numRows = row + 1
+            this.occupiedWidth = Math.max(
                     minWidth, calcurateMaxRowWidth(fromIndex, index))
-            mBaseWidth = mOccupiedWidth
-            mOccupiedHeight = mNumRows * mDefaultAbsoluteRowHeight + mVerticalGap
-            mBaseHeight = mOccupiedHeight
+            mBaseWidth = this.occupiedWidth
+            this.occupiedHeight = numRows * this.defaultAbsoluteRowHeight + this.verticalGap
+            mBaseHeight = this.occupiedHeight
             return index - fromIndex
         }
 
         private fun fitInWidth(startIndex: Int, endIndex: Int, width: Int): Boolean {
             for (index in startIndex until endIndex) {
-                if (mWidths[index] > width)
+                if (widths[index] > width)
                     return false
             }
             return true
@@ -96,52 +96,52 @@ class MoreSuggestions(params: MoreSuggestionsParam, suggestedWords: SuggestedWor
         private fun calcurateMaxRowWidth(startIndex: Int, endIndex: Int): Int {
             var maxRowWidth = 0
             var index = startIndex
-            for (row in 0 until mNumRows) {
-                val numColumnInRow = mNumColumnsInRow[row]
+            for (row in 0 until numRows) {
+                val numColumnInRow = numColumnsInRow[row]
                 var maxKeyWidth = 0
-                while (index < endIndex && mRowNumbers[index] == row) {
-                    maxKeyWidth = Math.max(maxKeyWidth, mWidths[index])
+                while (index < endIndex && rowNumbers[index] == row) {
+                    maxKeyWidth = Math.max(maxKeyWidth, widths[index])
                     index++
                 }
                 maxRowWidth = Math.max(maxRowWidth,
-                        maxKeyWidth * numColumnInRow + mDividerWidth * (numColumnInRow - 1))
+                        maxKeyWidth * numColumnInRow + dividerWidth * (numColumnInRow - 1))
             }
             return maxRowWidth
         }
 
         fun getNumColumnInRow(index: Int): Int {
-            return mNumColumnsInRow[mRowNumbers[index]]
+            return numColumnsInRow[rowNumbers[index]]
         }
 
         fun getColumnNumber(index: Int): Int {
-            val columnOrder = mColumnOrders[index]
+            val columnOrder = columnOrders[index]
             val numColumn = getNumColumnInRow(index)
             return COLUMN_ORDER_TO_NUMBER[numColumn - 1][columnOrder]
         }
 
         fun getX(index: Int): Int {
             val columnNumber = getColumnNumber(index)
-            return columnNumber * (getWidth(index) + mDividerWidth)
+            return columnNumber * (getWidth(index) + dividerWidth)
         }
 
         fun getY(index: Int): Int {
-            val row = mRowNumbers[index]
-            return (mNumRows - 1 - row) * mDefaultAbsoluteRowHeight + mTopPadding
+            val row = rowNumbers[index]
+            return (numRows - 1 - row) * this.defaultAbsoluteRowHeight + this.topPadding
         }
 
         fun getWidth(index: Int): Int {
             val numColumnInRow = getNumColumnInRow(index)
-            return (mOccupiedWidth - mDividerWidth * (numColumnInRow - 1)) / numColumnInRow
+            return (this.occupiedWidth - dividerWidth * (numColumnInRow - 1)) / numColumnInRow
         }
 
         fun markAsEdgeKey(key: Key, index: Int) {
-            val row = mRowNumbers[index]
+            val row = rowNumbers[index]
             if (row == 0)
                 key.markAsBottomEdge(this)
-            if (row == mNumRows - 1)
+            if (row == numRows - 1)
                 key.markAsTopEdge(this)
 
-            val numColumnInRow = mNumColumnsInRow[row]
+            val numColumnInRow = numColumnsInRow[row]
             val column = getColumnNumber(index)
             if (column == 0)
                 key.markAsLeftEdge(this)
@@ -165,7 +165,7 @@ class MoreSuggestions(params: MoreSuggestionsParam, suggestedWords: SuggestedWor
         private val mPaneView: MoreSuggestionsView
         private lateinit var mSuggestedWords: SuggestedWords
         private var mFromIndex = 0
-        private var mToIndex = 0
+        private var toIndex = 0
 
         init {
             mPaneView = paneView
@@ -175,22 +175,22 @@ class MoreSuggestions(params: MoreSuggestionsParam, suggestedWords: SuggestedWor
                 maxWidth: Int, minWidth: Int, maxRow: Int,
                 parentKeyboard: Keyboard): Builder {
             val xmlId = R.xml.kbd_suggestions_pane_template
-            mParams.mId = parentKeyboard.mId
+            mParams.id = parentKeyboard.id
             readAttributes(xmlId)
-            mParams.mTopPadding = parentKeyboard.mVerticalGap / 2
-            mParams.mVerticalGap = mParams.mTopPadding
-            mPaneView.updateKeyboardGeometry(mParams.mDefaultAbsoluteRowHeight)
+            mParams.topPadding = parentKeyboard.mVerticalGap / 2
+            mParams.verticalGap = mParams.topPadding
+            mPaneView.updateKeyboardGeometry(mParams.defaultAbsoluteRowHeight)
             val count = mParams.layout(suggestedWords, fromIndex, maxWidth, minWidth, maxRow,
                     mPaneView.newLabelPaint(null /* key */), mContext)
             mFromIndex = fromIndex
-            mToIndex = fromIndex + count
+            toIndex = fromIndex + count
             mSuggestedWords = suggestedWords
             return this
         }
 
         override fun build(): MoreSuggestions {
             val params = mParams
-            for (index in mFromIndex until mToIndex) {
+            for (index in mFromIndex until toIndex) {
                 val x = params.getX(index)
                 val y = params.getY(index)
                 val width = params.getWidth(index)
@@ -211,7 +211,7 @@ class MoreSuggestions(params: MoreSuggestionsParam, suggestedWords: SuggestedWor
                 val numColumnInRow = params.getNumColumnInRow(index)
                 if (columnNumber < numColumnInRow - 1) {
                     val divider = Divider(params, params.mDivider, x + width, y,
-                            params.mDividerWidth, params.mDefaultAbsoluteRowHeight)
+                            params.dividerWidth, params.defaultAbsoluteRowHeight)
                     params.onAddKey(divider)
                 }
             }
@@ -223,12 +223,12 @@ class MoreSuggestions(params: MoreSuggestionsParam, suggestedWords: SuggestedWor
             Key(word, null, KeyCode.MULTIPLE_CODE_POINTS,
                     word, info, 0, Key.BACKGROUND_TYPE_NORMAL,
                     params.getX(index), params.getY(index), params.getWidth(index),
-                    params.mDefaultAbsoluteRowHeight, params.mHorizontalGap, params.mVerticalGap) {
+                    params.defaultAbsoluteRowHeight, params.horizontalGap, params.verticalGap) {
         @JvmField
-        val mSuggestedWordIndex: Int
+        val suggestedWordIndex: Int
 
         init {
-            mSuggestedWordIndex = index
+            suggestedWordIndex = index
         }
     }
 

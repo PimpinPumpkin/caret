@@ -12,24 +12,24 @@ import app.caret.latin.R
 
 /** This class holds parameters to control how a gesture stroke is sampled and drawn on the screen. */
 class GestureStrokeDrawingParams(mainKeyboardViewAttr: TypedArray) {
-    @JvmField val mMinSamplingDistance: Double // in pixel
-    @JvmField val mMaxInterpolationAngularThreshold: Double // in radian
-    @JvmField val mMaxInterpolationDistanceThreshold: Double // in pixel
-    @JvmField val mMaxInterpolationSegments: Int
+    @JvmField val minSamplingDistance: Double // in pixel
+    @JvmField val maxInterpolationAngularThreshold: Double // in radian
+    @JvmField val maxInterpolationDistanceThreshold: Double // in pixel
+    @JvmField val maxInterpolationSegments: Int
 
     init {
-        mMinSamplingDistance = mainKeyboardViewAttr.getDimension(
+        minSamplingDistance = mainKeyboardViewAttr.getDimension(
                 R.styleable.MainKeyboardView_gestureTrailMinSamplingDistance,
                 DEFAULT_MIN_SAMPLING_DISTANCE).toDouble()
         val interpolationAngularDegree = mainKeyboardViewAttr.getInteger(R.styleable
                 .MainKeyboardView_gestureTrailMaxInterpolationAngularThreshold, 0)
-        mMaxInterpolationAngularThreshold = if (interpolationAngularDegree <= 0)
+        maxInterpolationAngularThreshold = if (interpolationAngularDegree <= 0)
                 Math.toRadians(DEFAULT_MAX_INTERPOLATION_ANGULAR_THRESHOLD.toDouble())
                 else Math.toRadians(interpolationAngularDegree.toDouble())
-        mMaxInterpolationDistanceThreshold = mainKeyboardViewAttr.getDimension(R.styleable
+        maxInterpolationDistanceThreshold = mainKeyboardViewAttr.getDimension(R.styleable
                 .MainKeyboardView_gestureTrailMaxInterpolationDistanceThreshold,
                 DEFAULT_MAX_INTERPOLATION_DISTANCE_THRESHOLD).toDouble()
-        mMaxInterpolationSegments = mainKeyboardViewAttr.getInteger(
+        maxInterpolationSegments = mainKeyboardViewAttr.getInteger(
                 R.styleable.MainKeyboardView_gestureTrailMaxInterpolationSegments,
                 DEFAULT_MAX_INTERPOLATION_SEGMENTS)
     }

@@ -71,7 +71,7 @@ class CaseSelector(
     val upper: AbstractKeyData,
 ) : AbstractKeyData {
     override fun compute(params: KeyboardParams, isPopup: Boolean): KeyData? {
-        return (if (params.mId.element.isAlphabetShifted) { upper } else { lower }).compute(params)
+        return (if (params.id.element.isAlphabetShifted) { upper } else { lower }).compute(params)
     }
 
     override fun asString(isForDisplay: Boolean): String {
@@ -117,7 +117,7 @@ class ShiftStateSelector(
     val manualOrLocked: AbstractKeyData? = null,
 ) : AbstractKeyData {
     override fun compute(params: KeyboardParams, isPopup: Boolean): KeyData? {
-        return when (params.mId.element) {
+        return when (params.id.element) {
             KeyboardElement.ALPHABET, KeyboardElement.SYMBOLS -> unshifted ?: default
             KeyboardElement.ALPHABET_MANUAL_SHIFTED -> shiftedManual ?: manualOrLocked ?: shifted ?: default
             KeyboardElement.ALPHABET_AUTOMATIC_SHIFTED -> shiftedAutomatic ?: shifted ?: default
@@ -175,12 +175,12 @@ data class VariationSelector(
 ) : AbstractKeyData {
     override fun compute(params: KeyboardParams, isPopup: Boolean): KeyData? {
         return when {
-            params.mId.isPasswordInput -> password ?: default
-            params.mId.mode == KeyboardMode.EMAIL -> email ?: default
-            params.mId.mode == KeyboardMode.URL -> uri ?: default
-            params.mId.mode == KeyboardMode.DATE -> date ?: default
-            params.mId.mode == KeyboardMode.TIME -> time ?: default
-            params.mId.mode == KeyboardMode.DATETIME -> datetime ?: default
+            params.id.isPasswordInput -> password ?: default
+            params.id.mode == KeyboardMode.EMAIL -> email ?: default
+            params.id.mode == KeyboardMode.URL -> uri ?: default
+            params.id.mode == KeyboardMode.DATE -> date ?: default
+            params.id.mode == KeyboardMode.TIME -> time ?: default
+            params.id.mode == KeyboardMode.DATETIME -> datetime ?: default
             else -> normal ?: default
         }?.compute(params)
     }
@@ -218,21 +218,21 @@ class KeyboardStateSelector(
     val emojiSearchAvailable: AbstractKeyData? = null,
 ) : AbstractKeyData {
     override fun compute(params: KeyboardParams, isPopup: Boolean): KeyData? {
-        if (params.mId.emojiKeyEnabled)
+        if (params.id.emojiKeyEnabled)
             emojiKeyEnabled?.compute(params)?.let { return it }
-        if (params.mId.languageSwitchKeyEnabled)
+        if (params.id.languageSwitchKeyEnabled)
             languageKeyEnabled?.compute(params)?.let { return it }
-        if (params.mId.dpadKeyEnabled)
+        if (params.id.dpadKeyEnabled)
             dpadKeyEnabled?.compute(params)?.let { return it }
-        if (params.mId.element == KeyboardElement.SYMBOLS)
+        if (params.id.element == KeyboardElement.SYMBOLS)
             symbols?.compute(params)?.let { return it }
-        if (params.mId.element == KeyboardElement.SYMBOLS_SHIFTED)
+        if (params.id.element == KeyboardElement.SYMBOLS_SHIFTED)
             moreSymbols?.compute(params)?.let { return it }
-        if (params.mId.element == KeyboardElement.DPAD)
+        if (params.id.element == KeyboardElement.DPAD)
             dpad?.compute(params)?.let { return it }
-        if (params.mId.element.isAlphabet)
+        if (params.id.element.isAlphabet)
             alphabet?.compute(params)?.let { return it }
-        if (params.mId.emojiSearchAvailable)
+        if (params.id.emojiSearchAvailable)
             emojiSearchAvailable?.compute(params)?.let { return it }
 
         return default?.compute(params)
@@ -267,7 +267,7 @@ class LayoutDirectionSelector(
     val rtl: AbstractKeyData,
 ) : AbstractKeyData {
     override fun compute(params: KeyboardParams, isPopup: Boolean): KeyData? {
-        return (if (params.mId.subtype.isRtlSubtype) { rtl } else { ltr }).compute(params)
+        return (if (params.id.subtype.isRtlSubtype) { rtl } else { ltr }).compute(params)
     }
 
     override fun asString(isForDisplay: Boolean): String {

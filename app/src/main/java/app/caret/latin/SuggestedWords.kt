@@ -174,15 +174,15 @@ open class SuggestedWords(
         // The completion info from the application. Null for suggestions that don't come from
         // the application (including keyboard-computed ones, so this is almost always null)
         @JvmField
-        val mApplicationSpecifiedCompletionInfo: CompletionInfo?
+        val applicationSpecifiedCompletionInfo: CompletionInfo?
         @JvmField
         val mScore: Int
         @JvmField
-        var mOriginalScore: Int = 0 // relevant only for background data gathering, todo: remove when gathering period is over
+        var originalScore: Int = 0 // relevant only for background data gathering, todo: remove when gathering period is over
         @JvmField
         val mKindAndFlags: Int
         @JvmField
-        val mCodePointCount: Int
+        val codePointCount: Int
         @JvmField
         val mSourceDict: Dictionary?
         // For auto-commit. This keeps track of the index inside the touch coordinates array
@@ -214,11 +214,11 @@ open class SuggestedWords(
                 autoCommitFirstWordConfidence: Int) {
             mWord = word
             mPrevWordsContext = prevWordsContext
-            mApplicationSpecifiedCompletionInfo = null
+            applicationSpecifiedCompletionInfo = null
             mScore = score
             mKindAndFlags = kindAndFlags
             mSourceDict = sourceDict
-            mCodePointCount = StringUtils.codePointCount(mWord)
+            codePointCount = StringUtils.codePointCount(mWord)
             mIndexOfTouchPointOfSecondWord = indexOfTouchPointOfSecondWord
             mAutoCommitFirstWordConfidence = autoCommitFirstWordConfidence
         }
@@ -231,11 +231,11 @@ open class SuggestedWords(
         constructor(applicationSpecifiedCompletion: CompletionInfo?) {
             mWord = applicationSpecifiedCompletion!!.text!!.toString()
             mPrevWordsContext = ""
-            mApplicationSpecifiedCompletionInfo = applicationSpecifiedCompletion
+            applicationSpecifiedCompletionInfo = applicationSpecifiedCompletion
             mScore = MAX_SCORE
             mKindAndFlags = KIND_APP_DEFINED
             mSourceDict = Dictionary.DICTIONARY_APPLICATION_DEFINED
-            mCodePointCount = StringUtils.codePointCount(mWord)
+            codePointCount = StringUtils.codePointCount(mWord)
             mIndexOfTouchPointOfSecondWord = NOT_AN_INDEX
             mAutoCommitFirstWordConfidence = NOT_A_CONFIDENCE
         }
@@ -266,7 +266,7 @@ open class SuggestedWords(
 
         fun isAppropriateForAutoCorrection(): Boolean {
             return (mKindAndFlags and KIND_FLAG_APPROPRIATE_FOR_AUTO_CORRECTION) != 0
-                    || (isKindOf(KIND_SHORTCUT) && Settings.getValues().mAutoCorrectShortcuts)
+                    || (isKindOf(KIND_SHORTCUT) && Settings.getValues().autoCorrectShortcuts)
         }
 
         fun setDebugString(str: String?) {

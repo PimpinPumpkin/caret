@@ -17,26 +17,26 @@ fun setInsetsOutlineProvider(view: View): InsetsOutlineProvider {
 }
 
 class InsetsOutlineProvider(private val mView: View) : ViewOutlineProvider() {
-    private var mLastVisibleTopInsets = NO_DATA
+    private var lastVisibleTopInsets = NO_DATA
     init {
         mView.outlineProvider = this
     }
     fun setInsets(insets: InputMethodService.Insets) {
         val visibleTopInsets = insets.visibleTopInsets
-        if (mLastVisibleTopInsets != visibleTopInsets) {
-            mLastVisibleTopInsets = visibleTopInsets
+        if (lastVisibleTopInsets != visibleTopInsets) {
+            lastVisibleTopInsets = visibleTopInsets
             mView.invalidateOutline()
         }
     }
 
     override fun getOutline(view: View, outline: Outline) {
-        if (mLastVisibleTopInsets == NO_DATA) { // Call default implementation.
+        if (lastVisibleTopInsets == NO_DATA) { // Call default implementation.
             BACKGROUND.getOutline(view, outline)
             return
         }
         // todo: this is now, but it's just fine??
         // TODO: Revisit this when floating/resize keyboard is supported.
-        outline.setRect(view.left, mLastVisibleTopInsets, view.right, view.bottom)
+        outline.setRect(view.left, lastVisibleTopInsets, view.right, view.bottom)
     }
 
     companion object {

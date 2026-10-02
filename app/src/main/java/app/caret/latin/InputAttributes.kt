@@ -24,22 +24,22 @@ import java.util.Arrays
 class InputAttributes {
     private val TAG = InputAttributes::class.java.simpleName
 
-    @JvmField val mTargetApplicationPackageName: String?
-    @JvmField val mInputTypeShouldAutoCorrect: Boolean
-    @JvmField val mIsPasswordField: Boolean
+    @JvmField val targetApplicationPackageName: String?
+    @JvmField val inputTypeShouldAutoCorrect: Boolean
+    @JvmField val isPasswordField: Boolean
     @JvmField val mShouldShowSuggestions: Boolean
-    @JvmField val mMayOverrideShowingSuggestions: Boolean
-    @JvmField val mApplicationSpecifiedCompletionOn: Boolean
-    @JvmField val mShouldInsertSpacesAutomatically: Boolean
-    @JvmField val mShouldShowVoiceInputKey: Boolean
-    @JvmField val mNoLearning: Boolean
+    @JvmField val mayOverrideShowingSuggestions: Boolean
+    @JvmField val applicationSpecifiedCompletionOn: Boolean
+    @JvmField val shouldInsertSpacesAutomatically: Boolean
+    @JvmField val shouldShowVoiceInputKey: Boolean
+    @JvmField val noLearning: Boolean
     /**
      * Whether the floating gesture preview should be disabled. If true, this should override the
      * corresponding keyboard settings preference, always suppressing the floating preview text.
      * {@link app.caret.latin.settings.SettingsValues#mGestureFloatingPreviewTextEnabled}
      */
-    @JvmField val mDisableGestureFloatingPreviewText: Boolean
-    @JvmField val mIsGeneralTextInput: Boolean
+    @JvmField val disableGestureFloatingPreviewText: Boolean
+    @JvmField val isGeneralTextInput: Boolean
     @JvmField val mInputType: Int
     private val mEditorInfo: EditorInfo?
     private val mPackageNameForPrivateImeOptions: String?
@@ -48,10 +48,10 @@ class InputAttributes {
             packageNameForPrivateImeOptions: String?) {
         mEditorInfo = editorInfo
         mPackageNameForPrivateImeOptions = packageNameForPrivateImeOptions
-        mTargetApplicationPackageName = if (null != editorInfo) editorInfo.packageName else null
-        mInputType = AppWorkarounds.adjustInputType(if (null != editorInfo) editorInfo.inputType else 0, mTargetApplicationPackageName)
+        targetApplicationPackageName = if (null != editorInfo) editorInfo.packageName else null
+        mInputType = AppWorkarounds.adjustInputType(if (null != editorInfo) editorInfo.inputType else 0, targetApplicationPackageName)
         val inputClass = mInputType and InputType.TYPE_MASK_CLASS
-        mIsPasswordField = InputTypeUtils.isPasswordInputType(mInputType)
+        isPasswordField = InputTypeUtils.isPasswordInputType(mInputType)
                 || InputTypeUtils.isVisiblePasswordInputType(mInputType)
         if (inputClass != InputType.TYPE_CLASS_TEXT) {
             // If we are not looking at a TYPE_CLASS_TEXT field, the following strange
@@ -69,14 +69,14 @@ class InputAttributes {
                         + " imeOptions=0x%08x", mInputType, editorInfo.imeOptions))
             }
             mShouldShowSuggestions = false
-            mMayOverrideShowingSuggestions = false
-            mInputTypeShouldAutoCorrect = false
-            mApplicationSpecifiedCompletionOn = false
-            mShouldInsertSpacesAutomatically = false
-            mShouldShowVoiceInputKey = false
-            mDisableGestureFloatingPreviewText = false
-            mIsGeneralTextInput = false
-            mNoLearning = false
+            mayOverrideShowingSuggestions = false
+            inputTypeShouldAutoCorrect = false
+            applicationSpecifiedCompletionOn = false
+            shouldInsertSpacesAutomatically = false
+            shouldShowVoiceInputKey = false
+            disableGestureFloatingPreviewText = false
+            isGeneralTextInput = false
+            noLearning = false
             return
         }
 
@@ -88,25 +88,25 @@ class InputAttributes {
 
         // TODO: Have a helper method in InputTypeUtils
         // Make sure that passwords are not displayed in {@link SuggestionStripView}.
-        mShouldShowSuggestions = !mIsPasswordField && !flagNoSuggestions
-        mMayOverrideShowingSuggestions = !mIsPasswordField
+        mShouldShowSuggestions = !isPasswordField && !flagNoSuggestions
+        mayOverrideShowingSuggestions = !isPasswordField
 
-        mShouldInsertSpacesAutomatically = InputTypeUtils.isAutoSpaceFriendlyType(mInputType)
+        shouldInsertSpacesAutomatically = InputTypeUtils.isAutoSpaceFriendlyType(mInputType)
 
-        val noMicrophone = mIsPasswordField
+        val noMicrophone = isPasswordField
                 || InputTypeUtils.isEmailVariation(variation)
                 || hasNoMicrophoneKeyOption()
                 || !RichInputMethodManager.isInitialized() // avoid crash when only using spell checker
                 || !RichInputMethodManager.getInstance().isShortcutImeReady
-        mShouldShowVoiceInputKey = !noMicrophone
+        shouldShowVoiceInputKey = !noMicrophone
 
-        mDisableGestureFloatingPreviewText = InputAttributes.inPrivateImeOptions(
+        disableGestureFloatingPreviewText = InputAttributes.inPrivateImeOptions(
                 mPackageNameForPrivateImeOptions, NO_FLOATING_GESTURE_PREVIEW, editorInfo)
 
         // autocorrect if explicitly wanted, but also for most multi-line input types (like AOSP keyboard)
         // originally, URI and email were always excluded from autocorrect (in Suggest.java), but this is
         //  and unexpected place, and if the input field explicitly requests autocorrect we should follow the flag
-        mInputTypeShouldAutoCorrect = flagAutoCorrect || (
+        inputTypeShouldAutoCorrect = flagAutoCorrect || (
                 flagMultiLine
                 && variation != InputType.TYPE_TEXT_VARIATION_WEB_EDIT_TEXT
                 && variation != InputType.TYPE_TEXT_VARIATION_URI
@@ -114,10 +114,10 @@ class InputAttributes {
                 && !flagNoSuggestions
         )
 
-        mApplicationSpecifiedCompletionOn = flagAutoComplete && isFullscreenMode
+        applicationSpecifiedCompletionOn = flagAutoComplete && isFullscreenMode
 
         // If we come here, inputClass is always TYPE_CLASS_TEXT
-        mIsGeneralTextInput = InputType.TYPE_TEXT_VARIATION_EMAIL_ADDRESS != variation
+        isGeneralTextInput = InputType.TYPE_TEXT_VARIATION_EMAIL_ADDRESS != variation
                 && InputType.TYPE_TEXT_VARIATION_PASSWORD != variation
                 && InputType.TYPE_TEXT_VARIATION_PHONETIC != variation
                 && InputType.TYPE_TEXT_VARIATION_URI != variation
@@ -127,9 +127,9 @@ class InputAttributes {
 
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O)
-            mNoLearning = (editorInfo!!.imeOptions and EditorInfo.IME_FLAG_NO_PERSONALIZED_LEARNING) != 0
+            noLearning = (editorInfo!!.imeOptions and EditorInfo.IME_FLAG_NO_PERSONALIZED_LEARNING) != 0
         else
-            mNoLearning = false
+            noLearning = false
     }
 
     fun isTypeNull(): Boolean {
@@ -162,12 +162,12 @@ class InputAttributes {
         return String.format(
                 "%s: inputType=0x%08x%s%s%s%s%s targetApp=%s\n", javaClass.simpleName,
                 mInputType,
-                (if (mInputTypeShouldAutoCorrect) " shouldAutoCorrect" else ""),
-                (if (mIsPasswordField) " password" else ""),
+                (if (inputTypeShouldAutoCorrect) " shouldAutoCorrect" else ""),
+                (if (isPasswordField) " password" else ""),
                 (if (mShouldShowSuggestions) " shouldShowSuggestions" else ""),
-                (if (mApplicationSpecifiedCompletionOn) " appSpecified" else ""),
-                (if (mShouldInsertSpacesAutomatically) " insertSpaces" else ""),
-                mTargetApplicationPackageName)
+                (if (applicationSpecifiedCompletionOn) " appSpecified" else ""),
+                (if (shouldInsertSpacesAutomatically) " insertSpaces" else ""),
+                targetApplicationPackageName)
     }
 
     companion object {

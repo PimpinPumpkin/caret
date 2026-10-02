@@ -114,7 +114,7 @@ class KeyboardLayoutSet internal constructor(private val mContext: Context, priv
         lateinit var subtype: RichInputMethodSubtype
         var settingsValues: SettingsValues? = null
         // When the device is still locked, features like showing the IME setting app need to be locked down.
-        var deviceLocked = Settings.getValues().mIsLocked
+        var deviceLocked = Settings.getValues().isLocked
         var isSpellChecker = false
         var keyboardWidth = 0
         var keyboardHeight = 0
@@ -199,7 +199,7 @@ class KeyboardLayoutSet internal constructor(private val mContext: Context, priv
                     }
                     InputType.TYPE_CLASS_PHONE -> KeyboardMode.PHONE
                     InputType.TYPE_CLASS_TEXT ->
-                        if (!Settings.getValues().mUrlEmailLayout) KeyboardMode.TEXT
+                        if (!Settings.getValues().urlEmailLayout) KeyboardMode.TEXT
                         else if (InputTypeUtils.isEmailVariation(variation)) KeyboardMode.EMAIL
                         else if (variation == InputType.TYPE_TEXT_VARIATION_URI) KeyboardMode.URL
                         else KeyboardMode.TEXT

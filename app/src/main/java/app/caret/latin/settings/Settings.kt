@@ -56,7 +56,7 @@ class Settings : SharedPreferences.OnSharedPreferenceChangeListener {
     private var mContext: Context? = null
     private lateinit var mPrefs: SharedPreferences
     private var mSettingsValues: SettingsValues? = null
-    private val mSettingsValuesLock = ReentrantLock()
+    private val settingsValuesLock = ReentrantLock()
 
     private constructor() {
         // Intentional empty constructor for singleton.
@@ -75,7 +75,7 @@ class Settings : SharedPreferences.OnSharedPreferenceChangeListener {
     override fun onSharedPreferenceChanged(prefs: SharedPreferences?, key: String?) {
         if (key != null && !reloadOnChanged(key))
             return
-        mSettingsValuesLock.lock()
+        settingsValuesLock.lock()
         try {
             val settingsValues = mSettingsValues
             if (settingsValues == null) {
@@ -88,7 +88,7 @@ class Settings : SharedPreferences.OnSharedPreferenceChangeListener {
             loadSettings(mContext!!, settingsValues.mLocale, settingsValues.mInputAttributes)
             StatsUtils.onLoadSettings(mSettingsValues)
         } finally {
-            mSettingsValuesLock.unlock()
+            settingsValuesLock.unlock()
         }
         if (PREF_ADDITIONAL_SUBTYPES == key) {
             SubtypeSettings.reloadEnabledSubtypes(mContext!!)
@@ -105,7 +105,7 @@ class Settings : SharedPreferences.OnSharedPreferenceChangeListener {
 
     fun loadSettings(context: Context, locale: Locale,
                      inputAttributes: InputAttributes) {
-        mSettingsValuesLock.lock()
+        settingsValuesLock.lock()
         mContext = context
         try {
             val prefs = mPrefs
@@ -114,7 +114,7 @@ class Settings : SharedPreferences.OnSharedPreferenceChangeListener {
                 SettingsValues(ctx, prefs, ctx.resources, inputAttributes)
             }
         } finally {
-            mSettingsValuesLock.unlock()
+            settingsValuesLock.unlock()
         }
     }
 
@@ -143,22 +143,22 @@ class Settings : SharedPreferences.OnSharedPreferenceChangeListener {
     }
 
     fun writeOneHandedModeEnabled(enabled: Boolean) {
-        val landscape = mSettingsValues!!.mDisplayOrientation == Configuration.ORIENTATION_LANDSCAPE
-        val index = findIndexOfDefaultSetting(landscape, mSettingsValues!!.mIsSplitKeyboardEnabled, FoldableUtils.isFolded)
+        val landscape = mSettingsValues!!.displayOrientation == Configuration.ORIENTATION_LANDSCAPE
+        val index = findIndexOfDefaultSetting(landscape, mSettingsValues!!.isSplitKeyboardEnabled, FoldableUtils.isFolded)
         val key = createPrefKeyForBooleanSettings(PREF_ONE_HANDED_MODE_PREFIX, index, 3)
         mPrefs.edit().putBoolean(key, enabled).apply()
     }
 
     fun writeOneHandedModeScale(scale: Float) {
-        val landscape = mSettingsValues!!.mDisplayOrientation == Configuration.ORIENTATION_LANDSCAPE
-        val index = findIndexOfDefaultSetting(landscape, mSettingsValues!!.mIsSplitKeyboardEnabled, FoldableUtils.isFolded)
+        val landscape = mSettingsValues!!.displayOrientation == Configuration.ORIENTATION_LANDSCAPE
+        val index = findIndexOfDefaultSetting(landscape, mSettingsValues!!.isSplitKeyboardEnabled, FoldableUtils.isFolded)
         val key = createPrefKeyForBooleanSettings(PREF_ONE_HANDED_SCALE_PREFIX, index, 3)
         mPrefs.edit().putFloat(key, scale).apply()
     }
 
     fun writeOneHandedModeGravity(gravity: Int) {
-        val landscape = mSettingsValues!!.mDisplayOrientation == Configuration.ORIENTATION_LANDSCAPE
-        val index = findIndexOfDefaultSetting(landscape, mSettingsValues!!.mIsSplitKeyboardEnabled, FoldableUtils.isFolded)
+        val landscape = mSettingsValues!!.displayOrientation == Configuration.ORIENTATION_LANDSCAPE
+        val index = findIndexOfDefaultSetting(landscape, mSettingsValues!!.isSplitKeyboardEnabled, FoldableUtils.isFolded)
         val key = createPrefKeyForBooleanSettings(PREF_ONE_HANDED_GRAVITY_PREFIX, index, 3)
         mPrefs.edit().putInt(key, gravity).apply()
     }
@@ -172,7 +172,7 @@ class Settings : SharedPreferences.OnSharedPreferenceChangeListener {
     }
 
     fun readShowToolbarOnly(): Boolean {
-        return mSettingsValues!!.mHasHardwareKeyboard
+        return mSettingsValues!!.hasHardwareKeyboard
             && mPrefs.getBoolean(PREF_SHOW_ONLY_TOOLBAR_WITH_HARDWARE_KEYBOARD, Defaults.PREF_SHOW_ONLY_TOOLBAR_WITH_HARDWARE_KEYBOARD)
     }
 
@@ -385,7 +385,7 @@ class Settings : SharedPreferences.OnSharedPreferenceChangeListener {
         const val PREF_SAVED_APP_SUBTYPE_PREFIX = "saved_app_subtype_"
 
         // static cache for background images to avoid potentially slow reload on every settings reload
-        private val sCachedBackgroundImages = arrayOfNulls<Drawable>(4)
+        private val cachedBackgroundImages = arrayOfNulls<Drawable>(4)
 
         private val sInstance = Settings()
 
@@ -581,15 +581,15 @@ class Settings : SharedPreferences.OnSharedPreferenceChangeListener {
         fun readUserBackgroundImage(context: Context, night: Boolean): Drawable? {
             val landscape = context.resources.configuration.orientation == Configuration.ORIENTATION_LANDSCAPE
             val index = (if (night) 1 else 0) + (if (landscape) 2 else 0)
-            if (sCachedBackgroundImages[index] != null) return sCachedBackgroundImages[index]
+            if (cachedBackgroundImages[index] != null) return cachedBackgroundImages[index]
 
             var image = getCustomBackgroundFile(context, night, landscape)
             if (!image.isFile() && landscape)
                 image = getCustomBackgroundFile(context, night, false) // fall back to portrait image for historic reasons
             if (!image.isFile()) return null
             try {
-                sCachedBackgroundImages[index] = BitmapDrawable(context.resources, BitmapFactory.decodeFile(image.absolutePath))
-                return sCachedBackgroundImages[index]
+                cachedBackgroundImages[index] = BitmapDrawable(context.resources, BitmapFactory.decodeFile(image.absolutePath))
+                return cachedBackgroundImages[index]
             } catch (e: Exception) {
                 return null
             }
@@ -602,7 +602,7 @@ class Settings : SharedPreferences.OnSharedPreferenceChangeListener {
 
         @JvmStatic
         fun clearCachedBackgroundImages() {
-            Arrays.fill(sCachedBackgroundImages, null)
+            Arrays.fill(cachedBackgroundImages, null)
         }
 
         @JvmStatic

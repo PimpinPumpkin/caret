@@ -48,7 +48,7 @@ class GestureStrokeDrawingPoints(private val drawingParams: GestureStrokeDrawing
         lastX = x
         lastY = y
         val isDownEvent = (previewEventTimes.getLength() == 0)
-        if (distanceFromLastSample >= drawingParams.mMinSamplingDistance || isDownEvent) {
+        if (distanceFromLastSample >= drawingParams.minSamplingDistance || isDownEvent) {
             distanceFromLastSample = 0.0
             return true
         }
@@ -123,16 +123,16 @@ class GestureStrokeDrawingPoints(private val drawingParams: GestureStrokeDrawing
             lastInterpolatedPreviewIndex = p1
             lastInterpolatedDrawIndex = d1
             interpolator.setInterval(p0, p1, p2, p3)
-            val m1 = Math.atan2(interpolator.mSlope1Y.toDouble(), interpolator.mSlope1X.toDouble())
-            val m2 = Math.atan2(interpolator.mSlope2Y.toDouble(), interpolator.mSlope2X.toDouble())
+            val m1 = Math.atan2(interpolator.slope1Y.toDouble(), interpolator.slope1X.toDouble())
+            val m2 = Math.atan2(interpolator.slope2Y.toDouble(), interpolator.slope2X.toDouble())
             val deltaAngle = Math.abs(angularDiff(m2, m1))
             val segmentsByAngle = Math.ceil(
-                    deltaAngle / drawingParams.mMaxInterpolationAngularThreshold).toInt()
-            val deltaDistance = Math.hypot((interpolator.mP1X - interpolator.mP2X).toDouble(),
-                    (interpolator.mP1Y - interpolator.mP2Y).toDouble())
+                    deltaAngle / drawingParams.maxInterpolationAngularThreshold).toInt()
+            val deltaDistance = Math.hypot((interpolator.p1X - interpolator.p2X).toDouble(),
+                    (interpolator.p1Y - interpolator.p2Y).toDouble())
             val segmentsByDistance = Math.ceil(deltaDistance
-                    / drawingParams.mMaxInterpolationDistanceThreshold).toInt()
-            val segments = Math.min(drawingParams.mMaxInterpolationSegments,
+                    / drawingParams.maxInterpolationDistanceThreshold).toInt()
+            val segments = Math.min(drawingParams.maxInterpolationSegments,
                     Math.max(segmentsByAngle, segmentsByDistance))
             val t1 = eventTimes.get(d1)
             val dt = pt[p2] - pt[p1]
@@ -142,8 +142,8 @@ class GestureStrokeDrawingPoints(private val drawingParams: GestureStrokeDrawing
                 val t = i / segments.toFloat()
                 interpolator.interpolate(t)
                 eventTimes.addAt(d1, (dt * t).toInt() + t1)
-                xCoords.addAt(d1, interpolator.mInterpolatedX.toInt())
-                yCoords.addAt(d1, interpolator.mInterpolatedY.toInt())
+                xCoords.addAt(d1, interpolator.interpolatedX.toInt())
+                yCoords.addAt(d1, interpolator.interpolatedY.toInt())
                 if (GestureTrailDrawingPoints.DEBUG_SHOW_POINTS) {
                     types.addAt(d1, GestureTrailDrawingPoints.POINT_TYPE_INTERPOLATED)
                 }

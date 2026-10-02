@@ -355,19 +355,19 @@ abstract class AndroidWordLevelSpellCheckerSession(private val mService: Android
     protected class SuggestionsParams(val mSuggestions: Array<String?>?, val mFlags: Int)
 
     protected class SuggestionsCache {
-        private val mUnigramSuggestionsInfoCache = LruCache<String?, SuggestionsParams?>(MAX_CACHE_SIZE)
+        private val unigramSuggestionsInfoCache = LruCache<String?, SuggestionsParams?>(MAX_CACHE_SIZE)
 
-        fun getSuggestionsFromCache(query: String?) = mUnigramSuggestionsInfoCache.get(query)
+        fun getSuggestionsFromCache(query: String?) = unigramSuggestionsInfoCache.get(query)
 
         fun putSuggestionsToCache(query: String?, suggestions: Array<String?>?, flags: Int) {
             if (suggestions == null || query.isNullOrEmpty()) {
                 return
             }
-            mUnigramSuggestionsInfoCache.put(query, SuggestionsParams(suggestions, flags))
+            unigramSuggestionsInfoCache.put(query, SuggestionsParams(suggestions, flags))
         }
 
         fun clearCache() {
-            mUnigramSuggestionsInfoCache.evictAll()
+            unigramSuggestionsInfoCache.evictAll()
         }
 
         companion object {

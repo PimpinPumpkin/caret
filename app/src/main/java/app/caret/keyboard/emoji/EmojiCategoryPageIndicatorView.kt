@@ -14,26 +14,26 @@ import android.view.View
 
 class EmojiCategoryPageIndicatorView @JvmOverloads constructor(context: Context, attrs: AttributeSet?,
         defStyle: Int = 0) : View(context, attrs, defStyle) {
-    private val mPaint = Paint()
-    private var mCategoryPageSize = 0
-    private var mCurrentCategoryPageId = 0
+    private val paint = Paint()
+    private var categoryPageSize = 0
+    private var currentCategoryPageId = 0
     private var mOffset = 0.0f
     @JvmField var mWidth = 0
 
     fun setColors(foregroundColor: Int, backgroundColor: Int) {
-        mPaint.setColor(foregroundColor)
+        paint.setColor(foregroundColor)
         setBackgroundColor(backgroundColor)
     }
 
     fun setCategoryPageId(size: Int, id: Int, offset: Float) {
-        mCategoryPageSize = size
-        mCurrentCategoryPageId = id
+        categoryPageSize = size
+        currentCategoryPageId = id
         mOffset = offset
         invalidate()
     }
 
     override fun onDraw(canvas: Canvas) {
-        if (mCategoryPageSize <= 1) {
+        if (categoryPageSize <= 1) {
             // If the category is not set yet or contains only one category,
             // just clear and return.
             canvas.drawColor(0)
@@ -42,12 +42,12 @@ class EmojiCategoryPageIndicatorView @JvmOverloads constructor(context: Context,
         val height = getHeight().toFloat()
         val leftPadding = getPaddingLeft().toFloat()
         val width = mWidth - leftPadding - getPaddingRight()
-        val unitWidth = width / mCategoryPageSize
-        val left = Math.min(unitWidth * mCurrentCategoryPageId + mOffset * unitWidth, width - unitWidth)
+        val unitWidth = width / categoryPageSize
+        val left = Math.min(unitWidth * currentCategoryPageId + mOffset * unitWidth, width - unitWidth)
         val top = 0.0f
         val right = Math.min(left + unitWidth, width)
         val bottom = height * BOTTOM_MARGIN_RATIO
-        canvas.drawRect(left + leftPadding, top, right + leftPadding, bottom, mPaint)
+        canvas.drawRect(left + leftPadding, top, right + leftPadding, bottom, paint)
     }
 
     companion object {

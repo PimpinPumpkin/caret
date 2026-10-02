@@ -39,12 +39,12 @@ object FloatingKeyboardUtils {
         extraHeight = getSuggestionStripHeight(view.resources) + getFloatingHandleHeight(view.resources)
         val (x, y) = readPosition(
             view.context,
-            windowFrame.right - windowFrame.left - Settings.getValues().mFloatingWidth,
-            windowFrame.bottom - windowFrame.top - extraHeight.toInt() - Settings.getValues().mFloatingHeight
+            windowFrame.right - windowFrame.left - Settings.getValues().floatingWidth,
+            windowFrame.bottom - windowFrame.top - extraHeight.toInt() - Settings.getValues().floatingHeight
         )
         if (DebugFlags.DEBUG_ENABLED)
-            Log.d(TAG, "place floating view at $x, $y, width ${Settings.getValues().mFloatingWidth}, height ${Settings.getValues().mFloatingHeight}")
-        ViewLayoutUtils.placeViewAt(view, x, y, Settings.getValues().mFloatingWidth, ViewGroup.LayoutParams.WRAP_CONTENT)
+            Log.d(TAG, "place floating view at $x, $y, width ${Settings.getValues().floatingWidth}, height ${Settings.getValues().floatingHeight}")
+        ViewLayoutUtils.placeViewAt(view, x, y, Settings.getValues().floatingWidth, ViewGroup.LayoutParams.WRAP_CONTENT)
         if (view.findViewById<View>(R.id.float_handle_container)?.isVisible == true)
             return
         view.findViewById<View>(R.id.float_handle_container)?.isVisible = true
@@ -90,7 +90,7 @@ object FloatingKeyboardUtils {
     }
 
     private fun getSuggestionStripHeight(resources: Resources) =
-        if (Settings.getValues().mToolbarMode == ToolbarMode.HIDDEN) 0
+        if (Settings.getValues().toolbarMode == ToolbarMode.HIDDEN) 0
         else resources.getDimension(R.dimen.config_suggestions_strip_height).toInt()
 
     @SuppressLint("ClickableViewAccessibility")
@@ -115,8 +115,8 @@ object FloatingKeyboardUtils {
                     val sv = Settings.getValues()
                     val availableWidth = windowFrame.right - windowFrame.left
                     val availableHeight = windowFrame.bottom - windowFrame.top
-                    positionX = (positionX + dx).coerceIn(0f, (availableWidth - sv.mFloatingWidth).toFloat())
-                    positionY = (positionY + dy).coerceIn(0f, availableHeight - extraHeight - sv.mFloatingHeight)
+                    positionX = (positionX + dx).coerceIn(0f, (availableWidth - sv.floatingWidth).toFloat())
+                    positionY = (positionY + dy).coerceIn(0f, availableHeight - extraHeight - sv.floatingHeight)
                     lp.leftMargin = positionX.toInt()
                     lp.topMargin = positionY.toInt()
                     savePosition(context, lp.leftMargin, lp.topMargin)
@@ -154,10 +154,10 @@ object FloatingKeyboardUtils {
                         .toInt().coerceAtLeast(200)
                     val minHeight = (minWidth * 0.75).toInt()
                     // avoid setting window outside windowFrame, view behaves strange otherwise
-                    val newWidth = (Settings.getValues().mFloatingWidth + dx / scale).toInt()
+                    val newWidth = (Settings.getValues().floatingWidth + dx / scale).toInt()
                         .coerceIn(minWidth, maxWidth)
                         .coerceAtMost(availableWidth - lp.leftMargin)
-                    val newHeight = (Settings.getValues().mFloatingHeight + dy / scale).toInt()
+                    val newHeight = (Settings.getValues().floatingHeight + dy / scale).toInt()
                         .coerceIn(minHeight, maxHeight)
                         .coerceAtMost(availableHeight - extraHeight.toInt() - lp.topMargin)
                     setFloatingSize(context, newWidth, newHeight)

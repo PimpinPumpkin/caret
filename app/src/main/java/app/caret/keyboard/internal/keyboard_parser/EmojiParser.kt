@@ -23,7 +23,7 @@ import kotlin.math.sqrt
 class EmojiParser(private val params: KeyboardParams, private val context: Context) {
 
     fun parse(): ArrayList<ArrayList<KeyParams>> {
-        val emojiFileName = getEmojiFileName(params.mId.element)
+        val emojiFileName = getEmojiFileName(params.id.element)
         val emojiLines = if (emojiFileName == null) {
             listOf( // special template keys for recents category
                 StringUtils.newSingleCodePointString(Constants.RECENTS_TEMPLATE_KEY_CODE_0),
@@ -32,7 +32,7 @@ class EmojiParser(private val params: KeyboardParams, private val context: Conte
         } else {
             loadEmojiFile(emojiFileName, context)
         }
-        if (params.mId.element == KeyboardElement.EMOJI_PEOPLE) {
+        if (params.id.element == KeyboardElement.EMOJI_PEOPLE) {
             loadEmojiDefaultVersionsAndPopupSpecs(context, emojiLines)
             return parseEmojis(emojiLines.map { line -> getEmojiDefaultVersion(line.splitOnWhitespace().first()) })
         }
@@ -41,8 +41,8 @@ class EmojiParser(private val params: KeyboardParams, private val context: Conte
 
     private fun parseEmojis(emojis: List<String>): ArrayList<ArrayList<KeyParams>> {
         val row = ArrayList<KeyParams>(emojis.size)
-        var currentX = params.mLeftPadding.toFloat()
-        val currentY = params.mTopPadding.toFloat() // no need to ever change, assignment to rows into rows is done in DynamicGridKeyboard
+        var currentX = params.leftPadding.toFloat()
+        val currentY = params.topPadding.toFloat() // no need to ever change, assignment to rows into rows is done in DynamicGridKeyboard
 
         val (keyWidth, keyHeight) = getEmojiKeyDimensions(params, context)
 
@@ -50,9 +50,9 @@ class EmojiParser(private val params: KeyboardParams, private val context: Conte
             val keyParams = parseEmojiKeyNew(emoji) ?: return@forEach
             keyParams.xPos = currentX
             keyParams.yPos = currentY
-            keyParams.mAbsoluteWidth = keyWidth
-            keyParams.mAbsoluteHeight = keyHeight
-            currentX += keyParams.mAbsoluteWidth
+            keyParams.absoluteWidth = keyWidth
+            keyParams.absoluteHeight = keyHeight
+            currentX += keyParams.absoluteWidth
             row.add(keyParams)
         }
         return arrayListOf(row)
@@ -75,20 +75,20 @@ fun getEmojiKeyDimensions(params: KeyboardParams, context: Context): Pair<Float,
     // determine key width for default settings (no number row, no one-handed mode, 100% height and bottom padding scale)
     // this is a bit long, but ensures that emoji size stays the same, independent of these settings
     // we also ignore side padding for key width, and prefer fewer keys per row over narrower keys
-    val defaultKeyWidth = ResourceUtils.getDefaultKeyboardWidth(context) * params.mDefaultKeyWidth
-    var keyWidth = defaultKeyWidth * sqrt(Settings.getValues().mKeyboardHeightScale)
+    val defaultKeyWidth = ResourceUtils.getDefaultKeyboardWidth(context) * params.defaultKeyWidth
+    var keyWidth = defaultKeyWidth * sqrt(Settings.getValues().keyboardHeightScale)
     val defaultKeyboardHeight = ResourceUtils.getDefaultKeyboardHeight(context.resources, false)
     val defaultBottomPadding = context.resources.getFraction(
         R.fraction.config_keyboard_bottom_padding_holo, defaultKeyboardHeight, defaultKeyboardHeight
     )
-    val emojiKeyboardHeight = defaultKeyboardHeight * 0.75f + params.mVerticalGap - defaultBottomPadding -
+    val emojiKeyboardHeight = defaultKeyboardHeight * 0.75f + params.verticalGap - defaultBottomPadding -
         context.resources.getDimensionPixelSize(R.dimen.config_emoji_category_page_id_height)
     var keyHeight =
-        emojiKeyboardHeight * params.mDefaultRowHeight * Settings.getValues().mKeyboardHeightScale // still apply height scale to key
+        emojiKeyboardHeight * params.defaultRowHeight * Settings.getValues().keyboardHeightScale // still apply height scale to key
 
-    if (Settings.getValues().mEmojiKeyFit) {
-        keyWidth *= Settings.getValues().mFontSizeMultiplierEmoji
-        keyHeight *= Settings.getValues().mFontSizeMultiplierEmoji
+    if (Settings.getValues().emojiKeyFit) {
+        keyWidth *= Settings.getValues().fontSizeMultiplierEmoji
+        keyHeight *= Settings.getValues().fontSizeMultiplierEmoji
     }
     return keyWidth to keyHeight
 }

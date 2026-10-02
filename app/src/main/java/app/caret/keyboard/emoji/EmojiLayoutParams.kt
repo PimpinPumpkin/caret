@@ -25,18 +25,18 @@ internal class EmojiLayoutParams(res: Resources) {
         val defaultKeyboardHeight = ResourceUtils.getSecondaryKeyboardHeight(res, sv)
 
         val keyVerticalGap = (res.getFraction(R.fraction.config_key_vertical_gap_holo,
-            defaultKeyboardHeight, defaultKeyboardHeight) * sv.mKeyGapScale).toInt()
+            defaultKeyboardHeight, defaultKeyboardHeight) * sv.keyGapScale).toInt()
         val bottomPadding = (res.getFraction(R.fraction.config_keyboard_bottom_padding_holo,
-            defaultKeyboardHeight, defaultKeyboardHeight) * sv.mBottomPaddingScale).toInt()
+            defaultKeyboardHeight, defaultKeyboardHeight) * sv.bottomPaddingScale).toInt()
         val topPadding = res.getFraction(R.fraction.config_keyboard_top_padding_holo,
             defaultKeyboardHeight, defaultKeyboardHeight).toInt()
 
-        val rowCount = KeyboardParams.DEFAULT_KEYBOARD_ROWS + if (sv.mShowsNumberRow) 1 else 0
+        val rowCount = KeyboardParams.DEFAULT_KEYBOARD_ROWS + if (sv.showsNumberRow) 1 else 0
         bottomRowKeyboardHeight = (defaultKeyboardHeight - bottomPadding - topPadding) / rowCount - keyVerticalGap / 2
 
         val pageIdHeight = res.getDimension(R.dimen.config_emoji_category_page_id_height)
         emojiCategoryPageIdViewHeight = pageIdHeight.toInt()
-        val offset = 1.25f * res.displayMetrics.density * sv.mKeyboardHeightScale // like ClipboardLayoutParams
+        val offset = 1.25f * res.displayMetrics.density * sv.keyboardHeightScale // like ClipboardLayoutParams
         val emojiListHeight = defaultKeyboardHeight - bottomRowKeyboardHeight - bottomPadding + (offset.toInt())
         emojiListBottomMargin = 0
         emojiKeyboardHeight = emojiListHeight - emojiCategoryPageIdViewHeight - emojiListBottomMargin

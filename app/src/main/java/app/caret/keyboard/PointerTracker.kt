@@ -249,15 +249,15 @@ class PointerTracker private constructor(id: Int) : PointerTrackerQueue.Element,
         if (oldKeyboard != null) {
             // changing keyboards may change height
             // since y is measured from top of view, this change needs to be considered in some places
-            keyboardChangeOccupiedHeightDifference = newKeyboard.mOccupiedHeight - oldKeyboard.mOccupiedHeight
+            keyboardChangeOccupiedHeightDifference = newKeyboard.occupiedHeight - oldKeyboard.occupiedHeight
         }
         keyDetector = newKeyDetector
         keyboard = newKeyboard
         // Mark that keyboard layout has been changed.
         keyboardLayoutHasBeenChanged = true
-        val keyWidth = newKeyboard.mMostCommonKeyWidth
-        val keyHeight = newKeyboard.mMostCommonKeyHeight
-        batchInputArbiter.setKeyboardGeometry(keyWidth, newKeyboard.mOccupiedHeight)
+        val keyWidth = newKeyboard.mostCommonKeyWidth
+        val keyHeight = newKeyboard.mostCommonKeyHeight
+        batchInputArbiter.setKeyboardGeometry(keyWidth, newKeyboard.occupiedHeight)
         // Keep {@link #currentKey} that comes from previous keyboard. The key preview of
         // {@link #currentKey} will be dismissed by {@setReleasedKeyGraphics(Key)} via
         // {@link onMoveEventInternal(int,int,long)} or {@link #onUpEventInternal(int,int,long)}.
@@ -290,7 +290,7 @@ class PointerTracker private constructor(id: Int) : PointerTrackerQueue.Element,
         // A non-null key always comes from a keyboard that was set on this tracker.
         val kb = keyboard ?: return
         if (key.isShift()) {
-            for (shiftKey in kb.mShiftKeys) {
+            for (shiftKey in kb.shiftKeys) {
                 if (shiftKey !== key) {
                     drawingProxy.onKeyReleased(shiftKey, false)
                 }
@@ -303,7 +303,7 @@ class PointerTracker private constructor(id: Int) : PointerTrackerQueue.Element,
             if (altKey != null) {
                 drawingProxy.onKeyReleased(altKey, false)
             }
-            for (k in kb.mAltCodeKeysWhileTyping) {
+            for (k in kb.altCodeKeysWhileTyping) {
                 if (k !== key && k.getAltCode() == altCode) {
                     drawingProxy.onKeyReleased(k, false)
                 }
@@ -329,7 +329,7 @@ class PointerTracker private constructor(id: Int) : PointerTrackerQueue.Element,
         // A non-null key always comes from a keyboard that was set on this tracker.
         val kb = keyboard ?: return
         if (key.isShift()) {
-            for (shiftKey in kb.mShiftKeys) {
+            for (shiftKey in kb.shiftKeys) {
                 if (shiftKey !== key) {
                     drawingProxy.onKeyPressed(shiftKey, false)
                 }
@@ -342,7 +342,7 @@ class PointerTracker private constructor(id: Int) : PointerTrackerQueue.Element,
             if (altKey != null) {
                 drawingProxy.onKeyPressed(altKey, false)
             }
-            for (k in kb.mAltCodeKeysWhileTyping) {
+            for (k in kb.altCodeKeysWhileTyping) {
                 if (k !== key && k.getAltCode() == altCode) {
                     drawingProxy.onKeyPressed(k, false)
                 }
@@ -524,7 +524,7 @@ class PointerTracker private constructor(id: Int) : PointerTrackerQueue.Element,
         // A gesture should start only from a non-modifier key. Note that the gesture detection is
         // disabled when the key is repeating.
         val kb = keyboard
-        isDetectingGesture = (kb != null) && kb.mId.element.isAlphabet
+        isDetectingGesture = (kb != null) && kb.id.element.isAlphabet
                 && key != null && !key.isModifier() && !keySwipeAllowed && !inKeySwipe
         if (isDetectingGesture) {
             batchInputArbiter.addDownEventPoint(x, y, eventTime,
@@ -591,7 +591,7 @@ class PointerTracker private constructor(id: Int) : PointerTrackerQueue.Element,
             if (key.isModifier() && code != KeyCode.CTRL_LOCK && code != KeyCode.ALT_LOCK && code != KeyCode.FN_LOCK && code != KeyCode.META_LOCK) {
                 // A non-null key always comes from a keyboard that was set on this tracker.
                 val kb = keyboard ?: return
-                val element = kb.mId.element
+                val element = kb.id.element
                 isInSlidingKeyInput = !(code == KeyCode.SHIFT && (element == KeyboardElement.ALPHABET_SHIFT_LOCKED || element == KeyboardElement.DPAD))
             } else {
                 isInSlidingKeyInput = false
@@ -609,9 +609,9 @@ class PointerTracker private constructor(id: Int) : PointerTrackerQueue.Element,
     private fun isSwiper(code: Int): Boolean {
         val sv = Settings.getValues()
         return when (code) {
-            Constants.CODE_SPACE -> sv.mSpaceSwipeHorizontal != KeyboardActionListener.SwipeAction.NONE
-                    || sv.mSpaceSwipeVertical != KeyboardActionListener.SwipeAction.NONE
-            KeyCode.DELETE -> sv.mDeleteSwipeEnabled
+            Constants.CODE_SPACE -> sv.spaceSwipeHorizontal != KeyboardActionListener.SwipeAction.NONE
+                    || sv.spaceSwipeVertical != KeyboardActionListener.SwipeAction.NONE
+            KeyCode.DELETE -> sv.deleteSwipeEnabled
             else -> false
         }
     }
@@ -703,7 +703,7 @@ class PointerTracker private constructor(id: Int) : PointerTrackerQueue.Element,
         val kb = keyboard
         if (DEBUG_MODE && kb != null) {
             val keyDiagonal = Math.hypot(
-                    kb.mMostCommonKeyWidth.toDouble(), kb.mMostCommonKeyHeight.toDouble()).toFloat()
+                    kb.mostCommonKeyWidth.toDouble(), kb.mostCommonKeyHeight.toDouble()).toFloat()
             val radiusRatio =
                     bogusMoveEventDetector.getDistanceFromDownEvent(x, y) /
                     keyDiagonal
@@ -787,7 +787,7 @@ class PointerTracker private constructor(id: Int) : PointerTrackerQueue.Element,
 
     private fun onKeySwipe(code: Int, x: Int, y: Int, eventTime: Long) {
         val sv = Settings.getValues()
-        val fastTypingTimeout = 2 * sv.mKeyLongpressTimeout / 3
+        val fastTypingTimeout = 2 * sv.keyLongpressTimeout / 3
         // we don't want keyswipes to start immediately if the user is fast-typing,
         // see https://github.com/openboard-team/openboard/issues/411
         // delete swipe is excluded because it already has a distance threshold,
@@ -807,7 +807,7 @@ class PointerTracker private constructor(id: Int) : PointerTrackerQueue.Element,
                 if (!inVerticalSwipe) {
                     timerProxy.cancelKeyTimersOf(this)
                     inVerticalSwipe = true
-                } else if (oneShotSwipe(sv.mSpaceSwipeVertical)) return
+                } else if (oneShotSwipe(sv.spaceSwipeVertical)) return
                 if (listener.onVerticalSpaceSwipe(stepsY)) {
                     startY += stepsY * pointerStep
                 }
@@ -820,7 +820,7 @@ class PointerTracker private constructor(id: Int) : PointerTrackerQueue.Element,
                 if (!inHorizontalSwipe) {
                     timerProxy.cancelKeyTimersOf(this)
                     inHorizontalSwipe = true
-                } else if (oneShotSwipe(sv.mSpaceSwipeHorizontal)) return
+                } else if (oneShotSwipe(sv.spaceSwipeHorizontal)) return
                 if (listener.onHorizontalSpaceSwipe(stepsX)) {
                     startX += stepsX * pointerStep
                 }
@@ -1018,7 +1018,7 @@ class PointerTracker private constructor(id: Int) : PointerTrackerQueue.Element,
             return
         }
         if (code == KeyCode.LANGUAGE_SWITCH
-                || (code == Constants.CODE_SPACE && key.getPopupKeys() == null && Settings.getValues().mSpaceForLangChange)
+                || (code == Constants.CODE_SPACE && key.getPopupKeys() == null && Settings.getValues().spaceForLangChange)
         ) {
             // Long pressing the space key invokes IME switcher dialog.
             if (listener.onCustomRequest(KeyboardActionListener.CustomAction.SHOW_INPUT_METHOD_PICKER)) {
@@ -1087,7 +1087,7 @@ class PointerTracker private constructor(id: Int) : PointerTrackerQueue.Element,
         if (distanceFromKeyEdgeSquared >= keyHysteresisDistanceSquared) {
             val kb = keyboard
             if (DEBUG_MODE && kb != null) {
-                val distanceToEdgeRatio = Math.sqrt(distanceFromKeyEdgeSquared.toDouble()).toFloat() / kb.mMostCommonKeyWidth
+                val distanceToEdgeRatio = Math.sqrt(distanceFromKeyEdgeSquared.toDouble()).toFloat() / kb.mostCommonKeyWidth
                 Log.d(TAG, String.format(Locale.US, "[%d] isMajorEnoughMoveToBeOnNewKey:"
                         +" %.2f key width from key edge", pointerId, distanceToEdgeRatio))
             }
@@ -1097,7 +1097,7 @@ class PointerTracker private constructor(id: Int) : PointerTrackerQueue.Element,
                 && bogusMoveEventDetector.hasTraveledLongDistance(x, y)) {
             val kb = keyboard
             if (DEBUG_MODE && kb != null) {
-                val keyDiagonal = Math.hypot(kb.mMostCommonKeyWidth.toDouble(), kb.mMostCommonKeyHeight.toDouble()).toFloat()
+                val keyDiagonal = Math.hypot(kb.mostCommonKeyWidth.toDouble(), kb.mostCommonKeyHeight.toDouble()).toFloat()
                 val lengthFromDownRatio = bogusMoveEventDetector.getAccumulatedDistanceFromDownKey() / keyDiagonal
                 Log.d(TAG, String.format(Locale.US, "[%d] isMajorEnoughMoveToBeOnNewKey:"
                         + " %.2f key diagonal from virtual down point", pointerId, lengthFromDownRatio))
@@ -1127,8 +1127,8 @@ class PointerTracker private constructor(id: Int) : PointerTrackerQueue.Element,
             return
         }
         if (code == KeyCode.SYMBOL_ALPHA
-            && (!Settings.getValues().mLongPressSymbolsForNumpad
-                || keyboard?.mId?.element != KeyboardElement.SYMBOLS
+            && (!Settings.getValues().longPressSymbolsForNumpad
+                || keyboard?.id?.element != KeyboardElement.SYMBOLS
             )
         ) {
             return
@@ -1140,7 +1140,7 @@ class PointerTracker private constructor(id: Int) : PointerTrackerQueue.Element,
     }
 
     private fun getLongPressTimeout(code: Int): Int {
-        val longpressTimeout = Settings.getValues().mKeyLongpressTimeout
+        val longpressTimeout = Settings.getValues().keyLongpressTimeout
         return when (code) {
             Constants.CODE_SPACE, KeyCode.SHIFT, KeyCode.SYMBOL_ALPHA
                 // We use slightly longer timeout for space, shift-lock, and the numpad long-press.
@@ -1275,7 +1275,7 @@ class PointerTracker private constructor(id: Int) : PointerTrackerQueue.Element,
             gestureStrokeRecognitionParams = GestureStrokeRecognitionParams(mainKeyboardViewAttr)
             gestureStrokeDrawingParams = GestureStrokeDrawingParams(mainKeyboardViewAttr)
             typingTimeRecorder = TypingTimeRecorder(
-                    gestureStrokeRecognitionParams.mStaticTimeThresholdAfterFastTyping,
+                    gestureStrokeRecognitionParams.staticTimeThresholdAfterFastTyping,
                     params.suppressKeyPreviewAfterBatchInputDuration)
 
             val res = mainKeyboardViewAttr.getResources()
@@ -1352,7 +1352,7 @@ class PointerTracker private constructor(id: Int) : PointerTrackerQueue.Element,
                 val tracker = trackers.get(i)
                 tracker.setKeyDetectorInner(keyDetector)
             }
-            gestureEnabler.setPasswordMode(keyboard.mId.isPasswordInput)
+            gestureEnabler.setPasswordMode(keyboard.id.isPasswordInput)
         }
 
         @JvmStatic

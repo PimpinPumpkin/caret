@@ -89,7 +89,7 @@ object DictionaryFactory {
             killDictionary(file)
             return null
         }
-        val dictType = header.mIdString.split(":").first()
+        val dictType = header.idString.split(":").first()
         val readOnlyBinaryDictionary = ReadOnlyBinaryDictionary(
             file.absolutePath, 0, file.length(), false, locale, dictType
         )

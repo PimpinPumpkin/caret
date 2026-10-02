@@ -27,8 +27,8 @@ class MainKeyboardAccessibilityDelegate(
     /** The most recently set keyboard mode.  */
     private var mLastKeyboardMode: KeyboardMode? = null
     // The rectangle region to ignore hover events.
-    private val mBoundsToIgnoreHoverEvent = Rect()
-    private val mAccessibilityLongPressTimer = AccessibilityLongPressTimer(this /* callback */, mainKeyboardView.context)
+    private val boundsToIgnoreHoverEvent = Rect()
+    private val accessibilityLongPressTimer = AccessibilityLongPressTimer(this /* callback */, mainKeyboardView.context)
 
     // Since this method is called even when accessibility is off, make sure
     // to check the state before announcing anything.
@@ -47,24 +47,24 @@ class MainKeyboardAccessibilityDelegate(
             val lastKeyboard = super.keyboard
             super.keyboard = keyboard
             val lastKeyboardMode = mLastKeyboardMode
-            mLastKeyboardMode = keyboard.mId.mode
+            mLastKeyboardMode = keyboard.id.mode
             // Since this method is called even when accessibility is off, make sure
             // to check the state before announcing anything.
             if (!AccessibilityUtils.instance.isAccessibilityEnabled) {
                 return
             }
             // Announce the language name only when the language is changed.
-            if (lastKeyboard == null || keyboard.mId.subtype != lastKeyboard.mId.subtype) {
+            if (lastKeyboard == null || keyboard.id.subtype != lastKeyboard.id.subtype) {
                 announceKeyboardLanguage(keyboard)
                 return
             }
             // Announce the mode only when the mode is changed.
-            if (keyboard.mId.mode != lastKeyboardMode) {
+            if (keyboard.id.mode != lastKeyboardMode) {
                 announceKeyboardMode(keyboard)
                 return
             }
             // Announce the keyboard type only when the type is changed.
-            if (keyboard.mId.element != lastKeyboard.mId.element) {
+            if (keyboard.id.element != lastKeyboard.id.element) {
                 announceKeyboardType(keyboard, lastKeyboard)
                 return
             }
@@ -86,7 +86,7 @@ class MainKeyboardAccessibilityDelegate(
      * @param keyboard The new keyboard.
      */
     private fun announceKeyboardLanguage(keyboard: Keyboard) {
-        sendWindowStateChanged(keyboard.mId.subtype.rawSubtype.displayName())
+        sendWindowStateChanged(keyboard.id.subtype.rawSubtype.displayName())
     }
 
     /**
@@ -96,8 +96,8 @@ class MainKeyboardAccessibilityDelegate(
      * @param keyboard The new keyboard.
      */
     private fun announceKeyboardMode(keyboard: Keyboard) {
-        val context = mKeyboardView.context
-        val modeTextResId = KEYBOARD_MODE_RES_IDS[keyboard.mId.mode]
+        val context = this.keyboardView.context
+        val modeTextResId = KEYBOARD_MODE_RES_IDS[keyboard.id.mode]
         if (modeTextResId == 0 || modeTextResId == null) {
             return
         }
@@ -113,8 +113,8 @@ class MainKeyboardAccessibilityDelegate(
      * @param lastKeyboard The last keyboard.
      */
     private fun announceKeyboardType(keyboard: Keyboard, lastKeyboard: Keyboard) {
-        val lastElementId = lastKeyboard.mId.element
-        val resId = when (keyboard.mId.element) {
+        val lastElementId = lastKeyboard.id.element
+        val resId = when (keyboard.id.element) {
             KeyboardElement.ALPHABET_AUTOMATIC_SHIFTED, KeyboardElement.ALPHABET -> {
                 if (lastElementId == KeyboardElement.ALPHABET
                         || lastElementId == KeyboardElement.ALPHABET_AUTOMATIC_SHIFTED) {
@@ -154,12 +154,12 @@ class MainKeyboardAccessibilityDelegate(
         val y = key.getHitBox().centerY()
         if (DEBUG_HOVER) {
             Log.d(TAG, "performClickOn: key=" + key
-                    + " inIgnoreBounds=" + mBoundsToIgnoreHoverEvent.contains(x, y))
+                    + " inIgnoreBounds=" + boundsToIgnoreHoverEvent.contains(x, y))
         }
-        if (mBoundsToIgnoreHoverEvent.contains(x, y)) {
+        if (boundsToIgnoreHoverEvent.contains(x, y)) {
             // This hover exit event points to the key that should be ignored.
             // Clear the ignoring region to handle further hover events.
-            mBoundsToIgnoreHoverEvent.setEmpty()
+            boundsToIgnoreHoverEvent.setEmpty()
             return
         }
         super.performClickOn(key)
@@ -170,18 +170,18 @@ class MainKeyboardAccessibilityDelegate(
         val y = key.getHitBox().centerY()
         if (DEBUG_HOVER) {
             Log.d(TAG, "onHoverEnterTo: key=" + key
-                    + " inIgnoreBounds=" + mBoundsToIgnoreHoverEvent.contains(x, y))
+                    + " inIgnoreBounds=" + boundsToIgnoreHoverEvent.contains(x, y))
         }
-        mAccessibilityLongPressTimer.cancelLongPress()
-        if (mBoundsToIgnoreHoverEvent.contains(x, y)) {
+        accessibilityLongPressTimer.cancelLongPress()
+        if (boundsToIgnoreHoverEvent.contains(x, y)) {
             return
         }
         // This hover enter event points to the key that isn't in the ignoring region.
         // Further hover events should be handled.
-        mBoundsToIgnoreHoverEvent.setEmpty()
+        boundsToIgnoreHoverEvent.setEmpty()
         super.onHoverEnterTo(key)
         if (key.isLongPressEnabled()) {
-            mAccessibilityLongPressTimer.startLongPress(key)
+            accessibilityLongPressTimer.startLongPress(key)
         }
     }
 
@@ -190,9 +190,9 @@ class MainKeyboardAccessibilityDelegate(
         val y = key.getHitBox().centerY()
         if (DEBUG_HOVER) {
             Log.d(TAG, "onHoverExitFrom: key=" + key
-                    + " inIgnoreBounds=" + mBoundsToIgnoreHoverEvent.contains(x, y))
+                    + " inIgnoreBounds=" + boundsToIgnoreHoverEvent.contains(x, y))
         }
-        mAccessibilityLongPressTimer.cancelLongPress()
+        accessibilityLongPressTimer.cancelLongPress()
         super.onHoverExitFrom(key)
     }
 
@@ -206,7 +206,7 @@ class MainKeyboardAccessibilityDelegate(
         val y = key.getHitBox().centerY()
         val downEvent = MotionEvent.obtain(eventTime, eventTime, MotionEvent.ACTION_DOWN, x.toFloat(), y.toFloat(), 0)
         // Inject a fake down event to {@link PointerTracker} to handle a long press correctly.
-        tracker.processMotionEvent(downEvent, mKeyDetector)
+        tracker.processMotionEvent(downEvent, this.keyDetector)
         downEvent.recycle()
         // Invoke {@link PointerTracker#onLongPressed()} as if a long press timeout has passed.
         tracker.onLongPressed()
@@ -217,18 +217,18 @@ class MainKeyboardAccessibilityDelegate(
         if (tracker.isInOperation) {
             // This long press shows a popup keys keyboard and further hover events should be
             // handled.
-            mBoundsToIgnoreHoverEvent.setEmpty()
+            boundsToIgnoreHoverEvent.setEmpty()
             return
         }
         // This long press has handled at {@link MainKeyboardView#onLongPress(PointerTracker)}.
         // We should ignore further hover events on this key.
-        mBoundsToIgnoreHoverEvent.set(key.getHitBox())
+        boundsToIgnoreHoverEvent.set(key.getHitBox())
         if (key.hasNoPanelAutoPopupKey()) {
             // This long press has registered a code point without showing a popup keys keyboard.
             // We should talk back the code point if possible.
             val codePointOfNoPanelAutoPopupKey = key.getPopupKeys()?.get(0)?.mCode ?: return
             val text: String = KeyCodeDescriptionMapper.instance.getDescriptionForCodePoint(
-                    mKeyboardView.context, codePointOfNoPanelAutoPopupKey) ?: return
+                    this.keyboardView.context, codePointOfNoPanelAutoPopupKey) ?: return
             sendWindowStateChanged(text)
         }
     }

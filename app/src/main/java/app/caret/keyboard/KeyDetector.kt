@@ -11,7 +11,7 @@ package app.caret.keyboard
  */
 open class KeyDetector {
     private val mKeyHysteresisDistanceSquared: Int
-    private val mKeyHysteresisDistanceForSlidingModifierSquared: Int
+    private val keyHysteresisDistanceForSlidingModifierSquared: Int
 
     private var mKeyboard: Keyboard? = null
     private var mCorrectionX = 0
@@ -29,7 +29,7 @@ open class KeyDetector {
      */
     constructor(keyHysteresisDistance: Float, keyHysteresisDistanceForSlidingModifier: Float) {
         mKeyHysteresisDistanceSquared = (keyHysteresisDistance * keyHysteresisDistance).toInt()
-        mKeyHysteresisDistanceForSlidingModifierSquared = (
+        keyHysteresisDistanceForSlidingModifierSquared = (
                 keyHysteresisDistanceForSlidingModifier * keyHysteresisDistanceForSlidingModifier).toInt()
     }
 
@@ -44,7 +44,7 @@ open class KeyDetector {
 
     fun getKeyHysteresisDistanceSquared(isSlidingFromModifier: Boolean): Int {
         return if (isSlidingFromModifier)
-            mKeyHysteresisDistanceForSlidingModifierSquared else mKeyHysteresisDistanceSquared
+            keyHysteresisDistanceForSlidingModifierSquared else mKeyHysteresisDistanceSquared
     }
 
     fun getTouchX(x: Int): Int {

@@ -113,9 +113,9 @@ class ClipboardHistoryView @JvmOverloads constructor(
     private fun setupClipKey(params: KeyDrawParams) {
         clipboardAdapter.apply {
             itemBackgroundId = keyBackgroundId
-            itemTypeFace = params.mTypeface
-            itemTextColor = params.mTextColor
-            itemTextSize = params.mLabelSize.toFloat()
+            itemTypeFace = params.typeface
+            itemTextColor = params.textColor
+            itemTextSize = params.labelSize.toFloat()
         }
     }
 
@@ -156,14 +156,14 @@ class ClipboardHistoryView @JvmOverloads constructor(
         val params = KeyDrawParams()
         params.updateParams(clipboardLayoutParams.bottomRowKeyboardHeight, keyVisualAttr)
         val settings = Settings.getInstance()
-        KeyboardTypeface.customTypeface()?.let { params.mTypeface = it }
+        KeyboardTypeface.customTypeface()?.let { params.typeface = it }
         setupClipKey(params)
         setupBottomRowKeyboard(editorInfo, keyboardActionListener)
 
         placeholderView.apply {
             KeyboardTypeface.applyToTextView(this)
-            setTextColor(params.mTextColor)
-            setTextSize(TypedValue.COMPLEX_UNIT_PX, params.mLabelSize.toFloat() * 2)
+            setTextColor(params.textColor)
+            setTextSize(TypedValue.COMPLEX_UNIT_PX, params.labelSize.toFloat() * 2)
         }
         clipboardRecyclerView.apply {
             adapter = clipboardAdapter
@@ -177,10 +177,10 @@ class ClipboardHistoryView @JvmOverloads constructor(
                 null, R.styleable.Keyboard, R.attr.keyboardStyle, R.style.Keyboard)
             val leftPadding = (keyboardAttr.getFraction(R.styleable.Keyboard_keyboardLeftPadding,
                 keyboardWidth, keyboardWidth, 0f)
-                    * settings.getCurrent().mSidePaddingScale).toInt()
+                    * settings.getCurrent().sidePaddingScale).toInt()
             val rightPadding =  (keyboardAttr.getFraction(R.styleable.Keyboard_keyboardRightPadding,
                 keyboardWidth, keyboardWidth, 0f)
-                    * settings.getCurrent().mSidePaddingScale).toInt()
+                    * settings.getCurrent().sidePaddingScale).toInt()
             keyboardAttr.recycle()
             setPadding(leftPadding, paddingTop, rightPadding, paddingBottom)
         }
@@ -223,7 +223,7 @@ class ClipboardHistoryView @JvmOverloads constructor(
         if (clipContent?.filename != null) keyboardActionListener.onContent(clipContent.getContentInfo(context))
         else keyboardActionListener.onTextInput(clipContent?.text)
         keyboardActionListener.onReleaseKey(KeyCode.NOT_SPECIFIED, false)
-        if (Settings.getValues().mAlphaAfterClipHistoryEntry)
+        if (Settings.getValues().alphaAfterClipHistoryEntry)
             keyboardActionListener.onCodeInput(KeyCode.ALPHA, Constants.NOT_A_COORDINATE, Constants.NOT_A_COORDINATE, false)
     }
 

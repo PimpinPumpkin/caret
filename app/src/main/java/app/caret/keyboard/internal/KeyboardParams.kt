@@ -25,15 +25,15 @@ import java.util.SortedSet
 import java.util.TreeSet
 
 open class KeyboardParams {
-    lateinit var mId: KeyboardId
+    lateinit var id: KeyboardId
     @JvmField
-    var mThemeId = 0
+    var themeId = 0
 
     /** Total height and width of the keyboard, including the paddings and keys */
     @JvmField
-    var mOccupiedHeight = 0
+    var occupiedHeight = 0
     @JvmField
-    var mOccupiedWidth = 0
+    var occupiedWidth = 0
 
     /** Base height and width of the keyboard used to calculate rows' or keys' heights and
      *  widths
@@ -44,42 +44,42 @@ open class KeyboardParams {
     var mBaseWidth = 0
 
     @JvmField
-    var mTopPadding = 0
+    var topPadding = 0
     @JvmField
-    var mBottomPadding = 0
+    var bottomPadding = 0
     @JvmField
-    var mLeftPadding = 0
+    var leftPadding = 0
     @JvmField
-    var mRightPadding = 0
+    var rightPadding = 0
 
     @JvmField
-    var mKeyVisualAttributes: KeyVisualAttributes? = null
+    var keyVisualAttributes: KeyVisualAttributes? = null
 
     @JvmField
-    var mDefaultRowHeight = 0f
+    var defaultRowHeight = 0f
     @JvmField
-    var mDefaultKeyWidth = 0f
+    var defaultKeyWidth = 0f
     @JvmField
-    var mRelativeHorizontalGap = 0f
+    var relativeHorizontalGap = 0f
     @JvmField
-    var mRelativeVerticalGap = 0f
+    var relativeVerticalGap = 0f
     // relative values multiplied with baseHeight / baseWidth
     @JvmField
-    var mDefaultAbsoluteRowHeight = 0
+    var defaultAbsoluteRowHeight = 0
     @JvmField
-    var mDefaultAbsoluteKeyWidth = 0
+    var defaultAbsoluteKeyWidth = 0
     @JvmField
-    var mHorizontalGap = 0
+    var horizontalGap = 0
     @JvmField
-    var mVerticalGap = 0
+    var verticalGap = 0
 
     @JvmField
-    var mPopupKeysTemplate = 0
+    var popupKeysTemplate = 0
     @JvmField
-    var mMaxPopupKeysKeyboardColumn = 0
-    // popup key width is separate from mDefaultAbsoluteKeyWidth because it should not depend on alpha or number layout
+    var maxPopupKeysKeyboardColumn = 0
+    // popup key width is separate from defaultAbsoluteKeyWidth because it should not depend on alpha or number layout
     @JvmField
-    var mAbsolutePopupKeyWidth = 0
+    var absolutePopupKeyWidth = 0
 
     @JvmField
     var GRID_WIDTH = 0
@@ -88,43 +88,43 @@ open class KeyboardParams {
 
     // Keys are sorted from top-left to bottom-right order.
     @JvmField
-    val mSortedKeys: SortedSet<Key> = TreeSet(ROW_COLUMN_COMPARATOR)
+    val sortedKeys: SortedSet<Key> = TreeSet(ROW_COLUMN_COMPARATOR)
     @JvmField
-    val mShiftKeys = ArrayList<Key>()
+    val shiftKeys = ArrayList<Key>()
     @JvmField
-    val mAltCodeKeysWhileTyping = ArrayList<Key>()
+    val altCodeKeysWhileTyping = ArrayList<Key>()
     @JvmField
-    val mIconsSet = KeyboardIconsSet.instance
+    val iconsSet = KeyboardIconsSet.instance
     // todo: not good, this only works because params are currently always created for the active subtype
     @JvmField
-    val mSecondaryLocales: List<Locale> = Settings.getValues().mSecondaryLocales
+    val secondaryLocales: List<Locale> = Settings.getValues().secondaryLocales
     @JvmField
-    val mPopupKeyOrder = ArrayList<String>()
+    val popupKeyOrder = ArrayList<String>()
     @JvmField
-    val mPopupKeyHintOrder = ArrayList<String>()
+    val popupKeyHintOrder = ArrayList<String>()
 
     private val uniqueKeysCache: UniqueKeysCache
     @JvmField
-    var mAllowRedundantPopupKeys = false
-    lateinit var mLocaleKeyboardInfos: LocaleKeyboardInfos
+    var allowRedundantPopupKeys = false
+    lateinit var localeKeyboardInfos: LocaleKeyboardInfos
     @JvmField
     var setTabletExtraKeys = false
 
     @JvmField
-    var mMostCommonKeyHeight = 0
+    var mostCommonKeyHeight = 0
     @JvmField
-    var mMostCommonKeyWidth = 0
+    var mostCommonKeyWidth = 0
 
     // should be enabled for all alphabet layouts, except for specific layouts when shifted
     @JvmField
-    var mProximityCharsCorrectionEnabled = false
+    var proximityCharsCorrectionEnabled = false
 
     // only for removing redundant popup keys
     @JvmField
     var baseKeys: List<Key.KeyParams>? = null
 
     @JvmField
-    val mTouchPositionCorrection = TouchPositionCorrection()
+    val touchPositionCorrection = TouchPositionCorrection()
 
     constructor() : this(UniqueKeysCache.NO_CACHE)
 
@@ -133,8 +133,8 @@ open class KeyboardParams {
     }
 
     protected fun clearKeys() {
-        mSortedKeys.clear()
-        mShiftKeys.clear()
+        sortedKeys.clear()
+        shiftKeys.clear()
         clearHistogram()
     }
 
@@ -145,21 +145,21 @@ open class KeyboardParams {
             // Ignore zero width {@link Spacer}.
             return
         }
-        mSortedKeys.add(key)
+        sortedKeys.add(key)
         if (isSpacer) {
             return
         }
         updateHistogram(key)
         if (key.getCode() == KeyCode.SHIFT) {
-            mShiftKeys.add(key)
+            shiftKeys.add(key)
         }
         if (key.altCodeWhileTyping()) {
-            mAltCodeKeysWhileTyping.add(key)
+            altCodeKeysWhileTyping.add(key)
         }
     }
 
     fun removeRedundantPopupKeys() {
-        if (mAllowRedundantPopupKeys || baseKeys == null) {
+        if (allowRedundantPopupKeys || baseKeys == null) {
             return
         }
         val lettersOnBaseLayout =
@@ -167,11 +167,11 @@ open class KeyboardParams {
         for (key in baseKeys!!) {
             lettersOnBaseLayout.addLetter(key)
         }
-        val allKeys = ArrayList<Key>(mSortedKeys)
-        mSortedKeys.clear()
+        val allKeys = ArrayList<Key>(sortedKeys)
+        sortedKeys.clear()
         for (key in allKeys) {
             val filteredKey = Key.removeRedundantPopupKeys(key, lettersOnBaseLayout)
-            mSortedKeys.add(uniqueKeysCache.getUniqueKey(filteredKey))
+            sortedKeys.add(uniqueKeysCache.getUniqueKey(filteredKey))
         }
         baseKeys = null
     }
@@ -182,28 +182,28 @@ open class KeyboardParams {
     private val widthHistogram = SparseIntArray()
 
     private fun clearHistogram() {
-        mMostCommonKeyHeight = 0
+        mostCommonKeyHeight = 0
         maxHeightCount = 0
         heightHistogram.clear()
 
         maxWidthCount = 0
-        mMostCommonKeyWidth = 0
+        mostCommonKeyWidth = 0
         widthHistogram.clear()
     }
 
     private fun updateHistogram(key: Key) {
-        val height = key.getHeight() + mVerticalGap
+        val height = key.getHeight() + verticalGap
         val heightCount = updateHistogramCounter(heightHistogram, height)
         if (heightCount > maxHeightCount) {
             maxHeightCount = heightCount
-            mMostCommonKeyHeight = height
+            mostCommonKeyHeight = height
         }
 
-        val width = key.getWidth() + mHorizontalGap
+        val width = key.getWidth() + horizontalGap
         val widthCount = updateHistogramCounter(widthHistogram, width)
         if (widthCount > maxWidthCount) {
             maxWidthCount = widthCount
-            mMostCommonKeyWidth = width
+            mostCommonKeyWidth = width
         }
     }
 
@@ -218,67 +218,67 @@ open class KeyboardParams {
             else context.getResources().obtainAttributes(attr, R.styleable.Keyboard_Key)
         val sv = Settings.getValues()
         try {
-            val height = mId.height
-            val width = mId.width
-            mOccupiedHeight = height
-            mOccupiedWidth = width
-            mTopPadding = keyboardAttr.getFraction(
+            val height = id.height
+            val width = id.width
+            occupiedHeight = height
+            occupiedWidth = width
+            topPadding = keyboardAttr.getFraction(
                     R.styleable.Keyboard_keyboardTopPadding, height, height, 0f).toInt()
-            mBottomPadding = (keyboardAttr.getFraction(
+            bottomPadding = (keyboardAttr.getFraction(
                     R.styleable.Keyboard_keyboardBottomPadding, height, height, 0f)
-                    * sv.mBottomPaddingScale).toInt()
-            mLeftPadding = (keyboardAttr.getFraction(
+                    * sv.bottomPaddingScale).toInt()
+            leftPadding = (keyboardAttr.getFraction(
                     R.styleable.Keyboard_keyboardLeftPadding, width, width, 0f)
-                    * sv.mSidePaddingScale).toInt()
-            mRightPadding = (keyboardAttr.getFraction(
+                    * sv.sidePaddingScale).toInt()
+            rightPadding = (keyboardAttr.getFraction(
                     R.styleable.Keyboard_keyboardRightPadding, width, width, 0f)
-                    * sv.mSidePaddingScale).toInt()
+                    * sv.sidePaddingScale).toInt()
 
-            mBaseWidth = mOccupiedWidth - mLeftPadding - mRightPadding
+            mBaseWidth = occupiedWidth - leftPadding - rightPadding
             val defaultKeyWidthFactor = if (context.getResources().getInteger(R.integer.config_screen_metrics) > 2) 0.9f else 1f
             val alphaSymbolKeyWidth = keyAttr.getFraction(R.styleable.Keyboard_Key_keyWidth,
                     1, 1, defaultKeyWidthFactor / DEFAULT_KEYBOARD_COLUMNS)
-            mDefaultKeyWidth = if (mId.element.isNumberLayout) 0.17f else alphaSymbolKeyWidth
-            mDefaultAbsoluteKeyWidth = (mDefaultKeyWidth * mBaseWidth).toInt()
-            mAbsolutePopupKeyWidth = (alphaSymbolKeyWidth * mBaseWidth).toInt()
+            defaultKeyWidth = if (id.element.isNumberLayout) 0.17f else alphaSymbolKeyWidth
+            defaultAbsoluteKeyWidth = (defaultKeyWidth * mBaseWidth).toInt()
+            absolutePopupKeyWidth = (alphaSymbolKeyWidth * mBaseWidth).toInt()
 
-            mRelativeHorizontalGap = keyboardAttr.getFraction(
-                    R.styleable.Keyboard_horizontalGap, 1, 1, 0f) * sv.mKeyGapScale
-            mRelativeVerticalGap = keyboardAttr.getFraction(
-                    R.styleable.Keyboard_verticalGap, 1, 1, 0f) * sv.mKeyGapScale
-            mHorizontalGap = (mRelativeHorizontalGap * width).toInt()
-            mVerticalGap = (mRelativeVerticalGap * height).toInt()
+            relativeHorizontalGap = keyboardAttr.getFraction(
+                    R.styleable.Keyboard_horizontalGap, 1, 1, 0f) * sv.keyGapScale
+            relativeVerticalGap = keyboardAttr.getFraction(
+                    R.styleable.Keyboard_verticalGap, 1, 1, 0f) * sv.keyGapScale
+            horizontalGap = (relativeHorizontalGap * width).toInt()
+            verticalGap = (relativeVerticalGap * height).toInt()
 
-            mBaseHeight = mOccupiedHeight - mTopPadding - mBottomPadding + mVerticalGap
-            mDefaultRowHeight = ResourceUtils.getDimensionOrFraction(keyboardAttr,
+            mBaseHeight = occupiedHeight - topPadding - bottomPadding + verticalGap
+            defaultRowHeight = ResourceUtils.getDimensionOrFraction(keyboardAttr,
                     R.styleable.Keyboard_rowHeight, 1, 1f / DEFAULT_KEYBOARD_ROWS)
-            if (mDefaultRowHeight > 1) { // can be absolute size, in that case will be > 1
-                mDefaultAbsoluteRowHeight = mDefaultRowHeight.toInt()
-                mDefaultRowHeight *= -1f // make it negative when it's absolute
+            if (defaultRowHeight > 1) { // can be absolute size, in that case will be > 1
+                defaultAbsoluteRowHeight = defaultRowHeight.toInt()
+                defaultRowHeight *= -1f // make it negative when it's absolute
             } else {
-                mDefaultAbsoluteRowHeight = (mDefaultRowHeight * mBaseHeight).toInt()
+                defaultAbsoluteRowHeight = (defaultRowHeight * mBaseHeight).toInt()
             }
 
-            mKeyVisualAttributes = KeyVisualAttributes.newInstance(keyAttr)
+            keyVisualAttributes = KeyVisualAttributes.newInstance(keyAttr)
 
-            mPopupKeysTemplate = keyboardAttr.getResourceId(R.styleable.Keyboard_popupKeysTemplate, 0)
-            mMaxPopupKeysKeyboardColumn = keyAttr.getInt(R.styleable.Keyboard_Key_maxPopupKeysColumn, 5)
+            popupKeysTemplate = keyboardAttr.getResourceId(R.styleable.Keyboard_popupKeysTemplate, 0)
+            maxPopupKeysKeyboardColumn = keyAttr.getInt(R.styleable.Keyboard_Key_maxPopupKeysColumn, 5)
 
-            mThemeId = keyboardAttr.getInt(R.styleable.Keyboard_themeId, 0)
-            mIconsSet.loadIcons(context)
+            themeId = keyboardAttr.getInt(R.styleable.Keyboard_themeId, 0)
+            iconsSet.loadIcons(context)
 
             // touchPositionResId currently is 0 for popups, and touch_position_correction_data_holo for others
             val touchPositionResId = keyboardAttr.getResourceId(R.styleable.Keyboard_touchPositionCorrectionData, 0)
             if (touchPositionResId != 0) {
-                val actualId = if (mId.element.isAlphabet) touchPositionResId else R.array.touch_position_correction_data_default
+                val actualId = if (id.element.isAlphabet) touchPositionResId else R.array.touch_position_correction_data_default
                 val data = context.getResources().getStringArray(actualId)
-                mTouchPositionCorrection.load(data)
+                touchPositionCorrection.load(data)
             }
         } finally {
             keyAttr.recycle()
             keyboardAttr.recycle()
         }
-        setTabletExtraKeys = Settings.getInstance().isTablet() && !mId.subtype.isCustom
+        setTabletExtraKeys = Settings.getInstance().isTablet() && !id.subtype.isCustom
     }
 
     companion object {

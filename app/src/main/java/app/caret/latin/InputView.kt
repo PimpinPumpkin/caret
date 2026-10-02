@@ -101,7 +101,7 @@ class InputView(context: Context, attrs: AttributeSet?) : FrameLayout(context, a
         requestApplyInsets()
 
         // need to update the floating keyboard position after applying insets
-        if (Settings.getValues().mIsFloatingKeyboard)
+        if (Settings.getValues().isFloatingKeyboard)
             FloatingKeyboardUtils.setFloating(this)
     }
 
@@ -118,20 +118,20 @@ class InputView(context: Context, attrs: AttributeSet?) : FrameLayout(context, a
         protected val mSenderView: SenderView = senderView
         protected val mReceiverView: ReceiverView = receiverView
 
-        protected val mEventSendingRect = Rect()
-        protected val mEventReceivingRect = Rect()
+        protected val eventSendingRect = Rect()
+        protected val eventReceivingRect = Rect()
 
         // Return true if a touch event of global coordinate x, y needs to be forwarded.
         protected abstract fun needsToForward(x: Int, y: Int): Boolean
 
         // Translate global x-coordinate to <code>ReceiverView</code> local coordinate.
         protected fun translateX(x: Int): Int {
-            return x - mEventReceivingRect.left
+            return x - eventReceivingRect.left
         }
 
         // Translate global y-coordinate to <code>ReceiverView</code> local coordinate.
         protected open fun translateY(y: Int): Int {
-            return y - mEventReceivingRect.top
+            return y - eventReceivingRect.top
         }
 
         /**
@@ -149,8 +149,8 @@ class InputView(context: Context, attrs: AttributeSet?) : FrameLayout(context, a
                     mReceiverView.visibility != View.VISIBLE) {
                 return false
             }
-            mSenderView.getGlobalVisibleRect(mEventSendingRect)
-            if (!mEventSendingRect.contains(x, y)) {
+            mSenderView.getGlobalVisibleRect(eventSendingRect)
+            if (!eventSendingRect.contains(x, y)) {
                 return false
             }
 
@@ -166,7 +166,7 @@ class InputView(context: Context, attrs: AttributeSet?) : FrameLayout(context, a
         // Returns true if a {@link MotionEvent} is forwarded to <code>ReceiverView</code>.
         // Otherwise returns false.
         fun onTouchEvent(x: Int, y: Int, me: MotionEvent): Boolean {
-            mReceiverView.getGlobalVisibleRect(mEventReceivingRect)
+            mReceiverView.getGlobalVisibleRect(eventReceivingRect)
             // Translate global coordinates to <code>ReceiverView</code> local coordinates.
             me.setLocation(translateX(x).toFloat(), translateY(y).toFloat())
             mReceiverView.dispatchTouchEvent(me)
@@ -189,7 +189,7 @@ class InputView(context: Context, attrs: AttributeSet?) : FrameLayout(context, a
         }
 
         private fun isInKeyboardTopPadding(y: Int): Boolean {
-            return y < mEventSendingRect.top + mKeyboardTopPadding
+            return y < eventSendingRect.top + mKeyboardTopPadding
         }
 
         override fun needsToForward(x: Int, y: Int): Boolean {
@@ -205,7 +205,7 @@ class InputView(context: Context, attrs: AttributeSet?) : FrameLayout(context, a
             val translatedY = super.translateY(y)
             if (isInKeyboardTopPadding(y)) {
                 // The forwarded event should have coordinates that are inside of the target.
-                return Math.min(translatedY, mEventReceivingRect.height() - 1)
+                return Math.min(translatedY, eventReceivingRect.height() - 1)
             }
             return translatedY
         }
@@ -222,7 +222,7 @@ class InputView(context: Context, attrs: AttributeSet?) : FrameLayout(context, a
             : MotionEventForwarder<View, SuggestionStripView>(mainKeyboardView.rootView, suggestionStripView) {
 
         override fun needsToForward(x: Int, y: Int): Boolean {
-            return mReceiverView.isShowingMoreSuggestionPanel && mEventSendingRect.contains(x, y)
+            return mReceiverView.isShowingMoreSuggestionPanel && eventSendingRect.contains(x, y)
         }
 
         override fun onForwardingEvent(me: MotionEvent) {

@@ -18,7 +18,7 @@ import java.util.TreeSet
  */
 class SuggestionResults : TreeSet<SuggestedWordInfo> {
     @JvmField
-    val mRawSuggestions: ArrayList<SuggestedWordInfo>?
+    val rawSuggestions: ArrayList<SuggestedWordInfo>?
     // TODO: Instead of a boolean , we may want to include the context of this suggestion results,
     // such as {@link NgramContext}.
     @JvmField
@@ -29,7 +29,7 @@ class SuggestionResults : TreeSet<SuggestedWordInfo> {
 
     constructor(capacity: Int, isBeginningOfSentence: Boolean,
             firstSuggestionExceedsConfidenceThreshold: Boolean) :
-        this(sSuggestedWordInfoComparator, capacity, isBeginningOfSentence,
+        this(suggestedWordInfoComparator, capacity, isBeginningOfSentence,
                 firstSuggestionExceedsConfidenceThreshold)
 
     private constructor(comparator: Comparator<SuggestedWordInfo>, capacity: Int,
@@ -37,9 +37,9 @@ class SuggestionResults : TreeSet<SuggestedWordInfo> {
             firstSuggestionExceedsConfidenceThreshold: Boolean) : super(comparator) {
         mCapacity = capacity
         if (ProductionFlags.INCLUDE_RAW_SUGGESTIONS) {
-            mRawSuggestions = ArrayList()
+            rawSuggestions = ArrayList()
         } else {
-            mRawSuggestions = null
+            rawSuggestions = null
         }
         mIsBeginningOfSentence = isBeginningOfSentence
         mFirstSuggestionExceedsConfidenceThreshold = firstSuggestionExceedsConfidenceThreshold
@@ -67,14 +67,14 @@ class SuggestionResults : TreeSet<SuggestedWordInfo> {
         override fun compare(o1: SuggestedWordInfo, o2: SuggestedWordInfo): Int {
             if (o1.mScore > o2.mScore) return -1
             if (o1.mScore < o2.mScore) return 1
-            if (o1.mCodePointCount < o2.mCodePointCount) return -1
-            if (o1.mCodePointCount > o2.mCodePointCount) return 1
+            if (o1.codePointCount < o2.codePointCount) return -1
+            if (o1.codePointCount > o2.codePointCount) return 1
             return o1.mWord.compareTo(o2.mWord)
         }
     }
 
     companion object {
-        private val sSuggestedWordInfoComparator =
+        private val suggestedWordInfoComparator =
                 SuggestedWordInfoComparator()
     }
 }

@@ -117,8 +117,8 @@ class KeyboardWrapperView @JvmOverloads constructor(
                     val changePercent = 2 * sign * (x - motionEvent.rawX) / context.resources.displayMetrics.density
                     if (abs(changePercent) < 1) return@setOnTouchListener true
                     x = motionEvent.rawX
-                    val landscape = Settings.getValues().mDisplayOrientation == Configuration.ORIENTATION_LANDSCAPE
-                    val split = Settings.getValues().mIsSplitKeyboardEnabled
+                    val landscape = Settings.getValues().displayOrientation == Configuration.ORIENTATION_LANDSCAPE
+                    val split = Settings.getValues().isSplitKeyboardEnabled
                     val oldScale = Settings.readOneHandedModeScale(context.prefs(), landscape, split, FoldableUtils.isFolded)
                     val newScale = (oldScale + changePercent / 100f).coerceAtMost(2.5f).coerceAtLeast(0.5f)
                     if (newScale == oldScale) return@setOnTouchListener true
@@ -187,7 +187,7 @@ class KeyboardWrapperView @JvmOverloads constructor(
                 keyboardView.measuredHeight
         )
 
-        val scale = Settings.getValues().mKeyboardHeightScale
+        val scale = Settings.getValues().keyboardHeightScale
         // scale one-handed mode button height if keyboard height scale is < 80%
         val heightScale = if (scale < 0.8f) scale + 0.2f else 1f
         val buttonsLeft = if (isLeftGravity) keyboardView.measuredWidth else 0

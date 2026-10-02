@@ -20,7 +20,7 @@ import app.caret.keyboard.PointerTracker
 abstract class AbstractDrawingPreview {
     private var mDrawingView: View? = null
     private var mPreviewEnabled = false
-    private var mHasValidGeometry = false
+    private var hasValidGeometry = false
 
     fun setDrawingView(drawingView: DrawingPreviewPlacerView) {
         mDrawingView = drawingView
@@ -35,7 +35,7 @@ abstract class AbstractDrawingPreview {
     }
 
     protected fun isPreviewEnabled(): Boolean {
-        return mPreviewEnabled && mHasValidGeometry
+        return mPreviewEnabled && hasValidGeometry
     }
 
     fun setPreviewEnabled(enabled: Boolean) {
@@ -53,7 +53,7 @@ abstract class AbstractDrawingPreview {
      * @param height the height of {@link MainKeyboardView}.
      */
     open fun setKeyboardViewGeometry(originCoords: IntArray, width: Int, height: Int) {
-        mHasValidGeometry = (width > 0 && height > 0)
+        hasValidGeometry = (width > 0 && height > 0)
     }
 
     abstract fun onDeallocateMemory()

@@ -15,11 +15,11 @@ import java.util.HashMap
 object KeyboardCodesSet {
     const val PREFIX_CODE = "!code/"
 
-    private val sNameToIdMap = HashMap<String?, Int>()
+    private val nameToIdMap = HashMap<String?, Int>()
 
     @JvmStatic
     fun getCode(name: String?): Int {
-        val id = sNameToIdMap[name]
+        val id = nameToIdMap[name]
         if (id == null) {
             try {
                 return Integer.parseInt(name).checkAndConvertCode(true) // need to take care about longPress check in some other place
@@ -86,7 +86,7 @@ object KeyboardCodesSet {
 
     init {
         for (i in 0 until ID_TO_NAME.size) {
-            sNameToIdMap.put(ID_TO_NAME[i], i)
+            nameToIdMap.put(ID_TO_NAME[i], i)
         }
     }
 }

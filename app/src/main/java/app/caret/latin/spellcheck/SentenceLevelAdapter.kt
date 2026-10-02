@@ -35,14 +35,14 @@ class SentenceLevelAdapter(res: Resources, locale: Locale) {
      */
     class SentenceWordItem(ti: TextInfo, start: Int, end: Int) {
         @JvmField
-        val mTextInfo: TextInfo
+        val textInfo: TextInfo
         @JvmField
         val mStart: Int
         @JvmField
         val mLength: Int
 
         init {
-            mTextInfo = ti
+            textInfo = ti
             mStart = start
             mLength = end - start
         }
@@ -57,20 +57,20 @@ class SentenceLevelAdapter(res: Resources, locale: Locale) {
         @JvmField
         val mItems: ArrayList<SentenceWordItem>
         @JvmField
-        val mSize: Int
+        val size: Int
 
         init {
             mOriginalTextInfo = ti
             mItems = items
-            mSize = items.size
+            size = items.size
         }
     }
 
     private class WordIterator(res: Resources, locale: Locale) {
-        private val mSpacingAndPunctuations: SpacingAndPunctuations
+        private val spacingAndPunctuations: SpacingAndPunctuations
 
         init {
-            mSpacingAndPunctuations = runInLocale(res, locale) { r -> SpacingAndPunctuations(r, false) }
+            spacingAndPunctuations = runInLocale(res, locale) { r -> SpacingAndPunctuations(r, false) }
         }
 
         fun getEndOfWord(sequence: CharSequence, fromIndex: Int): Int {
@@ -78,14 +78,14 @@ class SentenceLevelAdapter(res: Resources, locale: Locale) {
             var index = if (fromIndex < 0) 0 else Character.offsetByCodePoints(sequence, fromIndex, 1)
             while (index < length) {
                 val codePoint = Character.codePointAt(sequence, index)
-                if (mSpacingAndPunctuations.isWordSeparator(codePoint)) {
+                if (spacingAndPunctuations.isWordSeparator(codePoint)) {
                     // If it's a period, we want to stop here only if it's followed by another
                     // word separator. In all other cases we stop here.
                     if (Constants.CODE_PERIOD == codePoint) {
                         val indexOfNextCodePoint =
                                 index + Character.charCount(Constants.CODE_PERIOD)
                         if (indexOfNextCodePoint < length
-                                && mSpacingAndPunctuations.isWordSeparator(
+                                && spacingAndPunctuations.isWordSeparator(
                                         Character.codePointAt(sequence, indexOfNextCodePoint))) {
                             return index
                         }
@@ -106,7 +106,7 @@ class SentenceLevelAdapter(res: Resources, locale: Locale) {
             var index = if (fromIndex < 0) 0 else Character.offsetByCodePoints(sequence, fromIndex, 1)
             while (index < length) {
                 val codePoint = Character.codePointAt(sequence, index)
-                if (!mSpacingAndPunctuations.isWordSeparator(codePoint)) {
+                if (!spacingAndPunctuations.isWordSeparator(codePoint)) {
                     return index
                 }
                 index += Character.charCount(codePoint)
@@ -166,7 +166,7 @@ class SentenceLevelAdapter(res: Resources, locale: Locale) {
             val originalSequence =
                     originalTextInfoParams.mOriginalTextInfo.sequence
 
-            val querySize = originalTextInfoParams.mSize
+            val querySize = originalTextInfoParams.size
             val offsets = IntArray(querySize)
             val lengths = IntArray(querySize)
             val reconstructedSuggestions = arrayOfNulls<SuggestionsInfo>(querySize)
@@ -174,7 +174,7 @@ class SentenceLevelAdapter(res: Resources, locale: Locale) {
                 val item = originalTextInfoParams.mItems[i]
                 var result: SuggestionsInfo? = null
                 for (cur in results) {
-                    if (cur != null && cur.sequence == item.mTextInfo.sequence) {
+                    if (cur != null && cur.sequence == item.textInfo.sequence) {
                         result = cur
                         result.setCookieAndSequence(originalCookie, originalSequence)
                         break

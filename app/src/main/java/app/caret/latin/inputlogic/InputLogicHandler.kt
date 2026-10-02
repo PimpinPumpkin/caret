@@ -19,7 +19,7 @@ import app.caret.latin.common.InputPointers
  * A helper to manage deferred tasks for the input logic.
  */
 class InputLogicHandler(latinIMEHandler: LatinIME.UIHandler, inputLogic: InputLogic) : Handler.Callback {
-    val mNonUIThreadHandler: Handler
+    val nonUIThreadHandler: Handler
     val mLatinIMEHandler: LatinIME.UIHandler
     val mInputLogic: InputLogic
     private val lock = Any()
@@ -29,13 +29,13 @@ class InputLogicHandler(latinIMEHandler: LatinIME.UIHandler, inputLogic: InputLo
         val handlerThread = HandlerThread(
                 InputLogicHandler::class.java.simpleName)
         handlerThread.start()
-        mNonUIThreadHandler = Handler(handlerThread.looper, this)
+        nonUIThreadHandler = Handler(handlerThread.looper, this)
         mLatinIMEHandler = latinIMEHandler
         mInputLogic = inputLogic
     }
 
     fun reset() {
-        mNonUIThreadHandler.removeCallbacksAndMessages(null)
+        nonUIThreadHandler.removeCallbacksAndMessages(null)
     }
 
     /**
@@ -160,7 +160,7 @@ class InputLogicHandler(latinIMEHandler: LatinIME.UIHandler, inputLogic: InputLo
     }
 
     fun getSuggestedWords(callback: Runnable) {
-        mNonUIThreadHandler.obtainMessage(MSG_GET_SUGGESTED_WORDS, callback).sendToTarget()
+        nonUIThreadHandler.obtainMessage(MSG_GET_SUGGESTED_WORDS, callback).sendToTarget()
     }
 
     companion object {

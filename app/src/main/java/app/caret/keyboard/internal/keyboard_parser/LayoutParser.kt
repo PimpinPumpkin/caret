@@ -35,10 +35,10 @@ object LayoutParser {
     fun clearCache() = layoutCache.clear()
 
     fun parseLayout(layoutType: LayoutType, params: KeyboardParams, context: Context): MutableList<MutableList<KeyData>> {
-        if (layoutType == LayoutType.FUNCTIONAL && !params.mId.element.takesFunctionalKeys)
+        if (layoutType == LayoutType.FUNCTIONAL && !params.id.element.takesFunctionalKeys)
             return mutableListOf(mutableListOf()) // no functional keys
-        val layoutName = if (layoutType == LayoutType.MAIN) params.mId.subtype.mainLayoutName
-            else params.mId.subtype.layouts[layoutType] ?: Settings.readDefaultLayoutName(layoutType, context.prefs())
+        val layoutName = if (layoutType == LayoutType.MAIN) params.id.subtype.mainLayoutName
+            else params.id.subtype.layouts[layoutType] ?: Settings.readDefaultLayoutName(layoutType, context.prefs())
         return layoutCache.getOrPut(layoutType.name + layoutName) {
             createCacheLambda(layoutType, layoutName, context)
         }(params).apply {
@@ -95,8 +95,8 @@ object LayoutParser {
         return { params ->
             simpleKeyData.mapIndexedTo(mutableListOf()) { i, row ->
                 val newRow = row.toMutableList()
-                if (params.mId.element.isAlphabet && layoutName.endsWith("+"))
-                    params.mLocaleKeyboardInfos.getExtraKeys(i+1)?.let { newRow.addAll(it) }
+                if (params.id.element.isAlphabet && layoutName.endsWith("+"))
+                    params.localeKeyboardInfos.getExtraKeys(i+1)?.let { newRow.addAll(it) }
                 newRow
             }
         }

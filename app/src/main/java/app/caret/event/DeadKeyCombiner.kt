@@ -52,20 +52,20 @@ class DeadKeyCombiner : Combiner {
         /**
          * Maps Unicode combining diacritical to display-form dead key.
          */
-        val sCombiningToAccent = SparseIntArray()
-        val sAccentToCombining = SparseIntArray()
+        val combiningToAccent = SparseIntArray()
+        val accentToCombining = SparseIntArray()
         private fun addCombining(combining: Int, accent: Int) {
-            sCombiningToAccent.append(combining, accent)
-            sAccentToCombining.append(accent, combining)
+            combiningToAccent.append(combining, accent)
+            accentToCombining.append(accent, combining)
         }
 
         // Caution! This may only contain chars, not supplementary code points. It's unlikely
         // it will ever need to, but if it does we'll have to change this
-        private val sNonstandardDeadCombinations = SparseIntArray()
+        private val nonstandardDeadCombinations = SparseIntArray()
 
         private fun addNonStandardDeadCombination(deadCodePoint: Int, spacingCodePoint: Int, result: Int) {
             val combination = deadCodePoint shl 16 or spacingCodePoint
-            sNonstandardDeadCombinations.put(combination, result)
+            nonstandardDeadCombinations.put(combination, result)
         }
 
         const val NOT_A_CHAR = 0
@@ -75,7 +75,7 @@ class DeadKeyCombiner : Combiner {
                                       spacingCodePoint: Int): Char {
             val combination = spacingCodePoint or
                     (deadCodePoint shl BITS_TO_SHIFT_DEAD_CODE_POINT_FOR_NON_STANDARD_COMBINATION)
-            return sNonstandardDeadCombinations[combination, NOT_A_CHAR].toChar()
+            return nonstandardDeadCombinations[combination, NOT_A_CHAR].toChar()
         }
 
         init { // U+0300: COMBINING GRAVE ACCENT
@@ -144,18 +144,18 @@ class DeadKeyCombiner : Combiner {
             //addCombining('\u0345', ACCENT_YPOGEGRAMMENI);
             // One-way mappings to equivalent preferred accents.
             // U+0340: COMBINING GRAVE TONE MARK
-            sCombiningToAccent.append('\u0340'.code, ACCENT_GRAVE)
+            combiningToAccent.append('\u0340'.code, ACCENT_GRAVE)
             // U+0341: COMBINING ACUTE TONE MARK
-            sCombiningToAccent.append('\u0341'.code, ACCENT_ACUTE)
+            combiningToAccent.append('\u0341'.code, ACCENT_ACUTE)
             // U+0343: COMBINING GREEK KORONIS
-            sCombiningToAccent.append('\u0343'.code, ACCENT_COMMA_ABOVE)
+            combiningToAccent.append('\u0343'.code, ACCENT_COMMA_ABOVE)
             // One-way legacy mappings to preserve compatibility with older applications.
             // U+0300: COMBINING GRAVE ACCENT
-            sAccentToCombining.append(ACCENT_GRAVE_LEGACY, '\u0300'.code)
+            accentToCombining.append(ACCENT_GRAVE_LEGACY, '\u0300'.code)
             // U+0302: COMBINING CIRCUMFLEX ACCENT
-            sAccentToCombining.append(ACCENT_CIRCUMFLEX_LEGACY, '\u0302'.code)
+            accentToCombining.append(ACCENT_CIRCUMFLEX_LEGACY, '\u0302'.code)
             // U+0303: COMBINING TILDE
-            sAccentToCombining.append(ACCENT_TILDE_LEGACY, '\u0303'.code)
+            accentToCombining.append(ACCENT_TILDE_LEGACY, '\u0303'.code)
         }
 
         init { // Non-standard decompositions.
@@ -192,12 +192,12 @@ class DeadKeyCombiner : Combiner {
     }
 
     // TODO: make this a list of events instead
-    val mDeadSequence = StringBuilder()
+    val deadSequence = StringBuilder()
 
     override fun processEvent(previousEvents: ArrayList<Event>?, event: Event): Event {
-        if (TextUtils.isEmpty(mDeadSequence)) { // No dead char is currently being tracked: this is the most common case.
+        if (TextUtils.isEmpty(deadSequence)) { // No dead char is currently being tracked: this is the most common case.
             if (event.isDead) { // The event was a dead key. Start tracking it.
-                mDeadSequence.appendCodePoint(event.codePoint)
+                deadSequence.appendCodePoint(event.codePoint)
                 return Event.createConsumedEvent(event)
             }
             // Regular keystroke when not keeping track of a dead key. Simply said, there are
@@ -206,51 +206,51 @@ class DeadKeyCombiner : Combiner {
             return event
         }
         if (Character.isWhitespace(event.codePoint)
-                || event.codePoint == mDeadSequence.codePointBefore(mDeadSequence.length)) { // When whitespace or twice the same dead key, we should output the dead sequence as is.
-            val resultEvent = createEventChainFromSequence(mDeadSequence.toString(), event)
-            mDeadSequence.setLength(0)
+                || event.codePoint == deadSequence.codePointBefore(deadSequence.length)) { // When whitespace or twice the same dead key, we should output the dead sequence as is.
+            val resultEvent = createEventChainFromSequence(deadSequence.toString(), event)
+            deadSequence.setLength(0)
             return resultEvent
         }
         if (event.isFunctionalKeyEvent) {
             if (KeyCode.DELETE == event.keyCode) { // Remove the last code point
-                val trimIndex = mDeadSequence.length - Character.charCount(
-                        mDeadSequence.codePointBefore(mDeadSequence.length))
-                mDeadSequence.setLength(trimIndex)
+                val trimIndex = deadSequence.length - Character.charCount(
+                        deadSequence.codePointBefore(deadSequence.length))
+                deadSequence.setLength(trimIndex)
                 return Event.createConsumedEvent(event)
             }
             return event
         }
         if (event.isDead) {
-            mDeadSequence.appendCodePoint(event.codePoint)
+            deadSequence.appendCodePoint(event.codePoint)
             return Event.createConsumedEvent(event)
         }
         // Combine normally.
         val sb = StringBuilder()
         sb.appendCodePoint(event.codePoint)
         var codePointIndex = 0
-        while (codePointIndex < mDeadSequence.length) {
-            val deadCodePoint = mDeadSequence.codePointAt(codePointIndex)
+        while (codePointIndex < deadSequence.length) {
+            val deadCodePoint = deadSequence.codePointAt(codePointIndex)
             val replacementSpacingChar = Data.getNonstandardCombination(deadCodePoint, event.codePoint)
             if (Data.NOT_A_CHAR != replacementSpacingChar.code) {
                 sb.setCharAt(0, replacementSpacingChar)
             } else {
-                val combining = Data.sAccentToCombining[deadCodePoint]
+                val combining = Data.accentToCombining[deadCodePoint]
                 sb.appendCodePoint(if (0 == combining) deadCodePoint else combining)
             }
             codePointIndex += if (Character.isSupplementaryCodePoint(deadCodePoint)) 2 else 1
         }
         val normalizedString = Normalizer.normalize(sb, Normalizer.Form.NFC)
         val resultEvent = createEventChainFromSequence(normalizedString, event)
-        mDeadSequence.setLength(0)
+        deadSequence.setLength(0)
         return resultEvent
     }
 
     override fun reset() {
-        mDeadSequence.setLength(0)
+        deadSequence.setLength(0)
     }
 
     override val combiningStateFeedback: CharSequence
-        get() = mDeadSequence
+        get() = deadSequence
 
     companion object {
         private fun createEventChainFromSequence(text: CharSequence, originalEvent: Event): Event {

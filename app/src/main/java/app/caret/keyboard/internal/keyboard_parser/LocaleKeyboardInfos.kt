@@ -196,8 +196,8 @@ class LocaleKeyboardInfos(dataStream: InputStream?, locale: Locale) {
                 ?: LocaleKeyboardInfos(getStreamForLocale(locale, context), locale)
 
         fun addLocaleKeyTextsToParams(context: Context, params: KeyboardParams, popupKeysSetting: String) {
-            val locales = params.mSecondaryLocales + params.mId.locale
-            params.mLocaleKeyboardInfos = localeKeyboardInfosCache.getOrPut(locales.joinToString { it.toString() } + Settings.getValues().mShowMorePopupKeys) {
+            val locales = params.secondaryLocales + params.id.locale
+            params.localeKeyboardInfos = localeKeyboardInfosCache.getOrPut(locales.joinToString { it.toString() } + Settings.getValues().showMorePopupKeys) {
                 createLocaleKeyTexts(context, params, popupKeysSetting)
             }
         }
@@ -206,9 +206,9 @@ class LocaleKeyboardInfos(dataStream: InputStream?, locale: Locale) {
             getStreamForLocale(locale, context)?.bufferedReader()?.readLines()?.any { it == "[number_row]" } == true
 
         private fun createLocaleKeyTexts(context: Context, params: KeyboardParams, popupKeysSetting: String): LocaleKeyboardInfos {
-            val lkt = LocaleKeyboardInfos(getStreamForLocale(params.mId.locale, context), params.mId.locale)
-            params.mSecondaryLocales.forEach { locale ->
-                if (locale == params.mId.locale) return@forEach
+            val lkt = LocaleKeyboardInfos(getStreamForLocale(params.id.locale, context), params.id.locale)
+            params.secondaryLocales.forEach { locale ->
+                if (locale == params.id.locale) return@forEach
                 lkt.addFile(getStreamForLocale(locale, context), true)
             }
             when (popupKeysSetting) {
@@ -216,7 +216,7 @@ class LocaleKeyboardInfos(dataStream: InputStream?, locale: Locale) {
                 POPUP_KEYS_MORE -> lkt.addFile(context.assets.open("$LOCALE_TEXTS_FOLDER/more_popups_more.txt"), false)
                 POPUP_KEYS_ALL -> lkt.addFile(context.assets.open("$LOCALE_TEXTS_FOLDER/more_popups_all.txt"), false)
             }
-            lkt.addLocaleTlds(params.mId.locale)
+            lkt.addLocaleTlds(params.id.locale)
             return lkt
         }
 

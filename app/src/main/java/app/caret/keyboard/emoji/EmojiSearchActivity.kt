@@ -213,7 +213,7 @@ class EmojiSearchActivity : ComponentActivity() {
                                     hintLocales = hintLocales,
                                     platformImeOptions = PlatformImeOptions(encodePrivateImeOptions(PrivateImeOptions(heightPx)))),
                                 keyboardActions = KeyboardActions(onDone = {
-                                    if (Settings.getValues().mAutoCorrectEnabled) pressedKey = firstKey
+                                    if (Settings.getValues().autoCorrectEnabled) pressedKey = firstKey
                                     finish()
                                 }),
                                 singleLine = true,
@@ -297,7 +297,7 @@ class EmojiSearchActivity : ComponentActivity() {
             if (resources.configuration.orientation == Configuration.ORIENTATION_LANDSCAPE) 1 else 2,
             false, keyboardWidth)
         val builder = KeyboardBuilder(this, KeyboardParams())
-        builder.load(keyboard.mId)
+        builder.load(keyboard.id)
         keyboardParams = builder.mParams
         val (width, height) = getEmojiKeyDimensions(keyboardParams, this)
         keyWidth = width
@@ -320,7 +320,7 @@ class EmojiSearchActivity : ComponentActivity() {
                 finish()
             }
 
-            override fun getDescription(emoji: String?): String? = if (Settings.getValues().mShowEmojiDescriptions)
+            override fun getDescription(emoji: String?): String? = if (Settings.getValues().showEmojiDescriptions)
                 dictionaryFacilitator?.getWordProperty(getEmojiNeutralVersion(emoji!!))?.let {
                     if (it.mHasShortcuts) it.mShortcutTargets[0]?.mWord else null
                 } else null
@@ -359,8 +359,8 @@ class EmojiSearchActivity : ComponentActivity() {
             val popupSpec = getEmojiPopupSpec(emoji)
             val keyParams = Key.KeyParams(emoji, emoji.getCode(), if (popupSpec != null) EMOJI_HINT_LABEL else null, popupSpec,
                 Key.LABEL_FLAGS_FONT_NORMAL, keyboardParams)
-            keyParams.mAbsoluteWidth = keyWidth
-            keyParams.mAbsoluteHeight = keyHeight
+            keyParams.absoluteWidth = keyWidth
+            keyParams.absoluteHeight = keyHeight
             val key = keyParams.createKey()
             keyboard.addKeyLast(key)
             if (firstKey == null) firstKey = key

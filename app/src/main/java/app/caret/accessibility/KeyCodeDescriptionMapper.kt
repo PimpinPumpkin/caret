@@ -22,7 +22,7 @@ import app.caret.latin.common.StringUtils
 
 internal class KeyCodeDescriptionMapper private constructor() {
     // Sparse array of spoken description resource IDs indexed by key codes
-    private val mKeyCodeMap = SparseIntArray().apply {
+    private val keyCodeMap = SparseIntArray().apply {
         // Special non-character codes defined in Keyboard
         put(Constants.CODE_SPACE, R.string.spoken_description_space)
         put(KeyCode.DELETE, R.string.spoken_description_delete)
@@ -106,9 +106,9 @@ internal class KeyCodeDescriptionMapper private constructor() {
      */
     fun getDescriptionForCodePoint(context: Context, codePoint: Int): String? {
         // If the key description should be obscured, now is the time to do it.
-        val index = mKeyCodeMap.indexOfKey(codePoint)
+        val index = keyCodeMap.indexOfKey(codePoint)
         if (index >= 0) {
-            return context.getString(mKeyCodeMap.valueAt(index))
+            return context.getString(keyCodeMap.valueAt(index))
         }
         return if (Character.isDefined(codePoint) && !Character.isISOControl(codePoint)) {
             StringUtils.newSingleCodePointString(codePoint)
@@ -131,7 +131,7 @@ internal class KeyCodeDescriptionMapper private constructor() {
          * @return a character sequence describing the action performed by pressing the key
          */
         private fun getDescriptionForSwitchAlphaSymbol(context: Context, keyboard: Keyboard?): String? {
-            val resId = when (val element = keyboard?.mId?.element) {
+            val resId = when (val element = keyboard?.id?.element) {
                 KeyboardElement.ALPHABET, KeyboardElement.ALPHABET_AUTOMATIC_SHIFTED, KeyboardElement.ALPHABET_MANUAL_SHIFTED, KeyboardElement.ALPHABET_SHIFT_LOCKED -> R.string.spoken_description_to_symbol
                 KeyboardElement.SYMBOLS, KeyboardElement.SYMBOLS_SHIFTED -> R.string.spoken_description_to_alpha
                 KeyboardElement.PHONE -> R.string.spoken_description_to_symbol
@@ -152,7 +152,7 @@ internal class KeyCodeDescriptionMapper private constructor() {
          * @return A context-sensitive description of the "Shift" key.
          */
         private fun getDescriptionForShiftKey(context: Context, keyboard: Keyboard?): String {
-            val resId: Int = when (keyboard?.mId?.element) {
+            val resId: Int = when (keyboard?.id?.element) {
                 KeyboardElement.ALPHABET_AUTOMATIC_SHIFTED, KeyboardElement.ALPHABET_MANUAL_SHIFTED -> R.string.spoken_description_shift_shifted
                 KeyboardElement.ALPHABET_SHIFT_LOCKED -> R.string.spoken_description_caps_lock
                 KeyboardElement.SYMBOLS -> R.string.spoken_description_symbols_shift
@@ -175,7 +175,7 @@ internal class KeyCodeDescriptionMapper private constructor() {
             if (!TextUtils.isEmpty(key.getLabel())) {
                 return key.getLabel()!!.trim { it <= ' ' }
             }
-            val resId = when (keyboard?.mId?.imeAction) {
+            val resId = when (keyboard?.id?.imeAction) {
                 EditorInfo.IME_ACTION_SEARCH -> R.string.label_search_key
                 EditorInfo.IME_ACTION_GO -> R.string.label_go_key
                 EditorInfo.IME_ACTION_SEND -> R.string.label_send_key

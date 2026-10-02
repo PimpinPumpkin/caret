@@ -37,15 +37,15 @@ class PersonalizationHelper {
         private val TAG = PersonalizationHelper::class.java.simpleName
         private const val DEBUG = false
 
-        private val sLangUserHistoryDictCache =
+        private val langUserHistoryDictCache =
                 ConcurrentHashMap<String, SoftReference<UserHistoryDictionary>>()
 
         @JvmStatic
         fun getUserHistoryDictionary(context: Context, locale: Locale): UserHistoryDictionary {
             val lookupStr = locale.toString()
-            synchronized(sLangUserHistoryDictCache) {
-                if (sLangUserHistoryDictCache.containsKey(lookupStr)) {
-                    val ref = sLangUserHistoryDictCache[lookupStr]
+            synchronized(langUserHistoryDictCache) {
+                if (langUserHistoryDictCache.containsKey(lookupStr)) {
+                    val ref = langUserHistoryDictCache[lookupStr]
                     val dict = if (ref == null) null else ref.get()
                     if (dict != null) {
                         if (DEBUG) {
@@ -56,15 +56,15 @@ class PersonalizationHelper {
                     }
                 }
                 val dict = UserHistoryDictionary(context, locale)
-                sLangUserHistoryDictCache[lookupStr] = SoftReference(dict)
+                langUserHistoryDictCache[lookupStr] = SoftReference(dict)
                 return dict
             }
         }
 
         @JvmStatic
         fun removeAllUserHistoryDictionaries(context: Context) {
-            synchronized(sLangUserHistoryDictCache) {
-                for (entry in sLangUserHistoryDictCache.entries) {
+            synchronized(langUserHistoryDictCache) {
+                for (entry in langUserHistoryDictCache.entries) {
                     if (entry.value != null) {
                         val dict = entry.value.get()
                         if (dict != null) {
@@ -72,7 +72,7 @@ class PersonalizationHelper {
                         }
                     }
                 }
-                sLangUserHistoryDictCache.clear()
+                langUserHistoryDictCache.clear()
                 val filesDir = context.filesDir
                 if (filesDir == null) {
                     Log.e(TAG, "context.getFilesDir() returned null.")

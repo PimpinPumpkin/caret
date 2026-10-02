@@ -24,17 +24,17 @@ object LanguageOnSpacebarUtils {
     const val FORMAT_TYPE_FULL_LOCALE = 2
 
     private var sEnabledSubtypes: List<InputMethodSubtype> = Collections.emptyList()
-    private var sIsSystemLanguageSameAsInputLanguage = false
+    private var isSystemLanguageSameAsInputLanguage = false
 
     @JvmStatic
     fun getLanguageOnSpacebarFormatType(subtype: RichInputMethodSubtype): Int {
-        if (!Settings.getValues().mSpaceBarText.isEmpty())
+        if (!Settings.getValues().spaceBarText.isEmpty())
             return FORMAT_TYPE_FULL_LOCALE
         if (subtype.isNoLanguage) {
             return FORMAT_TYPE_FULL_LOCALE
         }
         // Only this subtype is enabled and equals to the system locale.
-        if (sEnabledSubtypes.size < 2 && sIsSystemLanguageSameAsInputLanguage && Settings.getValues().mSecondaryLocales.isEmpty()) {
+        if (sEnabledSubtypes.size < 2 && isSystemLanguageSameAsInputLanguage && Settings.getValues().secondaryLocales.isEmpty()) {
             return FORMAT_TYPE_NONE
         }
         val locale = subtype.locale
@@ -63,15 +63,15 @@ object LanguageOnSpacebarUtils {
            implicitlyEnabledSubtype: Boolean, systemLocale: Locale) {
         val newLocale = subtype.locale
         if (systemLocale == newLocale) {
-            sIsSystemLanguageSameAsInputLanguage = true
+            isSystemLanguageSameAsInputLanguage = true
             return
         }
         if (systemLocale.getLanguage() != newLocale.getLanguage()) {
-            sIsSystemLanguageSameAsInputLanguage = false
+            isSystemLanguageSameAsInputLanguage = false
             return
         }
         // If the subtype is enabled explicitly, the language name should be displayed even when
         // the keyboard language and the system language are equal.
-        sIsSystemLanguageSameAsInputLanguage = implicitlyEnabledSubtype
+        isSystemLanguageSameAsInputLanguage = implicitlyEnabledSubtype
     }
 }

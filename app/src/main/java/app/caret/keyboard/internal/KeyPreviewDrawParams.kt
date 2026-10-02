@@ -13,9 +13,9 @@ import app.caret.latin.R
 
 class KeyPreviewDrawParams(mainKeyboardViewAttr: TypedArray) {
     // XML attributes of {@link MainKeyboardView}.
-    @JvmField val mPreviewOffset: Int
-    @JvmField val mPreviewBackgroundResId: Int
-    private var mShowPopup = true
+    @JvmField val previewOffset: Int
+    @JvmField val previewBackgroundResId: Int
+    private var showPopup = true
 
     // The graphical geometry of the key preview.
     // <-width->
@@ -43,9 +43,9 @@ class KeyPreviewDrawParams(mainKeyboardViewAttr: TypedArray) {
     private var mVisibleOffset = 0
 
     init {
-        mPreviewOffset = mainKeyboardViewAttr.getDimensionPixelOffset(
+        previewOffset = mainKeyboardViewAttr.getDimensionPixelOffset(
                 R.styleable.MainKeyboardView_keyPreviewOffset, 0)
-        mPreviewBackgroundResId = mainKeyboardViewAttr.getResourceId(
+        previewBackgroundResId = mainKeyboardViewAttr.getResourceId(
                 R.styleable.MainKeyboardView_keyPreviewBackground, 0)
     }
 
@@ -78,11 +78,11 @@ class KeyPreviewDrawParams(mainKeyboardViewAttr: TypedArray) {
     }
 
     fun setPopupEnabled(enabled: Boolean) {
-        mShowPopup = enabled
+        showPopup = enabled
     }
 
     fun isPopupEnabled(): Boolean {
-        return mShowPopup
+        return showPopup
     }
 
 }

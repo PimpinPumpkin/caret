@@ -17,22 +17,22 @@ class HermiteInterpolator {
 
     // Working variable to calculate interpolated value.
     /** The coordinates of the start point of the interval. */
-    @JvmField var mP1X = 0
-    @JvmField var mP1Y = 0
+    @JvmField var p1X = 0
+    @JvmField var p1Y = 0
     /** The coordinates of the end point of the interval. */
-    @JvmField var mP2X = 0
-    @JvmField var mP2Y = 0
+    @JvmField var p2X = 0
+    @JvmField var p2Y = 0
     /** The slope of the tangent at the start point. */
-    @JvmField var mSlope1X = 0f
-    @JvmField var mSlope1Y = 0f
+    @JvmField var slope1X = 0f
+    @JvmField var slope1Y = 0f
     /** The slope of the tangent at the end point. */
-    @JvmField var mSlope2X = 0f
-    @JvmField var mSlope2Y = 0f
+    @JvmField var slope2X = 0f
+    @JvmField var slope2Y = 0f
     /** The interpolated coordinates.
      * The return variables of {@link #interpolate(float)} to avoid instantiations.
      */
-    @JvmField var mInterpolatedX = 0f
-    @JvmField var mInterpolatedY = 0f
+    @JvmField var interpolatedX = 0f
+    @JvmField var interpolatedY = 0f
 
     constructor() {
         // Nothing to do with here.
@@ -58,9 +58,9 @@ class HermiteInterpolator {
     /**
      * Set interpolation interval.
      * <p>
-     * The start and end coordinates of the interval will be set in {@link #mP1X}, {@link #mP1Y},
-     * {@link #mP2X}, and {@link #mP2Y}. The slope of the tangents at start and end points will be
-     * set in {@link #mSlope1X}, {@link #mSlope1Y}, {@link #mSlope2X}, and {@link #mSlope2Y}.
+     * The start and end coordinates of the interval will be set in {@link #p1X}, {@link #p1Y},
+     * {@link #p2X}, and {@link #p2Y}. The slope of the tangents at start and end points will be
+     * set in {@link #slope1X}, {@link #slope1Y}, {@link #slope2X}, and {@link #slope2Y}.
      *
      * @param p0 the index just before interpolation interval. If <code>p1</code> points the start
      *           of valid points, <code>p0</code> must be less than <code>minPos</code> of
@@ -72,60 +72,60 @@ class HermiteInterpolator {
      *           {@link #reset(int[],int[],int,int)}.
      */
     fun setInterval(p0: Int, p1: Int, p2: Int, p3: Int) {
-        mP1X = mXCoords[p1]
-        mP1Y = mYCoords[p1]
-        mP2X = mXCoords[p2]
-        mP2Y = mYCoords[p2]
+        p1X = mXCoords[p1]
+        p1Y = mYCoords[p1]
+        p2X = mXCoords[p2]
+        p2Y = mYCoords[p2]
         // A(ax,ay) is the vector p1->p2.
-        val ax = mP2X - mP1X
-        val ay = mP2Y - mP1Y
+        val ax = p2X - p1X
+        val ay = p2Y - p1Y
 
         // Calculate the slope of the tangent at p1.
         if (p0 >= mMinPos) {
             // p1 has previous valid point p0.
             // The slope of the tangent is half of the vector p0->p2.
-            mSlope1X = (mP2X - mXCoords[p0]) / 2.0f
-            mSlope1Y = (mP2Y - mYCoords[p0]) / 2.0f
+            slope1X = (p2X - mXCoords[p0]) / 2.0f
+            slope1Y = (p2Y - mYCoords[p0]) / 2.0f
         } else if (p3 < mMaxPos) {
             // p1 has no previous valid point, but p2 has next valid point p3.
             // B(bx,by) is the slope vector of the tangent at p2.
-            val bx = (mXCoords[p3] - mP1X) / 2.0f
-            val by = (mYCoords[p3] - mP1Y) / 2.0f
+            val bx = (mXCoords[p3] - p1X) / 2.0f
+            val by = (mYCoords[p3] - p1Y) / 2.0f
             val crossProdAB = ax * by - ay * bx
             val dotProdAB = ax * bx + ay * by
             val normASquare = (ax * ax + ay * ay).toFloat()
             val invHalfNormASquare = 1.0f / normASquare / 2.0f
             // The slope of the tangent is the mirror image of vector B to vector A.
-            mSlope1X = invHalfNormASquare * (dotProdAB * ax + crossProdAB * ay)
-            mSlope1Y = invHalfNormASquare * (dotProdAB * ay - crossProdAB * ax)
+            slope1X = invHalfNormASquare * (dotProdAB * ax + crossProdAB * ay)
+            slope1Y = invHalfNormASquare * (dotProdAB * ay - crossProdAB * ax)
         } else {
             // p1 and p2 have no previous valid point. (Interval has only point p1 and p2)
-            mSlope1X = ax.toFloat()
-            mSlope1Y = ay.toFloat()
+            slope1X = ax.toFloat()
+            slope1Y = ay.toFloat()
         }
 
         // Calculate the slope of the tangent at p2.
         if (p3 < mMaxPos) {
             // p2 has next valid point p3.
             // The slope of the tangent is half of the vector p1->p3.
-            mSlope2X = (mXCoords[p3] - mP1X) / 2.0f
-            mSlope2Y = (mYCoords[p3] - mP1Y) / 2.0f
+            slope2X = (mXCoords[p3] - p1X) / 2.0f
+            slope2Y = (mYCoords[p3] - p1Y) / 2.0f
         } else if (p0 >= mMinPos) {
             // p2 has no next valid point, but p1 has previous valid point p0.
             // B(bx,by) is the slope vector of the tangent at p1.
-            val bx = (mP2X - mXCoords[p0]) / 2.0f
-            val by = (mP2Y - mYCoords[p0]) / 2.0f
+            val bx = (p2X - mXCoords[p0]) / 2.0f
+            val by = (p2Y - mYCoords[p0]) / 2.0f
             val crossProdAB = ax * by - ay * bx
             val dotProdAB = ax * bx + ay * by
             val normASquare = (ax * ax + ay * ay).toFloat()
             val invHalfNormASquare = 1.0f / normASquare / 2.0f
             // The slope of the tangent is the mirror image of vector B to vector A.
-            mSlope2X = invHalfNormASquare * (dotProdAB * ax + crossProdAB * ay)
-            mSlope2Y = invHalfNormASquare * (dotProdAB * ay - crossProdAB * ax)
+            slope2X = invHalfNormASquare * (dotProdAB * ax + crossProdAB * ay)
+            slope2Y = invHalfNormASquare * (dotProdAB * ay - crossProdAB * ax)
         } else {
             // p1 and p2 has no previous valid point. (Interval has only point p1 and p2)
-            mSlope2X = ax.toFloat()
-            mSlope2Y = ay.toFloat()
+            slope2X = ax.toFloat()
+            slope2Y = ay.toFloat()
         }
     }
 
@@ -138,8 +138,8 @@ class HermiteInterpolator {
      *   p(t) = (1+2t)(1-t)(1-t)*p1 + t(1-t)(1-t)*m1 + (3-2t)t^2*p2 + (t-1)t^2*m2
      * where t is an element of [0,1].
      * <p>
-     * The interpolated XY-coordinates will be set in {@link #mInterpolatedX} and
-     * {@link #mInterpolatedY}.
+     * The interpolated XY-coordinates will be set in {@link #interpolatedX} and
+     * {@link #interpolatedY}.
      *
      * @param t the interpolation parameter. The value must be in close interval <code>[0,1]</code>.
      */
@@ -150,7 +150,7 @@ class HermiteInterpolator {
         val k2 = 3.0f - tm2
         val omt2 = omt * omt
         val t2 = t * t
-        mInterpolatedX = (k1 * mP1X + t * mSlope1X) * omt2 + (k2 * mP2X - omt * mSlope2X) * t2
-        mInterpolatedY = (k1 * mP1Y + t * mSlope1Y) * omt2 + (k2 * mP2Y - omt * mSlope2Y) * t2
+        interpolatedX = (k1 * p1X + t * slope1X) * omt2 + (k2 * p2X - omt * slope2X) * t2
+        interpolatedY = (k1 * p1Y + t * slope1Y) * omt2 + (k2 * p2Y - omt * slope2Y) * t2
     }
 }

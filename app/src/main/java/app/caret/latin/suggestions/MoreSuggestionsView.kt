@@ -83,7 +83,7 @@ class MoreSuggestionsView @JvmOverloads constructor(
         }
     }
 
-    override fun getDefaultCoordX() = (getKeyboard() as MoreSuggestions).mOccupiedWidth / 2
+    override fun getDefaultCoordX() = (getKeyboard() as MoreSuggestions).occupiedWidth / 2
 
     fun updateKeyboardGeometry(keyHeight: Int) {
         updateKeyDrawParams(keyHeight)
@@ -92,7 +92,7 @@ class MoreSuggestionsView @JvmOverloads constructor(
     private fun setModalMode() {
         isInModalMode = true
         // Set vertical correction to zero (Reset popup keys keyboard sliding allowance R.dimen.config_popup_keys_keyboard_slide_allowance).
-        mKeyDetector.setKeyboard(getKeyboard(), -paddingLeft.toFloat(), -paddingTop.toFloat())
+        this.keyDetector.setKeyboard(getKeyboard(), -paddingLeft.toFloat(), -paddingTop.toFloat())
     }
 
     override fun onKeyInput(key: Key, x: Int, y: Int) {
@@ -106,7 +106,7 @@ class MoreSuggestionsView @JvmOverloads constructor(
             return
         }
         val suggestedWords = keyboard.mSuggestedWords
-        val index = key.mSuggestedWordIndex
+        val index = key.suggestedWordIndex
         if (index < 0 || index >= suggestedWords.size()) {
             Log.e(TAG, "Selected suggestion has an illegal index: $index")
             return
@@ -123,14 +123,14 @@ class MoreSuggestionsView @JvmOverloads constructor(
         val parentKeyboard = mainKeyboardView.getKeyboard() ?: return false
         val keyboard = moreSuggestionsBuilder.layout(
             suggestedWords, fromIndex, maxWidth,
-            (maxWidth * layoutHelper.mMinMoreSuggestionsWidth).toInt(),
+            (maxWidth * layoutHelper.minMoreSuggestionsWidth).toInt(),
             layoutHelper.getMaxMoreSuggestionsRow(), parentKeyboard
         ).build()
         setKeyboard(keyboard)
         container.measure(ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT)
 
         val pointX = parentView.width / 2
-        val pointY = -layoutHelper.mMoreSuggestionsBottomGap
+        val pointY = -layoutHelper.moreSuggestionsBottomGap
         showPopupKeysPanel(parentView, moreSuggestionsController, pointX, pointY, moreSuggestionsListener)
         originX = lastX
         originY = lastY

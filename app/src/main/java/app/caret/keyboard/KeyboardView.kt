@@ -41,7 +41,7 @@ import java.util.HashSet
 open class KeyboardView @JvmOverloads constructor(context: Context, attrs: AttributeSet?,
         defStyle: Int = R.attr.keyboardViewStyle) : View(context, attrs, defStyle) {
     // XML attributes
-    private val mKeyVisualAttributes: KeyVisualAttributes?
+    private val keyVisualAttributes: KeyVisualAttributes?
     // Default keyLabelFlags from {@link KeyboardTheme}.
     // Currently only "alignHintLabelToBottom" is supported.
     private val defaultKeyLabelFlags: Int
@@ -59,8 +59,8 @@ open class KeyboardView @JvmOverloads constructor(context: Context, attrs: Attri
     private val keyBackgroundPadding = Rect()
     private val colors: Colors
     private var keyScaleForText = 0f
-    protected var mFontSizeMultiplier = 0f
-    protected var mHintFontSizeMultiplier = 0f
+    protected var fontSizeMultiplier = 0f
+    protected var hintFontSizeMultiplier = 0f
 
     // Main keyboard
     // TODO: Consider having a dummy keyboard object to make this @NonNull
@@ -108,7 +108,7 @@ open class KeyboardView @JvmOverloads constructor(context: Context, attrs: Attri
                 R.styleable.KeyboardView_spacebarIconWidthRatio, 1.0f)
         keyHintLetterPadding = keyboardViewAttr.getDimension(
                 R.styleable.KeyboardView_keyHintLetterPadding, 0.0f)
-        keyPopupHintLetter = if (Settings.getValues().mShowsPopupHints)
+        keyPopupHintLetter = if (Settings.getValues().showsPopupHints)
                 keyboardViewAttr.getString(R.styleable.KeyboardView_keyPopupHintLetter)
                 else ""
         keyPopupHintLetterPadding = keyboardViewAttr.getDimension(
@@ -124,7 +124,7 @@ open class KeyboardView @JvmOverloads constructor(context: Context, attrs: Attri
         val keyAttr = context.obtainStyledAttributes(attrs,
                 R.styleable.Keyboard_Key, defStyle, R.style.KeyboardView)
         defaultKeyLabelFlags = keyAttr.getInt(R.styleable.Keyboard_Key_keyLabelFlags, 0)
-        mKeyVisualAttributes = KeyVisualAttributes.newInstance(keyAttr)
+        keyVisualAttributes = KeyVisualAttributes.newInstance(keyAttr)
         keyAttr.recycle()
 
         mPaint.setAntiAlias(true)
@@ -132,7 +132,7 @@ open class KeyboardView @JvmOverloads constructor(context: Context, attrs: Attri
     }
 
     fun getKeyVisualAttribute(): KeyVisualAttributes? {
-        return mKeyVisualAttributes
+        return keyVisualAttributes
     }
 
     open fun setHardwareAcceleratedDrawingEnabled(enabled: Boolean) {
@@ -159,18 +159,18 @@ open class KeyboardView @JvmOverloads constructor(context: Context, attrs: Attri
         }
 
         mKeyboard = keyboard
-        keyScaleForText = Math.sqrt((1 / Settings.getValues().mKeyboardHeightScale).toDouble()).toFloat()
-        val scale = Math.min(2 * keyboard.mMostCommonKeyWidth, keyboard.mMostCommonKeyHeight - keyboard.mVerticalGap)
+        keyScaleForText = Math.sqrt((1 / Settings.getValues().keyboardHeightScale).toDouble()).toFloat()
+        val scale = Math.min(2 * keyboard.mostCommonKeyWidth, keyboard.mostCommonKeyHeight - keyboard.mVerticalGap)
         val scaledKeySize = (scale * keyScaleForText).toInt()
-        mKeyDrawParams.updateParams(scaledKeySize, mKeyVisualAttributes)
-        mKeyDrawParams.updateParams(scaledKeySize, keyboard.mKeyVisualAttributes)
+        mKeyDrawParams.updateParams(scaledKeySize, keyVisualAttributes)
+        mKeyDrawParams.updateParams(scaledKeySize, keyboard.keyVisualAttributes)
         invalidateAllKeys()
         requestLayout()
-        mFontSizeMultiplier = if (mKeyboard!!.mId.element.isEmojiLayout)
+        fontSizeMultiplier = if (mKeyboard!!.id.element.isEmojiLayout)
                 // In the case of EmojiKeyFit, the size of emojis is taken care of by the size of the keys
-                (if (Settings.getValues().mEmojiKeyFit) 1f else Settings.getValues().mFontSizeMultiplierEmoji)
-                else Settings.getValues().mFontSizeMultiplier
-        mHintFontSizeMultiplier = Settings.getValues().mHintFontSizeMultiplier
+                (if (Settings.getValues().emojiKeyFit) 1f else Settings.getValues().fontSizeMultiplierEmoji)
+                else Settings.getValues().fontSizeMultiplier
+        hintFontSizeMultiplier = Settings.getValues().hintFontSizeMultiplier
     }
 
     /**
@@ -191,7 +191,7 @@ open class KeyboardView @JvmOverloads constructor(context: Context, attrs: Attri
     }
 
     protected fun updateKeyDrawParams(keyHeight: Int) {
-        mKeyDrawParams.updateParams(keyHeight, mKeyVisualAttributes)
+        mKeyDrawParams.updateParams(keyHeight, keyVisualAttributes)
     }
 
     override fun onMeasure(widthMeasureSpec: Int, heightMeasureSpec: Int) {
@@ -201,8 +201,8 @@ open class KeyboardView @JvmOverloads constructor(context: Context, attrs: Attri
             return
         }
         // The main keyboard expands to the entire this {@link KeyboardView}.
-        val width = keyboard.mOccupiedWidth + getPaddingLeft() + getPaddingRight()
-        val height = keyboard.mOccupiedHeight + getPaddingTop() + getPaddingBottom()
+        val width = keyboard.occupiedWidth + getPaddingLeft() + getPaddingRight()
+        val height = keyboard.occupiedHeight + getPaddingTop() + getPaddingBottom()
         setMeasuredDimension(width, height)
     }
 
@@ -257,8 +257,8 @@ open class KeyboardView @JvmOverloads constructor(context: Context, attrs: Attri
             return
         }
 
-        showsHints = Settings.getValues().mShowsHints
-        val scale = Settings.getValues().mKeyboardHeightScale
+        showsHints = Settings.getValues().showsHints
+        val scale = Settings.getValues().keyboardHeightScale
         iconScaleFactor = if (scale < 0.8f) scale + 0.2f else 1f
         val paint = mPaint
         val background = getBackground()
@@ -309,7 +309,7 @@ open class KeyboardView @JvmOverloads constructor(context: Context, attrs: Attri
         val attr = key.getVisualAttributes()
         // don't use the raw key height, linear font scaling with height is too extreme
         val params = mKeyDrawParams.mayCloneAndUpdateParams((key.getHeight() * keyScaleForText).toInt(), attr)
-        params.mAnimAlpha = Constants.Color.ALPHA_OPAQUE
+        params.animAlpha = Constants.Color.ALPHA_OPAQUE
 
         if (!key.isSpacer()) {
             val background = key.selectBackgroundDrawable(
@@ -361,13 +361,13 @@ open class KeyboardView @JvmOverloads constructor(context: Context, attrs: Attri
         // Draw key label.
         val keyboard = getKeyboard()
         val icon = if (keyboard == null) null
-                else key.getIcon(keyboard.mIconsSet, params.mAnimAlpha)
+                else key.getIcon(keyboard.iconsSet, params.animAlpha)
         var labelX = centerX
         var labelBaseline = centerY
         val label = key.getLabel()
         if (label != null) {
             paint.setTypeface(KeyboardTypeface.resolve(label, key.selectTypeface(params)))
-            paint.setTextSize(key.selectTextSize(params) * mFontSizeMultiplier)
+            paint.setTextSize(key.selectTextSize(params) * fontSizeMultiplier)
             val labelCharHeight = TypefaceUtils.getReferenceCharHeight(paint)
             val labelCharWidth = TypefaceUtils.getReferenceCharWidth(paint)
 
@@ -379,7 +379,7 @@ open class KeyboardView @JvmOverloads constructor(context: Context, attrs: Attri
                 // The label is placed off center of the key. Currently used only on "phone number" layout
                 // to have letter hints shown nicely. We don't want to align it off center if hints are off.
                 // use a non-negative number to avoid label starting left of the letter for high keyboard scale on holo phone layout
-                labelX = Math.max(0f, centerX + params.mLabelOffCenterRatio * labelCharWidth)
+                labelX = Math.max(0f, centerX + params.labelOffCenterRatio * labelCharWidth)
                 paint.setTextAlign(Align.LEFT)
             } else {
                 labelX = centerX
@@ -414,7 +414,7 @@ open class KeyboardView @JvmOverloads constructor(context: Context, attrs: Attri
                     paint.setColor(key.selectTextColor(params))
                 // Set a drop shadow for the text if the shadow radius is positive value.
                 if (keyTextShadowRadius > 0.0f) {
-                    paint.setShadowLayer(keyTextShadowRadius, 0.0f, 0.0f, params.mTextShadowColor)
+                    paint.setShadowLayer(keyTextShadowRadius, 0.0f, 0.0f, params.textShadowColor)
                 } else {
                     paint.clearShadowLayer()
                 }
@@ -423,7 +423,7 @@ open class KeyboardView @JvmOverloads constructor(context: Context, attrs: Attri
                 paint.setColor(Color.TRANSPARENT)
                 paint.clearShadowLayer()
             }
-            blendAlpha(paint, params.mAnimAlpha)
+            blendAlpha(paint, params.animAlpha)
             canvas.drawText(label, 0, label.length, labelX, labelBaseline, paint)
             // Turn off drop shadow and reset x-scale.
             paint.clearShadowLayer()
@@ -433,13 +433,13 @@ open class KeyboardView @JvmOverloads constructor(context: Context, attrs: Attri
         // Draw hint label.
         val hintLabel = key.getHintLabel()
         val hintIcon = if (keyboard == null || !showsHints || hintLabel != null) null
-                        else key.getHintIcon(keyboard.mIconsSet, params.mAnimAlpha)
+                        else key.getHintIcon(keyboard.iconsSet, params.animAlpha)
         if (hintLabel != null && showsHints) {
-            paint.setTextSize(key.selectHintTextSize(params) * mHintFontSizeMultiplier)
+            paint.setTextSize(key.selectHintTextSize(params) * hintFontSizeMultiplier)
             paint.setColor(key.selectHintTextColor(params))
             // TODO: Should add a way to specify type face for hint letters
             paint.setTypeface(KeyboardTypeface.resolve(hintLabel, Typeface.DEFAULT_BOLD))
-            blendAlpha(paint, params.mAnimAlpha)
+            blendAlpha(paint, params.animAlpha)
             val labelCharHeight = TypefaceUtils.getReferenceCharHeight(paint)
             val labelCharWidth = TypefaceUtils.getReferenceCharWidth(paint)
             val isFunctionalKeyAndRoundedStyle = colors.themeStyle == STYLE_ROUNDED && key.hasFunctionalBackground()
@@ -448,7 +448,7 @@ open class KeyboardView @JvmOverloads constructor(context: Context, attrs: Attri
             if (key.hasHintLabel()) {
                 // The hint label is placed just right of the key label. Used mainly on
                 // "phone number" layout.
-                hintX = labelX + params.mHintLabelOffCenterRatio * labelCharWidth
+                hintX = labelX + params.hintLabelOffCenterRatio * labelCharWidth
                 if (key.isAlignHintLabelToBottom(defaultKeyLabelFlags)) {
                     hintBaseline = labelBaseline
                 } else {
@@ -478,16 +478,16 @@ open class KeyboardView @JvmOverloads constructor(context: Context, attrs: Attri
             }
             val adjustmentY = if (isFunctionalKeyAndRoundedStyle)
                     hintBaseline * 0.5f
-                    else params.mHintLabelVerticalAdjustment * labelCharHeight
+                    else params.hintLabelVerticalAdjustment * labelCharHeight
             canvas.drawText(hintLabel, 0, hintLabel.length, hintX, hintBaseline + adjustmentY, paint)
         } else if (hintIcon != null) {
-            val iconSize = (key.selectHintTextSize(params) * mHintFontSizeMultiplier).toInt()
+            val iconSize = (key.selectHintTextSize(params) * hintFontSizeMultiplier).toInt()
             val isFunctionalKeyAndRoundedStyle = colors.themeStyle == STYLE_ROUNDED && (key.hasFunctionalBackground() || key.hasActionKeyBackground())
             val hintX: Float
             val hintBaseline: Float
             if (key.hasHintLabel()) {
                 // The hint icon is placed just right of the key label. Used mainly on "phone number" layout.
-                hintX = labelX + params.mHintLabelOffCenterRatio * iconSize
+                hintX = labelX + params.hintLabelOffCenterRatio * iconSize
                 hintBaseline = centerY + iconSize / 2.0f
             } else if (key.hasShiftedLetterHintIcon()) {
                 // The hint label is placed at top-right corner of the key. Used mainly on tablet.
@@ -503,7 +503,7 @@ open class KeyboardView @JvmOverloads constructor(context: Context, attrs: Attri
             }
             val adjustmentY = if (isFunctionalKeyAndRoundedStyle)
                                       iconSize * 0.5f
-                                      else params.mHintLabelVerticalAdjustment * iconSize
+                                      else params.hintLabelVerticalAdjustment * iconSize
             hintIcon.setColorFilter(key.selectHintTextColor(params), PorterDuff.Mode.MULTIPLY)
             drawIcon(canvas, hintIcon, hintX.toInt(), (hintBaseline + adjustmentY).toInt(), iconSize, iconSize)
         } else if (key.getPopupKeys() != null && !key.hasNoPanelAutoPopupKey()
@@ -537,9 +537,9 @@ open class KeyboardView @JvmOverloads constructor(context: Context, attrs: Attri
         val labelCharWidth = TypefaceUtils.getReferenceCharWidth(paint)
         val hintX: Float
         val hintBaseline = paint.ascent()
-        paint.setTypeface(params.mTypeface)
-        paint.setTextSize(params.mHintLetterSize.toFloat())
-        paint.setColor(params.mHintLabelColor)
+        paint.setTypeface(params.typeface)
+        paint.setTextSize(params.hintLetterSize.toFloat())
+        paint.setColor(params.hintLabelColor)
         paint.setTextAlign(Align.CENTER)
         if (colors.themeStyle == STYLE_ROUNDED) {
             if (key.getBackgroundType() == Key.BACKGROUND_TYPE_SPACEBAR)
@@ -557,12 +557,12 @@ open class KeyboardView @JvmOverloads constructor(context: Context, attrs: Attri
         val paint = Paint()
         paint.setAntiAlias(true)
         if (key == null) {
-            paint.setTypeface(mKeyDrawParams.mTypeface)
-            paint.setTextSize(mKeyDrawParams.mLabelSize.toFloat())
+            paint.setTypeface(mKeyDrawParams.typeface)
+            paint.setTextSize(mKeyDrawParams.labelSize.toFloat())
         } else {
             paint.setColor(key.selectTextColor(mKeyDrawParams))
             paint.setTypeface(key.selectTypeface(mKeyDrawParams))
-            paint.setTextSize(key.selectTextSize(mKeyDrawParams) * mFontSizeMultiplier)
+            paint.setTextSize(key.selectTextSize(mKeyDrawParams) * fontSizeMultiplier)
         }
         return paint
     }
@@ -609,7 +609,7 @@ open class KeyboardView @JvmOverloads constructor(context: Context, attrs: Attri
         if (key.hasActionKeyBackground()) {
             colors.setColor(icon, ColorType.ACTION_KEY_ICON)
         } else if (key.isShift() && keyboard != null) {
-            if (keyboard.mId.element.isAlphabetShifted)
+            if (keyboard.id.element.isAlphabetShifted)
                 colors.setColor(icon, ColorType.SHIFT_KEY_ICON)
             else
                 colors.setColor(icon, ColorType.KEY_ICON) // normal key if not shifted

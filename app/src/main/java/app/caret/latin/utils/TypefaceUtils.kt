@@ -18,41 +18,41 @@ object TypefaceUtils {
     // This utility class is not publicly instantiable.
 
     // This sparse array caches key label text height in pixel indexed by key label text size.
-    private val sTextHeightCache = SparseArray<Float>()
+    private val textHeightCache = SparseArray<Float>()
     // Working variable for the following method.
-    private val sTextHeightBounds = Rect()
+    private val textHeightBounds = Rect()
 
     private fun getCharHeight(referenceChar: CharArray, paint: Paint): Float {
         val key = getCharGeometryCacheKey(referenceChar[0], paint)
-        synchronized(sTextHeightCache) {
-            val cachedValue: Float? = sTextHeightCache.get(key)
+        synchronized(textHeightCache) {
+            val cachedValue: Float? = textHeightCache.get(key)
             if (cachedValue != null) {
                 return cachedValue
             }
 
-            paint.getTextBounds(referenceChar, 0, 1, sTextHeightBounds)
-            val height = sTextHeightBounds.height().toFloat()
-            sTextHeightCache.put(key, height)
+            paint.getTextBounds(referenceChar, 0, 1, textHeightBounds)
+            val height = textHeightBounds.height().toFloat()
+            textHeightCache.put(key, height)
             return height
         }
     }
 
     // This sparse array caches key label text width in pixel indexed by key label text size.
-    private val sTextWidthCache = SparseArray<Float>()
+    private val textWidthCache = SparseArray<Float>()
     // Working variable for the following method.
-    private val sTextWidthBounds = Rect()
+    private val textWidthBounds = Rect()
 
     private fun getCharWidth(referenceChar: CharArray, paint: Paint): Float {
         val key = getCharGeometryCacheKey(referenceChar[0], paint)
-        synchronized(sTextWidthCache) {
-            val cachedValue: Float? = sTextWidthCache.get(key)
+        synchronized(textWidthCache) {
+            val cachedValue: Float? = textWidthCache.get(key)
             if (cachedValue != null) {
                 return cachedValue
             }
 
-            paint.getTextBounds(referenceChar, 0, 1, sTextWidthBounds)
-            val width = sTextWidthBounds.width().toFloat()
-            sTextWidthCache.put(key, width)
+            paint.getTextBounds(referenceChar, 0, 1, textWidthBounds)
+            val width = textWidthBounds.width().toFloat()
+            textWidthCache.put(key, width)
             return width
         }
     }
@@ -88,13 +88,13 @@ object TypefaceUtils {
     }
 
     // Working variable for the following method.
-    private val sStringWidthBounds = Rect()
+    private val stringWidthBounds = Rect()
 
     @JvmStatic
     fun getStringWidth(string: String, paint: Paint): Float {
-        synchronized(sStringWidthBounds) {
-            paint.getTextBounds(string, 0, string.length, sStringWidthBounds)
-            return sStringWidthBounds.width().toFloat()
+        synchronized(stringWidthBounds) {
+            paint.getTextBounds(string, 0, string.length, stringWidthBounds)
+            return stringWidthBounds.width().toFloat()
         }
     }
 }

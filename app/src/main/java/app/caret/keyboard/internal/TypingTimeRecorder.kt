@@ -10,9 +10,9 @@ class TypingTimeRecorder(staticTimeThresholdAfterFastTyping: Int,
         suppressKeyPreviewAfterBatchInputDuration: Int) {
     private val mStaticTimeThresholdAfterFastTyping: Int // msec
     private val mSuppressKeyPreviewAfterBatchInputDuration: Int
-    private var mLastTypingTime: Long = 0
+    private var lastTypingTime: Long = 0
     private var mLastLetterTypingTime: Long = 0
-    private var mLastBatchInputTime: Long = 0
+    private var lastBatchInputTime: Long = 0
 
     init {
         mStaticTimeThresholdAfterFastTyping = staticTimeThresholdAfterFastTyping
@@ -25,7 +25,7 @@ class TypingTimeRecorder(staticTimeThresholdAfterFastTyping: Int,
     }
 
     private fun wasLastInputTyping(): Boolean {
-        return mLastTypingTime >= mLastBatchInputTime
+        return lastTypingTime >= lastBatchInputTime
     }
 
     fun onCodeInput(code: Int, eventTime: Long) {
@@ -35,7 +35,7 @@ class TypingTimeRecorder(staticTimeThresholdAfterFastTyping: Int,
         // 3. A non-letter key is typed within the threshold time since the last letter key typing.
         if (Character.isLetter(code)) {
             if (wasLastInputTyping()
-                    || eventTime - mLastTypingTime < mStaticTimeThresholdAfterFastTyping) {
+                    || eventTime - lastTypingTime < mStaticTimeThresholdAfterFastTyping) {
                 mLastLetterTypingTime = eventTime
             }
         } else {
@@ -44,11 +44,11 @@ class TypingTimeRecorder(staticTimeThresholdAfterFastTyping: Int,
                 mLastLetterTypingTime = eventTime
             }
         }
-        mLastTypingTime = eventTime
+        lastTypingTime = eventTime
     }
 
     fun onEndBatchInput(eventTime: Long) {
-        mLastBatchInputTime = eventTime
+        lastBatchInputTime = eventTime
     }
 
     fun getLastLetterTypingTime(): Long {
@@ -57,6 +57,6 @@ class TypingTimeRecorder(staticTimeThresholdAfterFastTyping: Int,
 
     fun needsToSuppressKeyPreviewPopup(eventTime: Long): Boolean {
         return !wasLastInputTyping()
-                && eventTime - mLastBatchInputTime < mSuppressKeyPreviewAfterBatchInputDuration
+                && eventTime - lastBatchInputTime < mSuppressKeyPreviewAfterBatchInputDuration
     }
 }

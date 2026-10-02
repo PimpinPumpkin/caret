@@ -28,25 +28,25 @@ import org.xmlpull.v1.XmlPullParser
 
 open class KeyboardBuilder<KP : KeyboardParams>(protected val mContext: Context, @JvmField val mParams: KP) {
     @JvmField
-    protected val mResources: Resources
+    protected val resources: Resources
     private var mCurrentY = 0
 
-    private var mLeftEdge = false
-    private var mTopEdge = false
+    private var leftEdge = false
+    private var topEdge = false
     private var mRightEdgeKey: Key? = null
     private lateinit var keysInRows: ArrayList<ArrayList<KeyParams>>
 
     init {
         val res = mContext.resources
-        mResources = res
+        resources = res
         mParams.GRID_WIDTH = res.getInteger(R.integer.config_keyboard_grid_width)
         mParams.GRID_HEIGHT = res.getInteger(R.integer.config_keyboard_grid_height)
     }
 
     fun load(id: KeyboardId): KeyboardBuilder<KP> {
-        mParams.mId = id
+        mParams.id = id
         if (id.element.isEmojiLayout) {
-            mParams.mAllowRedundantPopupKeys = true
+            mParams.allowRedundantPopupKeys = true
             readAttributes(R.xml.kbd_emoji)
             keysInRows = EmojiParser(mParams, mContext).parse()
         } else {
@@ -54,7 +54,7 @@ open class KeyboardBuilder<KP : KeyboardParams>(protected val mContext: Context,
                 setupParams()
                 keysInRows = KeyboardParser(mParams, mContext).parseLayout()
                 if (keysInRows.size != 4) // that was effectively the default for OpenBoard
-                    mParams.mTouchPositionCorrection.load(mContext.resources.getStringArray(R.array.touch_position_correction_data_default))
+                    mParams.touchPositionCorrection.load(mContext.resources.getStringArray(R.array.touch_position_correction_data_default))
                 determineAbsoluteValues()
             } catch (e: Exception) {
                 Log.e(TAG, "error parsing layout $id ${id.element}", e)
@@ -66,19 +66,19 @@ open class KeyboardBuilder<KP : KeyboardParams>(protected val mContext: Context,
 
     private fun setupParams() {
         val sv = Settings.getValues()
-        mParams.mAllowRedundantPopupKeys = !sv.mRemoveRedundantPopups
-        mParams.mProximityCharsCorrectionEnabled = mParams.mId.element == KeyboardElement.ALPHABET
-                || (mParams.mId.element.isAlphabet && !mParams.mId.subtype.hasExtraValue(Constants.Subtype.ExtraValue.NO_SHIFT_PROXIMITY_CORRECTION))
+        mParams.allowRedundantPopupKeys = !sv.removeRedundantPopups
+        mParams.proximityCharsCorrectionEnabled = mParams.id.element == KeyboardElement.ALPHABET
+                || (mParams.id.element.isAlphabet && !mParams.id.subtype.hasExtraValue(Constants.Subtype.ExtraValue.NO_SHIFT_PROXIMITY_CORRECTION))
 
-        LocaleKeyboardInfos.addLocaleKeyTextsToParams(mContext, mParams, sv.mShowMorePopupKeys)
-        mParams.mPopupKeyOrder.addAll(sv.mPopupKeyOrder)
+        LocaleKeyboardInfos.addLocaleKeyTextsToParams(mContext, mParams, sv.showMorePopupKeys)
+        mParams.popupKeyOrder.addAll(sv.popupKeyOrder)
         // add label source only if popup key type enabled
-        sv.mPopupKeyHintOrder.forEach { if (it in sv.mPopupKeyOrder) mParams.mPopupKeyHintOrder.add(it) }
+        sv.popupKeyHintOrder.forEach { if (it in sv.popupKeyOrder) mParams.popupKeyHintOrder.add(it) }
     }
 
     // todo: remnant of old parser, replace it if reasonably simple
     protected fun readAttributes(@XmlRes xmlId: Int) {
-        val parser = mResources.getXml(xmlId)
+        val parser = resources.getXml(xmlId)
         while (parser.eventType != XmlPullParser.END_DOCUMENT) {
             val event = parser.next()
             if (event == XmlPullParser.START_TAG) {
@@ -93,16 +93,16 @@ open class KeyboardBuilder<KP : KeyboardParams>(protected val mContext: Context,
     }
 
     fun disableTouchPositionCorrectionDataForTest() {
-        mParams.mTouchPositionCorrection.setEnabled(false)
+        mParams.touchPositionCorrection.setEnabled(false)
     }
 
     fun setProximityCharsCorrectionEnabled(enabled: Boolean) {
-        mParams.mProximityCharsCorrectionEnabled = enabled
+        mParams.proximityCharsCorrectionEnabled = enabled
     }
 
     open fun build(): Keyboard {
-        if (mParams.mId.isSplitLayout
-                && mParams.mId.element in KeyboardElement.ALPHABET..KeyboardElement.SYMBOLS_SHIFTED) {
+        if (mParams.id.isSplitLayout
+                && mParams.id.element in KeyboardElement.ALPHABET..KeyboardElement.SYMBOLS_SHIFTED) {
             addSplit()
         }
         addKeysToParams()
@@ -111,25 +111,25 @@ open class KeyboardBuilder<KP : KeyboardParams>(protected val mContext: Context,
 
     // determine key size and positions using relative width and height
     private fun determineAbsoluteValues() {
-        var currentY = mParams.mTopPadding.toFloat()
+        var currentY = mParams.topPadding.toFloat()
         for (row in keysInRows) {
             if (row.isEmpty()) continue
-            var currentX = mParams.mLeftPadding.toFloat()
+            var currentX = mParams.leftPadding.toFloat()
             row.forEach {
                 it.setAbsoluteDimensions(currentX, currentY)
                 if (DebugFlags.DEBUG_ENABLED)
-                    Log.d(TAG, "setting size and position for ${it.mLabel ?: it.mIconName}, ${it.mCode}: x ${currentX.toInt()}, w ${it.mAbsoluteWidth.toInt()}")
-                currentX += it.mAbsoluteWidth
+                    Log.d(TAG, "setting size and position for ${it.mLabel ?: it.mIconName}, ${it.mCode}: x ${currentX.toInt()}, w ${it.absoluteWidth.toInt()}")
+                currentX += it.absoluteWidth
             }
-            currentY += row.first().mAbsoluteHeight
+            currentY += row.first().absoluteHeight
         }
     }
 
     private fun addSplit() {
-        val spacerRelativeWidth = Settings.getValues().mSplitKeyboardSpacerRelativeWidth
+        val spacerRelativeWidth = Settings.getValues().splitKeyboardSpacerRelativeWidth
         // adjust gaps for the whole keyboard, so it's the same for all rows
-        mParams.mRelativeHorizontalGap *= 1f / (1f + spacerRelativeWidth)
-        mParams.mHorizontalGap = (mParams.mRelativeHorizontalGap * mParams.mId.width).toInt()
+        mParams.relativeHorizontalGap *= 1f / (1f + spacerRelativeWidth)
+        mParams.horizontalGap = (mParams.relativeHorizontalGap * mParams.id.width).toInt()
         var maxWidthBeforeSpacer = 0f
         var maxWidthAfterSpacer = 0f
         for (row in keysInRows) {
@@ -137,7 +137,7 @@ open class KeyboardBuilder<KP : KeyboardParams>(protected val mContext: Context,
             val relativeWidthSum = row.sumOf { it.mWidth } // sum up relative widths
             val spacer = KeyParams.newSpacer(mParams, spacerRelativeWidth)
             // insert spacer before first key that starts right of the center (also consider gap)
-            var insertIndex = row.indexOfFirst { it.xPos + it.mAbsoluteWidth / 3 > mParams.mOccupiedWidth / 2 }
+            var insertIndex = row.indexOfFirst { it.xPos + it.absoluteWidth / 3 > mParams.occupiedWidth / 2 }
                 .takeIf { it > -1 } ?: (row.size / 2) // fallback should never be needed, but better than having an error
             val indexOfProperSpace = row.indexOfFirst { key ->
                 // should work reasonably with customizable layouts, where space key might be completely different:
@@ -150,8 +150,8 @@ open class KeyboardBuilder<KP : KeyboardParams>(protected val mContext: Context,
                 insertIndex = row.indexOf(spaceLeft) + 1
                 val widthBeforeSpace = row.subList(0, insertIndex - 1).sumOf { it.mWidth }
                 val widthAfterSpace = row.subList(insertIndex, row.size).sumOf { it.mWidth }
-                val spaceLeftWidth = (maxWidthBeforeSpacer - widthBeforeSpace).coerceAtLeast(mParams.mDefaultKeyWidth)
-                val spaceRightWidth = (maxWidthAfterSpacer - widthAfterSpace).coerceAtLeast(mParams.mDefaultKeyWidth)
+                val spaceLeftWidth = (maxWidthBeforeSpacer - widthBeforeSpace).coerceAtLeast(mParams.defaultKeyWidth)
+                val spaceRightWidth = (maxWidthAfterSpacer - widthAfterSpace).coerceAtLeast(mParams.defaultKeyWidth)
                 val spacerWidth = spaceLeft.mWidth + spacerRelativeWidth - spaceLeftWidth - spaceRightWidth
                 if (spacerWidth > 0.05f) {
                     // only insert if the spacer has a reasonable width
@@ -176,11 +176,11 @@ open class KeyboardBuilder<KP : KeyboardParams>(protected val mContext: Context,
             val relativeWidthSumNew = row.sumOf { it.mWidth }
             val widthFactor = relativeWidthSum / relativeWidthSumNew
             // re-calculate absolute sizes and positions
-            var currentX = mParams.mLeftPadding.toFloat()
+            var currentX = mParams.leftPadding.toFloat()
             row.forEach {
                 it.mWidth *= widthFactor
                 it.setAbsoluteDimensions(currentX, y)
-                currentX += it.mAbsoluteWidth
+                currentX += it.absoluteWidth
             }
         }
     }
@@ -191,27 +191,27 @@ open class KeyboardBuilder<KP : KeyboardParams>(protected val mContext: Context,
         if (spaceKey.mWidth >= 0.5) return // only if space key is small
         val symbolKey = row.firstOrNull { it.mCode == KeyCode.SYMBOL_ALPHA }
         val symbolKeyWidth = symbolKey?.mWidth ?: 0f
-        if (symbolKeyWidth > mParams.mDefaultKeyWidth) {
-            val widthToChange = symbolKey!!.mWidth - mParams.mDefaultKeyWidth
+        if (symbolKeyWidth > mParams.defaultKeyWidth) {
+            val widthToChange = symbolKey!!.mWidth - mParams.defaultKeyWidth
             symbolKey.mWidth -= widthToChange
             spaceKey.mWidth += widthToChange
         }
         val actionKey = row.firstOrNull { it.mBackgroundType == Key.BACKGROUND_TYPE_ACTION }
         val actionKeyWidth = actionKey?.mWidth ?: 0f
-        if (actionKeyWidth > mParams.mDefaultKeyWidth * 1.1f) { // allow it to stay a little wider
-            val widthToChange = actionKey!!.mWidth - mParams.mDefaultKeyWidth * 1.1f
+        if (actionKeyWidth > mParams.defaultKeyWidth * 1.1f) { // allow it to stay a little wider
+            val widthToChange = actionKey!!.mWidth - mParams.defaultKeyWidth * 1.1f
             actionKey.mWidth -= widthToChange
             spaceKey.mWidth += widthToChange
         }
     }
 
     private fun startKeyboard() {
-        mCurrentY += mParams.mTopPadding
-        mTopEdge = true
+        mCurrentY += mParams.topPadding
+        topEdge = true
     }
 
     private fun startRow() {
-        mLeftEdge = true
+        leftEdge = true
         mRightEdgeKey = null
     }
 
@@ -222,17 +222,17 @@ open class KeyboardBuilder<KP : KeyboardParams>(protected val mContext: Context,
             mCurrentY += rightEdgeKey.getHeight() + rightEdgeKey.getVerticalGap()
             mRightEdgeKey = null
         }
-        mLeftEdge = false
-        mTopEdge = false
+        leftEdge = false
+        topEdge = false
     }
 
     private fun endKey(key: Key) {
         mParams.onAddKey(key)
-        if (mLeftEdge && !key.isSpacer()) {
+        if (leftEdge && !key.isSpacer()) {
             key.markAsLeftEdge(mParams)
-            mLeftEdge = false
+            leftEdge = false
         }
-        if (mTopEdge) {
+        if (topEdge) {
             key.markAsTopEdge(mParams)
         }
         if (!key.isSpacer()) {
@@ -242,9 +242,9 @@ open class KeyboardBuilder<KP : KeyboardParams>(protected val mContext: Context,
 
     private fun endKeyboard() {
         mParams.removeRedundantPopupKeys()
-        if (!mParams.mId.element.isEmojiLayout) return
-        val actualHeight = mCurrentY - mParams.mVerticalGap + mParams.mBottomPadding
-        mParams.mOccupiedHeight = mParams.mOccupiedHeight.coerceAtLeast(actualHeight)
+        if (!mParams.id.element.isEmojiLayout) return
+        val actualHeight = mCurrentY - mParams.verticalGap + mParams.bottomPadding
+        mParams.occupiedHeight = mParams.occupiedHeight.coerceAtLeast(actualHeight)
     }
 
     private fun addKeysToParams() {

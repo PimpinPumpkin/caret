@@ -109,7 +109,7 @@ fun DictionaryDialog(
 @Composable
 private fun DictionaryDetails(dict: File) {
     val header = DictionaryInfoUtils.getDictionaryFileHeaderOrNull(dict) ?: return
-    val type = header.mIdString.substringBefore(":")
+    val type = header.idString.substringBefore(":")
     var showDeleteDialog by remember { mutableStateOf(false) }
     var showDetails by remember { mutableStateOf(false) }
     val title = if (type != DictionaryInfoUtils.DEFAULT_MAIN_DICT) type

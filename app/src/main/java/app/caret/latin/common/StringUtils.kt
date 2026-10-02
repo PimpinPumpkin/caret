@@ -622,7 +622,7 @@ fun getTouchedWordRange(before: CharSequence, after: CharSequence, script: Strin
     var endIndexInAfter = -1 // todo: clarify why might we want to set it when checking before
     loopOverCodePointsBackwards(before) { codePoint, cpLength ->
         if (!isPartOfCompositionForScript(codePoint, spacingAndPunctuations, script)) {
-            if (Character.isWhitespace(codePoint) || !spacingAndPunctuations.mCurrentLanguageHasSpaces)
+            if (Character.isWhitespace(codePoint) || !spacingAndPunctuations.currentLanguageHasSpaces)
                 return@loopOverCodePointsBackwards true
             // continue to the next whitespace and see whether this contains a sometimesWordConnector
             for (i in startIndexInBefore - 1 downTo 0) {
@@ -649,7 +649,7 @@ fun getTouchedWordRange(before: CharSequence, after: CharSequence, script: Strin
         endIndexInAfter = 0
         loopOverCodePoints(after) { codePoint, cpLength ->
             if (!isPartOfCompositionForScript(codePoint, spacingAndPunctuations, script)) {
-                if (Character.isWhitespace(codePoint) || !spacingAndPunctuations.mCurrentLanguageHasSpaces)
+                if (Character.isWhitespace(codePoint) || !spacingAndPunctuations.currentLanguageHasSpaces)
                     return@loopOverCodePoints true
                 // continue to the next whitespace and see whether this contains a sometimesWordConnector
                 for (i in endIndexInAfter..<after.length) {

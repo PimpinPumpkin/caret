@@ -46,7 +46,7 @@ object BackgroundGatheringCache {
     }
 
     fun addWord(word: WordData) {
-        if (KeyboardSwitcher.getInstance().getKeyboard()?.mId?.internalAction?.code == KeyCode.INLINE_EMOJI_SEARCH_DONE) {
+        if (KeyboardSwitcher.getInstance().getKeyboard()?.id?.internalAction?.code == KeyCode.INLINE_EMOJI_SEARCH_DONE) {
             if (DEBUG) Log.i(TAG, "inline emoji search, not adding anything")
             return
         }
@@ -118,7 +118,7 @@ object BackgroundGatheringCache {
 
         if (DEBUG) Log.i(TAG, "replace selection \"$selection\", before: \"$before\", after: \"$after\"")
         val script = RichInputMethodManager.getInstance().currentSubtypeLocale.script
-        val spacingAndPunctuations = Settings.getValues().mSpacingAndPunctuations
+        val spacingAndPunctuations = Settings.getValues().spacingAndPunctuations
         val wordAtStart = getTouchedWordRange(before, "$selection$after", script, spacingAndPunctuations)
         val wordAtEnd = getTouchedWordRange("$before$selection", after, script, spacingAndPunctuations)
         if (DEBUG) Log.i(TAG, "at start \"${wordAtStart.mWord}\", at end \"${wordAtEnd.mWord}\"")
@@ -172,14 +172,14 @@ fun setUseBackgroundGathering(context: Context, editorInfo: EditorInfo): Boolean
 }
 
 private fun isBackgroundGatheringUsed(context: Context, editorInfo: EditorInfo): Boolean {
-    if (!JniUtils.sHaveGestureLib) return false
+    if (!JniUtils.haveGestureLib) return false
     if (!GestureDataGatheringSettings.isBackgroundGatheringEnabled(context.prefs())) return false
-    if (Settings.getValues().mIncognitoModeEnabled) return false
+    if (Settings.getValues().incognitoModeEnabled) return false
     val inputAttributes = InputAttributes(editorInfo, false, "")
     if (inputAttributes.mInputType and InputType.TYPE_CLASS_TEXT == 0)
         return false // undefined (e.g. terminal apps) type should work, but will likely not allow to track corrections
     val isEmailField = InputTypeUtils.isEmailVariation(inputAttributes.mInputType and InputType.TYPE_MASK_VARIATION)
-    if (inputAttributes.mIsPasswordField || inputAttributes.mNoLearning || isEmailField) return false
+    if (inputAttributes.isPasswordField || inputAttributes.noLearning || isEmailField) return false
     if (GestureDataGatheringSettings.isForbiddenForDataGathering(editorInfo.packageName, context)) return false
     if (editorInfo.privateImeOptions == "noBackground") return false // meant for review screen
     // we might not have a known dictionary, they are informed about this when enabling background gathering
@@ -207,11 +207,11 @@ class WordData(
 ) {
     // keyboard is not immutable, so better store potentially relevant information immediately
     private val keys = keyboard.getSortedKeys()
-    private val height = keyboard.mOccupiedHeight
-    private val width = keyboard.mOccupiedWidth
+    private val height = keyboard.occupiedHeight
+    private val width = keyboard.occupiedWidth
 
-    private val packageName = keyboard.mId.editorInfo.packageName
-    private val pointerData = PointerData.fromPointers(composedData.mInputPointers)
+    private val packageName = keyboard.id.editorInfo.packageName
+    private val pointerData = PointerData.fromPointers(composedData.inputPointers)
 
     private val timestamp = System.currentTimeMillis()
 
@@ -260,7 +260,7 @@ class WordData(
                 DictInfo(hash, dict.mDictType, dict.mLocale?.toLanguageTag())
             },
             // index not needed any more
-            filteredSuggestions.map { Suggestion(it.mWord, it.mOriginalScore /*, dictionariesInUsedSuggestions[it.mSourceDict]*/) },
+            filteredSuggestions.map { Suggestion(it.mWord, it.originalScore /*, dictionariesInUsedSuggestions[it.mSourceDict]*/) },
             pointerData,
             keyboardInfo,
             activeMode,
@@ -273,7 +273,7 @@ class WordData(
 
     fun filterSuggestions(blockedWords: Collection<String>): List<SuggestedWords.SuggestedWordInfo> {
         val filteredSuggestions = mutableListOf<SuggestedWords.SuggestedWordInfo>()
-        for (word in suggestions.sortedByDescending { it.mOriginalScore }) {
+        for (word in suggestions.sortedByDescending { it.originalScore }) {
             if (activeMode && word.mWord == targetWord) {
                 // always add the targetWord if we have it
                 filteredSuggestions.add(word)
@@ -283,7 +283,7 @@ class WordData(
                 continue // only first occurrence word
             if (filteredSuggestions.size > 18) // user sees 18 suggestions at most
                 continue
-            if (word.mOriginalScore < 0 && filteredSuggestions.size > 5)
+            if (word.originalScore < 0 && filteredSuggestions.size > 5)
                 continue // no need to add bad matches
             if (activeMode) {
                 filteredSuggestions.add(word)
@@ -312,7 +312,7 @@ class WordData(
         if (activeMode)
             // active mode should be fine, the check is just an addition in case there is a bug that sets the wrong mode or dictionary facilitator
             return suggestions.all { it.mSourceDict == suggestions.first().mSourceDict }
-        if (Settings.getValues().mIncognitoModeEnabled)
+        if (Settings.getValues().incognitoModeEnabled)
             return false // don't save in incognito mode
         if (!GestureDataGatheringSettings.isBackgroundGatheringEnabled(context.prefs()))
             return false
@@ -320,9 +320,9 @@ class WordData(
             return false
         if (GestureDataGatheringSettings.isForbiddenForDataGathering(packageName, context))
             return false // package ignored (we should never come here for blocked apps, but better be safe)
-        val inputAttributes = InputAttributes(keyboard.mId.editorInfo, false, "")
+        val inputAttributes = InputAttributes(keyboard.id.editorInfo, false, "")
         val isEmailField = InputTypeUtils.isEmailVariation(inputAttributes.mInputType and InputType.TYPE_MASK_VARIATION)
-        if (inputAttributes.mIsPasswordField || inputAttributes.mNoLearning || isEmailField)
+        if (inputAttributes.isPasswordField || inputAttributes.noLearning || isEmailField)
             return false // background gathering should not even be enabled, but better have this backup
 
         val matchingSuggestions = suggestions.filter { it.mWord.equals(targetWord ?: topSuggestion?.getWord(), true) }

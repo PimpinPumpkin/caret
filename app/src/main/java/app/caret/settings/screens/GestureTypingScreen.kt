@@ -40,7 +40,7 @@ fun GestureTypingScreen(
     val gestureFloatingPreviewEnabled = prefs.getBoolean(Settings.PREF_GESTURE_FLOATING_PREVIEW_TEXT, Defaults.PREF_GESTURE_FLOATING_PREVIEW_TEXT)
     val gestureEnabled = prefs.getBoolean(Settings.PREF_GESTURE_INPUT, Defaults.PREF_GESTURE_INPUT)
     val ctx = LocalContext.current
-    val haveGestures = JniUtils.sHaveGestureLib
+    val haveGestures = JniUtils.haveGestureLib
     val items = listOf(
         if (FutoSwipe.hasLibrary()) SettingsWithoutKey.SWIPE_MODELS else null,
         if (FutoSwipe.isInstalled(ctx) && FutoSwipe.hasOtherLibrary) FutoSwipe.PREF_ENABLED else null,
@@ -130,7 +130,7 @@ fun createGestureTypingSettings(context: Context) = listOf(
 @Preview
 @Composable
 private fun Preview() {
-    JniUtils.sHaveGestureLib = true
+    JniUtils.haveGestureLib = true
     initPreview(LocalContext.current)
     Theme(previewDark) {
         Surface {

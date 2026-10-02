@@ -26,17 +26,17 @@ import app.caret.latin.utils.InputTypeUtils
 
 class AccessibilityUtils private constructor() {
     private lateinit var mContext: Context
-    private lateinit var mAccessibilityManager: AccessibilityManager
-    private lateinit var mAudioManager: AudioManager
+    private lateinit var accessibilityManager: AccessibilityManager
+    private lateinit var audioManager: AudioManager
     /** The most recent auto-correction.  */
-    private var mAutoCorrectionWord: String? = null
+    private var autoCorrectionWord: String? = null
     /** The most recent typed word for auto-correction.  */
-    private var mTypedWord: String? = null
+    private var typedWord: String? = null
 
     private fun initInternal(context: Context) {
         mContext = context
-        mAccessibilityManager = context.getSystemService(Context.ACCESSIBILITY_SERVICE) as AccessibilityManager
-        mAudioManager = context.getSystemService(Context.AUDIO_SERVICE) as AudioManager
+        accessibilityManager = context.getSystemService(Context.ACCESSIBILITY_SERVICE) as AccessibilityManager
+        audioManager = context.getSystemService(Context.AUDIO_SERVICE) as AudioManager
     }
 
     /**
@@ -46,7 +46,7 @@ class AccessibilityUtils private constructor() {
      * @return `true` if accessibility is enabled.
      */
     val isAccessibilityEnabled: Boolean
-        get() = ENABLE_ACCESSIBILITY && mAccessibilityManager.isEnabled
+        get() = ENABLE_ACCESSIBILITY && accessibilityManager.isEnabled
 
     /**
      * Returns `true` if touch exploration is enabled. Currently, this
@@ -56,7 +56,7 @@ class AccessibilityUtils private constructor() {
      * @return `true` if touch exploration is enabled.
      */
     val isTouchExplorationEnabled: Boolean
-        get() = isAccessibilityEnabled && mAccessibilityManager.isTouchExplorationEnabled
+        get() = isAccessibilityEnabled && accessibilityManager.isTouchExplorationEnabled
 
     /**
      * Returns whether the device should obscure typed password characters.
@@ -74,10 +74,10 @@ class AccessibilityUtils private constructor() {
         // Always speak if the user is listening through headphones.
         val listeningThroughHeadphones = if (Build.VERSION.SDK_INT < Build.VERSION_CODES.M) {
             @Suppress("deprecation") // no replacement available
-            mAudioManager.isWiredHeadsetOn || mAudioManager.isBluetoothA2dpOn
+            audioManager.isWiredHeadsetOn || audioManager.isBluetoothA2dpOn
         } else {
             // try the same as the deprecated thing above, for what we can assume to be headphones
-            mAudioManager.getDevices(AudioManager.GET_DEVICES_OUTPUTS).any {
+            audioManager.getDevices(AudioManager.GET_DEVICES_OUTPUTS).any {
                 when (it.type) {
                     TYPE_WIRED_HEADSET, TYPE_WIRED_HEADPHONES, TYPE_BLUETOOTH_SCO, TYPE_BLUETOOTH_A2DP, TYPE_USB_HEADSET, TYPE_HEARING_AID, TYPE_BLE_HEADSET -> true
                     else -> false
@@ -98,12 +98,12 @@ class AccessibilityUtils private constructor() {
      */
     fun setAutoCorrection(suggestedWords: SuggestedWords) {
         if (suggestedWords.mWillAutoCorrect) {
-            mAutoCorrectionWord = suggestedWords.getWord(SuggestedWords.INDEX_OF_AUTO_CORRECTION)
+            autoCorrectionWord = suggestedWords.getWord(SuggestedWords.INDEX_OF_AUTO_CORRECTION)
             val typedWordInfo = suggestedWords.mTypedWordInfo
-            mTypedWord = typedWordInfo?.mWord
+            typedWord = typedWordInfo?.mWord
         } else {
-            mAutoCorrectionWord = null
-            mTypedWord = null
+            autoCorrectionWord = null
+            typedWord = null
         }
     }
 
@@ -119,13 +119,13 @@ class AccessibilityUtils private constructor() {
      */
     fun getAutoCorrectionDescription(
             keyCodeDescription: String?, shouldObscure: Boolean): String? {
-        if (!TextUtils.isEmpty(mAutoCorrectionWord)) {
-            if (!TextUtils.equals(mAutoCorrectionWord, mTypedWord)) {
+        if (!TextUtils.isEmpty(autoCorrectionWord)) {
+            if (!TextUtils.equals(autoCorrectionWord, typedWord)) {
                 return if (shouldObscure) { // This should never happen, but just in case...
                     mContext.getString(R.string.spoken_auto_correct_obscured,
                             keyCodeDescription)
                 } else mContext.getString(R.string.spoken_auto_correct, keyCodeDescription,
-                        mTypedWord, mAutoCorrectionWord)
+                        typedWord, autoCorrectionWord)
             }
         }
         return keyCodeDescription
@@ -139,7 +139,7 @@ class AccessibilityUtils private constructor() {
      * @param text The text to speak.
      */
     fun announceForAccessibility(view: View, text: CharSequence?) {
-        if (!mAccessibilityManager.isEnabled) {
+        if (!accessibilityManager.isEnabled) {
             Log.e(TAG, "Attempted to speak when accessibility was disabled!")
             return
         }
@@ -185,8 +185,8 @@ class AccessibilityUtils private constructor() {
      * @param event The event to send.
      */
     fun requestSendAccessibilityEvent(event: AccessibilityEvent?) {
-        if (mAccessibilityManager.isEnabled) {
-            mAccessibilityManager.sendAccessibilityEvent(event)
+        if (accessibilityManager.isEnabled) {
+            accessibilityManager.sendAccessibilityEvent(event)
         }
     }
 

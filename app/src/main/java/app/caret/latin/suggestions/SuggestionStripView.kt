@@ -150,8 +150,8 @@ class SuggestionStripView(context: Context, attrs: AttributeSet?, defStyle: Int)
         enabledToolKeyBackground.gradientType = GradientDrawable.RADIAL_GRADIENT
         enabledToolKeyBackground.gradientRadius = resources.getDimensionPixelSize(R.dimen.config_suggestions_strip_height) / 2.1f
 
-        val mToolbarMode = if (isGone) ToolbarMode.HIDDEN else Settings.getValues().mToolbarMode
-        if (mToolbarMode == ToolbarMode.TOOLBAR_KEYS) {
+        val toolbarMode = if (isGone) ToolbarMode.HIDDEN else Settings.getValues().toolbarMode
+        if (toolbarMode == ToolbarMode.TOOLBAR_KEYS) {
             setToolbarVisibility(true)
         }
 
@@ -182,7 +182,7 @@ class SuggestionStripView(context: Context, attrs: AttributeSet?, defStyle: Int)
                 pinnedKeys.addView(button, pinnedKeys.childCount - if (pinnedKeys.findViewWithTag<View>(ToolbarKey.VOICE) != null) 1 else 0)
             }
             val pinnedKeyInToolbar = toolbar.findViewWithTag<View>(pinnedKey)
-            if (pinnedKeyInToolbar != null && Settings.getValues().mQuickPinToolbarKeys)
+            if (pinnedKeyInToolbar != null && Settings.getValues().quickPinToolbarKeys)
                 pinnedKeyInToolbar.background = enabledToolKeyBackground
         }
         toolbarContainer.doOnNextLayout {
@@ -206,7 +206,7 @@ class SuggestionStripView(context: Context, attrs: AttributeSet?, defStyle: Int)
                 val dy = me.y - down.y
                 val dx = me.x - down.x
 
-                if (Settings.getValues().mToolbarSwipeDownToHide && dy > 50.dpToPx(resources) && abs(dy) > abs(dx)) {
+                if (Settings.getValues().toolbarSwipeDownToHide && dy > 50.dpToPx(resources) && abs(dy) > abs(dx)) {
                     listener.onSwipeDownOnToolbar()
                     return true
                 }
@@ -231,7 +231,7 @@ class SuggestionStripView(context: Context, attrs: AttributeSet?, defStyle: Int)
 
     fun setRtl(isRtlLanguage: Boolean) {
         val newLayoutDirection: Int
-        if (!Settings.getValues().mVarToolbarDirection)
+        if (!Settings.getValues().varToolbarDirection)
             newLayoutDirection = LAYOUT_DIRECTION_LOCALE
         else {
             newLayoutDirection = if (isRtlLanguage) LAYOUT_DIRECTION_RTL else LAYOUT_DIRECTION_LTR
@@ -291,7 +291,7 @@ class SuggestionStripView(context: Context, attrs: AttributeSet?, defStyle: Int)
             suggestionsStrip.addView(view)
         }
 
-        if (Settings.getValues().mAutoHideToolbar) setToolbarVisibility(false)
+        if (Settings.getValues().autoHideToolbar) setToolbarVisibility(false)
     }
 
     fun setMoreSuggestionsHeight(remainingHeight: Int) {
@@ -382,7 +382,7 @@ class SuggestionStripView(context: Context, attrs: AttributeSet?, defStyle: Int)
 
     private fun onLongClickToolbarKey(view: View) {
         val tag = view.tag as? ToolbarKey ?: return
-        if (!Settings.getValues().mQuickPinToolbarKeys || view.parent === pinnedKeys) {
+        if (!Settings.getValues().quickPinToolbarKeys || view.parent === pinnedKeys) {
             onLongClickToolbarKey(view) { code, isRepeat -> listener.onCodeInput(code, Constants.SUGGESTION_STRIP_COORDINATE, Constants.SUGGESTION_STRIP_COORDINATE, isRepeat) }
         } else if (view.parent === toolbar) {
             AudioAndHapticFeedbackManager.getInstance().performHapticFeedback(this, HapticEvent.KEY_LONG_PRESS)
@@ -491,7 +491,7 @@ class SuggestionStripView(context: Context, attrs: AttributeSet?, defStyle: Int)
         suggestionsStrip.isVisible = true
 
         // Show the toolbar if no suggestions are left and the "Auto show toolbar" setting is enabled
-        if (this.suggestedWords.isEmpty() && Settings.getValues().mAutoShowToolbar) {
+        if (this.suggestedWords.isEmpty() && Settings.getValues().autoShowToolbar) {
             setToolbarVisibility(true)
         }
     }
@@ -517,7 +517,7 @@ class SuggestionStripView(context: Context, attrs: AttributeSet?, defStyle: Int)
     }
 
     fun updateVoiceKey() {
-        val show = Settings.getValues().mShowsVoiceInputKey
+        val show = Settings.getValues().showsVoiceInputKey
         toolbar.findViewWithTag<View>(ToolbarKey.VOICE)?.isVisible = show
         pinnedKeys.findViewWithTag<View>(ToolbarKey.VOICE)?.isVisible = show
         pinnedKeysStart.findViewWithTag<View>(ToolbarKey.VOICE)?.isVisible = show
@@ -527,8 +527,8 @@ class SuggestionStripView(context: Context, attrs: AttributeSet?, defStyle: Int)
         updateVoiceKey()
         val settingsValues = Settings.getValues()
 
-        val toolbarIsExpandable = settingsValues.mToolbarMode == ToolbarMode.EXPANDABLE
-        if (settingsValues.mIncognitoModeEnabled) {
+        val toolbarIsExpandable = settingsValues.toolbarMode == ToolbarMode.EXPANDABLE
+        if (settingsValues.incognitoModeEnabled) {
             toolbarExpandKey.setImageDrawable(incognitoIcon)
             toolbarExpandKey.isVisible = true
         } else {

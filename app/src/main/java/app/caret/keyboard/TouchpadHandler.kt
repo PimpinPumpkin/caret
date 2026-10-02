@@ -49,7 +49,7 @@ class TouchpadHandler {
             touchpadActivationTime = SystemClock.elapsedRealtime()
             mListener!!.onCustomRequest(KeyboardActionListener.CustomAction.TOUCHPAD_ON)
             val sv = Settings.getValues()
-            handler.postDelayed(hapticRunnable, sv.mKeyLongpressTimeout.toLong())
+            handler.postDelayed(hapticRunnable, sv.keyLongpressTimeout.toLong())
             return
         }
 
@@ -60,14 +60,14 @@ class TouchpadHandler {
         val sv = Settings.getValues()
 
         // Debounce
-        if (SystemClock.elapsedRealtime() - touchpadActivationTime < sv.mKeyLongpressTimeout) {
+        if (SystemClock.elapsedRealtime() - touchpadActivationTime < sv.keyLongpressTimeout) {
             touchpadLastX = x
             touchpadLastY = y
             return
         }
 
         // Edge Scrolling
-        if (sv.mTouchpadEdgeScroll && handleEdgeScrolling(x, y)) {
+        if (sv.touchpadEdgeScroll && handleEdgeScrolling(x, y)) {
             return
         }
 
@@ -95,7 +95,7 @@ class TouchpadHandler {
         // 0 -> 70px (Very Slow)
         // 50 -> 40px (Default)
         // 100 -> 10px (Very Fast)
-        val sensitivity = Settings.getInstance().getCurrent().mTouchpadSensitivity
+        val sensitivity = Settings.getInstance().getCurrent().touchpadSensitivity
         val moveThreshold = 70 - (sensitivity * 0.6f).toInt()
 
         // Handle horizontal movement with accumulator
@@ -146,8 +146,8 @@ class TouchpadHandler {
         val currentKeyboard = KeyboardSwitcher.getInstance().getKeyboard()
         if (currentKeyboard == null) return false
 
-        val keyboardHeight = currentKeyboard.mBaseHeight
-        val keyboardWidth = currentKeyboard.mBaseWidth
+        val keyboardHeight = currentKeyboard.baseHeight
+        val keyboardWidth = currentKeyboard.baseWidth
         val thresholdX = (keyboardWidth * EDGE_THRESHOLD_PERCENTAGE).toInt()
         val thresholdY = (keyboardHeight * EDGE_THRESHOLD_PERCENTAGE).toInt()
 
@@ -188,7 +188,7 @@ class TouchpadHandler {
     }
 
     private fun getBaseScrollDelay(): Long {
-        val sensitivity = Settings.getInstance().getCurrent().mTouchpadSensitivity
+        val sensitivity = Settings.getInstance().getCurrent().touchpadSensitivity
 
         // Calculates the base scroll delay based on user sensitivity (range: 0-100).
         // Maps sensitivity 0 to 300ms (slowest) and 100 to 50ms (fastest).

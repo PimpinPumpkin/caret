@@ -10,9 +10,9 @@ import kotlin.random.Random
 
 /** An immutable class that encapsulates a snapshot of word composition data. */
 class ComposedData(
-    @JvmField val mInputPointers: InputPointers,
-    @JvmField val mIsBatchMode: Boolean,
-    @JvmField val mTypedWord: String
+    @JvmField val inputPointers: InputPointers,
+    @JvmField val isBatchMode: Boolean,
+    @JvmField val typedWord: String
 ) {
     /**
      * Copy the code points in the typed word to a destination array of ints.
@@ -27,19 +27,19 @@ class ComposedData(
         destination: IntArray
     ): Int {
         // lastIndex is exclusive
-        val lastIndex = (mTypedWord.length - StringUtils.getTrailingSingleQuotesCount(mTypedWord))
+        val lastIndex = (typedWord.length - StringUtils.getTrailingSingleQuotesCount(typedWord))
         if (lastIndex <= 0) {
             return 0 // The string is empty or contains only single quotes.
         }
 
         // The following function counts the number of code points in the text range which begins
         // at index 0 and extends to the character at lastIndex.
-        val codePointSize = Character.codePointCount(mTypedWord, 0, lastIndex)
+        val codePointSize = Character.codePointCount(typedWord, 0, lastIndex)
         if (codePointSize > destination.size) {
             return -1
         }
         return StringUtils.copyCodePointsAndReturnCodePointCount(
-            destination, mTypedWord, 0, lastIndex, true
+            destination, typedWord, 0, lastIndex, true
         )
     }
 

@@ -33,9 +33,9 @@ class UserBinaryDictionary protected constructor(context: Context, locale: Local
         context, ExpandableBinaryDictionary.getDictName(name, locale!!, dictFile), locale!!,
         Dictionary.TYPE_USER, dictFile) {
 
-    private var mObserver: ContentObserver?
+    private var observer: ContentObserver?
     // this really needs to be the locale string, as it interacts with system
-    private val mLocaleString: String
+    private val localeString: String
     private val mAlsoUseMoreRestrictiveLocales: Boolean
 
     init {
@@ -43,26 +43,26 @@ class UserBinaryDictionary protected constructor(context: Context, locale: Local
         val localeStr = locale.toString()
         if (SubtypeLocaleUtils.NO_LANGUAGE == localeStr) {
             // If we don't have a locale, insert into the "all locales" user dictionary.
-            mLocaleString = USER_DICTIONARY_ALL_LANGUAGES
+            localeString = USER_DICTIONARY_ALL_LANGUAGES
         } else {
-            mLocaleString = localeStr
+            localeString = localeStr
         }
         mAlsoUseMoreRestrictiveLocales = alsoUseMoreRestrictiveLocales
 
-        mObserver = object : ContentObserver(null) {
+        observer = object : ContentObserver(null) {
             override fun onChange(self: Boolean, uri: Uri?) {
                 setNeedsToRecreate()
             }
         }
-        context.contentResolver.registerContentObserver(Words.CONTENT_URI, true, mObserver!!)
+        context.contentResolver.registerContentObserver(Words.CONTENT_URI, true, observer!!)
         reloadDictionaryIfRequired()
     }
 
     @Synchronized
     override fun close() {
-        if (mObserver != null) {
-            mContext.contentResolver.unregisterContentObserver(mObserver!!)
-            mObserver = null
+        if (observer != null) {
+            mContext.contentResolver.unregisterContentObserver(observer!!)
+            observer = null
         }
         super.close()
     }
@@ -73,7 +73,7 @@ class UserBinaryDictionary protected constructor(context: Context, locale: Local
         // This is correct for locale processing. (well, and it sucks e.g. for sr-Latn, resp. sr__#Latn as string)
         // For this example, we'll look at the "en_US_POSIX" case.
         val localeElements: Array<String> =
-                if (TextUtils.isEmpty(mLocaleString)) arrayOf() else mLocaleString.split("_", limit = 3).toTypedArray()
+                if (TextUtils.isEmpty(localeString)) arrayOf() else localeString.split("_", limit = 3).toTypedArray()
         val length = localeElements.size
 
         val request = StringBuilder("(locale is NULL)")

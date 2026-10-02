@@ -37,7 +37,7 @@ import kotlin.math.min
  */
 class Suggest(private val mDictionaryFacilitator: DictionaryFacilitator) {
     private var mAutoCorrectionThreshold = 0f
-    private val mPlausibilityThreshold = 0f
+    private val plausibilityThreshold = 0f
     private val nextWordSuggestionsCache = HashMap<NgramContext, SuggestionResults>()
 
     // cache cleared whenever LatinIME.loadSettings is called, notably on changing layout and switching input fields
@@ -131,12 +131,12 @@ class Suggest(private val mDictionaryFacilitator: DictionaryFacilitator) {
         // If there is an incoming autocorrection, make sure typed word is shown, so user is able to override it.
         // Otherwise, if the relevant setting is enabled, show the typed word in the middle.
         val typedWordWasCapitalized = capitalizedTypedWord != typedWordString
-        val correctToCapitalizedWord = typedWordWasCapitalized && isCorrectionEnabled && Settings.getValues().mAutoCorrectCapitalizedSuggestion
+        val correctToCapitalizedWord = typedWordWasCapitalized && isCorrectionEnabled && Settings.getValues().autoCorrectCapitalizedSuggestion
             && !wordComposer.isCursorFrontOrMiddleOfComposingWord() && typedWordString.drop(1).none { it.isUpperCase() }
         val indexOfTypedWord = 1 + if (hasAutoCorrection) SuggestedWords.INDEX_OF_AUTO_CORRECTION else SuggestedWords.INDEX_OF_TYPED_WORD
         if (
             (hasAutoCorrection
-                || (Settings.getValues().mCenterSuggestionTextToEnter && !wordComposer.isResumed())
+                || (Settings.getValues().centerSuggestionTextToEnter && !wordComposer.isResumed())
                 || typedWordWasCapitalized
             ) && suggestionsList.size >= indexOfTypedWord && capitalizedTypedWord.isNotEmpty()) {
             if (typedWordFirstOccurrenceWordInfo != null) {
@@ -150,7 +150,7 @@ class Suggest(private val mDictionaryFacilitator: DictionaryFacilitator) {
             }
         }
         val isTypedWordValid = firstOccurrenceOfTypedWordInSuggestions > -1 || (!resultsArePredictions && !allowsToBeAutoCorrected)
-        return SuggestedWords(suggestionsList, suggestionResults.mRawSuggestions, typedWordInfo,
+        return SuggestedWords(suggestionsList, suggestionResults.rawSuggestions, typedWordInfo,
             isTypedWordValid, hasAutoCorrection || correctToCapitalizedWord, false, inputStyle, sequenceNumber)
     }
 
@@ -171,7 +171,7 @@ class Suggest(private val mDictionaryFacilitator: DictionaryFacilitator) {
         val consideredWord = typedWordString.dropLast(trailingSingleQuotesCount)
         val firstAndTypedEmptyInfos by lazy { getEmptyWordSuggestions() }
 
-        val scoreLimit = Settings.getValues().mScoreLimitForAutocorrect
+        val scoreLimit = Settings.getValues().scoreLimitForAutocorrect
         // We allow auto-correction if whitelisting is not required or the word is whitelisted,
         // or if the word had more than one char and was not suggested.
         val allowsToBeAutoCorrected: Boolean
@@ -340,8 +340,8 @@ class Suggest(private val mDictionaryFacilitator: DictionaryFacilitator) {
             BackgroundGatheringCache.addWord(wordData)
         }
 
-        val autocorrectCapitalization = addCapitalizedSuggestion && Settings.getValues().mAutoCorrectCapitalizedSuggestion && isCorrectionEnabled && !wordComposer.isCursorFrontOrMiddleOfComposingWord()
-        return SuggestedWords(suggestionsList, suggestionResults.mRawSuggestions, pseudoTypedWordInfo, true,
+        val autocorrectCapitalization = addCapitalizedSuggestion && Settings.getValues().autoCorrectCapitalizedSuggestion && isCorrectionEnabled && !wordComposer.isCursorFrontOrMiddleOfComposingWord()
+        return SuggestedWords(suggestionsList, suggestionResults.rawSuggestions, pseudoTypedWordInfo, true,
             autocorrectCapitalization, false, inputStyle, sequenceNumber)
     }
 
@@ -375,7 +375,7 @@ class Suggest(private val mDictionaryFacilitator: DictionaryFacilitator) {
 
         private const val MAXIMUM_AUTO_CORRECT_LENGTH_FOR_GERMAN = 12
         // TODO: should we add Finnish here?
-        private val sLanguageToMaximumAutoCorrectionWithSpaceLength = hashMapOf(Locale.GERMAN.language to MAXIMUM_AUTO_CORRECT_LENGTH_FOR_GERMAN)
+        private val languageToMaximumAutoCorrectionWithSpaceLength = hashMapOf(Locale.GERMAN.language to MAXIMUM_AUTO_CORRECT_LENGTH_FOR_GERMAN)
 
         private fun capitalizeAndAddTrailingSingleQuotes(
             suggestions: ArrayList<SuggestedWordInfo>, capsMode: CapsMode, trailingSingleQuotesCount: Int, defaultLocale: Locale
@@ -470,7 +470,7 @@ class Suggest(private val mDictionaryFacilitator: DictionaryFacilitator) {
          */
         private fun isAllowedByAutoCorrectionWithSpaceFilter(info: SuggestedWordInfo): Boolean {
             val locale = info.mSourceDict!!.mLocale ?: return true
-            val maximumLengthForThisLanguage = sLanguageToMaximumAutoCorrectionWithSpaceLength[locale.language]
+            val maximumLengthForThisLanguage = languageToMaximumAutoCorrectionWithSpaceLength[locale.language]
                 ?: return true // This language does not enforce a maximum length to auto-correction
             return (info.mWord.length <= maximumLengthForThisLanguage
                     || -1 == info.mWord.indexOf(Constants.CODE_SPACE.toChar()))
@@ -478,7 +478,7 @@ class Suggest(private val mDictionaryFacilitator: DictionaryFacilitator) {
 
         /** returns CapsMode.MANUAL, CapsMode.MANUAL_LOCKED, or CAPS_MODE_OFF */
         private fun getCapsModeForTyping(wordComposer: WordComposer, keyboard: Keyboard): CapsMode {
-            val capsMode = keyboard.mId.element.capsMode
+            val capsMode = keyboard.id.element.capsMode
             if (capsMode == CapsMode.MANUAL || capsMode == CapsMode.MANUAL_LOCKED)
                 return capsMode
             // we have some auto-mode which we ignore
@@ -491,7 +491,7 @@ class Suggest(private val mDictionaryFacilitator: DictionaryFacilitator) {
         /** returns CapsMode.MANUAL, CapsMode.MANUAL_LOCKED, or CAPS_MODE_OFF */
         // maybe could check the details in differences to getCapsModeForTyping and unify?
         private fun getCapsModeForGesture(wordComposer: WordComposer, keyboard: Keyboard): CapsMode {
-            val capsMode = keyboard.mId.element.capsMode
+            val capsMode = keyboard.id.element.capsMode
             if (capsMode == CapsMode.MANUAL || capsMode == CapsMode.MANUAL_LOCKED)
                 return capsMode
             if (wordComposer.isAllUpperCase()) return CapsMode.MANUAL_LOCKED
@@ -545,7 +545,7 @@ class Suggest(private val mDictionaryFacilitator: DictionaryFacilitator) {
             suggestionsContainer: ArrayList<SuggestedWordInfo>,
             nextWordSuggestions: SuggestionResults, rejected: SuggestedWordInfo?
         ): SuggestedWordInfo? {
-            if (pseudoTypedWordInfo == null || !Settings.getValues().mUsePersonalizedDicts
+            if (pseudoTypedWordInfo == null || !Settings.getValues().usePersonalizedDicts
                 || pseudoTypedWordInfo.mSourceDict!!.mDictType != Dictionary.TYPE_MAIN || suggestionsContainer.size < 2
             ) return pseudoTypedWordInfo
             val goodNextSuggestions = nextWordSuggestions.filter { it.mScore >= 170 } // we only want reasonably often typed words, value may require tuning

@@ -31,9 +31,9 @@ import java.util.*
  */
 class CombinerChain(initialText: String, combiningSpec: String) {
     // The already combined text, as described above
-    private val mCombinedText = StringBuilder(initialText)
+    private val combinedText = StringBuilder(initialText)
     // The feedback on the composing state, as described above
-    private val mStateFeedback = SpannableStringBuilder()
+    private val stateFeedback = SpannableStringBuilder()
     private val mCombiners = ArrayList<Combiner>()
 
     init {
@@ -46,17 +46,17 @@ class CombinerChain(initialText: String, combiningSpec: String) {
     }
 
     fun reset() {
-        mCombinedText.setLength(0)
-        mStateFeedback.clear()
+        combinedText.setLength(0)
+        stateFeedback.clear()
         for (c in mCombiners) {
             c.reset()
         }
     }
 
     private fun updateStateFeedback() {
-        mStateFeedback.clear()
+        stateFeedback.clear()
         for (i in mCombiners.indices.reversed()) {
-            mStateFeedback.append(mCombiners[i].combiningStateFeedback)
+            stateFeedback.append(mCombiners[i].combiningStateFeedback)
         }
     }
 
@@ -91,15 +91,15 @@ class CombinerChain(initialText: String, combiningSpec: String) {
     fun applyProcessedEvent(event: Event?) {
         if (null != event) { // TODO: figure out the generic way of doing this
             if (KeyCode.DELETE == event.keyCode) {
-                val length = mCombinedText.length
+                val length = combinedText.length
                 if (length > 0) {
-                    val lastCodePoint = mCombinedText.codePointBefore(length)
-                    mCombinedText.delete(length - Character.charCount(lastCodePoint), length)
+                    val lastCodePoint = combinedText.codePointBefore(length)
+                    combinedText.delete(length - Character.charCount(lastCodePoint), length)
                 }
             } else {
                 val textToCommit = event.textToCommit
                 if (!TextUtils.isEmpty(textToCommit)) {
-                    mCombinedText.append(textToCommit)
+                    combinedText.append(textToCommit)
                 }
             }
         }
@@ -112,8 +112,8 @@ class CombinerChain(initialText: String, combiningSpec: String) {
      */
     val composingWordWithCombiningFeedback: CharSequence
         get() {
-            val s = SpannableStringBuilder(mCombinedText)
-            return s.append(mStateFeedback)
+            val s = SpannableStringBuilder(combinedText)
+            return s.append(stateFeedback)
         }
 
 }

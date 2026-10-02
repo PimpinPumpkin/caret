@@ -23,22 +23,22 @@ import app.caret.keyboard.PointerTracker
  * Draw preview graphics of multiple gesture trails during gesture input.
  */
 class GestureTrailsDrawingPreview(mainKeyboardViewAttr: TypedArray) : AbstractDrawingPreview(), Runnable {
-    private val mGestureTrails = SparseArray<GestureTrailDrawingPoints>()
-    private val mDrawingParams: GestureTrailDrawingParams
+    private val gestureTrails = SparseArray<GestureTrailDrawingPoints>()
+    private val drawingParams: GestureTrailDrawingParams
     private val mGesturePaint: Paint
-    private var mOffscreenWidth = 0
-    private var mOffscreenHeight = 0
-    private var mOffscreenOffsetY = 0
+    private var offscreenWidth = 0
+    private var offscreenHeight = 0
+    private var offscreenOffsetY = 0
     private var mOffscreenBuffer: Bitmap? = null
     private val mOffscreenCanvas = Canvas()
-    private val mOffscreenSrcRect = Rect()
+    private val offscreenSrcRect = Rect()
     private val mDirtyRect = Rect()
-    private val mGestureTrailBoundsRect = Rect() // per trail
+    private val gestureTrailBoundsRect = Rect() // per trail
 
-    private val mDrawingHandler = Handler()
+    private val drawingHandler = Handler()
 
     init {
-        mDrawingParams = GestureTrailDrawingParams(mainKeyboardViewAttr)
+        drawingParams = GestureTrailDrawingParams(mainKeyboardViewAttr)
         val gesturePaint = Paint()
         gesturePaint.setAntiAlias(true)
         gesturePaint.setXfermode(PorterDuffXfermode(PorterDuff.Mode.SRC))
@@ -48,10 +48,10 @@ class GestureTrailsDrawingPreview(mainKeyboardViewAttr: TypedArray) : AbstractDr
     override fun setKeyboardViewGeometry(originCoords: IntArray, width: Int,
             height: Int) {
         super.setKeyboardViewGeometry(originCoords, width, height)
-        mOffscreenOffsetY = (height
+        offscreenOffsetY = (height
                 * GestureStrokeRecognitionPoints.EXTRA_GESTURE_TRAIL_AREA_ABOVE_KEYBOARD_RATIO).toInt()
-        mOffscreenWidth = width
-        mOffscreenHeight = mOffscreenOffsetY + height
+        offscreenWidth = width
+        offscreenHeight = offscreenOffsetY + height
     }
 
     override fun onDeallocateMemory() {
@@ -70,15 +70,15 @@ class GestureTrailsDrawingPreview(mainKeyboardViewAttr: TypedArray) : AbstractDr
 
     private fun mayAllocateOffscreenBuffer() {
         val offscreenBuffer = mOffscreenBuffer
-        if (offscreenBuffer != null && offscreenBuffer.getWidth() == mOffscreenWidth
-                && offscreenBuffer.getHeight() == mOffscreenHeight) {
+        if (offscreenBuffer != null && offscreenBuffer.getWidth() == offscreenWidth
+                && offscreenBuffer.getHeight() == offscreenHeight) {
             return
         }
         freeOffscreenBuffer()
         mOffscreenBuffer = Bitmap.createBitmap(
-                mOffscreenWidth, mOffscreenHeight, Bitmap.Config.ARGB_8888)
+                offscreenWidth, offscreenHeight, Bitmap.Config.ARGB_8888)
         mOffscreenCanvas.setBitmap(mOffscreenBuffer)
-        mOffscreenCanvas.translate(0f, mOffscreenOffsetY.toFloat())
+        mOffscreenCanvas.translate(0f, offscreenOffsetY.toFloat())
     }
 
     private fun drawGestureTrails(offscreenCanvas: Canvas, paint: Paint,
@@ -92,15 +92,15 @@ class GestureTrailsDrawingPreview(mainKeyboardViewAttr: TypedArray) : AbstractDr
         dirtyRect.setEmpty()
         var needsUpdatingGestureTrail = false
         // Draw gesture trails to offscreen buffer.
-        synchronized(mGestureTrails) {
+        synchronized(gestureTrails) {
             // Trails count == fingers count that have ever been active.
-            val trailsCount = mGestureTrails.size()
+            val trailsCount = gestureTrails.size()
             for (index in 0 until trailsCount) {
-                val trail = mGestureTrails.valueAt(index)
+                val trail = gestureTrails.valueAt(index)
                 needsUpdatingGestureTrail = needsUpdatingGestureTrail or trail.drawGestureTrail(
-                        offscreenCanvas, paint, mGestureTrailBoundsRect, mDrawingParams)
-                // {@link #mGestureTrailBoundsRect} has bounding box of the trail.
-                dirtyRect.union(mGestureTrailBoundsRect)
+                        offscreenCanvas, paint, gestureTrailBoundsRect, drawingParams)
+                // {@link #gestureTrailBoundsRect} has bounding box of the trail.
+                dirtyRect.union(gestureTrailBoundsRect)
             }
         }
         return needsUpdatingGestureTrail
@@ -124,14 +124,14 @@ class GestureTrailsDrawingPreview(mainKeyboardViewAttr: TypedArray) : AbstractDr
         val needsUpdatingGestureTrail = drawGestureTrails(
                 mOffscreenCanvas, mGesturePaint, mDirtyRect)
         if (needsUpdatingGestureTrail) {
-            mDrawingHandler.removeCallbacks(this)
-            mDrawingHandler.postDelayed(this, mDrawingParams.mUpdateInterval.toLong())
+            drawingHandler.removeCallbacks(this)
+            drawingHandler.postDelayed(this, drawingParams.updateInterval.toLong())
         }
         // Transfer offscreen buffer to screen.
         if (!mDirtyRect.isEmpty()) {
-            mOffscreenSrcRect.set(mDirtyRect)
-            mOffscreenSrcRect.offset(0, mOffscreenOffsetY)
-            canvas.drawBitmap(mOffscreenBuffer!!, mOffscreenSrcRect, mDirtyRect, null)
+            offscreenSrcRect.set(mDirtyRect)
+            offscreenSrcRect.offset(0, offscreenOffsetY)
+            canvas.drawBitmap(mOffscreenBuffer!!, offscreenSrcRect, mDirtyRect, null)
             // Note: Defer clearing the dirty rectangle here because we will get cleared
             // rectangle on the canvas.
         }
@@ -145,11 +145,11 @@ class GestureTrailsDrawingPreview(mainKeyboardViewAttr: TypedArray) : AbstractDr
         if (!isPreviewEnabled()) {
             return
         }
-        val trail: GestureTrailDrawingPoints = synchronized(mGestureTrails) {
-            var t: GestureTrailDrawingPoints? = mGestureTrails.get(tracker.pointerId)
+        val trail: GestureTrailDrawingPoints = synchronized(gestureTrails) {
+            var t: GestureTrailDrawingPoints? = gestureTrails.get(tracker.pointerId)
             if (t == null) {
                 t = GestureTrailDrawingPoints()
-                mGestureTrails.put(tracker.pointerId, t)
+                gestureTrails.put(tracker.pointerId, t)
             }
             t
         }

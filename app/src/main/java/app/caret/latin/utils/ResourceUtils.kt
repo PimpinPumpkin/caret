@@ -28,12 +28,12 @@ object ResourceUtils {
     @JvmStatic
     fun getKeyboardWidth(ctx: Context, settingsValues: SettingsValues): Int {
         // Floating keyboard width takes priority
-        if (settingsValues.mIsFloatingKeyboard) {
-            return settingsValues.mFloatingWidth
+        if (settingsValues.isFloatingKeyboard) {
+            return settingsValues.floatingWidth
         }
         val defaultKeyboardWidth = getDefaultKeyboardWidth(ctx)
-        if (settingsValues.mOneHandedModeEnabled) {
-            return (settingsValues.mOneHandedModeScale * defaultKeyboardWidth).toInt()
+        if (settingsValues.oneHandedModeEnabled) {
+            return (settingsValues.oneHandedModeScale * defaultKeyboardWidth).toInt()
         }
         return defaultKeyboardWidth
     }
@@ -58,7 +58,7 @@ object ResourceUtils {
     @JvmStatic
     fun getSecondaryKeyboardHeight(res: Resources, settingsValues: SettingsValues): Int {
         val keyboardHeight = getKeyboardHeight(res, settingsValues)
-        if (settingsValues.mToolbarMode == ToolbarMode.HIDDEN && !settingsValues.mToolbarHidingGlobal) {
+        if (settingsValues.toolbarMode == ToolbarMode.HIDDEN && !settingsValues.toolbarHidingGlobal) {
             // Small adjustment to match the height of the main keyboard which has a hidden strip container.
             return keyboardHeight - res.getDimension(R.dimen.config_suggestions_strip_height).toInt()
         }
@@ -67,11 +67,11 @@ object ResourceUtils {
 
     @JvmStatic
     fun getKeyboardHeight(res: Resources, settingsValues: SettingsValues): Int {
-        if (settingsValues.mIsFloatingKeyboard) {
-            return settingsValues.mFloatingHeight
+        if (settingsValues.isFloatingKeyboard) {
+            return settingsValues.floatingHeight
         }
-        val defaultKeyboardHeight = getDefaultKeyboardHeight(res, settingsValues.mShowsNumberRow)
-        return (defaultKeyboardHeight * settingsValues.mKeyboardHeightScale).toInt()
+        val defaultKeyboardHeight = getDefaultKeyboardHeight(res, settingsValues.showsNumberRow)
+        return (defaultKeyboardHeight * settingsValues.keyboardHeightScale).toInt()
     }
 
     @JvmStatic

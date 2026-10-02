@@ -70,7 +70,7 @@ class CombinedFormatUtils {
                     builder.append("\n")
                 }
             }
-            if (wordProperty.mHasNgrams) {
+            if (wordProperty.hasNgrams) {
                 for (ngramProperty in wordProperty.mNgrams!!) {
                     builder.append(" " + NGRAM_TAG + "=" + ngramProperty.mTargetWord.mWord)
                     builder.append(",")

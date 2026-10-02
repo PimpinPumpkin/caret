@@ -17,7 +17,7 @@ import app.caret.latin.utils.Log
 import app.caret.latin.utils.SpannableStringUtils
 
 class AndroidSpellCheckerSession(service: AndroidSpellCheckerService) : AndroidWordLevelSpellCheckerSession(service) {
-    private val mResources = service.resources
+    private val resources = service.resources
     private var mSentenceLevelAdapter: SentenceLevelAdapter? = null
 
     private fun fixWronglyInvalidatedWordWithSingleQuote(textInfo: TextInfo, sentenceSuggestionsInfo: SentenceSuggestionsInfo): SentenceSuggestionsInfo? {
@@ -128,7 +128,7 @@ class AndroidSpellCheckerSession(service: AndroidSpellCheckerService) : AndroidW
             if (sentenceLevelAdapter == null) {
                 val localeString = getLocale()
                 if (!TextUtils.isEmpty(localeString)) {
-                    sentenceLevelAdapter = SentenceLevelAdapter(mResources, localeString!!.constructLocale())
+                    sentenceLevelAdapter = SentenceLevelAdapter(resources, localeString!!.constructLocale())
                     mSentenceLevelAdapter = sentenceLevelAdapter
                 }
             }
@@ -140,9 +140,9 @@ class AndroidSpellCheckerSession(service: AndroidSpellCheckerService) : AndroidW
         val retval = arrayOfNulls<SentenceSuggestionsInfo>(infosSize)
         for (i in 0..<infosSize) {
             val textInfoParams = sentenceLevelAdapter.getSplitWords(textInfos[i])
-            val mItems = textInfoParams.mItems
-            val itemsSize = mItems.size
-            val splitTextInfos = Array(itemsSize) { mItems[it].mTextInfo }
+            val items = textInfoParams.mItems
+            val itemsSize = items.size
+            val splitTextInfos = Array(itemsSize) { items[it].textInfo }
             retval[i] = SentenceLevelAdapter.reconstructSuggestions(
                 textInfoParams, onGetSuggestionsMultiple(
                     splitTextInfos, suggestionsLimit, true

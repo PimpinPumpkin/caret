@@ -227,7 +227,7 @@ fun GestureDataScreen(
                     keyboard: Keyboard,
                     inputStyle: Int
                 ) {
-                    if (!composedData.mIsBatchMode || inputStyle != SuggestedWords.INPUT_STYLE_TAIL_BATCH) return
+                    if (!composedData.isBatchMode || inputStyle != SuggestedWords.INPUT_STYLE_TAIL_BATCH) return
                     val target = wordFromDict ?: return
                     val newData = WordData(target, suggestions, composedData, ngramContext, keyboard, inputStyle, true)
                     if (suggestions.any { it.mWord == target && it.mScore >= 0 } // just not negative should be fine
@@ -672,7 +672,7 @@ private interface DictWithInfo {
 }
 
 private class CacheDictWithInfo(private val file: File): DictWithInfo {
-    override val locale = (DictionaryInfoUtils.getDictionaryFileHeaderOrNull(file)?.mLocaleString ?: SubtypeLocaleUtils.NO_LANGUAGE)
+    override val locale = (DictionaryInfoUtils.getDictionaryFileHeaderOrNull(file)?.localeString ?: SubtypeLocaleUtils.NO_LANGUAGE)
         .constructLocale()
     override val hash = ChecksumCalculator.checksum(file) ?: ""
     override val internal = !file.name.endsWith(DictionaryInfoUtils.USER_DICTIONARY_SUFFIX)
@@ -701,7 +701,7 @@ private fun BinaryDictionary.addWords(words: MutableList<WeightedWord>) {
         val length = word.codePointCount(0, word.length)
         if (!result.mWordProperty.mIsNotAWord
                 && length > 1
-                && !(result.mWordProperty.mIsPossiblyOffensive && Settings.getValues().mBlockPotentiallyOffensive)
+                && !(result.mWordProperty.mIsPossiblyOffensive && Settings.getValues().blockPotentiallyOffensive)
                 && result.mWordProperty.getProbability() > 2 // some minimum value, as there are too many unknown / rare words down there
                 && (!hasCases || word.uppercase() != word)
             ) {

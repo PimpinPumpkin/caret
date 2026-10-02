@@ -28,7 +28,7 @@ import java.util.HashSet
 class KeyPreviewView @JvmOverloads constructor(context: Context, attrs: AttributeSet?, defStyleAttr: Int = 0) :
         TextView(context, attrs, defStyleAttr) {
 
-    private val mBackgroundPadding = Rect()
+    private val backgroundPadding = Rect()
 
     init {
         setGravity(Gravity.CENTER)
@@ -43,9 +43,9 @@ class KeyPreviewView @JvmOverloads constructor(context: Context, attrs: Attribut
         }
 
         setCompoundDrawables(null, null, null, null)
-        setTextColor(drawParams.mPreviewTextColor)
+        setTextColor(drawParams.previewTextColor)
         setTextSize(TypedValue.COMPLEX_UNIT_PX, key.selectPreviewTextSize(drawParams)
-                * Settings.getValues().mFontSizeMultiplier)
+                * Settings.getValues().fontSizeMultiplier)
         KeyboardTypeface.applyToTextView(this, key.getPreviewLabel(), key.selectPreviewTypeface(drawParams))
         // TODO Should take care of temporaryShiftLabel here.
         setTextAndScaleX(key.getPreviewLabel())
@@ -54,11 +54,11 @@ class KeyPreviewView @JvmOverloads constructor(context: Context, attrs: Attribut
     private fun setTextAndScaleX(text: String?) {
         setTextScaleX(1.0f)
         setText(text)
-        if (sNoScaleXTextSet.contains(text)) {
+        if (noScaleXTextSet.contains(text)) {
             return
         }
         if (isEmoji(text!!)) {
-            sNoScaleXTextSet.add(text)
+            noScaleXTextSet.add(text)
             return
         }
         // TODO: Override {@link #setBackground(Drawable)} that is supported from API 16 and
@@ -67,12 +67,12 @@ class KeyPreviewView @JvmOverloads constructor(context: Context, attrs: Attribut
         if (background == null) {
             return
         }
-        background.getPadding(mBackgroundPadding)
-        val maxWidth = background.intrinsicWidth - mBackgroundPadding.left -
-                mBackgroundPadding.right
+        background.getPadding(backgroundPadding)
+        val maxWidth = background.intrinsicWidth - backgroundPadding.left -
+                backgroundPadding.right
         val width = getTextWidth(text, getPaint())
         if (width <= maxWidth) {
-            sNoScaleXTextSet.add(text)
+            noScaleXTextSet.add(text)
             return
         }
         setTextScaleX(maxWidth / width)
@@ -92,11 +92,11 @@ class KeyPreviewView @JvmOverloads constructor(context: Context, attrs: Attribut
         const val POSITION_LEFT = 1
         const val POSITION_RIGHT = 2
 
-        private val sNoScaleXTextSet = HashSet<String>()
+        private val noScaleXTextSet = HashSet<String>()
 
         @JvmStatic
         fun clearTextCache() {
-            sNoScaleXTextSet.clear()
+            noScaleXTextSet.clear()
         }
 
         private fun getTextWidth(text: String?, paint: TextPaint): Float {

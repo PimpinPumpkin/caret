@@ -28,13 +28,13 @@ import app.caret.latin.settings.Settings
  */
 class GestureFloatingTextDrawingPreview(mainKeyboardViewAttr: TypedArray) : AbstractDrawingPreview() {
     protected class GesturePreviewTextParams(mainKeyboardViewAttr: TypedArray) {
-        @JvmField val mGesturePreviewDynamic: Boolean
-        @JvmField val mGesturePreviewTextOffset: Int
-        @JvmField val mGesturePreviewTextHeight: Int
-        @JvmField val mGesturePreviewHorizontalPadding: Float
-        @JvmField val mGesturePreviewVerticalPadding: Float
-        @JvmField val mGesturePreviewRoundRadius: Float
-        @JvmField val mDisplayWidth: Int
+        @JvmField val gesturePreviewDynamic: Boolean
+        @JvmField val gesturePreviewTextOffset: Int
+        @JvmField val gesturePreviewTextHeight: Int
+        @JvmField val gesturePreviewHorizontalPadding: Float
+        @JvmField val gesturePreviewVerticalPadding: Float
+        @JvmField val gesturePreviewRoundRadius: Float
+        @JvmField val displayWidth: Int
 
         private val gesturePreviewTextSize: Int
         private val gesturePreviewTextColor: Int
@@ -43,25 +43,25 @@ class GestureFloatingTextDrawingPreview(mainKeyboardViewAttr: TypedArray) : Abst
 
         init {
             val colors = Settings.getValues().mColors
-            mGesturePreviewDynamic = Settings.getValues().mGestureFloatingPreviewDynamicEnabled
+            gesturePreviewDynamic = Settings.getValues().gestureFloatingPreviewDynamicEnabled
             gesturePreviewTextSize = mainKeyboardViewAttr.getDimensionPixelSize(
                     R.styleable.MainKeyboardView_gestureFloatingPreviewTextSize, 0)
             gesturePreviewTextColor = colors.get(ColorType.KEY_TEXT)
-            mGesturePreviewTextOffset = mainKeyboardViewAttr.getDimensionPixelOffset(
+            gesturePreviewTextOffset = mainKeyboardViewAttr.getDimensionPixelOffset(
                     R.styleable.MainKeyboardView_gestureFloatingPreviewTextOffset, 0)
             gesturePreviewColor = colors.get(ColorType.GESTURE_PREVIEW)
-            mGesturePreviewHorizontalPadding = mainKeyboardViewAttr.getDimension(
+            gesturePreviewHorizontalPadding = mainKeyboardViewAttr.getDimension(
                     R.styleable.MainKeyboardView_gestureFloatingPreviewHorizontalPadding, 0.0f)
-            mGesturePreviewVerticalPadding = mainKeyboardViewAttr.getDimension(
+            gesturePreviewVerticalPadding = mainKeyboardViewAttr.getDimension(
                     R.styleable.MainKeyboardView_gestureFloatingPreviewVerticalPadding, 0.0f)
-            mGesturePreviewRoundRadius = mainKeyboardViewAttr.getDimension(
+            gesturePreviewRoundRadius = mainKeyboardViewAttr.getDimension(
                     R.styleable.MainKeyboardView_gestureFloatingPreviewRoundRadius, 0.0f)
-            mDisplayWidth = mainKeyboardViewAttr.getResources().getDisplayMetrics().widthPixels
+            displayWidth = mainKeyboardViewAttr.getResources().getDisplayMetrics().widthPixels
 
             val textPaint = getTextPaint()
             val textRect = Rect()
             textPaint.getTextBounds(TEXT_HEIGHT_REFERENCE_CHAR, 0, 1, textRect)
-            mGesturePreviewTextHeight = textRect.height()
+            gesturePreviewTextHeight = textRect.height()
         }
 
         fun getTextPaint(): Paint {
@@ -127,7 +127,7 @@ class GestureFloatingTextDrawingPreview(mainKeyboardViewAttr: TypedArray) : Abst
                 || TextUtils.isEmpty(mSuggestedWords.getWord(0))) {
             return
         }
-        val round = params.mGesturePreviewRoundRadius
+        val round = params.gesturePreviewRoundRadius
         canvas.drawRoundRect(
                 gesturePreviewRectangle, round, round, params.getBackgroundPaint())
         val text = mSuggestedWords.getWord(0)
@@ -144,20 +144,20 @@ class GestureFloatingTextDrawingPreview(mainKeyboardViewAttr: TypedArray) : Abst
         }
         val text = mSuggestedWords.getWord(0)
 
-        val textHeight = params.mGesturePreviewTextHeight
+        val textHeight = params.gesturePreviewTextHeight
         val textWidth = params.getTextPaint().measureText(text)
-        val hPad = params.mGesturePreviewHorizontalPadding
-        val vPad = params.mGesturePreviewVerticalPadding
+        val hPad = params.gesturePreviewHorizontalPadding
+        val vPad = params.gesturePreviewVerticalPadding
         val rectWidth = textWidth + hPad * 2.0f
         val rectHeight = textHeight + vPad * 2.0f
 
-        val rectX = if (params.mGesturePreviewDynamic) Math.min(
+        val rectX = if (params.gesturePreviewDynamic) Math.min(
                 Math.max(CoordinateUtils.x(lastPointerCoords) - rectWidth / 2.0f, 0.0f),
-                params.mDisplayWidth - rectWidth)
-            else (params.mDisplayWidth - rectWidth) / 2.0f
-        val rectY = if (params.mGesturePreviewDynamic) CoordinateUtils.y(lastPointerCoords) -
-                params.mGesturePreviewTextOffset - rectHeight
-            else -params.mGesturePreviewTextOffset - rectHeight
+                params.displayWidth - rectWidth)
+            else (params.displayWidth - rectWidth) / 2.0f
+        val rectY = if (params.gesturePreviewDynamic) CoordinateUtils.y(lastPointerCoords) -
+                params.gesturePreviewTextOffset - rectHeight
+            else -params.gesturePreviewTextOffset - rectHeight
         gesturePreviewRectangle.set(rectX, rectY, rectX + rectWidth, rectY + rectHeight)
 
         previewTextX = (rectX + hPad + textWidth / 2.0f).toInt()

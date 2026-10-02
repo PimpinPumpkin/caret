@@ -12,12 +12,12 @@ class GestureEnabler {
     /** True if we should handle gesture events. */
     private var mShouldHandleGesture = false
     private var mMainDictionaryAvailable = false
-    private var mGestureHandlingEnabledByInputField = false
+    private var gestureHandlingEnabledByInputField = false
     private var mGestureHandlingEnabledByUser = false
 
     private fun updateGestureHandlingMode() {
         mShouldHandleGesture = mMainDictionaryAvailable
-                && mGestureHandlingEnabledByInputField
+                && gestureHandlingEnabledByInputField
                 && mGestureHandlingEnabledByUser
                 && !AccessibilityUtils.instance.isTouchExplorationEnabled
     }
@@ -34,7 +34,7 @@ class GestureEnabler {
     }
 
     fun setPasswordMode(passwordMode: Boolean) {
-        mGestureHandlingEnabledByInputField = !passwordMode
+        gestureHandlingEnabledByInputField = !passwordMode
         updateGestureHandlingMode()
     }
 

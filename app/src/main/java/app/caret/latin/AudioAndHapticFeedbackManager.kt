@@ -28,7 +28,7 @@ class AudioAndHapticFeedbackManager private constructor() {
     private var mVibrator: Vibrator? = null
 
     private var mSettingsValues: SettingsValues? = null
-    private var mSoundOn = false
+    private var soundOn = false
     private var mDoNotDisturb = false
 
     init {
@@ -65,7 +65,7 @@ class AudioAndHapticFeedbackManager private constructor() {
     private fun reevaluateIfSoundIsOn(): Boolean {
         val settingsValues = mSettingsValues
         val audioManager = mAudioManager
-        if (settingsValues == null || !settingsValues.mSoundOn || audioManager == null || mDoNotDisturb) {
+        if (settingsValues == null || !settingsValues.soundOn || audioManager == null || mDoNotDisturb) {
             return false
         }
         return audioManager.ringerMode == AudioManager.RINGER_MODE_NORMAL
@@ -77,7 +77,7 @@ class AudioAndHapticFeedbackManager private constructor() {
         if (audioManager == null) {
             return
         }
-        if (!mSoundOn) {
+        if (!soundOn) {
             return
         }
         if (hapticEvent != HapticEvent.KEY_PRESS) {
@@ -89,20 +89,20 @@ class AudioAndHapticFeedbackManager private constructor() {
             Constants.CODE_SPACE -> AudioManager.FX_KEYPRESS_SPACEBAR
             else -> AudioManager.FX_KEYPRESS_STANDARD
         }
-        audioManager.playSoundEffect(sound, mSettingsValues!!.mKeypressSoundVolume)
+        audioManager.playSoundEffect(sound, mSettingsValues!!.keypressSoundVolume)
     }
 
     fun performHapticFeedback(viewToPerformHapticFeedbackOn: View?, hapticEvent: HapticEvent) {
         val settingsValues = mSettingsValues!!
-        if (!settingsValues.mVibrateOn || (mDoNotDisturb && !settingsValues.mVibrateInDndMode)) {
+        if (!settingsValues.vibrateOn || (mDoNotDisturb && !settingsValues.vibrateInDndMode)) {
             return
         }
         if (hapticEvent == HapticEvent.NO_HAPTICS) {
             // Avoid surprises with the handling of HapticFeedbackConstants.NO_HAPTICS
             return
         }
-        if (hapticEvent.allowCustomDuration && settingsValues.mKeypressVibrationDuration >= 0) {
-            vibrate(settingsValues.mKeypressVibrationDuration.toLong())
+        if (hapticEvent.allowCustomDuration && settingsValues.keypressVibrationDuration >= 0) {
+            vibrate(settingsValues.keypressVibrationDuration.toLong())
             return
         }
         // Go ahead with the system default
@@ -115,12 +115,12 @@ class AudioAndHapticFeedbackManager private constructor() {
 
     fun onSettingsChanged(settingsValues: SettingsValues?) {
         mSettingsValues = settingsValues
-        mSoundOn = reevaluateIfSoundIsOn()
+        soundOn = reevaluateIfSoundIsOn()
     }
 
     fun onRingerModeChanged(doNotDisturb: Boolean) {
         mDoNotDisturb = doNotDisturb
-        mSoundOn = reevaluateIfSoundIsOn()
+        soundOn = reevaluateIfSoundIsOn()
     }
 
     companion object {

@@ -613,12 +613,12 @@ class SuggestTest {
         }
         params.GRID_HEIGHT = 1
         params.GRID_WIDTH = 1
-        params.mId = KeyboardLayoutSet.getFakeKeyboardId(elementId)
+        params.id = KeyboardLayoutSet.getFakeKeyboardId(elementId)
 
         suggest.clearNextWordSuggestionsCache()
         return suggest.getSuggestedWords(
-            wc, NgramContext.EMPTY_PREV_WORDS_INFO, Keyboard(params), Settings.getValues().mSettingsValuesForSuggestion,
-            Settings.getValues().mAutoCorrectEnabled, 0, 0
+            wc, NgramContext.EMPTY_PREV_WORDS_INFO, Keyboard(params), Settings.getValues().settingsValuesForSuggestion,
+            Settings.getValues().autoCorrectEnabled, 0, 0
         )
     }
 
@@ -628,7 +628,7 @@ class SuggestTest {
             putFloat(Settings.PREF_AUTO_CORRECT_CONFIDENCE, autoCorrectThreshold)
             putBoolean(Settings.PREF_MORE_AUTO_CORRECTION, true)
         }
-        suggest.setAutoCorrectionThreshold(Settings.getValues().mAutoCorrectionThreshold)
+        suggest.setAutoCorrectionThreshold(Settings.getValues().autoCorrectionThreshold)
     }
 
     private fun shouldBeAutoCorrected(word: String, // typed word
@@ -703,8 +703,8 @@ class ShadowFacilitator {
     fun getSuggestionResults(composedData: ComposedData, ngramContext: NgramContext, keyboard: Keyboard,
                              settingsValuesForSuggestion: SettingsValuesForSuggestion, sessionId: Int, inputStyle: Int
     ): SuggestionResults = when {
-        composedData.mIsBatchMode -> glideTypingSuggestions
-        composedData.mTypedWord.isEmpty() -> nextWordSuggestions
+        composedData.isBatchMode -> glideTypingSuggestions
+        composedData.typedWord.isEmpty() -> nextWordSuggestions
         else -> tapTypingSuggestions
     }
 }

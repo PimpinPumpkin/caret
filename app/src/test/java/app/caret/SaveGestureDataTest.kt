@@ -59,6 +59,6 @@ class SaveGestureDataTest {
     private val kb = Keyboard(KeyboardParams().apply {
         GRID_HEIGHT = 1
         GRID_WIDTH = 1
-        mId = KeyboardLayoutSet.getFakeKeyboardId(KeyboardElement.ALPHABET)
+        this.id = KeyboardLayoutSet.getFakeKeyboardId(KeyboardElement.ALPHABET)
     })
 }

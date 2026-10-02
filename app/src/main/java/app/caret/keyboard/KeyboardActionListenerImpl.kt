@@ -84,7 +84,7 @@ class KeyboardActionListenerImpl(private val latinIME: LatinIME, private val inp
 
         val event: Event
         if (settings.getCurrent().mLocale.language == "ko") { // todo: this does not appear to be the right place
-            val subtype = keyboardSwitcher.getKeyboard()?.mId?.subtype ?: RichInputMethodManager.getInstance().currentSubtype
+            val subtype = keyboardSwitcher.getKeyboard()?.id?.subtype ?: RichInputMethodManager.getInstance().currentSubtype
             event = HangulEventDecoder.decodeHardwareKeyEvent(subtype, keyEvent) {
                 getHardwareKeyEventDecoder(keyEvent.deviceId).decodeHardwareKey(keyEvent)
             }
@@ -133,7 +133,7 @@ class KeyboardActionListenerImpl(private val latinIME: LatinIME, private val inp
                 return
             }
         }
-        if (Settings.getValues().mIsLocked && KeyCode.isIsBlockedWhenLocked(primaryCode))
+        if (Settings.getValues().isLocked && KeyCode.isIsBlockedWhenLocked(primaryCode))
             return
         val mkv = keyboardSwitcher.getMainKeyboardView()!!
 
@@ -195,7 +195,7 @@ class KeyboardActionListenerImpl(private val latinIME: LatinIME, private val inp
         }
     }
 
-    override fun onHorizontalSpaceSwipe(steps: Int): Boolean = when (Settings.getValues().mSpaceSwipeHorizontal) {
+    override fun onHorizontalSpaceSwipe(steps: Int): Boolean = when (Settings.getValues().spaceSwipeHorizontal) {
         KeyboardActionListener.SwipeAction.MOVE_CURSOR -> onMoveCursorHorizontally(steps)
         KeyboardActionListener.SwipeAction.SWITCH_LANGUAGE -> onLanguageSlide(steps)
         KeyboardActionListener.SwipeAction.TOGGLE_NUMPAD -> {
@@ -209,7 +209,7 @@ class KeyboardActionListenerImpl(private val latinIME: LatinIME, private val inp
         else -> false
     }
 
-    override fun onVerticalSpaceSwipe(steps: Int): Boolean = when (Settings.getValues().mSpaceSwipeVertical) {
+    override fun onVerticalSpaceSwipe(steps: Int): Boolean = when (Settings.getValues().spaceSwipeVertical) {
         KeyboardActionListener.SwipeAction.MOVE_CURSOR -> onMoveCursorVertically(steps)
         KeyboardActionListener.SwipeAction.SWITCH_LANGUAGE -> onLanguageSlide(steps)
         KeyboardActionListener.SwipeAction.TOGGLE_NUMPAD -> {
@@ -256,7 +256,7 @@ class KeyboardActionListenerImpl(private val latinIME: LatinIME, private val inp
     override fun onMoveDeletePointer(steps: Int) {
         inputLogic.finishInput()
         val end = connection.expectedSelectionEnd
-        val actualSteps = if (Settings.getValues().mSwipeDeleteByWord) wordSteps(steps) else actualSteps(steps)
+        val actualSteps = if (Settings.getValues().swipeDeleteByWord) wordSteps(steps) else actualSteps(steps)
         val start = connection.expectedSelectionStart + actualSteps
         if (start > end) return
         gestureMoveBackHaptics()
@@ -286,7 +286,7 @@ class KeyboardActionListenerImpl(private val latinIME: LatinIME, private val inp
     }
 
     private fun onLanguageSlide(steps: Int): Boolean {
-        if (abs(steps) < settings.getCurrent().mLanguageSwipeDistance) return false
+        if (abs(steps) < settings.getCurrent().languageSwipeDistance) return false
         val subtypes = SubtypeSettings.getEnabledSubtypes(true)
         if (subtypes.size <= 1) { // only allow if we have more than one subtype
             return false

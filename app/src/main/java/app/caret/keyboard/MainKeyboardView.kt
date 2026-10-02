@@ -154,7 +154,7 @@ class MainKeyboardView @JvmOverloads constructor(context: Context, attrs: Attrib
         backgroundDimAlphaPaint.setAlpha(backgroundDimAlpha)
         languageOnSpacebarTextRatio = mainKeyboardViewAttr.getFraction(
                 R.styleable.MainKeyboardView_languageOnSpacebarTextRatio, 1, 1, 1.0f) *
-                Settings.getValues().mFontSizeMultiplier
+                Settings.getValues().fontSizeMultiplier
         val colors: Colors = Settings.getValues().mColors
         languageOnSpacebarTextColor = colors.get(ColorType.SPACE_BAR_TEXT)
         languageOnSpacebarTextShadowRadius = mainKeyboardViewAttr.getFloat(
@@ -181,7 +181,7 @@ class MainKeyboardView @JvmOverloads constructor(context: Context, attrs: Attrib
         configShowPopupKeysKeyboardAtTouchedPoint = mainKeyboardViewAttr.getBoolean(
                 R.styleable.MainKeyboardView_showPopupKeysKeyboardAtTouchedPoint, false)
 
-        val gestureTrailFadeoutDuration = Settings.getValues().mGestureTrailFadeoutDuration
+        val gestureTrailFadeoutDuration = Settings.getValues().gestureTrailFadeoutDuration
         gestureFloatingPreviewTextLingerTimeout = gestureTrailFadeoutDuration / 4
 
         gestureFloatingTextDrawingPreview = GestureFloatingTextDrawingPreview(mainKeyboardViewAttr)
@@ -280,7 +280,7 @@ class MainKeyboardView @JvmOverloads constructor(context: Context, attrs: Attrib
         popupKeysKeyboardCache.clear()
 
         spaceKey = keyboard.getKey(Constants.CODE_SPACE)
-        val keyHeight = keyboard.mMostCommonKeyHeight - keyboard.mVerticalGap
+        val keyHeight = keyboard.mostCommonKeyHeight - keyboard.mVerticalGap
         languageOnSpacebarTextSize = keyHeight * languageOnSpacebarTextRatio
 
         if (AccessibilityUtils.instance.isAccessibilityEnabled) {
@@ -342,7 +342,7 @@ class MainKeyboardView @JvmOverloads constructor(context: Context, attrs: Attrib
     private fun showKeyPreview(key: Key, keyboard: Keyboard) {
         locatePreviewPlacerView()
         getLocationInWindow(originCoords)
-        keyPreviewChoreographer.placeAndShowKeyPreview(key, keyboard.mIconsSet, getKeyDrawParams(),
+        keyPreviewChoreographer.placeAndShowKeyPreview(key, keyboard.iconsSet, getKeyDrawParams(),
                 KeyboardSwitcher.getInstance().getWrapperView()!!.getWidth(), originCoords, drawingPreviewPlacerView)
     }
 
@@ -660,7 +660,7 @@ class MainKeyboardView @JvmOverloads constructor(context: Context, attrs: Attrib
     override fun onDrawKeyTopVisuals(key: Key, canvas: Canvas,
             paint: Paint, params: KeyDrawParams) {
         if (key.altCodeWhileTyping() && key.isEnabled()) {
-            params.mAnimAlpha = Constants.Color.ALPHA_OPAQUE
+            params.animAlpha = Constants.Color.ALPHA_OPAQUE
         }
         super.onDrawKeyTopVisuals(key, canvas, paint, params)
         val code = key.getCode()
@@ -670,7 +670,7 @@ class MainKeyboardView @JvmOverloads constructor(context: Context, attrs: Attrib
                 drawLanguageOnSpacebar(key, canvas, paint)
             }
             // Whether space key needs to show the "..." popup hint for special purposes
-            if (key.isLongPressEnabled() && hasMultipleEnabledIMEsOrSubtypes && Settings.getValues().mSpaceForLangChange) {
+            if (key.isLongPressEnabled() && hasMultipleEnabledIMEsOrSubtypes && Settings.getValues().spaceForLangChange) {
                 drawKeyPopupHint(key, canvas, paint, params)
             }
         } else if (code == KeyCode.LANGUAGE_SWITCH) {
@@ -700,7 +700,7 @@ class MainKeyboardView @JvmOverloads constructor(context: Context, attrs: Attrib
             subtype: RichInputMethodSubtype, width: Int): String {
         // Choose appropriate language name to fit into the width.
 
-        val secondaryLocales = Settings.getValues().mSecondaryLocales
+        val secondaryLocales = Settings.getValues().secondaryLocales
         // avoid showing same language twice
         val secondaryLocalesToUse = withoutDuplicateLanguages(secondaryLocales, subtype.locale.getLanguage())
         if (!secondaryLocalesToUse.isEmpty()) {
@@ -767,16 +767,16 @@ class MainKeyboardView @JvmOverloads constructor(context: Context, attrs: Attrib
         val height = key.getHeight()
         paint.setTextAlign(Align.CENTER)
         paint.setTextSize(languageOnSpacebarTextSize)
-        val customText = Settings.getValues().mSpaceBarText
+        val customText = Settings.getValues().spaceBarText
         val spaceText: String
         if (!customText.isEmpty()) {
             spaceText = customText
         } else if (DebugFlags.DEBUG_ENABLED) {
             val l = KeyboardSwitcher.getInstance().getLocaleAndConfidenceInfo()
-            spaceText = if (l != null) l else layoutLanguageOnSpacebar(paint, keyboard.mId.subtype, width)
+            spaceText = if (l != null) l else layoutLanguageOnSpacebar(paint, keyboard.id.subtype, width)
         }
         else
-            spaceText = layoutLanguageOnSpacebar(paint, keyboard.mId.subtype, width)
+            spaceText = layoutLanguageOnSpacebar(paint, keyboard.id.subtype, width)
         paint.setTypeface(KeyboardTypeface.resolve(spaceText, Typeface.DEFAULT))
         // Draw language text with shadow
         val descent = paint.descent()

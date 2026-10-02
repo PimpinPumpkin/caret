@@ -58,21 +58,21 @@ class GestureStrokeRecognitionPoints(private val pointerId: Int,
         maxYCoordinate = keyboardHeight
         // TODO: Find an appropriate base metric for these length. Maybe diagonal length of the key?
         detectFastMoveSpeedThreshold = (
-                keyWidth * recognitionParams.mDetectFastMoveSpeedThreshold).toInt()
+                keyWidth * recognitionParams.detectFastMoveSpeedThreshold).toInt()
         gestureDynamicDistanceThresholdFrom = (
-                keyWidth * recognitionParams.mDynamicDistanceThresholdFrom).toInt()
+                keyWidth * recognitionParams.dynamicDistanceThresholdFrom).toInt()
         gestureDynamicDistanceThresholdTo = (
-                keyWidth * recognitionParams.mDynamicDistanceThresholdTo).toInt()
+                keyWidth * recognitionParams.dynamicDistanceThresholdTo).toInt()
         gestureSamplingMinimumDistance = (
-                keyWidth * recognitionParams.mSamplingMinimumDistance).toInt()
+                keyWidth * recognitionParams.samplingMinimumDistance).toInt()
         gestureRecognitionSpeedThreshold = (
-                keyWidth * recognitionParams.mRecognitionSpeedThreshold).toInt()
+                keyWidth * recognitionParams.recognitionSpeedThreshold).toInt()
         if (DEBUG) {
             Log.d(TAG, String.format(Locale.US,
                     "[%d] setKeyboardGeometry: keyWidth=%3d tT=%3d >> %3d tD=%3d >> %3d",
                     pointerId, keyWidth,
-                    recognitionParams.mDynamicTimeThresholdFrom,
-                    recognitionParams.mDynamicTimeThresholdTo,
+                    recognitionParams.dynamicTimeThresholdFrom,
+                    recognitionParams.dynamicTimeThresholdTo,
                     gestureDynamicDistanceThresholdFrom,
                     gestureDynamicDistanceThresholdTo))
         }
@@ -87,7 +87,7 @@ class GestureStrokeRecognitionPoints(private val pointerId: Int,
     fun addDownEventPoint(x: Int, y: Int, elapsedTimeSinceFirstDown: Int,
             elapsedTimeSinceLastTyping: Int) {
         reset()
-        if (elapsedTimeSinceLastTyping < Settings.getValues().mGestureFastTypingCooldown) {
+        if (elapsedTimeSinceLastTyping < Settings.getValues().gestureFastTypingCooldown) {
             afterFastTyping = true
         }
         if (DEBUG) {
@@ -100,24 +100,24 @@ class GestureStrokeRecognitionPoints(private val pointerId: Int,
     }
 
     private fun getGestureDynamicDistanceThreshold(deltaTime: Int): Int {
-        if (!afterFastTyping || deltaTime >= recognitionParams.mDynamicThresholdDecayDuration) {
+        if (!afterFastTyping || deltaTime >= recognitionParams.dynamicThresholdDecayDuration) {
             return gestureDynamicDistanceThresholdTo
         }
         val decayedThreshold =
                 (gestureDynamicDistanceThresholdFrom - gestureDynamicDistanceThresholdTo) *
-                deltaTime / recognitionParams.mDynamicThresholdDecayDuration
+                deltaTime / recognitionParams.dynamicThresholdDecayDuration
         return gestureDynamicDistanceThresholdFrom - decayedThreshold
     }
 
     private fun getGestureDynamicTimeThreshold(deltaTime: Int): Int {
-        if (!afterFastTyping || deltaTime >= recognitionParams.mDynamicThresholdDecayDuration) {
-            return recognitionParams.mDynamicTimeThresholdTo
+        if (!afterFastTyping || deltaTime >= recognitionParams.dynamicThresholdDecayDuration) {
+            return recognitionParams.dynamicTimeThresholdTo
         }
         val decayedThreshold =
-                (recognitionParams.mDynamicTimeThresholdFrom
-                        - recognitionParams.mDynamicTimeThresholdTo) *
-                deltaTime / recognitionParams.mDynamicThresholdDecayDuration
-        return recognitionParams.mDynamicTimeThresholdFrom - decayedThreshold
+                (recognitionParams.dynamicTimeThresholdFrom
+                        - recognitionParams.dynamicTimeThresholdTo) *
+                deltaTime / recognitionParams.dynamicThresholdDecayDuration
+        return recognitionParams.dynamicTimeThresholdFrom - decayedThreshold
     }
 
     // TODO: Make this package private
@@ -280,7 +280,7 @@ class GestureStrokeRecognitionPoints(private val pointerId: Int,
     // TODO: Make this package private
     fun hasRecognitionTimePast(
             currentTime: Long, lastRecognitionTime: Long): Boolean {
-        return currentTime > lastRecognitionTime + recognitionParams.mRecognitionMinimumTime
+        return currentTime > lastRecognitionTime + recognitionParams.recognitionMinimumTime
     }
 
     // TODO: Make this package private

@@ -97,17 +97,17 @@ sealed interface KeyData : AbstractKeyData {
         //  keys could be replaced with toolbar keys, but parsing needs to be adjusted (should happen anyway...)
         private fun getCommaPopupKeys(params: KeyboardParams): List<String> {
             val keys = mutableListOf<String>()
-            if (!params.mId.deviceLocked)
+            if (!params.id.deviceLocked)
                 keys.add("!icon/clipboard_normal_key|!code/key_clipboard")
-            if (!params.mId.emojiKeyEnabled && !params.mId.element.isNumberLayout)
+            if (!params.id.emojiKeyEnabled && !params.id.element.isNumberLayout)
                 keys.add("!icon/emoji_normal_key|!code/key_emoji")
-            if (!params.mId.languageSwitchKeyEnabled && !params.mId.element.isNumberLayout && RichInputMethodManager.canSwitchLanguage())
+            if (!params.id.languageSwitchKeyEnabled && !params.id.element.isNumberLayout && RichInputMethodManager.canSwitchLanguage())
                 keys.add("!icon/language_switch_key|!code/key_language_switch")
-            if (!params.mId.oneHandedModeEnabled && !Settings.getValues().mIsFloatingKeyboard)
+            if (!params.id.oneHandedModeEnabled && !Settings.getValues().isFloatingKeyboard)
                 keys.add("!icon/start_onehanded_mode_key|!code/key_toggle_onehanded")
-            if (!params.mId.deviceLocked)
+            if (!params.id.deviceLocked)
                 keys.add(ToolbarKey.FLOATING.name.lowercase())
-            if (!params.mId.deviceLocked)
+            if (!params.id.deviceLocked)
                 keys.add("!icon/settings_key|!code/key_settings")
             if (shouldShowTldPopups(params)) {
                 keys.add(",")
@@ -116,12 +116,12 @@ sealed interface KeyData : AbstractKeyData {
         }
 
         private fun getPunctuationPopupKeys(params: KeyboardParams): List<String> {
-            if (params.mId.element == KeyboardElement.SYMBOLS || params.mId.element == KeyboardElement.SYMBOLS_SHIFTED)
+            if (params.id.element == KeyboardElement.SYMBOLS || params.id.element == KeyboardElement.SYMBOLS_SHIFTED)
                 return listOf("…")
-            if (params.mId.element.isNumberLayout)
+            if (params.id.element.isNumberLayout)
                 return listOf(":", "…", ";", "∞", "π", "√", "°", "^")
-            val popupKeys = params.mLocaleKeyboardInfos.getPopupKeys("punctuation")!!.toMutableList()
-            if (params.mId.subtype.isRtlSubtype) {
+            val popupKeys = params.localeKeyboardInfos.getPopupKeys("punctuation")!!.toMutableList()
+            if (params.id.subtype.isRtlSubtype) {
                 for (i in popupKeys.indices)
                     popupKeys[i] = popupKeys[i].rtlLabel(params) // for parentheses
             }
@@ -146,13 +146,13 @@ sealed interface KeyData : AbstractKeyData {
 
         private fun getStringInLocale(id: Int, params: KeyboardParams): String {
             // todo: hi-Latn strings instead of this workaround?
-            val locale = if (params.mId.locale.toLanguageTag() == "hi-Latn") "en_IN".constructLocale()
-            else params.mId.locale
+            val locale = if (params.id.locale.toLanguageTag() == "hi-Latn") "en_IN".constructLocale()
+            else params.id.locale
             return Settings.getInstance().getInLocale(id, locale)
         }
 
         private fun getActionKeyPopupKeys(params: KeyboardParams): SimplePopups? =
-            getActionKeyPopupKeyString(params.mId)?.let { createActionPopupKeys(it, params) }
+            getActionKeyPopupKeyString(params.id)?.let { createActionPopupKeys(it, params) }
 
         private fun getActionKeyPopupKeyString(keyboardId: KeyboardId): String? {
             val action = keyboardId.imeAction
@@ -213,7 +213,7 @@ sealed interface KeyData : AbstractKeyData {
             }
             // remove emoji shortcut on enter in tablet mode (like original, because bottom row always has an emoji key)
             // (probably not necessary, but whatever) and in emoji mode
-            if ((Settings.getInstance().isTablet() || params.mId.element == KeyboardElement.EMOJI_BOTTOM_ROW)
+            if ((Settings.getInstance().isTablet() || params.id.element == KeyboardElement.EMOJI_BOTTOM_ROW)
                 && popupKeys.remove("!icon/emoji_action_key|!code/key_emoji")) {
                 val i = popupKeys.indexOfFirst { it.startsWith(Key.POPUP_KEYS_FIXED_COLUMN_ORDER) }
                 if (i > -1) {
@@ -222,32 +222,32 @@ sealed interface KeyData : AbstractKeyData {
                         popupKeys[i] = popupKeys[i].replace(n.toString(), (n - 1).toString())
                 }
             }
-            if (params.mId.element == KeyboardElement.CLIPBOARD_BOTTOM_ROW)
+            if (params.id.element == KeyboardElement.CLIPBOARD_BOTTOM_ROW)
                 popupKeys.remove("!icon/clipboard_action_key|!code/key_clipboard")
             return SimplePopups(popupKeys)
         }
 
         fun String.replaceIconWithLabelIfNoDrawable(params: KeyboardParams): String {
-            if (params.mIconsSet.getIconDrawable(this) != null) return this
-            if (params.mId.width == AndroidSpellCheckerService.SPELLCHECKER_DUMMY_KEYBOARD_WIDTH
-                && params.mId.height == AndroidSpellCheckerService.SPELLCHECKER_DUMMY_KEYBOARD_HEIGHT
-                && !params.mId.subtype.hasExtraValue(Constants.Subtype.ExtraValue.EMOJI_CAPABLE)
+            if (params.iconsSet.getIconDrawable(this) != null) return this
+            if (params.id.width == AndroidSpellCheckerService.SPELLCHECKER_DUMMY_KEYBOARD_WIDTH
+                && params.id.height == AndroidSpellCheckerService.SPELLCHECKER_DUMMY_KEYBOARD_HEIGHT
+                && !params.id.subtype.hasExtraValue(Constants.Subtype.ExtraValue.EMOJI_CAPABLE)
             )
             // fake keyboard that is used by spell checker (for key coordinates), but not shown to the user
             // often this doesn't have any icons loaded, and there is no need to bother with this
                 return this
             val id = Settings.getInstance().getStringResIdByName("label_$this")
             if (id == 0) {
-                Log.w("TextKeyData", "no resource for label $this in ${params.mId}")
+                Log.w("TextKeyData", "no resource for label $this in ${params.id}")
                 return this
             }
             return getStringInLocale(id, params)
         }
 
         private fun shouldShowTldPopups(params: KeyboardParams): Boolean =
-            (Settings.getInstance().getCurrent().mShowTldPopupKeys
-                    && params.mId.subtype.layouts[LayoutType.FUNCTIONAL] != "functional_keys_tablet"
-                    && (params.mId.mode == KeyboardMode.URL || params.mId.mode == KeyboardMode.EMAIL))
+            (Settings.getInstance().getCurrent().showTldPopupKeys
+                    && params.id.subtype.layouts[LayoutType.FUNCTIONAL] != "functional_keys_tablet"
+                    && (params.id.mode == KeyboardMode.URL || params.id.mode == KeyboardMode.EMAIL))
 
         // could make arrays right away, but they need to be copied anyway as popupKeys arrays are modified when creating KeyParams
         private const val POPUP_KEYS_NAVIGATE_PREVIOUS = "!icon/previous_key|!code/key_action_previous,!icon/clipboard_action_key|!code/key_clipboard"
@@ -295,12 +295,12 @@ sealed interface KeyData : AbstractKeyData {
         val newLabel = KeyLabel.keyLabelToActualLabel(label, params)
         return when (code) {
             // consider currency codes for label
-            KeyCode.CURRENCY_SLOT_1 -> "$newLabel|${params.mLocaleKeyboardInfos.currencyKey.first}"
-            KeyCode.CURRENCY_SLOT_2 -> "$newLabel|${params.mLocaleKeyboardInfos.currencyKey.second[0]}"
-            KeyCode.CURRENCY_SLOT_3 -> "$newLabel|${params.mLocaleKeyboardInfos.currencyKey.second[1]}"
-            KeyCode.CURRENCY_SLOT_4 -> "$newLabel|${params.mLocaleKeyboardInfos.currencyKey.second[2]}"
-            KeyCode.CURRENCY_SLOT_5 -> "$newLabel|${params.mLocaleKeyboardInfos.currencyKey.second[3]}"
-            KeyCode.CURRENCY_SLOT_6 -> "$newLabel|${params.mLocaleKeyboardInfos.currencyKey.second[4]}"
+            KeyCode.CURRENCY_SLOT_1 -> "$newLabel|${params.localeKeyboardInfos.currencyKey.first}"
+            KeyCode.CURRENCY_SLOT_2 -> "$newLabel|${params.localeKeyboardInfos.currencyKey.second[0]}"
+            KeyCode.CURRENCY_SLOT_3 -> "$newLabel|${params.localeKeyboardInfos.currencyKey.second[1]}"
+            KeyCode.CURRENCY_SLOT_4 -> "$newLabel|${params.localeKeyboardInfos.currencyKey.second[2]}"
+            KeyCode.CURRENCY_SLOT_5 -> "$newLabel|${params.localeKeyboardInfos.currencyKey.second[3]}"
+            KeyCode.CURRENCY_SLOT_6 -> "$newLabel|${params.localeKeyboardInfos.currencyKey.second[4]}"
             else -> throw IllegalStateException("code in currency range, but not in currency range?")
         }
     }
@@ -310,15 +310,15 @@ sealed interface KeyData : AbstractKeyData {
         require(label.isNotEmpty() || type == KeyType.PLACEHOLDER || code != KeyCode.UNSPECIFIED) { "non-placeholder key has no code and no label" }
         require(width >= 0f || width == -1f) { "illegal width $width" }
         val newLabel = label.convertFlorisLabel().resolveStringLabel(params)
-        if (newLabel == KeyLabel.SHIFT && params.mId.element.isAlphabet
-                && params.mId.subtype.hasExtraValue(Constants.Subtype.ExtraValue.NO_SHIFT_KEY)) {
+        if (newLabel == KeyLabel.SHIFT && params.id.element.isAlphabet
+                && params.id.subtype.hasExtraValue(Constants.Subtype.ExtraValue.NO_SHIFT_KEY)) {
             return null
         }
 
         val newCode = code.checkAndConvertCode(isPopup)
-        val newLabelFlags = if (labelFlags == 0 && params.mId.element.isNumberLayout) {
+        val newLabelFlags = if (labelFlags == 0 && params.id.element.isNumberLayout) {
             if (type == KeyType.NUMERIC) {
-                when (params.mId.element) {
+                when (params.id.element) {
                     KeyboardElement.PHONE -> Key.LABEL_FLAGS_ALIGN_LABEL_OFF_CENTER or Key.LABEL_FLAGS_HAS_HINT_LABEL or Key.LABEL_FLAGS_FOLLOW_KEY_LARGE_LETTER_RATIO
                     KeyboardElement.PHONE_SYMBOLS -> 0
                     else -> Key.LABEL_FLAGS_FOLLOW_KEY_LARGE_LETTER_RATIO
@@ -418,18 +418,18 @@ sealed interface KeyData : AbstractKeyData {
             KeyLabel.SHIFT -> return Key.BACKGROUND_TYPE_FUNCTIONAL
         }
         // Caret: toolbar actions used as keys look like the other function keys
-        if (label in toolbarKeyStrings.values && params.mId.element.takesFunctionalKeys) return Key.BACKGROUND_TYPE_FUNCTIONAL
+        if (label in toolbarKeyStrings.values && params.id.element.takesFunctionalKeys) return Key.BACKGROUND_TYPE_FUNCTIONAL
         if (type == KeyType.PLACEHOLDER) return Key.BACKGROUND_TYPE_EMPTY
-        if ((params.mId.element == KeyboardElement.SYMBOLS || params.mId.element == KeyboardElement.SYMBOLS_SHIFTED)
+        if ((params.id.element == KeyboardElement.SYMBOLS || params.id.element == KeyboardElement.SYMBOLS_SHIFTED)
                 && (groupId == GROUP_COMMA || groupId == GROUP_PERIOD))
             return Key.BACKGROUND_TYPE_FUNCTIONAL
         return Key.BACKGROUND_TYPE_NORMAL
     }
 
     private fun getDefaultWidth(params: KeyboardParams): Float {
-        return if (label == KeyLabel.SPACE && params.mId.element.takesFunctionalKeys) -1f
-        else if (type == KeyType.NUMERIC && params.mId.element.isNumberLayout) -1f
-        else params.mDefaultKeyWidth
+        return if (label == KeyLabel.SPACE && params.id.element.takesFunctionalKeys) -1f
+        else if (type == KeyType.NUMERIC && params.id.element.isNumberLayout) -1f
+        else params.defaultKeyWidth
     }
 
     // todo (later): add explanations / reasoning, often this is just taken from conversion from OpenBoard / AOSP layouts
@@ -438,14 +438,14 @@ sealed interface KeyData : AbstractKeyData {
             KeyLabel.ALPHA, KeyLabel.SYMBOL_ALPHA, KeyLabel.SYMBOL -> Key.LABEL_FLAGS_PRESERVE_CASE
             KeyLabel.PERIOD -> Key.LABEL_FLAGS_PRESERVE_CASE or
                     // in functional_keys.json the label flag is already defined, let's not override it in case it's removed by the user
-                    if (!params.mId.element.takesFunctionalKeys && shouldShowTldPopups(params)) Key.LABEL_FLAGS_DISABLE_HINT_LABEL else 0
+                    if (!params.id.element.takesFunctionalKeys && shouldShowTldPopups(params)) Key.LABEL_FLAGS_DISABLE_HINT_LABEL else 0
             KeyLabel.ACTION -> {
                 Key.LABEL_FLAGS_PRESERVE_CASE or Key.LABEL_FLAGS_AUTO_X_SCALE or Key.LABEL_FLAGS_FOLLOW_KEY_LABEL_RATIO or
-                        KeyboardTheme.getThemeActionAndEmojiKeyLabelFlags(params.mThemeId)
+                        KeyboardTheme.getThemeActionAndEmojiKeyLabelFlags(params.themeId)
             }
-            KeyLabel.SPACE -> if (params.mId.element.isNumberLayout) Key.LABEL_FLAGS_ALIGN_ICON_TO_BOTTOM else 0
+            KeyLabel.SPACE -> if (params.id.element.isNumberLayout) Key.LABEL_FLAGS_ALIGN_ICON_TO_BOTTOM else 0
             KeyLabel.SHIFT -> Key.LABEL_FLAGS_PRESERVE_CASE
-            toolbarKeyStrings[ToolbarKey.EMOJI] -> KeyboardTheme.getThemeActionAndEmojiKeyLabelFlags(params.mThemeId)
+            toolbarKeyStrings[ToolbarKey.EMOJI] -> KeyboardTheme.getThemeActionAndEmojiKeyLabelFlags(params.themeId)
             KeyLabel.COM -> Key.LABEL_FLAGS_AUTO_X_SCALE or Key.LABEL_FLAGS_FONT_NORMAL or Key.LABEL_FLAGS_PRESERVE_CASE
             KeyLabel.CURRENCY -> Key.LABEL_FLAGS_FOLLOW_KEY_LETTER_RATIO
             KeyLabel.CTRL, KeyLabel.ALT, KeyLabel.FN, KeyLabel.META -> Key.LABEL_FLAGS_PRESERVE_CASE
@@ -463,7 +463,7 @@ sealed interface KeyData : AbstractKeyData {
             KeyLabel.PERIOD -> getPeriodPopups(params)
             KeyLabel.ACTION -> getActionKeyPopupKeys(params)
             KeyLabel.SHIFT -> {
-                if (params.mId.element.isAlphabet) SimplePopups(
+                if (params.id.element.isAlphabet) SimplePopups(
                     listOf(
                         "!noPanelAutoPopupKey!",
                         " |!code/key_capslock"
@@ -471,19 +471,19 @@ sealed interface KeyData : AbstractKeyData {
                 ) else null // why the alphabet popup keys actually?
             }
             KeyLabel.COM -> SimplePopups(
-                listOf(Key.POPUP_KEYS_HAS_LABELS).plus(params.mLocaleKeyboardInfos.tlds.drop(1))
+                listOf(Key.POPUP_KEYS_HAS_LABELS).plus(params.localeKeyboardInfos.tlds.drop(1))
             )
 
             KeyLabel.ZWNJ -> SimplePopups(listOf("!icon/zwj_key|\u200D"))
             // only add currency popups if there are none defined on the key
-            KeyLabel.CURRENCY -> if (popup.isEmpty()) SimplePopups(params.mLocaleKeyboardInfos.currencyKey.second) else null
+            KeyLabel.CURRENCY -> if (popup.isEmpty()) SimplePopups(params.localeKeyboardInfos.currencyKey.second) else null
             else -> null
         }
     }
 
     private fun getPeriodPopups(params: KeyboardParams): SimplePopups =
         SimplePopups(
-            if (shouldShowTldPopups(params)) params.mLocaleKeyboardInfos.tlds
+            if (shouldShowTldPopups(params)) params.localeKeyboardInfos.tlds
             else getPunctuationPopupKeys(params)
         )
 }

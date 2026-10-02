@@ -24,16 +24,16 @@ import app.caret.latin.common.ResizableIntArray
  */
 class GestureTrailDrawingPoints {
     // These three {@link ResizableIntArray}s should be synchronized by {@link #mEventTimes}.
-    private val mXCoordinates = ResizableIntArray(DEFAULT_CAPACITY)
-    private val mYCoordinates = ResizableIntArray(DEFAULT_CAPACITY)
+    private val xCoordinates = ResizableIntArray(DEFAULT_CAPACITY)
+    private val yCoordinates = ResizableIntArray(DEFAULT_CAPACITY)
     private val mEventTimes = ResizableIntArray(DEFAULT_CAPACITY)
     private val mPointTypes = ResizableIntArray(
             if (DEBUG_SHOW_POINTS) DEFAULT_CAPACITY else 0)
-    private var mCurrentStrokeId = -1
+    private var currentStrokeId = -1
     // The wall time of the zero value in {@link #mEventTimes}
-    private var mCurrentTimeBase: Long = 0
-    private var mTrailStartIndex = 0
-    private var mLastInterpolatedDrawIndex = 0
+    private var currentTimeBase: Long = 0
+    private var trailStartIndex = 0
+    private var lastInterpolatedDrawIndex = 0
 
     fun addStroke(stroke: GestureStrokeDrawingPoints, downTime: Long) {
         synchronized(mEventTimes) {
@@ -43,7 +43,7 @@ class GestureTrailDrawingPoints {
 
     private fun addStrokeLocked(stroke: GestureStrokeDrawingPoints, downTime: Long) {
         val trailSize = mEventTimes.getLength()
-        stroke.appendPreviewStroke(mEventTimes, mXCoordinates, mYCoordinates, mPointTypes)
+        stroke.appendPreviewStroke(mEventTimes, xCoordinates, yCoordinates, mPointTypes)
         if (mEventTimes.getLength() == trailSize) {
             return
         }
@@ -52,30 +52,30 @@ class GestureTrailDrawingPoints {
         // Because interpolation algorithm in {@link GestureStrokeDrawingPoints} can't determine
         // the interpolated points in the last segment of gesture stroke, it may need recalculation
         // of interpolation when new segments are added to the stroke.
-        // {@link #mLastInterpolatedDrawIndex} holds the start index of the last segment. It may
+        // {@link #lastInterpolatedDrawIndex} holds the start index of the last segment. It may
         // be updated by the interpolation
         // {@link GestureStrokeDrawingPoints#interpolatePreviewStroke}
         // or by animation {@link #drawGestureTrail(Canvas,Paint,Rect,GestureTrailDrawingParams)}
         // below.
-        val lastInterpolatedIndex = if (strokeId == mCurrentStrokeId)
-                mLastInterpolatedDrawIndex else trailSize
-        mLastInterpolatedDrawIndex = stroke.interpolateStrokeAndReturnStartIndexOfLastSegment(
-                lastInterpolatedIndex, mEventTimes, mXCoordinates, mYCoordinates, mPointTypes)
-        if (strokeId != mCurrentStrokeId) {
-            val elapsedTime = (downTime - mCurrentTimeBase).toInt()
-            for (i in mTrailStartIndex until trailSize) {
+        val lastInterpolatedIndex = if (strokeId == currentStrokeId)
+                lastInterpolatedDrawIndex else trailSize
+        lastInterpolatedDrawIndex = stroke.interpolateStrokeAndReturnStartIndexOfLastSegment(
+                lastInterpolatedIndex, mEventTimes, xCoordinates, yCoordinates, mPointTypes)
+        if (strokeId != currentStrokeId) {
+            val elapsedTime = (downTime - currentTimeBase).toInt()
+            for (i in trailStartIndex until trailSize) {
                 // Decay the previous strokes' event times.
                 eventTimes[i] -= elapsedTime
             }
-            val xCoords = mXCoordinates.getPrimitiveArray()
+            val xCoords = xCoordinates.getPrimitiveArray()
             xCoords[trailSize] = markAsDownEvent(xCoords[trailSize])
-            mCurrentTimeBase = downTime - eventTimes[trailSize]
-            mCurrentStrokeId = strokeId
+            currentTimeBase = downTime - eventTimes[trailSize]
+            currentStrokeId = strokeId
         }
     }
 
     private val mRoundedLine = RoundedLine()
-    private val mRoundedLineBounds = Rect()
+    private val roundedLineBounds = Rect()
 
     /**
      * Draw gesture trail
@@ -102,23 +102,23 @@ class GestureTrailDrawingPoints {
         }
 
         val eventTimes = mEventTimes.getPrimitiveArray()
-        val xCoords = mXCoordinates.getPrimitiveArray()
-        val yCoords = mYCoordinates.getPrimitiveArray()
+        val xCoords = xCoordinates.getPrimitiveArray()
+        val yCoords = yCoordinates.getPrimitiveArray()
         val pointTypes = mPointTypes.getPrimitiveArray()
-        val sinceDown = (SystemClock.uptimeMillis() - mCurrentTimeBase).toInt()
-        var startIndex = mTrailStartIndex
+        val sinceDown = (SystemClock.uptimeMillis() - currentTimeBase).toInt()
+        var startIndex = trailStartIndex
         while (startIndex < trailSize) {
             val elapsedTime = sinceDown - eventTimes[startIndex]
             // Skip too old trail points.
-            if (elapsedTime < params.mTrailLingerDuration) {
+            if (elapsedTime < params.trailLingerDuration) {
                 break
             }
             startIndex++
         }
-        mTrailStartIndex = startIndex
+        trailStartIndex = startIndex
 
         if (startIndex < trailSize) {
-            paint.setColor(params.mTrailColor)
+            paint.setColor(params.trailColor)
             paint.setStyle(Paint.Style.FILL)
             val roundedLine = mRoundedLine
             var p1x = getXCoordValue(xCoords[startIndex])
@@ -132,20 +132,20 @@ class GestureTrailDrawingPoints {
                 val r2 = getWidth(elapsedTime, params) / 2.0f
                 // Draw trail line only when the current point isn't a down point.
                 if (!isDownEventXCoord(xCoords[i])) {
-                    val body1 = r1 * params.mTrailBodyRatio
-                    val body2 = r2 * params.mTrailBodyRatio
+                    val body1 = r1 * params.trailBodyRatio
+                    val body2 = r2 * params.trailBodyRatio
                     val path = roundedLine.makePath(p1x.toFloat(), p1y.toFloat(), body1,
                             p2x.toFloat(), p2y.toFloat(), body2)
                     if (!path.isEmpty()) {
-                        roundedLine.getBounds(mRoundedLineBounds)
-                        if (params.mTrailShadowEnabled) {
-                            val shadow2 = r2 * params.mTrailShadowRatio
-                            paint.setShadowLayer(shadow2, 0.0f, 0.0f, params.mTrailColor)
+                        roundedLine.getBounds(roundedLineBounds)
+                        if (params.trailShadowEnabled) {
+                            val shadow2 = r2 * params.trailShadowRatio
+                            paint.setShadowLayer(shadow2, 0.0f, 0.0f, params.trailColor)
                             val shadowInset = -Math.ceil(shadow2.toDouble()).toInt()
-                            mRoundedLineBounds.inset(shadowInset, shadowInset)
+                            roundedLineBounds.inset(shadowInset, shadowInset)
                         }
                         // Take union for the bounds.
-                        outBoundsRect.union(mRoundedLineBounds)
+                        outBoundsRect.union(roundedLineBounds)
                         val alpha = getAlpha(elapsedTime, params)
                         paint.setAlpha(alpha)
                         canvas.drawPath(path, paint)
@@ -162,7 +162,7 @@ class GestureTrailDrawingPoints {
 
         val newSize = trailSize - startIndex
         if (newSize < startIndex) {
-            mTrailStartIndex = 0
+            trailStartIndex = 0
             if (newSize > 0) {
                 System.arraycopy(eventTimes, startIndex, eventTimes, 0, newSize)
                 System.arraycopy(xCoords, startIndex, xCoords, 0, newSize)
@@ -172,23 +172,23 @@ class GestureTrailDrawingPoints {
                 }
             }
             mEventTimes.setLength(newSize)
-            mXCoordinates.setLength(newSize)
-            mYCoordinates.setLength(newSize)
+            xCoordinates.setLength(newSize)
+            yCoordinates.setLength(newSize)
             if (DEBUG_SHOW_POINTS) {
                 mPointTypes.setLength(newSize)
             }
             // The start index of the last segment of the stroke
-            // {@link mLastInterpolatedDrawIndex} should also be updated because all array
+            // {@link lastInterpolatedDrawIndex} should also be updated because all array
             // elements have just been shifted for compaction or been zeroed.
-            mLastInterpolatedDrawIndex = Math.max(mLastInterpolatedDrawIndex - startIndex, 0)
+            lastInterpolatedDrawIndex = Math.max(lastInterpolatedDrawIndex - startIndex, 0)
         }
         return newSize > 0
     }
 
     private fun debugDrawPoints(canvas: Canvas, startIndex: Int, endIndex: Int,
             paint: Paint) {
-        val xCoords = mXCoordinates.getPrimitiveArray()
-        val yCoords = mYCoordinates.getPrimitiveArray()
+        val xCoords = xCoordinates.getPrimitiveArray()
+        val yCoords = yCoordinates.getPrimitiveArray()
         val pointTypes = mPointTypes.getPrimitiveArray()
         // {@link Paint} that is zero width stroke and anti alias off draws exactly 1 pixel.
         paint.setAntiAlias(false)
@@ -241,13 +241,13 @@ class GestureTrailDrawingPoints {
          * @return the width of a gesture trail
          */
         private fun getAlpha(elapsedTime: Int, params: GestureTrailDrawingParams): Int {
-            val fullAlpha = Color.alpha(params.mTrailColor)
-            if (elapsedTime < params.mFadeoutStartDelay) {
+            val fullAlpha = Color.alpha(params.trailColor)
+            if (elapsedTime < params.fadeoutStartDelay) {
                 return fullAlpha
             }
             val decreasingAlpha = (fullAlpha
-                    * (elapsedTime - params.mFadeoutStartDelay)
-                    / params.mFadeoutDuration)
+                    * (elapsedTime - params.fadeoutStartDelay)
+                    / params.fadeoutDuration)
             return fullAlpha - decreasingAlpha
         }
 
@@ -261,8 +261,8 @@ class GestureTrailDrawingPoints {
          * @return the width of a gesture trail
          */
         private fun getWidth(elapsedTime: Int, params: GestureTrailDrawingParams): Float {
-            val deltaWidth = params.mTrailStartWidth - params.mTrailEndWidth
-            return params.mTrailStartWidth - (deltaWidth * elapsedTime) / params.mTrailLingerDuration
+            val deltaWidth = params.trailStartWidth - params.trailEndWidth
+            return params.trailStartWidth - (deltaWidth * elapsedTime) / params.trailLingerDuration
         }
     }
 }

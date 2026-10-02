@@ -32,8 +32,8 @@ import app.caret.keyboard.KeyboardView
  * @param <KV> The keyboard view class type.
 </KV> */
 open class KeyboardAccessibilityDelegate<KV : KeyboardView>(
-    protected val mKeyboardView: KV,
-    protected val mKeyDetector: KeyDetector
+    protected val keyboardView: KV,
+    protected val keyDetector: KeyDetector
     ) : AccessibilityDelegateCompat() {
     private var mKeyboard: Keyboard? = null
     private var mAccessibilityNodeProvider: KeyboardAccessibilityNodeProvider<KV>? = null
@@ -70,7 +70,7 @@ open class KeyboardAccessibilityDelegate<KV : KeyboardView>(
         if (resId == 0) {
             return
         }
-        val context = mKeyboardView.context
+        val context = keyboardView.context
         sendWindowStateChanged(context.getString(resId))
     }
 
@@ -81,11 +81,11 @@ open class KeyboardAccessibilityDelegate<KV : KeyboardView>(
      */
     protected fun sendWindowStateChanged(text: String?) {
         val stateChange = AccessibilityUtils.obtainEvent(AccessibilityEvent.TYPE_WINDOW_STATE_CHANGED)
-        mKeyboardView.onInitializeAccessibilityEvent(stateChange)
+        keyboardView.onInitializeAccessibilityEvent(stateChange)
         stateChange.text.add(text)
         stateChange.contentDescription = null
-        val parent = mKeyboardView.parent
-        parent?.requestSendAccessibilityEvent(mKeyboardView, stateChange)
+        val parent = keyboardView.parent
+        parent?.requestSendAccessibilityEvent(keyboardView, stateChange)
     }
 
     /**
@@ -111,7 +111,7 @@ open class KeyboardAccessibilityDelegate<KV : KeyboardView>(
             // Instantiate the provide only when requested. Since the system
             // will call this method multiple times it is a good practice to
             // cache the provider instance.
-            return mAccessibilityNodeProvider ?: KeyboardAccessibilityNodeProvider(mKeyboardView, this)
+            return mAccessibilityNodeProvider ?: KeyboardAccessibilityNodeProvider(keyboardView, this)
         }
 
     /**
@@ -124,7 +124,7 @@ open class KeyboardAccessibilityDelegate<KV : KeyboardView>(
         val actionIndex = event.actionIndex
         val x = event.getX(actionIndex).toInt()
         val y = event.getY(actionIndex).toInt()
-        return mKeyDetector.detectHitKey(x, y)
+        return keyDetector.detectHitKey(x, y)
     }
 
     /**
@@ -217,7 +217,7 @@ open class KeyboardAccessibilityDelegate<KV : KeyboardView>(
         val eventTime = SystemClock.uptimeMillis()
         val touchEvent = MotionEvent.obtain(
                 eventTime, eventTime, touchAction, x.toFloat(), y.toFloat(), 0 /* metaState */)
-        mKeyboardView.onTouchEvent(touchEvent)
+        keyboardView.onTouchEvent(touchEvent)
         touchEvent.recycle()
     }
 
@@ -231,7 +231,7 @@ open class KeyboardAccessibilityDelegate<KV : KeyboardView>(
             Log.d(TAG, "onHoverEnterTo: key=$key")
         }
         key.onPressed()
-        mKeyboardView.invalidateKey(key)
+        keyboardView.invalidateKey(key)
         val provider = accessibilityNodeProvider
         provider.onHoverEnterTo(key)
         provider.performActionForKey(key, AccessibilityNodeInfoCompat.ACTION_ACCESSIBILITY_FOCUS)
@@ -254,7 +254,7 @@ open class KeyboardAccessibilityDelegate<KV : KeyboardView>(
             Log.d(TAG, "onHoverExitFrom: key=$key")
         }
         key.onReleased()
-        mKeyboardView.invalidateKey(key)
+        keyboardView.invalidateKey(key)
         val provider = accessibilityNodeProvider
         provider.onHoverExitFrom(key)
     }
@@ -276,6 +276,6 @@ open class KeyboardAccessibilityDelegate<KV : KeyboardView>(
 
     init {
         // Ensure that the view has an accessibility delegate.
-        ViewCompat.setAccessibilityDelegate(mKeyboardView, this) // todo: see the warning, this may be bad
+        ViewCompat.setAccessibilityDelegate(keyboardView, this) // todo: see the warning, this may be bad
     }
 }

@@ -31,7 +31,7 @@ class WordProperty : Comparable<WordProperty> {
     @JvmField val mIsNotAWord: Boolean
     @JvmField val mIsPossiblyOffensive: Boolean
     @JvmField val mHasShortcuts: Boolean
-    @JvmField val mHasNgrams: Boolean
+    @JvmField val hasNgrams: Boolean
 
     private var mHashCode = 0
 
@@ -56,7 +56,7 @@ class WordProperty : Comparable<WordProperty> {
         mIsBeginningOfSentence = false
         mIsNotAWord = isNotAWord
         mIsPossiblyOffensive = isPossiblyOffensive
-        mHasNgrams = bigrams != null && !bigrams.isEmpty()
+        hasNgrams = bigrams != null && !bigrams.isEmpty()
         mHasShortcuts = shortcutTargets != null && !shortcutTargets.isEmpty()
     }
 
@@ -78,7 +78,7 @@ class WordProperty : Comparable<WordProperty> {
         mIsNotAWord = isNotAWord
         mIsPossiblyOffensive = isPossiblyOffensive
         mHasShortcuts = hasShortcuts
-        mHasNgrams = hasBigram
+        hasNgrams = hasBigram
 
         val relatedNgramCount = ngramTargets.size
         for (i in 0 until relatedNgramCount) {
@@ -154,7 +154,7 @@ class WordProperty : Comparable<WordProperty> {
         return mProbabilityInfo == w.mProbabilityInfo && mWord == w.mWord
                 && mShortcutTargets == w.mShortcutTargets && equals(mNgrams, w.mNgrams)
                 && mIsNotAWord == w.mIsNotAWord && mIsPossiblyOffensive == w.mIsPossiblyOffensive
-                && mHasNgrams == w.mHasNgrams && mHasShortcuts && w.mHasNgrams
+                && hasNgrams == w.hasNgrams && mHasShortcuts && w.hasNgrams
     }
 
     override fun hashCode(): Int {

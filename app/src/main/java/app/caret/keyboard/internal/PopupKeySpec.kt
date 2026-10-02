@@ -64,7 +64,7 @@ class PopupKeySpec(popupKeySpec: String, needsToUpperCase: Boolean, locale: Loca
 
     fun buildKey(x: Int, y: Int, labelFlags: Int, background: Int, params: KeyboardParams): Key {
         return Key(mLabel, mIconName, mCode, mOutputText, null, labelFlags, background, x, y,
-                params.mDefaultAbsoluteKeyWidth, params.mDefaultAbsoluteRowHeight, params.mHorizontalGap, params.mVerticalGap)
+                params.defaultAbsoluteKeyWidth, params.defaultAbsoluteRowHeight, params.horizontalGap, params.verticalGap)
     }
 
     override fun hashCode(): Int {

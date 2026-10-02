@@ -22,20 +22,20 @@ class SpacingAndPunctuations {
     private val sortedWordConnectors: IntArray
     private val sortedSometimesWordConnectors: IntArray // maybe rename... they are some sort of glue for words containing separators
     @JvmField
-    val mSortedWordSeparators: IntArray
+    val sortedWordSeparators: IntArray
     @JvmField
-    val mPairSymbols: List<IntArray>
+    val pairSymbols: List<IntArray>
     private val sentenceSeparator: Int
     private val abbreviationMarker: Int
     private val sortedSentenceTerminators: IntArray
     @JvmField
-    val mSentenceSeparatorAndSpace: String
+    val sentenceSeparatorAndSpace: String
     @JvmField
-    val mCurrentLanguageHasSpaces: Boolean
+    val currentLanguageHasSpaces: Boolean
     @JvmField
-    val mUsesAmericanTypography: Boolean
+    val usesAmericanTypography: Boolean
     @JvmField
-    val mUsesGermanRules: Boolean
+    val usesGermanRules: Boolean
 
     constructor(res: Resources, urlDetection: Boolean) {
         // To be able to binary search the code point. See {@link #isUsuallyPrecededBySpace(int)}.
@@ -45,29 +45,29 @@ class SpacingAndPunctuations {
         sortedSymbolsClusteringTogether = StringUtils.toSortedCodePointArray(res.getString(R.string.symbols_clustering_together))
         // To be able to binary search the code point. See {@link #isWordConnector(int)}.
         sortedWordConnectors = StringUtils.toSortedCodePointArray(res.getString(R.string.symbols_word_connectors))
-        mSortedWordSeparators = StringUtils.toSortedCodePointArray(res.getString(R.string.symbols_word_separators))
-        mPairSymbols = toSortedCodepointArrays(res.getString(R.string.pair_symbols))
+        sortedWordSeparators = StringUtils.toSortedCodePointArray(res.getString(R.string.symbols_word_separators))
+        pairSymbols = toSortedCodepointArrays(res.getString(R.string.pair_symbols))
         sortedSentenceTerminators = StringUtils.toSortedCodePointArray(res.getString(R.string.symbols_sentence_terminators))
         sentenceSeparator = res.getInteger(R.integer.sentence_separator)
         abbreviationMarker = res.getInteger(R.integer.abbreviation_marker)
-        mSentenceSeparatorAndSpace = String(intArrayOf(
+        sentenceSeparatorAndSpace = String(intArrayOf(
                 sentenceSeparator, Constants.CODE_SPACE), 0, 2)
-        mCurrentLanguageHasSpaces = res.getBoolean(R.bool.current_language_has_spaces)
+        currentLanguageHasSpaces = res.getBoolean(R.bool.current_language_has_spaces)
         // make it empty if language doesn't have spaces, to avoid weird glitches
-        sortedSometimesWordConnectors = if (urlDetection && mCurrentLanguageHasSpaces) StringUtils.toSortedCodePointArray(res.getString(R.string.symbols_sometimes_word_connectors)) else IntArray(0)
+        sortedSometimesWordConnectors = if (urlDetection && currentLanguageHasSpaces) StringUtils.toSortedCodePointArray(res.getString(R.string.symbols_sometimes_word_connectors)) else IntArray(0)
         val locale = res.configuration.locale()
         // Heuristic: we use American Typography rules because it's the most common rules for all
         // English variants. German rules (not "German typography") also have small gotchas.
-        mUsesAmericanTypography = Locale.ENGLISH.language == locale.language
-        mUsesGermanRules = Locale.GERMAN.language == locale.language
+        usesAmericanTypography = Locale.ENGLISH.language == locale.language
+        usesGermanRules = Locale.GERMAN.language == locale.language
     }
 
     fun isWordSeparator(code: Int): Boolean {
-        return Arrays.binarySearch(mSortedWordSeparators, code) >= 0
+        return Arrays.binarySearch(sortedWordSeparators, code) >= 0
     }
 
     fun getSecondInSymbolPair(code: Int): Int {
-        return app.caret.latin.common.getSecondInSymbolPair(mPairSymbols, code)
+        return app.caret.latin.common.getSecondInSymbolPair(pairSymbols, code)
     }
 
     fun isWordConnector(code: Int): Boolean {
@@ -125,17 +125,17 @@ class SpacingAndPunctuations {
                 "" + Arrays.toString(sortedSymbolsFollowedBySpace) +
                 "\n   mSortedWordConnectors = " +
                 "" + Arrays.toString(sortedWordConnectors) +
-                "\n   mSortedWordSeparators = " +
-                "" + Arrays.toString(mSortedWordSeparators) +
+                "\n   sortedWordSeparators = " +
+                "" + Arrays.toString(sortedWordSeparators) +
                 "\n   mSentenceSeparator = " +
                 "" + sentenceSeparator +
-                "\n   mSentenceSeparatorAndSpace = " +
-                "" + mSentenceSeparatorAndSpace +
-                "\n   mCurrentLanguageHasSpaces = " +
-                "" + mCurrentLanguageHasSpaces +
-                "\n   mUsesAmericanTypography = " +
-                "" + mUsesAmericanTypography +
-                "\n   mUsesGermanRules = " +
-                "" + mUsesGermanRules
+                "\n   sentenceSeparatorAndSpace = " +
+                "" + sentenceSeparatorAndSpace +
+                "\n   currentLanguageHasSpaces = " +
+                "" + currentLanguageHasSpaces +
+                "\n   usesAmericanTypography = " +
+                "" + usesAmericanTypography +
+                "\n   usesGermanRules = " +
+                "" + usesGermanRules
     }
 }

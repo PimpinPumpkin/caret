@@ -27,14 +27,14 @@ fun createPopupKeysArray(popupSet: PopupSet<*>?, params: KeyboardParams, label: 
     // often PopupKeys are empty, so we want to avoid unnecessarily creating sets
     val popupKeysDelegate = lazy { mutableSetOf<String>() }
     val popupKeys by popupKeysDelegate
-    val types = if (params.mId.element.isAlphabet) params.mPopupKeyOrder else allPopupKeyTypes
+    val types = if (params.id.element.isAlphabet) params.popupKeyOrder else allPopupKeyTypes
     types.forEach { type ->
         when (type) {
             POPUP_KEYS_NUMBER -> popupSet?.numberLabel?.let { popupKeys.add(it) }
             POPUP_KEYS_LAYOUT -> popupSet?.getPopupKeyLabels(params)?.let { popupKeys.addAll(it) }
             POPUP_KEYS_SYMBOLS -> popupSet?.symbol?.let { popupKeys.add(it) }
-            POPUP_KEYS_LANGUAGE -> params.mLocaleKeyboardInfos.getPopupKeys(label)?.let { popupKeys.addAll(it) }
-            POPUP_KEYS_LANGUAGE_PRIORITY -> params.mLocaleKeyboardInfos.getPriorityPopupKeys(label)?.let { popupKeys.addAll(it) }
+            POPUP_KEYS_LANGUAGE -> params.localeKeyboardInfos.getPopupKeys(label)?.let { popupKeys.addAll(it) }
+            POPUP_KEYS_LANGUAGE_PRIORITY -> params.localeKeyboardInfos.getPriorityPopupKeys(label)?.let { popupKeys.addAll(it) }
         }
     }
     if (!popupKeysDelegate.isInitialized() || popupKeys.isEmpty())
@@ -77,13 +77,13 @@ fun getHintIcon(popupSet: PopupSet<*>?, params: KeyboardParams, label: String): 
 
 private fun getHintText(popupSet: PopupSet<*>?, params: KeyboardParams, label: String): String? {
     var hintLabel: String? = null
-    for (type in params.mPopupKeyHintOrder) {
+    for (type in params.popupKeyHintOrder) {
         when (type) {
             POPUP_KEYS_NUMBER -> popupSet?.numberLabel?.let { hintLabel = it }
             POPUP_KEYS_LAYOUT -> popupSet?.getPopupKeyLabels(params)?.let { hintLabel = it.firstOrNull() }
             POPUP_KEYS_SYMBOLS -> popupSet?.symbol?.let { hintLabel = it }
-            POPUP_KEYS_LANGUAGE -> params.mLocaleKeyboardInfos.getPopupKeys(label)?.let { hintLabel = it.firstOrNull() }
-            POPUP_KEYS_LANGUAGE_PRIORITY -> params.mLocaleKeyboardInfos.getPriorityPopupKeys(label)?.let { hintLabel = it.firstOrNull() }
+            POPUP_KEYS_LANGUAGE -> params.localeKeyboardInfos.getPopupKeys(label)?.let { hintLabel = it.firstOrNull() }
+            POPUP_KEYS_LANGUAGE_PRIORITY -> params.localeKeyboardInfos.getPriorityPopupKeys(label)?.let { hintLabel = it.firstOrNull() }
         }
         if (hintLabel != null) return hintLabel
     }
@@ -93,15 +93,15 @@ private fun getHintText(popupSet: PopupSet<*>?, params: KeyboardParams, label: S
 private fun transformLabel(label: String, params: KeyboardParams): String =
     if (label.startsWith("$$$")) { // currency keys, todo: handling is similar to textKeyData, could it be merged?
         if (label == "$$$") {
-            if (params.mId.isPasswordInput) "$"
-            else params.mLocaleKeyboardInfos.currencyKey.first
+            if (params.id.isPasswordInput) "$"
+            else params.localeKeyboardInfos.currencyKey.first
         } else {
             val index = label.substringAfter("$$$").toIntOrNull()
             if (index != null && index in 1..5)
-                params.mLocaleKeyboardInfos.currencyKey.second[index - 1]
+                params.localeKeyboardInfos.currencyKey.second[index - 1]
             else label
         }
-    } else if (params.mId.subtype.isRtlSubtype) {
+    } else if (params.id.subtype.isRtlSubtype) {
         label.rtlLabel(params)
     } else label
 

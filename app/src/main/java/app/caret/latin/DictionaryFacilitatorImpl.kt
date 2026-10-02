@@ -61,7 +61,7 @@ class DictionaryFacilitatorImpl : DictionaryFacilitator {
     private var dictionaryGroups = listOf(DictionaryGroup())
 
     @Volatile
-    private var mLatchForWaitingLoadingMainDictionaries = CountDownLatch(0)
+    private var latchForWaitingLoadingMainDictionaries = CountDownLatch(0)
 
     // The library does not deal well with ngram history for auto-capitalized words, so we adjust
     // the ngram context to store next word suggestions for such cases.
@@ -235,10 +235,10 @@ class DictionaryFacilitatorImpl : DictionaryFacilitator {
         context: Context, locales: Collection<Locale>, listener: DictionaryInitializationListener?
     ) {
         val latchForWaitingLoadingMainDictionary = CountDownLatch(1)
-        mLatchForWaitingLoadingMainDictionaries = latchForWaitingLoadingMainDictionary
+        latchForWaitingLoadingMainDictionaries = latchForWaitingLoadingMainDictionary
         scope.launch {
             try {
-                val useEmojiDict = Settings.getValues().mSuggestEmojis
+                val useEmojiDict = Settings.getValues().suggestEmojis
                 val dictGroupsWithNewMainDict = locales.mapNotNull {
                     val dictionaryGroup = findDictionaryGroupWithLocale(dictionaryGroups, it)
                     if (dictionaryGroup == null) {
@@ -285,7 +285,7 @@ class DictionaryFacilitatorImpl : DictionaryFacilitator {
 
     @Throws(InterruptedException::class)
     override fun waitForLoadingMainDictionaries(timeout: Long, unit: TimeUnit) {
-        mLatchForWaitingLoadingMainDictionaries.await(timeout, unit)
+        latchForWaitingLoadingMainDictionaries.await(timeout, unit)
     }
 
     // -------------- actual dictionary stuff like getting suggestions ------------
@@ -306,8 +306,8 @@ class DictionaryFacilitatorImpl : DictionaryFacilitator {
 
         // Add word to user dictionary if it is in no other dictionary except user history dictionary (i.e. typed again).
         val sv = Settings.getValues()
-        if (sv.mAddToPersonalDictionary // require the opt-in
-            && sv.mAutoCorrectEnabled == sv.mAutoCorrectionEnabledPerUserSettings // don't add if user wants autocorrect but input field does not, see https://github.com/HeliBorg/HeliBoard/issues/427#issuecomment-1905438000
+        if (sv.addToPersonalDictionary // require the opt-in
+            && sv.autoCorrectEnabled == sv.autoCorrectionEnabledPerUserSettings // don't add if user wants autocorrect but input field does not, see https://github.com/HeliBorg/HeliBoard/issues/427#issuecomment-1905438000
             && dictionaryGroups[0].hasDict(Dictionary.TYPE_USER_HISTORY) // require personalized suggestions
             && !wasAutoCapitalized // we can't be 100% sure about what the user intended to type, so better don't add it
             && words.size == 1 // only single words
@@ -487,7 +487,7 @@ class DictionaryFacilitatorImpl : DictionaryFacilitator {
         composedData: ComposedData, ngramContext: NgramContext, keyboard: Keyboard,
         settingsValuesForSuggestion: SettingsValuesForSuggestion, sessionId: Int, inputStyle: Int
     ): SuggestionResults {
-        if (composedData.mIsBatchMode) {
+        if (composedData.isBatchMode) {
             getFutoSwipeResults(composedData, ngramContext, keyboard)?.let { return it }
             // the native code crashes on swipe input when no gesture typing library is loaded
             if (!FutoSwipe.hasOtherLibrary)
@@ -515,10 +515,10 @@ class DictionaryFacilitatorImpl : DictionaryFacilitator {
         suggestionsArray.forEach {
             if (it == null) return@forEach
             suggestionResults.addAll(it)
-            suggestionResults.mRawSuggestions?.addAll(it)
+            suggestionResults.rawSuggestions?.addAll(it)
         }
 
-        includeAtLeastTwoWordSuggestions(suggestionResults, suggestionsArray, composedData.mTypedWord)
+        includeAtLeastTwoWordSuggestions(suggestionResults, suggestionsArray, composedData.typedWord)
 
         return suggestionResults
     }
@@ -542,7 +542,7 @@ class DictionaryFacilitatorImpl : DictionaryFacilitator {
         suggestions.forEach {
             if (isBlacklisted(it.getWord())) return@forEach
             results.add(it)
-            results.mRawSuggestions?.add(it)
+            results.rawSuggestions?.add(it)
         }
         return results
     }
@@ -553,7 +553,7 @@ class DictionaryFacilitatorImpl : DictionaryFacilitator {
         proximityInfoHandle: Long, weightOfLangModelVsSpatialModel: FloatArray, dictGroup: DictionaryGroup
     ): List<SuggestedWordInfo> {
         val suggestions = ArrayList<SuggestedWordInfo>()
-        val weightForLocale = dictGroup.getWeightForLocale(dictionaryGroups, composedData.mIsBatchMode)
+        val weightForLocale = dictGroup.getWeightForLocale(dictionaryGroups, composedData.isBatchMode)
         for (dictType in DictionaryFacilitator.ALL_DICTIONARY_TYPES) {
             val dictionary = dictGroup.getDict(dictType) ?: continue
             val dictionarySuggestions = dictionary.getSuggestions(composedData, ngramContext, proximityInfoHandle,
@@ -565,7 +565,7 @@ class DictionaryFacilitatorImpl : DictionaryFacilitator {
             // actually contains the word. But personal and addon dictionaries may contain shortcuts,
             // which do not pass an isInDictionary check (e.g. emojis).
             // (if the main dict contains shortcuts to non-words, this will break!)
-            val checkForGarbage = composedData.mIsBatchMode && (dictType == Dictionary.TYPE_USER_HISTORY || dictType == Dictionary.TYPE_MAIN)
+            val checkForGarbage = composedData.isBatchMode && (dictType == Dictionary.TYPE_USER_HISTORY || dictType == Dictionary.TYPE_MAIN)
 
             for (info in dictionarySuggestions) {
                 val word = info.getWord()

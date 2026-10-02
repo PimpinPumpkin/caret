@@ -60,13 +60,13 @@ object FutoSwipe {
     /** Called once at app start. */
     fun init(context: Context) {
         appContext = context.applicationContext
-        hasOtherLibrary = JniUtils.sHaveGestureLib
+        hasOtherLibrary = JniUtils.haveGestureLib
         refreshAvailability(context)
     }
 
     /** Swipe input is offered when this engine is in use or another gesture typing library is loaded. */
     fun refreshAvailability(context: Context) {
-        JniUtils.sHaveGestureLib = hasOtherLibrary || isActive(context)
+        JniUtils.haveGestureLib = hasOtherLibrary || isActive(context)
     }
 
     /** Call after the models were installed or removed. Drops what is loaded and reloads settings. */
@@ -90,10 +90,10 @@ object FutoSwipe {
     fun warmUp(keyboard: Keyboard) {
         val context = appContext ?: return
         if (!isActive(context)) return
-        if (decoder != null && keyboard.mId.locale == loadedLocale) return // only the slow first load needs a thread
+        if (decoder != null && keyboard.id.locale == loadedLocale) return // only the slow first load needs a thread
         Thread({
             try {
-                synchronized(this) { prepare(context, keyboard, keyboard.mId.locale) }
+                synchronized(this) { prepare(context, keyboard, keyboard.id.locale) }
             } catch (e: Throwable) {
                 Log.w(TAG, "warm up failed", e)
             }
@@ -142,7 +142,7 @@ object FutoSwipe {
     ): List<SuggestedWordInfo>? {
         val context = appContext ?: return null
         if (!isActive(context)) return null
-        val pointers = composedData.mInputPointers
+        val pointers = composedData.inputPointers
         val size = pointers.getPointerSize()
         if (size < 2) return emptyList()
         val swipeLayout = prepare(context, keyboard, locale) ?: return emptyList()
@@ -304,7 +304,7 @@ class SwipeLayout(val letters: String, val cx: FloatArray, val cy: FloatArray,
 
     companion object {
         fun fromKeyboard(keyboard: Keyboard, maxLetters: Int): SwipeLayout? =
-            fromKeys(keyboard.getSortedKeys().map { KeyBox(it.getCode(), it.getX(), it.getY(), it.getWidth(), it.getHeight()) }, keyboard.mOccupiedWidth, maxLetters)
+            fromKeys(keyboard.getSortedKeys().map { KeyBox(it.getCode(), it.getX(), it.getY(), it.getWidth(), it.getHeight()) }, keyboard.occupiedWidth, maxLetters)
 
         /**
          * Letters in reading order with their centers. x runs 0..1 over the keyboard width, y runs
@@ -369,7 +369,7 @@ class WordList private constructor(val file: File) {
         fun forLocale(context: Context, locale: Locale): WordList? {
             val dictFile = mainDictionaryFile(context, locale) ?: return null
             val dir = File(context.cacheDir, "swipe_words").apply { mkdirs() }
-            val blockOffensive = Settings.getValues().mBlockPotentiallyOffensive
+            val blockOffensive = Settings.getValues().blockPotentiallyOffensive
             val out = File(dir, "${locale.toLanguageTag()}_${dictFile.length()}_${dictFile.lastModified()}${if (blockOffensive) "_clean" else ""}.combined")
             if (out.isFile && out.length() > 0) return WordList(out)
             dir.listFiles()?.filter { it.name.startsWith("${locale.toLanguageTag()}_") }?.forEach { it.delete() }

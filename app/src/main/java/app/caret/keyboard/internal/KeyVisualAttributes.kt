@@ -16,82 +16,82 @@ import app.caret.latin.settings.Settings
 import app.caret.latin.utils.ResourceUtils
 
 class KeyVisualAttributes private constructor(keyAttr: TypedArray) {
-    @JvmField val mTypeface: Typeface?
+    @JvmField val typeface: Typeface?
 
-    @JvmField val mLetterRatio: Float
-    @JvmField val mLetterSize: Int
-    @JvmField val mLabelRatio: Float
-    @JvmField val mLabelSize: Int
-    @JvmField val mLargeLetterRatio: Float
-    @JvmField val mHintLetterRatio: Float
-    @JvmField val mShiftedLetterHintRatio: Float
-    @JvmField val mHintLabelRatio: Float
-    @JvmField val mPreviewTextRatio: Float
+    @JvmField val letterRatio: Float
+    @JvmField val letterSize: Int
+    @JvmField val labelRatio: Float
+    @JvmField val labelSize: Int
+    @JvmField val largeLetterRatio: Float
+    @JvmField val hintLetterRatio: Float
+    @JvmField val shiftedLetterHintRatio: Float
+    @JvmField val hintLabelRatio: Float
+    @JvmField val previewTextRatio: Float
 
-    @JvmField val mTextColor: Int
-    @JvmField val mTextInactivatedColor: Int
-    @JvmField val mTextShadowColor: Int
-    @JvmField val mFunctionalTextColor: Int
-    @JvmField val mHintLetterColor: Int
-    @JvmField val mHintLabelColor: Int
-    @JvmField val mShiftedLetterHintInactivatedColor: Int
-    @JvmField val mShiftedLetterHintActivatedColor: Int
-    @JvmField val mPreviewTextColor: Int
+    @JvmField val textColor: Int
+    @JvmField val textInactivatedColor: Int
+    @JvmField val textShadowColor: Int
+    @JvmField val functionalTextColor: Int
+    @JvmField val hintLetterColor: Int
+    @JvmField val hintLabelColor: Int
+    @JvmField val shiftedLetterHintInactivatedColor: Int
+    @JvmField val shiftedLetterHintActivatedColor: Int
+    @JvmField val previewTextColor: Int
 
-    @JvmField val mHintLabelVerticalAdjustment: Float
-    @JvmField val mLabelOffCenterRatio: Float
-    @JvmField val mHintLabelOffCenterRatio: Float
+    @JvmField val hintLabelVerticalAdjustment: Float
+    @JvmField val labelOffCenterRatio: Float
+    @JvmField val hintLabelOffCenterRatio: Float
 
     init {
         if (keyAttr.hasValue(R.styleable.Keyboard_Key_keyTypeface)) {
-            mTypeface = Typeface.defaultFromStyle(
+            typeface = Typeface.defaultFromStyle(
                     keyAttr.getInt(R.styleable.Keyboard_Key_keyTypeface, Typeface.NORMAL))
         } else {
-            mTypeface = null
+            typeface = null
         }
 
-        mLetterRatio = ResourceUtils.getFraction(keyAttr,
+        letterRatio = ResourceUtils.getFraction(keyAttr,
                 R.styleable.Keyboard_Key_keyLetterSize)
-        mLetterSize = ResourceUtils.getDimensionPixelSize(keyAttr,
+        letterSize = ResourceUtils.getDimensionPixelSize(keyAttr,
                 R.styleable.Keyboard_Key_keyLetterSize)
-        mLabelRatio = ResourceUtils.getFraction(keyAttr,
+        labelRatio = ResourceUtils.getFraction(keyAttr,
                 R.styleable.Keyboard_Key_keyLabelSize)
-        mLabelSize = ResourceUtils.getDimensionPixelSize(keyAttr,
+        labelSize = ResourceUtils.getDimensionPixelSize(keyAttr,
                 R.styleable.Keyboard_Key_keyLabelSize)
-        mLargeLetterRatio = ResourceUtils.getFraction(keyAttr,
+        largeLetterRatio = ResourceUtils.getFraction(keyAttr,
                 R.styleable.Keyboard_Key_keyLargeLetterRatio)
-        mHintLetterRatio = ResourceUtils.getFraction(keyAttr,
+        hintLetterRatio = ResourceUtils.getFraction(keyAttr,
                 R.styleable.Keyboard_Key_keyHintLetterRatio)
-        mShiftedLetterHintRatio = ResourceUtils.getFraction(keyAttr,
+        shiftedLetterHintRatio = ResourceUtils.getFraction(keyAttr,
                 R.styleable.Keyboard_Key_keyShiftedLetterHintRatio)
-        mHintLabelRatio = ResourceUtils.getFraction(keyAttr,
+        hintLabelRatio = ResourceUtils.getFraction(keyAttr,
                 R.styleable.Keyboard_Key_keyHintLabelRatio)
-        mPreviewTextRatio = ResourceUtils.getFraction(keyAttr,
+        previewTextRatio = ResourceUtils.getFraction(keyAttr,
                 R.styleable.Keyboard_Key_keyPreviewTextRatio)
 
         // todo: check what colors do, and if irrelevant and no plan to use -> remove here and from attr
         val colors = Settings.getValues().mColors
-        mTextColor = colors.get(ColorType.KEY_TEXT)
+        textColor = colors.get(ColorType.KEY_TEXT)
         // when? -> isShiftedLetterActivated, which is a label flag
-        mTextInactivatedColor = keyAttr.getColor(R.styleable.Keyboard_Key_keyTextInactivatedColor, 0)
+        textInactivatedColor = keyAttr.getColor(R.styleable.Keyboard_Key_keyTextInactivatedColor, 0)
         // when? -> mKeyTextShadowRadius > 0, but it's always set to -1 (in theme) -> maybe play with this?
-        mTextShadowColor = keyAttr.getColor(R.styleable.Keyboard_Key_keyTextShadowColor, 0)
-        mFunctionalTextColor = colors.get(ColorType.FUNCTIONAL_KEY_TEXT)
-        mHintLetterColor = colors.get(ColorType.KEY_HINT_TEXT)
-        mHintLabelColor = colors.get(ColorType.KEY_TEXT)
+        textShadowColor = keyAttr.getColor(R.styleable.Keyboard_Key_keyTextShadowColor, 0)
+        functionalTextColor = colors.get(ColorType.FUNCTIONAL_KEY_TEXT)
+        hintLetterColor = colors.get(ColorType.KEY_HINT_TEXT)
+        hintLabelColor = colors.get(ColorType.KEY_TEXT)
         // when? -> hasShiftedLetterHint and not isShiftedLetterActivated -> both are label flags
-        mShiftedLetterHintInactivatedColor = keyAttr.getColor(
+        shiftedLetterHintInactivatedColor = keyAttr.getColor(
                 R.styleable.Keyboard_Key_keyShiftedLetterHintInactivatedColor, 0)
         // when? -> hasShiftedLetterHint and isShiftedLetterActivated -> both are label flags
-        mShiftedLetterHintActivatedColor = keyAttr.getColor(
+        shiftedLetterHintActivatedColor = keyAttr.getColor(
                 R.styleable.Keyboard_Key_keyShiftedLetterHintActivatedColor, 0)
-        mPreviewTextColor = colors.get(ColorType.KEY_PREVIEW_TEXT)
+        previewTextColor = colors.get(ColorType.KEY_PREVIEW_TEXT)
 
-        mHintLabelVerticalAdjustment = ResourceUtils.getFraction(keyAttr,
+        hintLabelVerticalAdjustment = ResourceUtils.getFraction(keyAttr,
                 R.styleable.Keyboard_Key_keyHintLabelVerticalAdjustment, 0.0f)
-        mLabelOffCenterRatio = ResourceUtils.getFraction(keyAttr,
+        labelOffCenterRatio = ResourceUtils.getFraction(keyAttr,
                 R.styleable.Keyboard_Key_keyLabelOffCenterRatio, 0.0f)
-        mHintLabelOffCenterRatio = ResourceUtils.getFraction(keyAttr,
+        hintLabelOffCenterRatio = ResourceUtils.getFraction(keyAttr,
                 R.styleable.Keyboard_Key_keyHintLabelOffCenterRatio, 0.0f)
     }
 
@@ -113,12 +113,12 @@ class KeyVisualAttributes private constructor(keyAttr: TypedArray) {
             R.styleable.Keyboard_Key_keyLabelOffCenterRatio,
             R.styleable.Keyboard_Key_keyHintLabelOffCenterRatio
         )
-        private val sVisualAttributeIds = SparseIntArray()
+        private val visualAttributeIds = SparseIntArray()
         private const val ATTR_DEFINED = 1
         private const val ATTR_NOT_FOUND = 0
         init {
             for (attrId in VISUAL_ATTRIBUTE_IDS) {
-                sVisualAttributeIds.put(attrId, ATTR_DEFINED)
+                visualAttributeIds.put(attrId, ATTR_DEFINED)
             }
         }
 
@@ -127,7 +127,7 @@ class KeyVisualAttributes private constructor(keyAttr: TypedArray) {
             val indexCount = keyAttr.indexCount
             for (i in 0 until indexCount) {
                 val attrId = keyAttr.getIndex(i)
-                if (sVisualAttributeIds.get(attrId, ATTR_NOT_FOUND) == ATTR_NOT_FOUND) {
+                if (visualAttributeIds.get(attrId, ATTR_NOT_FOUND) == ATTR_NOT_FOUND) {
                     continue
                 }
                 return KeyVisualAttributes(keyAttr)
