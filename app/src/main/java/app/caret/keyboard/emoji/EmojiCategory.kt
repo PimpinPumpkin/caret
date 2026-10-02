@@ -181,7 +181,7 @@ internal class EmojiCategory(private val context: Context, private val layoutSet
             layoutSet.getKeyboard(KeyboardElement.EMOJI_RECENTS),
             0, true, ResourceUtils.getKeyboardWidth(context, Settings.getValues())
         )
-        return MAX_LINE_COUNT_PER_PAGE * tempKeyboard.occupiedColumnCount
+        return MAX_LINE_COUNT_PER_PAGE * tempKeyboard.getOccupiedColumnCount()
     }
 
     enum class Category(val element: KeyboardElement, val iconAttr: Int) {
