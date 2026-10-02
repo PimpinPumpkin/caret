@@ -212,8 +212,8 @@ open class KeyboardAccessibilityDelegate<KV : KeyboardView>(
      * @param key The key that a synthesized touch event is on.
      */
     private fun simulateTouchEvent(touchAction: Int, key: Key) {
-        val x = key.hitBox.centerX()
-        val y = key.hitBox.centerY()
+        val x = key.getHitBox().centerX()
+        val y = key.getHitBox().centerY()
         val eventTime = SystemClock.uptimeMillis()
         val touchEvent = MotionEvent.obtain(
                 eventTime, eventTime, touchAction, x.toFloat(), y.toFloat(), 0 /* metaState */)

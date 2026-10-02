@@ -50,7 +50,7 @@ class KeyboardAccessibilityNodeProvider<KV : KeyboardView>(
     /** The virtual view identifier for the hovering node.  */
     private var mHoveringNodeId = UNDEFINED
     /** The current keyboard.  */
-    private var mKeyboard: Keyboard? = mKeyboardView.keyboard
+    private var mKeyboard: Keyboard? = mKeyboardView.getKeyboard()
 
     /**
      * Sets the keyboard represented by this node provider.
@@ -165,7 +165,7 @@ class KeyboardAccessibilityNodeProvider<KV : KeyboardView>(
             val size = sortedKeys.size
             for (index in 0 until size) {
                 val key = sortedKeys[index]
-                if (key.isSpacer) {
+                if (key.isSpacer()) {
                     continue
                 }
                 // Use an index of the sorted keys list as a virtual view id.
@@ -180,7 +180,7 @@ class KeyboardAccessibilityNodeProvider<KV : KeyboardView>(
             return null
         }
         val keyDescription = getKeyDescription(key)
-        val boundsInParent = key.hitBox
+        val boundsInParent = key.getHitBox()
         // Calculate the key's in-screen bounds.
         mTempBoundsInScreen.set(boundsInParent)
         mTempBoundsInScreen.offset(CoordinateUtils.x(mParentLocation), CoordinateUtils.y(mParentLocation))
@@ -194,13 +194,13 @@ class KeyboardAccessibilityNodeProvider<KV : KeyboardView>(
         info.setBoundsInScreen(boundsInScreen)
         info.setParent(mKeyboardView)
         info.setSource(mKeyboardView, virtualViewId)
-        info.isEnabled = key.isEnabled
+        info.isEnabled = key.isEnabled()
         info.isVisibleToUser = true
         // Don't add ACTION_CLICK and ACTION_LONG_CLOCK actions while hovering on the key.
         // See {@link #onHoverEnterTo(Key)} and {@link #onHoverExitFrom(Key)}.
         if (virtualViewId != mHoveringNodeId) {
             info.addAction(AccessibilityNodeInfoCompat.ACTION_CLICK)
-            if (key.isLongPressEnabled) {
+            if (key.isLongPressEnabled()) {
                 info.addAction(AccessibilityNodeInfoCompat.ACTION_LONG_CLICK)
             }
         }
@@ -273,7 +273,7 @@ class KeyboardAccessibilityNodeProvider<KV : KeyboardView>(
         val currentSettings = Settings.getValues()
         val keyCodeDescription = mKeyCodeDescriptionMapper.getDescriptionForKey(
                 mKeyboardView.context, mKeyboard, key, shouldObscure)
-        return if (currentSettings.isWordSeparator(key.code)) {
+        return if (currentSettings.isWordSeparator(key.getCode())) {
             mAccessibilityUtils.getAutoCorrectionDescription(keyCodeDescription, shouldObscure)
         } else keyCodeDescription
     }

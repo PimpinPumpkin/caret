@@ -220,7 +220,7 @@ class SuggestionStripView(context: Context, attrs: AttributeSet?, defStyle: Int)
 
     // public stuff
 
-    val isShowingMoreSuggestionPanel get() = moreSuggestionsView.isShowingInParent
+    val isShowingMoreSuggestionPanel get() = moreSuggestionsView.isShowingInParent()
 
     /** A connection back to the input method. */
     fun setListener(newListener: Listener, inputView: View) {

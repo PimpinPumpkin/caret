@@ -226,9 +226,9 @@ class WordData(
             height,
             keys.map {
                 KeyInfo(
-                    it.x, it.width, it.y, it.height,
-                    it.outputText ?: if (it.code > 0) StringUtils.newSingleCodePointString(it.code) else "",
-                    it.popupKeys.orEmpty().map { popup ->
+                    it.getX(), it.getWidth(), it.getY(), it.getHeight(),
+                    it.getOutputText() ?: if (it.getCode() > 0) StringUtils.newSingleCodePointString(it.getCode()) else "",
+                    it.getPopupKeys().orEmpty().map { popup ->
                         popup.mOutputText ?: if (popup.mCode > 0) StringUtils.newSingleCodePointString(popup.mCode) else ""
                     }
                 )

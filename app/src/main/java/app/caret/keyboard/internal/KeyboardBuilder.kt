@@ -219,7 +219,7 @@ open class KeyboardBuilder<KP : KeyboardParams>(protected val mContext: Context,
         val rightEdgeKey = mRightEdgeKey
         if (rightEdgeKey != null) {
             rightEdgeKey.markAsRightEdge(mParams)
-            mCurrentY += rightEdgeKey.height + rightEdgeKey.verticalGap
+            mCurrentY += rightEdgeKey.getHeight() + rightEdgeKey.getVerticalGap()
             mRightEdgeKey = null
         }
         mLeftEdge = false
@@ -228,14 +228,14 @@ open class KeyboardBuilder<KP : KeyboardParams>(protected val mContext: Context,
 
     private fun endKey(key: Key) {
         mParams.onAddKey(key)
-        if (mLeftEdge && !key.isSpacer) {
+        if (mLeftEdge && !key.isSpacer()) {
             key.markAsLeftEdge(mParams)
             mLeftEdge = false
         }
         if (mTopEdge) {
             key.markAsTopEdge(mParams)
         }
-        if (!key.isSpacer) {
+        if (!key.isSpacer()) {
             mRightEdgeKey = key
         }
     }

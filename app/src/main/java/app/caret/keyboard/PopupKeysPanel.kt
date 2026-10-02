@@ -4,48 +4,37 @@
  * SPDX-License-Identifier: Apache-2.0 AND GPL-3.0-only
  */
 
-package app.caret.keyboard;
+package app.caret.keyboard
 
-import android.view.View;
-import android.view.ViewGroup;
-import app.caret.keyboard.emoji.EmojiViewCallback;
-import kotlin.Unit;
-import kotlin.jvm.functions.Function1;
+import android.view.View
+import android.view.ViewGroup
+import app.caret.keyboard.emoji.EmojiViewCallback
 
-public interface PopupKeysPanel {
+interface PopupKeysPanel {
     interface Controller {
         /**
          * Set the layout gravity.
          * @param layoutGravity requested by the popup
          */
-        default void setLayoutGravity(int layoutGravity) {
+        fun setLayoutGravity(layoutGravity: Int) {
         }
 
         /**
          * Add the {@link PopupKeysPanel} to the target view.
          * @param panel the panel to be shown.
          */
-        void onShowPopupKeysPanel(final PopupKeysPanel panel);
+        fun onShowPopupKeysPanel(panel: PopupKeysPanel)
 
         /**
          * Remove the current {@link PopupKeysPanel} from the target view.
          */
-        void onDismissPopupKeysPanel();
+        fun onDismissPopupKeysPanel()
 
         /**
          * Instructs the parent to cancel the panel (e.g., when entering a different input mode).
          */
-        void onCancelPopupKeysPanel();
+        fun onCancelPopupKeysPanel()
     }
-
-    Controller EMPTY_CONTROLLER = new Controller() {
-        @Override
-        public void onShowPopupKeysPanel(final PopupKeysPanel panel) {}
-        @Override
-        public void onDismissPopupKeysPanel() {}
-        @Override
-        public void onCancelPopupKeysPanel() {}
-    };
 
     /**
      * Initializes the layout and event handling of this {@link PopupKeysPanel} and calls the
@@ -60,8 +49,8 @@ public interface PopupKeysPanel {
      */
     // TODO: Currently the PopupKeysPanel is inside a container view that is added to the parent.
     // Consider the simpler approach of placing the PopupKeysPanel itself into the parent view.
-    void showPopupKeysPanel(View parentView, Controller controller, int pointX,
-                           int pointY, KeyboardActionListener listener);
+    fun showPopupKeysPanel(parentView: View, controller: Controller, pointX: Int,
+                           pointY: Int, listener: KeyboardActionListener)
 
     /**
      *
@@ -78,13 +67,13 @@ public interface PopupKeysPanel {
      */
     // TODO: Currently the PopupKeysPanel is inside a container view that is added to the parent.
     // Consider the simpler approach of placing the PopupKeysPanel itself into the parent view.
-    void showPopupKeysPanel(View parentView, Controller controller, int pointX, int pointY, Function1<Key, Unit> onReleaseKey);
+    fun showPopupKeysPanel(parentView: View, controller: Controller, pointX: Int, pointY: Int, onReleaseKey: (Key) -> Unit)
 
     /**
      * Dismisses the popup keys panel and calls the controller's onDismissPopupKeysPanel to remove
      * the panel's container view.
      */
-    void dismissPopupKeysPanel();
+    fun dismissPopupKeysPanel()
 
     /**
      * Process a move event on the popup keys panel.
@@ -94,7 +83,7 @@ public interface PopupKeysPanel {
      * @param pointerId pointer id touch point
      * @param eventTime timestamp of touch point
      */
-    void onMoveEvent(final int x, final int y, final int pointerId, final long eventTime);
+    fun onMoveEvent(x: Int, y: Int, pointerId: Int, eventTime: Long)
 
     /**
      * Process a down event on the popup keys panel.
@@ -104,7 +93,7 @@ public interface PopupKeysPanel {
      * @param pointerId pointer id touch point
      * @param eventTime timestamp of touch point
      */
-    void onDownEvent(final int x, final int y, final int pointerId, final long eventTime);
+    fun onDownEvent(x: Int, y: Int, pointerId: Int, eventTime: Long)
 
     /**
      * Process an up event on the popup keys panel.
@@ -114,7 +103,7 @@ public interface PopupKeysPanel {
      * @param pointerId pointer id touch point
      * @param eventTime timestamp of touch point
      */
-    void onUpEvent(final int x, final int y, final int pointerId, final long eventTime);
+    fun onUpEvent(x: Int, y: Int, pointerId: Int, eventTime: Long)
 
     /**
      * Translate X-coordinate of touch event to the local X-coordinate of this
@@ -123,7 +112,7 @@ public interface PopupKeysPanel {
      * @param x the global X-coordinate
      * @return the local X-coordinate to this {@link PopupKeysPanel}
      */
-    int translateX(int x);
+    fun translateX(x: Int): Int
 
     /**
      * Translate Y-coordinate of touch event to the local Y-coordinate of this
@@ -132,10 +121,10 @@ public interface PopupKeysPanel {
      * @param y the global Y-coordinate
      * @return the local Y-coordinate to this {@link PopupKeysPanel}
      */
-    int translateY(int y);
+    fun translateY(y: Int): Int
 
-    default View getContainerView() {
-        return (View) ((View) this).getParent();
+    fun getContainerView(): View {
+        return (this as View).parent as View
     }
 
     /**
@@ -143,26 +132,35 @@ public interface PopupKeysPanel {
      *
      * @param parentView the {@link ViewGroup} that hosts this {@link PopupKeysPanel}.
      */
-    default void showInParent(ViewGroup parentView) {
-        removeFromParent();
-        parentView.addView(getContainerView());
+    fun showInParent(parentView: ViewGroup) {
+        removeFromParent()
+        parentView.addView(getContainerView())
     }
 
     /**
      * Remove this {@link PopupKeysPanel} from the parent view.
      */
-    default void removeFromParent() {
-        final View containerView = getContainerView();
-        final ViewGroup currentParent = (ViewGroup)containerView.getParent();
+    fun removeFromParent() {
+        val containerView = getContainerView()
+        val currentParent = containerView.parent as ViewGroup?
         if (currentParent != null) {
-            currentParent.removeView(containerView);
+            currentParent.removeView(containerView)
         }
     }
 
     /**
      * Return whether the panel is currently being shown.
      */
-    default boolean isShowingInParent() {
-        return getContainerView().getParent() != null;
+    fun isShowingInParent(): Boolean {
+        return getContainerView().parent != null
+    }
+
+    companion object {
+        @JvmField
+        val EMPTY_CONTROLLER: Controller = object : Controller {
+            override fun onShowPopupKeysPanel(panel: PopupKeysPanel) {}
+            override fun onDismissPopupKeysPanel() {}
+            override fun onCancelPopupKeysPanel() {}
+        }
     }
 }

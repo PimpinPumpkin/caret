@@ -279,10 +279,10 @@ class EmojiSearchActivity : ComponentActivity() {
         super.onStop()
     }
 
-    private fun getEmoji(key: Key): String? = if (key.code == KeyCode.MULTIPLE_CODE_POINTS)
+    private fun getEmoji(key: Key): String? = if (key.getCode() == KeyCode.MULTIPLE_CODE_POINTS)
         key.getOutputText()
     else
-        Character.toString(key.code)
+        Character.toString(key.getCode())
 
     private fun init() {
         Log.d(TAG, "init start")
@@ -320,12 +320,12 @@ class EmojiSearchActivity : ComponentActivity() {
                 finish()
             }
 
-            override fun getDescription(emoji: String): String? = if (Settings.getValues().mShowEmojiDescriptions)
-                dictionaryFacilitator?.getWordProperty(getEmojiNeutralVersion(emoji))?.let {
+            override fun getDescription(emoji: String?): String? = if (Settings.getValues().mShowEmojiDescriptions)
+                dictionaryFacilitator?.getWordProperty(getEmojiNeutralVersion(emoji!!))?.let {
                     if (it.mHasShortcuts) it.mShortcutTargets[0]?.mWord else null
                 } else null
 
-            override fun onRemoveRecentsKey(key: Key?) {}
+            override fun onRemoveRecentsKey(key: Key) {}
         })
         KeyboardSwitcher.getInstance().resetKeyboardStateToAlphabet()
         Log.d(TAG, "init end")
@@ -350,7 +350,7 @@ class EmojiSearchActivity : ComponentActivity() {
             return
         }
 
-        val keyboard = emojiPageKeyboardView.keyboard as DynamicGridKeyboard
+        val keyboard = emojiPageKeyboardView.getKeyboard() as DynamicGridKeyboard
         keyboard.removeAllKeys()
         firstKey = null
         pressedKey = null

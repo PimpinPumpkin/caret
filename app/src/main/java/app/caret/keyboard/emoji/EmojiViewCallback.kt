@@ -1,31 +1,31 @@
 // SPDX-License-Identifier: GPL-3.0-only
 
-package app.caret.keyboard.emoji;
+package app.caret.keyboard.emoji
 
-import app.caret.keyboard.Key;
+import app.caret.keyboard.Key
 
 /**
  * Interface to handle callbacks from child elements
  * such as Emoji buttons and keyboard views.
  */
-public interface EmojiViewCallback {
+interface EmojiViewCallback {
 
     /**
      * Called when a key is pressed by the user
      */
-    void onPressKey(Key key);
+    fun onPressKey(key: Key)
 
     /**
      * Called when a key is released.
      * This may be called without any prior call to {@link EmojiViewCallback#onPressKey(Key)},
      * for example when a key from a popup keys keyboard is selected by releasing touch on it.
      */
-    void onReleaseKey(Key key);
+    fun onReleaseKey(key: Key)
 
     /**
      * Called from keyboard view to get an emoji description
      */
-    String getDescription(String emoji);
+    fun getDescription(emoji: String?): String?
 
-    void onRemoveRecentsKey(Key key);
+    fun onRemoveRecentsKey(key: Key)
 }

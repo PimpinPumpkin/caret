@@ -78,12 +78,12 @@ class MoreSuggestionsView @JvmOverloads constructor(
         // With accessibility mode on, mAccessibilityDelegate is set to a PopupKeysKeyboardAccessibilityDelegate object at the above
         // PopupKeysKeyboardView#setKeyboard call.
         if (mAccessibilityDelegate != null) {
-            mAccessibilityDelegate.setOpenAnnounce(R.string.spoken_open_more_suggestions)
-            mAccessibilityDelegate.setCloseAnnounce(R.string.spoken_close_more_suggestions)
+            mAccessibilityDelegate?.setOpenAnnounce(R.string.spoken_open_more_suggestions)
+            mAccessibilityDelegate?.setCloseAnnounce(R.string.spoken_close_more_suggestions)
         }
     }
 
-    override fun getDefaultCoordX() = (keyboard as MoreSuggestions).mOccupiedWidth / 2
+    override fun getDefaultCoordX() = (getKeyboard() as MoreSuggestions).mOccupiedWidth / 2
 
     fun updateKeyboardGeometry(keyHeight: Int) {
         updateKeyDrawParams(keyHeight)
@@ -92,7 +92,7 @@ class MoreSuggestionsView @JvmOverloads constructor(
     private fun setModalMode() {
         isInModalMode = true
         // Set vertical correction to zero (Reset popup keys keyboard sliding allowance R.dimen.config_popup_keys_keyboard_slide_allowance).
-        mKeyDetector.setKeyboard(keyboard, -paddingLeft.toFloat(), -paddingTop.toFloat())
+        mKeyDetector.setKeyboard(getKeyboard(), -paddingLeft.toFloat(), -paddingTop.toFloat())
     }
 
     override fun onKeyInput(key: Key, x: Int, y: Int) {
@@ -100,7 +100,7 @@ class MoreSuggestionsView @JvmOverloads constructor(
             Log.e(TAG, "Expected key is MoreSuggestionKey, but found ${key.javaClass.name}")
             return
         }
-        val keyboard = keyboard
+        val keyboard = getKeyboard()
         if (keyboard !is MoreSuggestions) {
             Log.e(TAG, "Expected keyboard is MoreSuggestions, but found ${keyboard?.javaClass?.name}")
             return
@@ -120,7 +120,7 @@ class MoreSuggestionsView @JvmOverloads constructor(
         layoutHelper: SuggestionStripLayoutHelper, parentView: View
     ): Boolean {
         val maxWidth = parentView.width - container.paddingLeft - container.paddingRight
-        val parentKeyboard = mainKeyboardView.keyboard ?: return false
+        val parentKeyboard = mainKeyboardView.getKeyboard() ?: return false
         val keyboard = moreSuggestionsBuilder.layout(
             suggestedWords, fromIndex, maxWidth,
             (maxWidth * layoutHelper.mMinMoreSuggestionsWidth).toInt(),
@@ -138,7 +138,7 @@ class MoreSuggestionsView @JvmOverloads constructor(
     }
 
     fun shouldInterceptTouchEvent(motionEvent: MotionEvent): Boolean {
-        if (!isShowingInParent) {
+        if (!isShowingInParent()) {
             lastX = motionEvent.x.toInt()
             lastY = motionEvent.y.toInt()
             return gestureDetector.onTouchEvent(motionEvent)
@@ -166,7 +166,7 @@ class MoreSuggestionsView @JvmOverloads constructor(
     }
 
     fun touchEvent(motionEvent: MotionEvent) {
-        if (!isShowingInParent) {
+        if (!isShowingInParent()) {
             return // Ignore any touch event while more suggestions panel hasn't been shown.
         }
         // In the sliding input mode. MotionEvent should be forwarded to MoreSuggestionsView.

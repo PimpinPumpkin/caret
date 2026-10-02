@@ -209,8 +209,9 @@ class PopupKeySpec(popupKeySpec: String, needsToUpperCase: Boolean, locale: Loca
         private val EMPTY_STRING_ARRAY = arrayOf<String>()
 
         // Note: the given array may contain null entries (see getIntValue and getBooleanValue).
+        @Suppress("UNCHECKED_CAST")
         @JvmStatic
-        fun filterOutEmptyString(array: Array<String>?): Array<String> {
+        fun filterOutEmptyString(array: Array<out String?>?): Array<String> {
             if (array == null) {
                 return EMPTY_STRING_ARRAY
             }
@@ -221,14 +222,14 @@ class PopupKeySpec(popupKeySpec: String, needsToUpperCase: Boolean, locale: Loca
                 val entry = entries[i]
                 if (TextUtils.isEmpty(entry)) {
                     if (out == null) {
-                        out = CollectionUtils.arrayAsList(array, 0, i)
+                        out = CollectionUtils.arrayAsList(array, 0, i) as ArrayList<String> // entries before i are not empty
                     }
                 } else if (out != null) {
                     out.add(entry!!)
                 }
             }
             if (out == null) {
-                return array
+                return array as Array<String> // no empty entry was found
             }
             return out.toTypedArray()
         }
@@ -292,7 +293,7 @@ class PopupKeySpec(popupKeySpec: String, needsToUpperCase: Boolean, locale: Loca
 
         // Note: matching entries of the given array are set to null.
         @JvmStatic
-        fun getIntValue(popupKeys: Array<String>?, key: String,
+        fun getIntValue(popupKeys: Array<out String?>?, key: String,
                 defaultValue: Int): Int {
             if (popupKeys == null) {
                 return defaultValue
@@ -323,7 +324,7 @@ class PopupKeySpec(popupKeySpec: String, needsToUpperCase: Boolean, locale: Loca
 
         // Note: matching entries of the given array are set to null.
         @JvmStatic
-        fun getBooleanValue(popupKeys: Array<String>?, key: String): Boolean {
+        fun getBooleanValue(popupKeys: Array<out String?>?, key: String): Boolean {
             if (popupKeys == null) {
                 return false
             }

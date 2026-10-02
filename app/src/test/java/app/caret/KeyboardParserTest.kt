@@ -342,13 +342,13 @@ f""", // no newline at the end
         keyParams[1].mAbsoluteWidth = 1f
         keyParams[1].mAbsoluteHeight = 1f
         val key = keyParams[1].createKey()
-        assertEquals(null, key.hintLabel)
-        assertEquals(2, key.popupKeys?.size)
+        assertEquals(null, key.getHintLabel())
+        assertEquals(2, key.getPopupKeys()?.size)
         val lettersOnBaseLayout = PopupKeySpec.LettersOnBaseLayout()
         lettersOnBaseLayout.addLetter(keyParams[0])
         val keyWithoutRedundantPopups = Key.removeRedundantPopupKeys(key, lettersOnBaseLayout)
-        assertEquals(1, keyWithoutRedundantPopups.popupKeys?.size)
-        assertEquals(null, keyWithoutRedundantPopups.hintLabel)
+        assertEquals(1, keyWithoutRedundantPopups.getPopupKeys()?.size)
+        assertEquals(null, keyWithoutRedundantPopups.getHintLabel())
     }
 
     @Test fun popupWithCodeAndLabel() {
@@ -573,7 +573,7 @@ f""", // no newline at the end
             assertEquals(expected[index].icon, keyParams.mIconName)
             assertEquals(expected[index].code, keyParams.mCode)
             assertEquals(expected[index].popups, keyParams.mPopupKeys?.mapNotNull { it.mLabel to it.mCode })
-            assertEquals(expected[index].text, keyParams.outputText)
+            assertEquals(expected[index].text, keyParams.getOutputText())
             assertEquals(expected[index].background, keyParams.mBackgroundType)
             assertTrue(LayoutUtilsCustom.checkKeys(listOf(listOf(keyParams))))
         }
@@ -608,7 +608,7 @@ f""", // no newline at the end
         keyParams.mAbsoluteWidth = 1f
         keyParams.mAbsoluteHeight = 1f
         val key = keyParams.createKey()
-        assertEquals(false, key.isLongPressEnabled)
+        assertEquals(false, key.isLongPressEnabled())
     }
 
     @Test fun placeholderNextToOtherPopup() {

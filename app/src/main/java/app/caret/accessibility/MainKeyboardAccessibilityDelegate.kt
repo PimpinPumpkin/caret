@@ -150,8 +150,8 @@ class MainKeyboardAccessibilityDelegate(
     }
 
     override fun performClickOn(key: Key) {
-        val x = key.hitBox.centerX()
-        val y = key.hitBox.centerY()
+        val x = key.getHitBox().centerX()
+        val y = key.getHitBox().centerY()
         if (DEBUG_HOVER) {
             Log.d(TAG, "performClickOn: key=" + key
                     + " inIgnoreBounds=" + mBoundsToIgnoreHoverEvent.contains(x, y))
@@ -166,8 +166,8 @@ class MainKeyboardAccessibilityDelegate(
     }
 
     override fun onHoverEnterTo(key: Key) {
-        val x = key.hitBox.centerX()
-        val y = key.hitBox.centerY()
+        val x = key.getHitBox().centerX()
+        val y = key.getHitBox().centerY()
         if (DEBUG_HOVER) {
             Log.d(TAG, "onHoverEnterTo: key=" + key
                     + " inIgnoreBounds=" + mBoundsToIgnoreHoverEvent.contains(x, y))
@@ -180,14 +180,14 @@ class MainKeyboardAccessibilityDelegate(
         // Further hover events should be handled.
         mBoundsToIgnoreHoverEvent.setEmpty()
         super.onHoverEnterTo(key)
-        if (key.isLongPressEnabled) {
+        if (key.isLongPressEnabled()) {
             mAccessibilityLongPressTimer.startLongPress(key)
         }
     }
 
     override fun onHoverExitFrom(key: Key) {
-        val x = key.hitBox.centerX()
-        val y = key.hitBox.centerY()
+        val x = key.getHitBox().centerX()
+        val y = key.getHitBox().centerY()
         if (DEBUG_HOVER) {
             Log.d(TAG, "onHoverExitFrom: key=" + key
                     + " inIgnoreBounds=" + mBoundsToIgnoreHoverEvent.contains(x, y))
@@ -202,8 +202,8 @@ class MainKeyboardAccessibilityDelegate(
         }
         val tracker = PointerTracker.getPointerTracker(HOVER_EVENT_POINTER_ID)
         val eventTime = SystemClock.uptimeMillis()
-        val x = key.hitBox.centerX()
-        val y = key.hitBox.centerY()
+        val x = key.getHitBox().centerX()
+        val y = key.getHitBox().centerY()
         val downEvent = MotionEvent.obtain(eventTime, eventTime, MotionEvent.ACTION_DOWN, x.toFloat(), y.toFloat(), 0)
         // Inject a fake down event to {@link PointerTracker} to handle a long press correctly.
         tracker.processMotionEvent(downEvent, mKeyDetector)
@@ -222,11 +222,11 @@ class MainKeyboardAccessibilityDelegate(
         }
         // This long press has handled at {@link MainKeyboardView#onLongPress(PointerTracker)}.
         // We should ignore further hover events on this key.
-        mBoundsToIgnoreHoverEvent.set(key.hitBox)
+        mBoundsToIgnoreHoverEvent.set(key.getHitBox())
         if (key.hasNoPanelAutoPopupKey()) {
             // This long press has registered a code point without showing a popup keys keyboard.
             // We should talk back the code point if possible.
-            val codePointOfNoPanelAutoPopupKey = key.popupKeys?.get(0)?.mCode ?: return
+            val codePointOfNoPanelAutoPopupKey = key.getPopupKeys()?.get(0)?.mCode ?: return
             val text: String = KeyCodeDescriptionMapper.instance.getDescriptionForCodePoint(
                     mKeyboardView.context, codePointOfNoPanelAutoPopupKey) ?: return
             sendWindowStateChanged(text)
