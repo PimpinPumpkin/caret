@@ -57,7 +57,7 @@ import kotlin.test.assertEquals
 ])
 class InputLogicTest {
     private val latinIME = Robolectric.setupService(LatinIME::class.java)
-    private val settingsValues get() = Settings.getValues()
+    private val settingsValues get() = Settings.values
     private val inputLogic get() = latinIME.inputLogic
     private val connection: RichInputConnection get() = inputLogic.connection
     private val composerReader = InputLogic::class.java.getDeclaredField("wordComposer").apply { isAccessible = true }
@@ -1406,7 +1406,7 @@ class InputLogicTest {
         checkConnectionConsistency()
     }
 
-    private fun getWordAtCursor() = connection.getWordRangeAtCursor(settingsValues.spacingAndPunctuations, currentScript)?.mWord
+    private fun getWordAtCursor() = connection.getWordRangeAtCursor(settingsValues.spacingAndPunctuations, currentScript)?.word
 
     private fun setCursorPosition(start: Int, end: Int = start, weirdTextField: Boolean = false) {
         val ei = EditorInfo()

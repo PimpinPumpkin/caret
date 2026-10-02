@@ -38,7 +38,7 @@ import java.util.Locale
 import java.util.TreeMap
 import kotlin.math.min
 
-abstract class AndroidWordLevelSpellCheckerSession(private val mService: AndroidSpellCheckerService) :
+abstract class AndroidWordLevelSpellCheckerSession(private val service: AndroidSpellCheckerService) :
     SpellCheckerService.Session() {
     private lateinit var locale: Locale
     private lateinit var script: String // Cache this for performance
@@ -50,7 +50,7 @@ abstract class AndroidWordLevelSpellCheckerSession(private val mService: Android
     }
 
     init {
-        mService.contentResolver.registerContentObserver(Words.CONTENT_URI, true, observer)
+        service.contentResolver.registerContentObserver(Words.CONTENT_URI, true, observer)
     }
 
     private fun updateLocale() {
@@ -72,7 +72,7 @@ abstract class AndroidWordLevelSpellCheckerSession(private val mService: Android
         // This function was taken from https://github.com/LineageOS/android_frameworks_base/blob/1235c24a0f092d0e41fd8e86f332f8dc03896a7b/services/core/java/com/android/server/TextServicesManagerService.java#L544 and slightly adopted.
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-            val imm = mService.applicationContext.getSystemService(InputMethodManager::class.java)
+            val imm = service.applicationContext.getSystemService(InputMethodManager::class.java)
             val currentInputMethodSubtype = imm?.currentInputMethodSubtype
             if (currentInputMethodSubtype != null) {
                 val localeString = currentInputMethodSubtype.locale
@@ -81,7 +81,7 @@ abstract class AndroidWordLevelSpellCheckerSession(private val mService: Android
                 }
                 // localeString for this app is always empty, get it from settings if possible
                 if (currentInputMethodSubtype.extraValue == "dummy") { // make sure this app is used
-                    return getSelectedSubtype(mService.prefs()).locale
+                    return getSelectedSubtype(service.prefs()).locale
                 }
             }
         }
@@ -91,7 +91,7 @@ abstract class AndroidWordLevelSpellCheckerSession(private val mService: Android
     }
 
     override fun onClose() {
-        mService.contentResolver.unregisterContentObserver(observer)
+        service.contentResolver.unregisterContentObserver(observer)
     }
 
     /**
@@ -107,20 +107,20 @@ abstract class AndroidWordLevelSpellCheckerSession(private val mService: Android
     private fun isInDictForAnyCapitalization(text: String, capitalizeType: Int): Boolean {
         // If the word is in there as is, then it's in the dictionary. If not, we'll test lower
         // case versions, but only if the word is not already all-lower case or mixed case.
-        if (mService.isValidWord(locale, text)) return true
+        if (service.isValidWord(locale, text)) return true
         if (StringUtils.CAPITALIZE_NONE == capitalizeType) return false
 
         // If we come here, we have a capitalized word (either First- or All-).
         // Downcase the word and look it up again. If the word is only capitalized, we
         // tested all possibilities, so if it's still negative we can return false.
         val lowerCaseText = text.lowercase(locale)
-        if (mService.isValidWord(locale, lowerCaseText)) return true
+        if (service.isValidWord(locale, lowerCaseText)) return true
         if (StringUtils.CAPITALIZE_FIRST == capitalizeType) return false
 
         // If the lower case version is not in the dictionary, it's still possible
         // that we have an all-caps version of a word that needs to be capitalized
         // according to the dictionary. E.g. "GERMANS" only exists in the dictionary as "Germans".
-        return mService.isValidWord(locale, StringUtils.capitalizeFirstAndDowncaseRest(lowerCaseText, locale))
+        return service.isValidWord(locale, StringUtils.capitalizeFirstAndDowncaseRest(lowerCaseText, locale))
     }
 
     // Note : this must be reentrant
@@ -143,7 +143,7 @@ abstract class AndroidWordLevelSpellCheckerSession(private val mService: Android
 
             scriptToPunctuationRegexMap[script]?.let { text = text.replace(it, "") }
 
-            if (!mService.hasMainDictionaryForLocale(locale))
+            if (!service.hasMainDictionaryForLocale(locale))
                 return AndroidSpellCheckerService.getNotInDictEmptySuggestions(false)
 
             // Handle special patterns like email, URI, telephone number.
@@ -164,22 +164,22 @@ abstract class AndroidWordLevelSpellCheckerSession(private val mService: Android
             }
 
             // unknown word -> don't show suggestions if switched off
-            if (!mService.prefs().getBoolean(Settings.PREF_SPELLCHECK_SUGGEST, Defaults.PREF_SPELLCHECK_SUGGEST))
+            if (!service.prefs().getBoolean(Settings.PREF_SPELLCHECK_SUGGEST, Defaults.PREF_SPELLCHECK_SUGGEST))
                 return AndroidSpellCheckerService.getTypoNoUiSuggestions()
 
-            val keyboard = mService.getKeyboardForLocale(locale)
+            val keyboard = service.getKeyboardForLocale(locale)
             val composer = WordComposer()
             if (locale.getLanguage() == "ko")
                 composer.restartCombining("hangul")
             val codePoints = StringUtils.toCodePointArray(text)
             composer.setComposingWord(codePoints, keyboard.getCoordinates(codePoints))
             // TODO: Don't gather suggestions if the limit is <= 0 unless necessary
-            val suggestionResults = mService
+            val suggestionResults = service
                 .getSuggestionResults(locale, composer.getComposedDataSnapshot(), ngramContext!!, keyboard)
-            val result = getResult(capitalizeType, locale, suggestionsLimit, mService.getRecommendedThreshold(), text, suggestionResults)
-            if (DebugFlags.DEBUG_ENABLED && !result.mSuggestions.isNullOrEmpty()) {
+            val result = getResult(capitalizeType, locale, suggestionsLimit, service.recommendedThreshold, text, suggestionResults)
+            if (DebugFlags.DEBUG_ENABLED && !result.suggestions.isNullOrEmpty()) {
                 val builder = StringBuilder()
-                for (suggestion in result.mSuggestions) {
+                for (suggestion in result.suggestions) {
                     builder.append(" [")
                     builder.append(suggestion)
                     builder.append("]")
@@ -193,9 +193,9 @@ abstract class AndroidWordLevelSpellCheckerSession(private val mService: Android
             StatsUtils.onInvalidWordIdentification(text)
 
             val flags = SuggestionsInfo.RESULT_ATTR_LOOKS_LIKE_TYPO or
-                (if (result.mHasRecommendedSuggestions) SuggestionsInfo.RESULT_ATTR_HAS_RECOMMENDED_SUGGESTIONS else 0)
-            val retval = SuggestionsInfo(flags, result.mSuggestions)
-            suggestionsCache.putSuggestionsToCache(text, result.mSuggestions, flags)
+                (if (result.hasRecommendedSuggestions) SuggestionsInfo.RESULT_ATTR_HAS_RECOMMENDED_SUGGESTIONS else 0)
+            val retval = SuggestionsInfo(flags, result.suggestions)
+            suggestionsCache.putSuggestionsToCache(text, result.suggestions, flags)
             return retval
         } catch (e: RuntimeException) {
             // Don't kill the keyboard if there is a bug in the spell checker
@@ -215,7 +215,7 @@ abstract class AndroidWordLevelSpellCheckerSession(private val mService: Android
             var allWordsAreValid = true
             // Validate all words on both sides of periods, skip empty tokens due to periods at first/last index
             for (word in splitText) {
-                if (!word.isEmpty() && !mService.isValidWord(locale, word) && !mService.isValidWord(locale, word.lowercase(locale))) {
+                if (!word.isEmpty() && !service.isValidWord(locale, word) && !service.isValidWord(locale, word.lowercase(locale))) {
                     allWordsAreValid = false
                     break
                 }
@@ -347,12 +347,12 @@ abstract class AndroidWordLevelSpellCheckerSession(private val mService: Android
         }
     }
 
-    private class Result(val mSuggestions: Array<String?>?, val mHasRecommendedSuggestions: Boolean)
+    private class Result(val suggestions: Array<String?>?, val hasRecommendedSuggestions: Boolean)
 
     private enum class Checkabiliy { CHECKABLE, TOO_MANY_NON_LETTERS, CONTAINS_PERIOD, EMAIL_OR_URL, FIRST_LETTER_UNCHECKABLE, TOO_SHORT }
 
     // todo: this is unused...
-    protected class SuggestionsParams(val mSuggestions: Array<String?>?, val mFlags: Int)
+    protected class SuggestionsParams(val suggestions: Array<String?>?, val flags: Int)
 
     protected class SuggestionsCache {
         private val unigramSuggestionsInfoCache = LruCache<String?, SuggestionsParams?>(MAX_CACHE_SIZE)

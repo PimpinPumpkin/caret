@@ -44,7 +44,7 @@ class KeyPreviewView @JvmOverloads constructor(context: Context, attrs: Attribut
         setCompoundDrawables(null, null, null, null)
         setTextColor(drawParams.previewTextColor)
         setTextSize(TypedValue.COMPLEX_UNIT_PX, key.selectPreviewTextSize(drawParams)
-                * Settings.getValues().fontSizeMultiplier)
+                * Settings.values.fontSizeMultiplier)
         KeyboardTypeface.applyToTextView(this, key.previewLabel, key.selectPreviewTypeface(drawParams))
         // TODO Should take care of temporaryShiftLabel here.
         setTextAndScaleX(key.previewLabel)

@@ -91,8 +91,9 @@ fun CustomizeIconsDialog(
             }
         },
     )
-    if (showIconDialog != null) {
-        val iconName = showIconDialog!!.first
+    val iconDialog = showIconDialog
+    if (iconDialog != null) {
+        val iconName = iconDialog.first
         val allIcons = KeyboardIconsSet.getAllIcons(ctx)
         val iconsForName = allIcons[iconName].orEmpty()
         val iconsSet = mutableSetOf<Int>()
@@ -130,7 +131,7 @@ fun CustomizeIconsDialog(
                 }
                 reloadItem(iconName)
             },
-            title = { Text(showIconDialog!!.second) },
+            title = { Text(iconDialog.second) },
             content = {
                 LazyVerticalGrid(
                     columns = GridCells.Adaptive(minSize = 64.dp),

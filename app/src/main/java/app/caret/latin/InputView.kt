@@ -95,13 +95,13 @@ class InputView(context: Context, attrs: AttributeSet?) : FrameLayout(context, a
     }
 
     private fun onNextLayout(v: View) {
-        Settings.getValues().mColors.setBackground(findViewById<View>(R.id.main_keyboard_frame), ColorType.MAIN_BACKGROUND)
+        Settings.values.colors.setBackground(findViewById<View>(R.id.main_keyboard_frame), ColorType.MAIN_BACKGROUND)
 
         // Work around inset application being unreliable
         requestApplyInsets()
 
         // need to update the floating keyboard position after applying insets
-        if (Settings.getValues().isFloatingKeyboard)
+        if (Settings.values.isFloatingKeyboard)
             FloatingKeyboardUtils.setFloating(this)
     }
 

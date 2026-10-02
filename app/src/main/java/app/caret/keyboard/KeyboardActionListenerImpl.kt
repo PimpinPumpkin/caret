@@ -44,7 +44,7 @@ class KeyboardActionListenerImpl(private val latinIME: LatinIME, private val inp
     private val hardwareEventDecoders: SparseArray<HardwareEventDecoder> = SparseArray(1)
 
     private val keyboardSwitcher = KeyboardSwitcher.getInstance()
-    private val settings = Settings.getInstance()
+    private val settings = Settings.instance
     private val audioAndHapticFeedbackManager = AudioAndHapticFeedbackManager.getInstance()
 
     // language slide state
@@ -83,7 +83,7 @@ class KeyboardActionListenerImpl(private val latinIME: LatinIME, private val inp
             return false
 
         val event: Event
-        if (settings.getCurrent().mLocale.language == "ko") { // todo: this does not appear to be the right place
+        if (settings.current.locale.language == "ko") { // todo: this does not appear to be the right place
             val subtype = keyboardSwitcher.keyboard?.id?.subtype ?: RichInputMethodManager.getInstance().currentSubtype
             event = HangulEventDecoder.decodeHardwareKeyEvent(subtype, keyEvent) {
                 getHardwareKeyEventDecoder(keyEvent.deviceId).decodeHardwareKey(keyEvent)
@@ -94,7 +94,7 @@ class KeyboardActionListenerImpl(private val latinIME: LatinIME, private val inp
 
         if (event.isHandled) {
             inputLogic.onCodeInput(
-                settings.getCurrent(), event,
+                settings.current, event,
                 keyboardSwitcher.getKeyboardCapsMode(), // TODO: this is not necessarily correct for a hardware keyboard right now
                 keyboardSwitcher.getCurrentKeyboardScript(),
                 latinIME.handler
@@ -133,7 +133,7 @@ class KeyboardActionListenerImpl(private val latinIME: LatinIME, private val inp
                 return
             }
         }
-        if (Settings.getValues().isLocked && KeyCode.isIsBlockedWhenLocked(primaryCode))
+        if (Settings.values.isLocked && KeyCode.isIsBlockedWhenLocked(primaryCode))
             return
         val mkv = keyboardSwitcher.getMainKeyboardView()!!
 
@@ -195,7 +195,7 @@ class KeyboardActionListenerImpl(private val latinIME: LatinIME, private val inp
         }
     }
 
-    override fun onHorizontalSpaceSwipe(steps: Int): Boolean = when (Settings.getValues().spaceSwipeHorizontal) {
+    override fun onHorizontalSpaceSwipe(steps: Int): Boolean = when (Settings.values.spaceSwipeHorizontal) {
         KeyboardActionListener.SwipeAction.MOVE_CURSOR -> onMoveCursorHorizontally(steps)
         KeyboardActionListener.SwipeAction.SWITCH_LANGUAGE -> onLanguageSlide(steps)
         KeyboardActionListener.SwipeAction.TOGGLE_NUMPAD -> {
@@ -209,7 +209,7 @@ class KeyboardActionListenerImpl(private val latinIME: LatinIME, private val inp
         else -> false
     }
 
-    override fun onVerticalSpaceSwipe(steps: Int): Boolean = when (Settings.getValues().spaceSwipeVertical) {
+    override fun onVerticalSpaceSwipe(steps: Int): Boolean = when (Settings.values.spaceSwipeVertical) {
         KeyboardActionListener.SwipeAction.MOVE_CURSOR -> onMoveCursorVertically(steps)
         KeyboardActionListener.SwipeAction.SWITCH_LANGUAGE -> onLanguageSlide(steps)
         KeyboardActionListener.SwipeAction.TOGGLE_NUMPAD -> {
@@ -256,7 +256,7 @@ class KeyboardActionListenerImpl(private val latinIME: LatinIME, private val inp
     override fun onMoveDeletePointer(steps: Int) {
         inputLogic.finishInput()
         val end = connection.expectedSelectionEnd
-        val actualSteps = if (Settings.getValues().swipeDeleteByWord) wordSteps(steps) else actualSteps(steps)
+        val actualSteps = if (Settings.values.swipeDeleteByWord) wordSteps(steps) else actualSteps(steps)
         val start = connection.expectedSelectionStart + actualSteps
         if (start > end) return
         gestureMoveBackHaptics()
@@ -286,7 +286,7 @@ class KeyboardActionListenerImpl(private val latinIME: LatinIME, private val inp
     }
 
     private fun onLanguageSlide(steps: Int): Boolean {
-        if (abs(steps) < settings.getCurrent().languageSwipeDistance) return false
+        if (abs(steps) < settings.current.languageSwipeDistance) return false
         val subtypes = SubtypeSettings.getEnabledSubtypes(true)
         if (subtypes.size <= 1) { // only allow if we have more than one subtype
             return false
@@ -374,7 +374,7 @@ class KeyboardActionListenerImpl(private val latinIME: LatinIME, private val inp
         //     https://github.com/HeliBorg/HeliBoard/issues/1139#issuecomment-2588169384
         //  * inputType is NOT of variant InputType.TYPE_TEXT_VARIATION_WEB_EDIT_TEXT (variant appears to always be 0)
         //     -> this is "fixed" now using AppWorkarounds.adjustInputType
-        val variation = InputType.TYPE_MASK_VARIATION and Settings.getValues().mInputAttributes.inputType
+        val variation = InputType.TYPE_MASK_VARIATION and Settings.values.inputAttributes.inputType
         if (variation != InputType.TYPE_TEXT_VARIATION_WEB_EDIT_TEXT
                 && inputLogic.moveCursorByAndReturnIfInsideComposingWord(moveSteps)) {
             // no need to finish input and restart suggestions if we're still in the word
@@ -387,7 +387,7 @@ class KeyboardActionListenerImpl(private val latinIME: LatinIME, private val inp
         inputLogic.finishInput()
         val newPosition = connection.expectedSelectionStart + moveSteps
         connection.setSelection(newPosition, newPosition)
-        inputLogic.restartSuggestionsOnWordTouchedByCursor(settings.getCurrent(), keyboardSwitcher.getCurrentKeyboardScript())
+        inputLogic.restartSuggestionsOnWordTouchedByCursor(settings.current, keyboardSwitcher.getCurrentKeyboardScript())
         return true
     }
 

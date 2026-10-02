@@ -85,7 +85,7 @@ class BnKhiproCombiner(
          * (e.g. during JVM unit tests).
          */
         val engine: KhiproEngine by lazy {
-            val ctx = Settings.getCurrentContext()
+            val ctx = Settings.currentContext
             val specText = try {
                 ctx.assets.open(SPEC_ASSET).use { input ->
                     BufferedReader(InputStreamReader(input)).readText()

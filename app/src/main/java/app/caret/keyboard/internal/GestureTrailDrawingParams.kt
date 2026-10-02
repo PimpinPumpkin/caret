@@ -33,7 +33,7 @@ class GestureTrailDrawingParams(mainKeyboardViewAttr: TypedArray) {
     @JvmField val trailLingerDuration: Int
 
     init {
-        trailColor = Settings.getValues().mColors.get(ColorType.GESTURE_TRAIL)
+        trailColor = Settings.values.colors.get(ColorType.GESTURE_TRAIL)
         trailStartWidth = mainKeyboardViewAttr.getDimension(
                 R.styleable.MainKeyboardView_gestureTrailStartWidth, 0.0f)
         trailEndWidth = mainKeyboardViewAttr.getDimension(
@@ -54,7 +54,7 @@ class GestureTrailDrawingParams(mainKeyboardViewAttr: TypedArray) {
         fadeoutDuration = if (GestureTrailDrawingPoints.DEBUG_SHOW_POINTS)
             FADEOUT_DURATION_FOR_DEBUG
         else
-            Settings.getValues().gestureTrailFadeoutDuration
+            Settings.values.gestureTrailFadeoutDuration
         trailLingerDuration = fadeoutStartDelay + fadeoutDuration
         updateInterval = mainKeyboardViewAttr.getInt(
                 R.styleable.MainKeyboardView_gestureTrailUpdateInterval, 0)

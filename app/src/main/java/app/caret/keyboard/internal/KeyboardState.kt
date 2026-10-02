@@ -107,7 +107,7 @@ class KeyboardState(private val switchActions: SwitchActions) {
             onUpdateShiftState(autoCapsFlags, recapitalizeMode)
         }
         switchActions.setOneHandedModeEnabled(onHandedModeEnabled)
-        switchActions.setFloatingKeyboardEnabled(Settings.getValues().isFloatingKeyboard)
+        switchActions.setFloatingKeyboardEnabled(Settings.values.isFloatingKeyboard)
     }
 
     fun onSaveKeyboardState() {
@@ -454,7 +454,7 @@ class KeyboardState(private val switchActions: SwitchActions) {
             Log.d(TAG, "onEvent: code=${Constants.printableCode(code)} ${stateToString(autoCapsFlags, recapitalizeMode)}")
         }
 
-        if (mode in Settings.getValues().alphaAfterSpace) {
+        if (mode in Settings.values.alphaAfterSpace) {
             if (isSpaceOrEnter(code)) {
                 if (isInSpaceToAlpha) {
                     resetToAlpha(autoCapsFlags, recapitalizeMode)
@@ -471,16 +471,16 @@ class KeyboardState(private val switchActions: SwitchActions) {
             KeyCode.EMOJI -> toggleLayout(Utility.EMOJI, autoCapsFlags, recapitalizeMode)
             KeyCode.ALPHA -> resetToAlpha(autoCapsFlags, recapitalizeMode)
             // Note: Printing clipboard content is handled in InputLogic.handleFunctionalEvent
-            KeyCode.CLIPBOARD -> if (Settings.getValues().clipboardHistoryEnabled) {
+            KeyCode.CLIPBOARD -> if (Settings.values.clipboardHistoryEnabled) {
                 toggleLayout(Utility.CLIPBOARD, autoCapsFlags, recapitalizeMode)
             }
             KeyCode.NUMPAD -> toggleLayout(Utility.NUMPAD, autoCapsFlags, recapitalizeMode)
             KeyCode.DPAD -> toggleLayout(Utility.DPAD, autoCapsFlags, recapitalizeMode)
             KeyCode.SYMBOL -> toggleLayout(Utility.SYMBOLS, autoCapsFlags, recapitalizeMode)
-            KeyCode.TOGGLE_ONE_HANDED_MODE -> switchActions.setOneHandedModeEnabled(!Settings.getValues().oneHandedModeEnabled)
+            KeyCode.TOGGLE_ONE_HANDED_MODE -> switchActions.setOneHandedModeEnabled(!Settings.values.oneHandedModeEnabled)
             KeyCode.SWITCH_ONE_HANDED_MODE -> switchActions.switchOneHandedMode()
             KeyCode.TOGGLE_FLOATING_WINDOW -> {
-                switchActions.setFloatingKeyboardEnabled(!Settings.getValues().isFloatingKeyboard)
+                switchActions.setFloatingKeyboardEnabled(!Settings.values.isFloatingKeyboard)
                 KeyboardSwitcher.getInstance().reloadKeyboard()
             }
         }

@@ -126,7 +126,7 @@ fun BackgroundGatheringSettings() {
                 if (!GestureDataGatheringSettings.hasBackgroundGatheringPref(ctx.prefs()))
                     showFirstStartDialog = true
                 if (it) {
-                    val usedMainDicts = DictionaryFactory.getMainDictsForLocale(ctx, Settings.getValues().mLocale, false)
+                    val usedMainDicts = DictionaryFactory.getMainDictsForLocale(ctx, Settings.values.locale, false)
                     val hashes = getKnownDictHashes(ctx)
                     if (usedMainDicts.none { ((it as? BinaryDictionary)?.hash ?: (it as? ReadOnlyBinaryDictionary)?.hash) in hashes })
                         showNoDictDialog = true

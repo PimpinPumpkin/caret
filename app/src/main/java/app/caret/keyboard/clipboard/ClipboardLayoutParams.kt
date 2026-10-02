@@ -20,7 +20,7 @@ class ClipboardLayoutParams(ctx: Context) {
 
     init {
         val res = ctx.resources
-        val sv = Settings.getValues()
+        val sv = Settings.values
         val defaultKeyboardHeight = ResourceUtils.getSecondaryKeyboardHeight(res, sv)
         val defaultKeyboardWidth = ResourceUtils.getKeyboardWidth(ctx, sv)
 

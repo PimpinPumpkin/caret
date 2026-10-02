@@ -100,9 +100,10 @@ object GestureDataGatheringSettings {
     fun getWordExclusions(context: Context): Set<String> {
         excludedWords?.let { return it }
         val json = context.prefs().getString(PREF_WORD_EXCLUSIONS, "[]") ?: "[]"
-        excludedWords = if (json.isEmpty()) sortedSetOf()
+        val words: SortedSet<String> = if (json.isEmpty()) sortedSetOf()
         else Json.decodeFromString<List<String?>>(json).toSortedSet(compareBy(String.CASE_INSENSITIVE_ORDER) { it ?: "" })
-        return excludedWords!!
+        excludedWords = words
+        return words
     }
 
     private var excludedWords: SortedSet<String>? = null
@@ -117,8 +118,9 @@ object GestureDataGatheringSettings {
     fun getAppExclusions(context: Context): Collection<String> {
         excludedApps?.let { return it }
         val string = context.prefs().getString(PREF_APP_EXCLUSIONS, "") ?: ""
-        excludedApps = string.split(",").filterNot { it.isEmpty() }.toHashSet()
-        return excludedApps!!
+        val apps = string.split(",").filterNot { it.isEmpty() }.toHashSet()
+        excludedApps = apps
+        return apps
     }
 
     fun setAppIncludeByDefault(context: Context, value: Boolean) =

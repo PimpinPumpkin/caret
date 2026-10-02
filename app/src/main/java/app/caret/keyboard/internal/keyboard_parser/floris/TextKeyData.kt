@@ -103,7 +103,7 @@ sealed interface KeyData : AbstractKeyData {
                 keys.add("!icon/emoji_normal_key|!code/key_emoji")
             if (!params.id.languageSwitchKeyEnabled && !params.id.element.isNumberLayout && RichInputMethodManager.canSwitchLanguage())
                 keys.add("!icon/language_switch_key|!code/key_language_switch")
-            if (!params.id.oneHandedModeEnabled && !Settings.getValues().isFloatingKeyboard)
+            if (!params.id.oneHandedModeEnabled && !Settings.values.isFloatingKeyboard)
                 keys.add("!icon/start_onehanded_mode_key|!code/key_toggle_onehanded")
             if (!params.id.deviceLocked)
                 keys.add(ToolbarKey.FLOATING.name.lowercase())
@@ -139,7 +139,7 @@ sealed interface KeyData : AbstractKeyData {
 
         private fun String.resolveStringLabel(params: KeyboardParams): String {
             if (length < 9 || !startsWith("!string/")) return this
-            val id = Settings.getInstance().getStringResIdByName(substringAfter("!string/"))
+            val id = Settings.instance.getStringResIdByName(substringAfter("!string/"))
             if (id == 0) return this
             return getStringInLocale(id, params)
         }
@@ -148,7 +148,7 @@ sealed interface KeyData : AbstractKeyData {
             // todo: hi-Latn strings instead of this workaround?
             val locale = if (params.id.locale.toLanguageTag() == "hi-Latn") "en_IN".constructLocale()
             else params.id.locale
-            return Settings.getInstance().getInLocale(id, locale)
+            return Settings.instance.getInLocale(id, locale)
         }
 
         private fun getActionKeyPopupKeys(params: KeyboardParams): SimplePopups? =
@@ -213,7 +213,7 @@ sealed interface KeyData : AbstractKeyData {
             }
             // remove emoji shortcut on enter in tablet mode (like original, because bottom row always has an emoji key)
             // (probably not necessary, but whatever) and in emoji mode
-            if ((Settings.getInstance().isTablet() || params.id.element == KeyboardElement.EMOJI_BOTTOM_ROW)
+            if ((Settings.instance.isTablet() || params.id.element == KeyboardElement.EMOJI_BOTTOM_ROW)
                 && popupKeys.remove("!icon/emoji_action_key|!code/key_emoji")) {
                 val i = popupKeys.indexOfFirst { it.startsWith(Key.POPUP_KEYS_FIXED_COLUMN_ORDER) }
                 if (i > -1) {
@@ -236,7 +236,7 @@ sealed interface KeyData : AbstractKeyData {
             // fake keyboard that is used by spell checker (for key coordinates), but not shown to the user
             // often this doesn't have any icons loaded, and there is no need to bother with this
                 return this
-            val id = Settings.getInstance().getStringResIdByName("label_$this")
+            val id = Settings.instance.getStringResIdByName("label_$this")
             if (id == 0) {
                 Log.w("TextKeyData", "no resource for label $this in ${params.id}")
                 return this
@@ -245,7 +245,7 @@ sealed interface KeyData : AbstractKeyData {
         }
 
         private fun shouldShowTldPopups(params: KeyboardParams): Boolean =
-            (Settings.getInstance().getCurrent().showTldPopupKeys
+            (Settings.instance.current.showTldPopupKeys
                     && params.id.subtype.layouts[LayoutType.FUNCTIONAL] != "functional_keys_tablet"
                     && (params.id.mode == KeyboardMode.URL || params.id.mode == KeyboardMode.EMAIL))
 

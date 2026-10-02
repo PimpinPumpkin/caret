@@ -102,12 +102,12 @@ class KeyboardSwitcher private constructor() {
         val themeUpdated = updateKeyboardThemeAndContextThemeWrapper(
                 displayContext, KeyboardTheme.getKeyboardTheme(displayContext))
         if (themeUpdated) {
-            val settings = Settings.getInstance()
-            settings.loadSettings(displayContext, settings.getCurrent().mLocale, settings.getCurrent().mInputAttributes)
+            val settings = Settings.instance
+            settings.loadSettings(displayContext, settings.current.locale, settings.current.inputAttributes)
             if (keyboardView != null)
                 latinIME.setInputView(onCreateInputView(displayContext, isHardwareAcceleratedDrawingEnabled))
         } else if (currentInputView != null && latinIME.hasSuggestionStripView()
-                    == (Settings.getValues().toolbarMode == ToolbarMode.HIDDEN || latinIME.isEmojiSearch())) {
+                    == (Settings.values.toolbarMode == ToolbarMode.HIDDEN || latinIME.isEmojiSearch())) {
             latinIME.updateSuggestionStripView(currentInputView)
         }
     }
@@ -121,7 +121,7 @@ class KeyboardSwitcher private constructor() {
                 || currentOrientation != res.getConfiguration().orientation
                 || (currentUiMode and Configuration.UI_MODE_NIGHT_MASK) != (res.getConfiguration().uiMode and Configuration.UI_MODE_NIGHT_MASK)
                 || !themeContext.getResources().equals(res)
-                || Settings.getValues().mColors.haveColorsChanged(context)) {
+                || Settings.values.colors.haveColorsChanged(context)) {
             themeNeedsReload = false
             keyboardTheme = newTheme
             themeContext = ContextThemeWrapper(context, newTheme.styleId)
@@ -221,7 +221,7 @@ class KeyboardSwitcher private constructor() {
         // @see #getVisibleKeyboardView() and
         // @see LatinIME#onComputeInset(android.inputmethodservice.InputMethodService.Insets)
         mainKeyboardFrame.setVisibility(visibility)
-        keyboardViewWrapper!!.setVisibility(if (Settings.getInstance().readShowToolbarOnly()) View.GONE else View.VISIBLE)
+        keyboardViewWrapper!!.setVisibility(if (Settings.instance.readShowToolbarOnly()) View.GONE else View.VISIBLE)
         emojiPalettesView.setVisibility(View.GONE)
         emojiPalettesView.stopEmojiPalettes()
         emojiTabStripView.setVisibility(View.GONE)
@@ -310,24 +310,24 @@ class KeyboardSwitcher private constructor() {
         if (!force && wrapper.oneHandedModeEnabled == enabled) {
             return
         }
-        val settings = Settings.getInstance()
+        val settings = Settings.instance
         wrapper.oneHandedModeEnabled = enabled
-        wrapper.oneHandedGravity = settings.getCurrent().oneHandedModeGravity
+        wrapper.oneHandedGravity = settings.current.oneHandedModeGravity
 
         // oneHandeMode is always disabled when floating, and we shouldn't mess up the setting
-        if (enabled != settings.getCurrent().oneHandedModeEnabled)
+        if (enabled != settings.current.oneHandedModeEnabled)
             settings.writeOneHandedModeEnabled(enabled)
         reloadKeyboard()
     }
 
     fun toggleSplitKeyboardMode() {
-        val settings = Settings.getInstance()
+        val settings = Settings.instance
         settings.writeSplitKeyboardEnabled(
-            !settings.getCurrent().isSplitKeyboardEnabled,
+            !settings.current.isSplitKeyboardEnabled,
             currentOrientation == Configuration.ORIENTATION_LANDSCAPE,
             FoldableUtils.isFolded
         )
-        setOneHandedModeEnabled(settings.getCurrent().oneHandedModeEnabled, true)
+        setOneHandedModeEnabled(settings.current.oneHandedModeEnabled, true)
         reloadKeyboard()
     }
 
@@ -359,7 +359,7 @@ class KeyboardSwitcher private constructor() {
         // Reload the entire keyboard, and switch to the previous layout
         val wasEmoji = isShowingEmojiPalettes
         val wasClipboard = isShowingClipboardHistory
-        loadKeyboard(latinIME.getCurrentInputEditorInfo(), Settings.getValues(),
+        loadKeyboard(latinIME.getCurrentInputEditorInfo(), Settings.values,
                 latinIME.getCurrentAutoCapsState(), latinIME.getCurrentRecapitalizeState(), null)
         if (wasEmoji) {
             setEmojiKeyboard()
@@ -524,7 +524,7 @@ class KeyboardSwitcher private constructor() {
         if (::clipboardHistoryView.isInitialized)
             prefs.unregisterOnSharedPreferenceChangeListener(clipboardHistoryView)
         if (themeNeedsReload) // necessary in some cases (e.g. theme switch) when themeNeedsReload is set before first keyboard load
-            Settings.getInstance().loadSettings(displayContext, Settings.getValues().mLocale, Settings.getValues().mInputAttributes)
+            Settings.instance.loadSettings(displayContext, Settings.values.locale, Settings.values.inputAttributes)
 
         updateKeyboardThemeAndContextThemeWrapper(displayContext, KeyboardTheme.getKeyboardTheme(displayContext))
         val inputView = LayoutInflater.from(themeContext).inflate(R.layout.input_view, null) as InputView
@@ -702,11 +702,11 @@ class KeyboardSwitcher private constructor() {
         override fun switchOneHandedMode() {
             val wrapper = keyboardViewWrapper!!
             wrapper.switchOneHandedModeSide()
-            Settings.getInstance().writeOneHandedModeGravity(wrapper.oneHandedGravity)
+            Settings.instance.writeOneHandedModeGravity(wrapper.oneHandedGravity)
         }
 
         override fun setFloatingKeyboardEnabled(enabled: Boolean) {
-            if (enabled != Settings.getValues().isFloatingKeyboard)
+            if (enabled != Settings.values.isFloatingKeyboard)
                 // mIsFloatingKeyboard is always disabled when device is locked, and we shouldn't mess up the setting
                 setFloatingKeyboardEnabled(themeContext, enabled)
             if (enabled) FloatingKeyboardUtils.setFloating(currentInputView)
@@ -728,7 +728,7 @@ class KeyboardSwitcher private constructor() {
             val view = keyboardView ?: return
 
             // Make {@link MainKeyboardView} visible and hide {@link EmojiPalettesView}.
-            val currentSettingsValues = Settings.getValues()
+            val currentSettingsValues = Settings.values
             setMainKeyboardFrame(view, currentSettingsValues, toggleState)
             // TODO: pass this object to setKeyboard instead of getting the current values.
             val oldKeyboard = view.keyboard
@@ -766,7 +766,7 @@ class KeyboardSwitcher private constructor() {
         }
 
         private fun getSecondaryStripVisibility(): Int {
-            return if (Settings.getValues().isSecondaryStripVisible()) View.VISIBLE else View.GONE
+            return if (Settings.values.isSecondaryStripVisible) View.VISIBLE else View.GONE
         }
     }
 }

@@ -14,14 +14,17 @@ import java.util.Locale
 class RecapitalizeStatus {
     // We store the location of the cursor and the string that was there before the recapitalize
     // action was done, and the location of the cursor and the string that was there after.
-    private lateinit var mText: String
+    private lateinit var text: String
     private lateinit var textPlacement: TextPlacement
-    private lateinit var mCurrentMode: RecapitalizeMode
+    lateinit var currentMode: RecapitalizeMode
+        private set
     private var skipOriginalMixedCaseMode = false
-    private lateinit var mLocale: Locale
-    private lateinit var mSortedSeparators: IntArray
-    private var mIsStarted = false
-    private var mIsEnabled = true
+    private lateinit var locale: Locale
+    private lateinit var sortedSeparators: IntArray
+    var isStarted = false
+        private set
+    var isEnabled = true
+        private set
 
     init {
         // By default, initialize with dummy values that won't match any real recapitalize.
@@ -30,36 +33,28 @@ class RecapitalizeStatus {
     }
 
     fun start(text: String, cursorStart: Int, locale: Locale, sortedSeparators: IntArray) {
-        if (!mIsEnabled) {
+        if (!isEnabled) {
             return
         }
-        mText = text
+        this.text = text
         textPlacement = TextPlacement(text, cursorStart)
-        mCurrentMode = RecapitalizeMode.of(mText, sortedSeparators)
-        skipOriginalMixedCaseMode = RecapitalizeMode.ORIGINAL_MIXED_CASE != mCurrentMode
-        mLocale = locale
-        mSortedSeparators = sortedSeparators
-        mIsStarted = true
+        currentMode = RecapitalizeMode.of(text, sortedSeparators)
+        skipOriginalMixedCaseMode = RecapitalizeMode.ORIGINAL_MIXED_CASE != currentMode
+        this.locale = locale
+        this.sortedSeparators = sortedSeparators
+        isStarted = true
     }
 
     fun stop() {
-        mIsStarted = false
-    }
-
-    fun isStarted(): Boolean {
-        return mIsStarted
+        isStarted = false
     }
 
     fun enable() {
-        mIsEnabled = true
+        isEnabled = true
     }
 
     fun disable() {
-        mIsEnabled = false
-    }
-
-    fun isEnabled(): Boolean {
-        return mIsEnabled
+        isEnabled = false
     }
 
     fun isSetAt(cursorStart: Int, cursorEnd: Int): Boolean {
@@ -74,8 +69,8 @@ class RecapitalizeStatus {
         var replacement: String
         var i = 0 // Protection against infinite loop.
         do {
-            mCurrentMode = mCurrentMode.rotate(skipOriginalMixedCaseMode)
-            replacement = mCurrentMode.apply(mText, mSortedSeparators, mLocale)
+            currentMode = currentMode.rotate(skipOriginalMixedCaseMode)
+            replacement = currentMode.apply(text, sortedSeparators, locale)
             ++i
         } while (replacement == textPlacement.text && i <= modeCount)
         textPlacement.text = replacement
@@ -83,9 +78,5 @@ class RecapitalizeStatus {
 
     fun textReplacement(): TextPlacement {
         return textPlacement
-    }
-
-    fun getCurrentMode(): RecapitalizeMode {
-        return mCurrentMode
     }
 }

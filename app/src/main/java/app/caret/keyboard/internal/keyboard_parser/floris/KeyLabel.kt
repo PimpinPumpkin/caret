@@ -53,7 +53,7 @@ object KeyLabel {
     const val DEFAULT_ACTION_KEY = "emoji"
 
     private fun actionKeyLabel(): String {
-        val chosen = Settings.getCurrentContext()?.prefs()?.getString(PREF_ACTION_KEY, DEFAULT_ACTION_KEY) ?: DEFAULT_ACTION_KEY
+        val chosen = Settings.currentContext?.prefs()?.getString(PREF_ACTION_KEY, DEFAULT_ACTION_KEY) ?: DEFAULT_ACTION_KEY
         return if (chosen in toolbarKeyStrings.values) chosen else DEFAULT_ACTION_KEY
     }
 
@@ -154,7 +154,7 @@ object KeyLabel {
     private fun getShiftLabel(params: KeyboardParams) = when (params.id.element) {
         KeyboardElement.SYMBOLS_SHIFTED -> params.localeKeyboardInfos.labelSymbol
         KeyboardElement.SYMBOLS -> params.localeKeyboardInfos.getShiftSymbolLabel(
-            Settings.getInstance().isTablet())
+            Settings.instance.isTablet())
         KeyboardElement.ALPHABET_MANUAL_SHIFTED, KeyboardElement.ALPHABET_AUTOMATIC_SHIFTED -> "!icon/${KeyboardIconsSet.NAME_SHIFT_KEY_SHIFTED}"
         KeyboardElement.ALPHABET_SHIFT_LOCKED -> "!icon/${KeyboardIconsSet.NAME_SHIFT_KEY_LOCKED}"
 

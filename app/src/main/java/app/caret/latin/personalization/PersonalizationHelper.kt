@@ -22,14 +22,14 @@ import java.util.concurrent.ConcurrentHashMap
  */
 class PersonalizationHelper {
     private class DictFilter(name: String) : FilenameFilter {
-        private val mName: String
+        private val name: String
 
         init {
-            mName = name
+            this.name = name
         }
 
         override fun accept(dir: File?, name: String?): Boolean {
-            return name!!.startsWith(mName)
+            return name!!.startsWith(this.name)
         }
     }
 

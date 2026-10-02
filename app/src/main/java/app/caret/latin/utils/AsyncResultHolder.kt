@@ -18,12 +18,12 @@ class AsyncResultHolder<E>(tag: String) {
 
     private val lock = Any()
 
-    private var mResult: E? = null
-    private val mTag: String
+    private var result: E? = null
+    private val tag: String
     private val latch: CountDownLatch
 
     init {
-        mTag = tag
+        this.tag = tag
         latch = CountDownLatch(1)
     }
 
@@ -35,7 +35,7 @@ class AsyncResultHolder<E>(tag: String) {
     fun set(result: E?) {
         synchronized(lock) {
             if (latch.count > 0) {
-                mResult = result
+                this.result = result
                 latch.countDown()
             }
         }
@@ -51,9 +51,9 @@ class AsyncResultHolder<E>(tag: String) {
      */
     fun get(defaultValue: E?, timeOut: Long): E? {
         try {
-            return if (latch.await(timeOut, TimeUnit.MILLISECONDS)) mResult else defaultValue
+            return if (latch.await(timeOut, TimeUnit.MILLISECONDS)) result else defaultValue
         } catch (e: InterruptedException) {
-            Log.w(mTag, "get() : Interrupted after " + timeOut + " ms")
+            Log.w(tag, "get() : Interrupted after " + timeOut + " ms")
             return defaultValue
         }
     }

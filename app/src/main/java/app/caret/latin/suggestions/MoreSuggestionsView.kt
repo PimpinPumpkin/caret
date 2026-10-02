@@ -105,7 +105,7 @@ class MoreSuggestionsView @JvmOverloads constructor(
             Log.e(TAG, "Expected keyboard is MoreSuggestions, but found ${keyboard?.javaClass?.name}")
             return
         }
-        val suggestedWords = keyboard.mSuggestedWords
+        val suggestedWords = keyboard.suggestedWords
         val index = key.suggestedWordIndex
         if (index < 0 || index >= suggestedWords.size()) {
             Log.e(TAG, "Selected suggestion has an illegal index: $index")
@@ -124,7 +124,7 @@ class MoreSuggestionsView @JvmOverloads constructor(
         val keyboard = moreSuggestionsBuilder.layout(
             suggestedWords, fromIndex, maxWidth,
             (maxWidth * layoutHelper.minMoreSuggestionsWidth).toInt(),
-            layoutHelper.getMaxMoreSuggestionsRow(), parentKeyboard
+            layoutHelper.maxMoreSuggestionsRow, parentKeyboard
         ).build()
         setKeyboard(keyboard)
         container.measure(ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT)

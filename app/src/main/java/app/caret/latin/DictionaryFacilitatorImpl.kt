@@ -238,7 +238,7 @@ class DictionaryFacilitatorImpl : DictionaryFacilitator {
         latchForWaitingLoadingMainDictionaries = latchForWaitingLoadingMainDictionary
         scope.launch {
             try {
-                val useEmojiDict = Settings.getValues().suggestEmojis
+                val useEmojiDict = Settings.values.suggestEmojis
                 val dictGroupsWithNewMainDict = locales.mapNotNull {
                     val dictionaryGroup = findDictionaryGroupWithLocale(dictionaryGroups, it)
                     if (dictionaryGroup == null) {
@@ -305,7 +305,7 @@ class DictionaryFacilitatorImpl : DictionaryFacilitator {
             adjustConfidences(suggestion, wasAutoCapitalized)
 
         // Add word to user dictionary if it is in no other dictionary except user history dictionary (i.e. typed again).
-        val sv = Settings.getValues()
+        val sv = Settings.values
         if (sv.addToPersonalDictionary // require the opt-in
             && sv.autoCorrectEnabled == sv.autoCorrectionEnabledPerUserSettings // don't add if user wants autocorrect but input field does not, see https://github.com/HeliBorg/HeliBoard/issues/427#issuecomment-1905438000
             && dictionaryGroups[0].hasDict(Dictionary.TYPE_USER_HISTORY) // require personalized suggestions
@@ -530,8 +530,8 @@ class DictionaryFacilitatorImpl : DictionaryFacilitator {
         val userWords = {
             listOf(Dictionary.TYPE_USER, Dictionary.TYPE_USER_HISTORY, Dictionary.TYPE_CONTACTS).flatMap { type ->
                 group.getSubDict(type)?.getWordPropertiesForSyncing()?.mapNotNull { property ->
-                    if (property == null || property.mIsNotAWord || property.mIsBeginningOfSentence) null
-                    else property.mWord to property.mProbabilityInfo.mProbability
+                    if (property == null || property.isNotAWord || property.isBeginningOfSentence) null
+                    else property.word to property.probabilityInfo.probability
                 } ?: emptyList()
             }
         }

@@ -270,7 +270,7 @@ class KeyboardAccessibilityNodeProvider<KV : KeyboardView>(
      */
     private fun getKeyDescription(key: Key): String? {
         val shouldObscure = keyboard?.id?.inputType?.let { accessibilityUtils.shouldObscureInput(it) } ?: false
-        val currentSettings = Settings.getValues()
+        val currentSettings = Settings.values
         val keyCodeDescription = keyCodeDescriptionMapper.getDescriptionForKey(
                 keyboardView.context, keyboard, key, shouldObscure)
         return if (currentSettings.isWordSeparator(key.code)) {

@@ -100,7 +100,7 @@ class InlineAutofillUtils {
     companion object {
         @JvmStatic
         fun createInlineSuggestionRequest(context: Context): InlineSuggestionsRequest {
-            val colors = Settings.getValues().mColors
+            val colors = Settings.values.colors
             val chipBgDrawableId = androidx.autofill.R.drawable.autofill_inline_suggestion_chip_background
             val chipBgColor = colors.get(ColorType.AUTOFILL_BACKGROUND_CHIP)
             val chipTextColor = colors.get(ColorType.KEY_TEXT)

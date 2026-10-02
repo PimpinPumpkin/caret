@@ -210,10 +210,18 @@ Next:
    in the declaring file. Fields whose plain name clashes with a local, parameter or method in
    their file keep the prefix (about 290).
 
+5. A per-file cleanup pass then went over all 172 files that still had `!!`, prefixed fields or
+   Java-style getters, in three waves of ten workers, each wave compiled, unit-tested,
+   smoke-tested and hand-checked before its commit. `!!` went from 402 to 285; what is left sits
+   on values that can really be null where the old code crashed too (mostly
+   `prefs.getString(key, default)!!`, SDK-nullable override parameters, and views that do not
+   exist before the input view is created). Getters that only returned a value are properties,
+   including `Settings.values`, `Settings.instance` and `KeyboardSwitcher.keyboard`.
+
 Still open in the converted code:
-- Getters that only return a field are still functions in most classes (`getKeyboard()`,
-  `getMainKeyboardView()`, `getTypedWord()`, `Settings.getValues()` and so on).
-- About 400 `!!` remain across the app. Many were added mechanically at call sites where Java
-  dereferenced a value that the converted callee now types as nullable; they keep the old
-  behavior but deserve the same per-file review the first seven files got.
-- The remaining prefixed fields.
+- 1 fields keep an `m`/`s` prefix, nearly all of them the public fields of `SettingsValues`
+  (read in hundreds of places; renaming them is mechanical but was left out of this pass).
+- 82 no-argument `get...()`/`is...()` functions remain. They are overrides, interface members,
+  redefined by test shadows, or compute something.
+- Not exercised by hand since the conversion: the spell checker service, contacts and apps
+  dictionaries, Korean input, hardware keyboards, one-handed, split and floating modes.

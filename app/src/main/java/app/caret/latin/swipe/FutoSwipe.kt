@@ -369,7 +369,7 @@ class WordList private constructor(val file: File) {
         fun forLocale(context: Context, locale: Locale): WordList? {
             val dictFile = mainDictionaryFile(context, locale) ?: return null
             val dir = File(context.cacheDir, "swipe_words").apply { mkdirs() }
-            val blockOffensive = Settings.getValues().blockPotentiallyOffensive
+            val blockOffensive = Settings.values.blockPotentiallyOffensive
             val out = File(dir, "${locale.toLanguageTag()}_${dictFile.length()}_${dictFile.lastModified()}${if (blockOffensive) "_clean" else ""}.combined")
             if (out.isFile && out.length() > 0) return WordList(out)
             dir.listFiles()?.filter { it.name.startsWith("${locale.toLanguageTag()}_") }?.forEach { it.delete() }
@@ -385,11 +385,11 @@ class WordList private constructor(val file: File) {
                         val result = dict.getNextWordProperty(token)
                         val property = result.mWordProperty
                         token = result.mNextToken
-                        if (property != null && property.isValid() && !property.mIsNotAWord
-                            && !property.mIsBeginningOfSentence && !(blockOffensive && property.mIsPossiblyOffensive)
-                            && property.mWord.none { it == ',' || it == '\n' }
+                        if (property != null && property.isValid && !property.isNotAWord
+                            && !property.isBeginningOfSentence && !(blockOffensive && property.isPossiblyOffensive)
+                            && property.word.none { it == ',' || it == '\n' }
                         ) {
-                            writer.write(" word=${property.mWord},f=${property.mProbabilityInfo.mProbability}\n")
+                            writer.write(" word=${property.word},f=${property.probabilityInfo.probability}\n")
                             count++
                         }
                     } while (token != 0)

@@ -85,11 +85,11 @@ fun BackupRestorePreference(setting: Setting) {
             }
         )
     }
-    if (error != null) {
+    error?.let { message ->
         InfoDialog(
-            if (error!!.startsWith("b"))
-                stringResource(R.string.backup_error, error!!.drop(1))
-            else stringResource(R.string.restore_error, error!!.drop(1))
+            if (message.startsWith("b"))
+                stringResource(R.string.backup_error, message.drop(1))
+            else stringResource(R.string.restore_error, message.drop(1))
         ) { error = null }
     }
 }
@@ -172,7 +172,7 @@ private fun restoreLauncher(onError: (String) -> Unit): ManagedActivityResultLau
             val restoredDb = ctx.getDatabasePath(Database.NAME + "_restored")
             val oldPrefs = ctx.prefs().all.toMap()
             val oldProtectedPrefs = ctx.protectedPrefs().all.toMap()
-            val filesDir = ctx.filesDir!!
+            val filesDir = ctx.filesDir
             val deviceProtectedFilesDir = DeviceProtectedUtils.getFilesDir(ctx)
             val filesDir2 = File(filesDir.absolutePath + "2")
             val deviceProtectedFilesDir2 = File(deviceProtectedFilesDir.absolutePath + "2")
@@ -184,7 +184,7 @@ private fun restoreLauncher(onError: (String) -> Unit): ManagedActivityResultLau
                     ZipInputStream(inputStream).use { zip ->
                         var entry: ZipEntry? = zip.nextEntry
                         LayoutUtilsCustom.onLayoutFileChanged()
-                        Settings.getInstance().stopListener()
+                        Settings.instance.stopListener()
                         while (entry != null) {
                             if (entry.name.startsWith("unprotected${File.separator}")) {
                                 val adjustedName = entry.name.substringAfter("unprotected${File.separator}")
@@ -269,7 +269,7 @@ private fun restoreLauncher(onError: (String) -> Unit): ManagedActivityResultLau
         wait.await()
         checkVersionUpgrade(ctx)
         transferOldPinnedClips(ctx)
-        Settings.getInstance().startListener()
+        Settings.instance.startListener()
         SubtypeSettings.reloadEnabledSubtypes(ctx)
         val newDictBroadcast = Intent(DictionaryPackConstants.NEW_DICTIONARY_INTENT_ACTION)
         ctx.getActivity()?.sendBroadcast(newDictBroadcast)

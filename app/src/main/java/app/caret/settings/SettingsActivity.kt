@@ -75,9 +75,9 @@ open class SettingsActivity : ComponentActivity(), SharedPreferences.OnSharedPre
     @OptIn(ExperimentalMaterial3Api::class)
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        if (Settings.getValues() == null) {
+        if (Settings.values == null) {
             val inputAttributes = InputAttributes(EditorInfo(), false, packageName)
-            Settings.getInstance().loadSettings(this, resources.configuration.locale(), inputAttributes)
+            Settings.instance.loadSettings(this, resources.configuration.locale(), inputAttributes)
         }
         ExecutorUtils.getBackgroundExecutor(ExecutorUtils.KEYBOARD).execute { cleanUnusedMainDicts(this) }
         crashReportFiles.value = findCrashReports(!BuildConfig.DEBUG && !DebugFlags.DEBUG_ENABLED)

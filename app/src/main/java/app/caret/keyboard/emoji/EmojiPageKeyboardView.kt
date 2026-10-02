@@ -214,7 +214,7 @@ class EmojiPageKeyboardView : KeyboardView, PopupKeysPanel.Controller {
     }
 
     private val longPressTimeout: Int
-        get() = Settings.getValues().keyLongpressTimeout
+        get() = Settings.values.keyLongpressTimeout
 
     /**
      * {@inheritDoc}

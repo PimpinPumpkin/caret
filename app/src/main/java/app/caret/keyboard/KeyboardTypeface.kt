@@ -41,7 +41,7 @@ object KeyboardTypeface {
     @JvmStatic
     fun customTypeface(): Typeface? {
         if (customTypefaceLoaded) return cachedCustomTypeface
-        val context = Settings.getCurrentContext() ?: return null
+        val context = Settings.currentContext ?: return null
         synchronized(lock) {
             if (!customTypefaceLoaded) {
                 cachedCustomTypeface = loadCustomTypeface(context)
@@ -55,7 +55,7 @@ object KeyboardTypeface {
     @JvmStatic
     fun emojiTypeface(): Typeface? {
         if (emojiTypefaceLoaded) return cachedEmojiTypeface
-        val context = Settings.getCurrentContext() ?: return null
+        val context = Settings.currentContext ?: return null
         synchronized(lock) {
             if (!emojiTypefaceLoaded) {
                 cachedEmojiTypeface = loadCustomEmojiTypeface(context)

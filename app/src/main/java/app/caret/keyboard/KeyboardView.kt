@@ -91,7 +91,7 @@ open class KeyboardView @JvmOverloads constructor(context: Context, attrs: Attri
     private val fontMetrics = Paint.FontMetrics()
 
     init {
-        colors = Settings.getValues().mColors
+        colors = Settings.values.colors
 
         val keyboardViewAttr = context.obtainStyledAttributes(attrs,
                 R.styleable.KeyboardView, defStyle, R.style.KeyboardView)
@@ -113,7 +113,7 @@ open class KeyboardView @JvmOverloads constructor(context: Context, attrs: Attri
                 R.styleable.KeyboardView_spacebarIconWidthRatio, 1.0f)
         keyHintLetterPadding = keyboardViewAttr.getDimension(
                 R.styleable.KeyboardView_keyHintLetterPadding, 0.0f)
-        keyPopupHintLetter = if (Settings.getValues().showsPopupHints)
+        keyPopupHintLetter = if (Settings.values.showsPopupHints)
                 keyboardViewAttr.getString(R.styleable.KeyboardView_keyPopupHintLetter)
                 else ""
         keyPopupHintLetterPadding = keyboardViewAttr.getDimension(
@@ -160,7 +160,7 @@ open class KeyboardView @JvmOverloads constructor(context: Context, attrs: Attri
         }
 
         this.keyboard = keyboard
-        keyScaleForText = Math.sqrt((1 / Settings.getValues().keyboardHeightScale).toDouble()).toFloat()
+        keyScaleForText = Math.sqrt((1 / Settings.values.keyboardHeightScale).toDouble()).toFloat()
         val scale = Math.min(2 * keyboard.mostCommonKeyWidth, keyboard.mostCommonKeyHeight - keyboard.verticalGap)
         val scaledKeySize = (scale * keyScaleForText).toInt()
         keyDrawParams.updateParams(scaledKeySize, keyVisualAttributes)
@@ -169,9 +169,9 @@ open class KeyboardView @JvmOverloads constructor(context: Context, attrs: Attri
         requestLayout()
         fontSizeMultiplier = if (keyboard.id.element.isEmojiLayout)
                 // In the case of EmojiKeyFit, the size of emojis is taken care of by the size of the keys
-                (if (Settings.getValues().emojiKeyFit) 1f else Settings.getValues().fontSizeMultiplierEmoji)
-                else Settings.getValues().fontSizeMultiplier
-        hintFontSizeMultiplier = Settings.getValues().hintFontSizeMultiplier
+                (if (Settings.values.emojiKeyFit) 1f else Settings.values.fontSizeMultiplierEmoji)
+                else Settings.values.fontSizeMultiplier
+        hintFontSizeMultiplier = Settings.values.hintFontSizeMultiplier
     }
 
     protected fun updateKeyDrawParams(keyHeight: Int) {
@@ -241,8 +241,8 @@ open class KeyboardView @JvmOverloads constructor(context: Context, attrs: Attri
             return
         }
 
-        showsHints = Settings.getValues().showsHints
-        val scale = Settings.getValues().keyboardHeightScale
+        showsHints = Settings.values.showsHints
+        val scale = Settings.values.keyboardHeightScale
         iconScaleFactor = if (scale < 0.8f) scale + 0.2f else 1f
         val background = getBackground()
         // Calculate clip region and set.

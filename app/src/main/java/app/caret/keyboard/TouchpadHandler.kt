@@ -48,7 +48,7 @@ class TouchpadHandler {
             touchpadLastY = y
             touchpadActivationTime = SystemClock.elapsedRealtime()
             listener!!.onCustomRequest(KeyboardActionListener.CustomAction.TOUCHPAD_ON)
-            val sv = Settings.getValues()
+            val sv = Settings.values
             handler.postDelayed(hapticRunnable, sv.keyLongpressTimeout.toLong())
             return
         }
@@ -57,7 +57,7 @@ class TouchpadHandler {
     }
 
     private fun onMove(x: Int, y: Int) {
-        val sv = Settings.getValues()
+        val sv = Settings.values
 
         // Debounce
         if (SystemClock.elapsedRealtime() - touchpadActivationTime < sv.keyLongpressTimeout) {
@@ -95,7 +95,7 @@ class TouchpadHandler {
         // 0 -> 70px (Very Slow)
         // 50 -> 40px (Default)
         // 100 -> 10px (Very Fast)
-        val sensitivity = Settings.getInstance().getCurrent().touchpadSensitivity
+        val sensitivity = Settings.instance.current.touchpadSensitivity
         val moveThreshold = 70 - (sensitivity * 0.6f).toInt()
 
         // Handle horizontal movement with accumulator
@@ -188,7 +188,7 @@ class TouchpadHandler {
     }
 
     private fun getBaseScrollDelay(): Long {
-        val sensitivity = Settings.getInstance().getCurrent().touchpadSensitivity
+        val sensitivity = Settings.instance.current.touchpadSensitivity
 
         // Calculates the base scroll delay based on user sensitivity (range: 0-100).
         // Maps sensitivity 0 to 300ms (slowest) and 100 to 50ms (fastest).

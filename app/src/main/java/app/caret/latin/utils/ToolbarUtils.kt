@@ -54,15 +54,15 @@ fun setToolbarButtonsActivatedStateOnPrefChange(buttonsGroup: ViewGroup, key: St
 private fun setToolbarButtonActivatedState(button: ImageButton) {
     button.isActivated = when (button.tag) {
         INCOGNITO -> button.context.prefs().getBoolean(Settings.PREF_ALWAYS_INCOGNITO_MODE, Defaults.PREF_ALWAYS_INCOGNITO_MODE)
-        ONE_HANDED -> Settings.getValues().oneHandedModeEnabled
-        SPLIT -> Settings.getValues().isSplitKeyboardEnabled
-        AUTOCORRECT -> Settings.getValues().autoCorrectionEnabledPerUserSettings
+        ONE_HANDED -> Settings.values.oneHandedModeEnabled
+        SPLIT -> Settings.values.isSplitKeyboardEnabled
+        AUTOCORRECT -> Settings.values.autoCorrectionEnabledPerUserSettings
         BACKGROUND_GATHERING -> useBackgroundGathering
         else -> true
     }
 }
 
-fun getCodeForToolbarKey(key: ToolbarKey) = Settings.getInstance().getCustomToolbarKeyCode(key) ?: when (key) {
+fun getCodeForToolbarKey(key: ToolbarKey) = Settings.instance.getCustomToolbarKeyCode(key) ?: when (key) {
     VOICE -> KeyCode.VOICE_INPUT
     CLIPBOARD -> KeyCode.CLIPBOARD
     NUMPAD -> KeyCode.NUMPAD
@@ -100,7 +100,7 @@ fun getCodeForToolbarKey(key: ToolbarKey) = Settings.getInstance().getCustomTool
     MORE -> KeyCode.UNSPECIFIED // handled in onClickToolbarKey
 }
 
-fun getCodeForToolbarKeyLongClick(key: ToolbarKey) = Settings.getInstance().getCustomToolbarLongpressCode(key) ?: when (key) {
+fun getCodeForToolbarKeyLongClick(key: ToolbarKey) = Settings.instance.getCustomToolbarLongpressCode(key) ?: when (key) {
     CLIPBOARD -> KeyCode.CLIPBOARD_PASTE
     UNDO -> KeyCode.REDO
     REDO -> KeyCode.UNDO
@@ -238,15 +238,13 @@ fun readCustomKeyCodes(prefs: SharedPreferences): EnumMap<ToolbarKey, Pair<Int?,
 }
 
 fun getCustomKeyCode(key: ToolbarKey, prefs: SharedPreferences): Int? {
-    if (customToolbarKeyCodes == null)
-        customToolbarKeyCodes = readCustomKeyCodes(prefs)
-    return customToolbarKeyCodes!![key]?.first
+    val codes = customToolbarKeyCodes ?: readCustomKeyCodes(prefs).also { customToolbarKeyCodes = it }
+    return codes[key]?.first
 }
 
 fun getCustomLongpressKeyCode(key: ToolbarKey, prefs: SharedPreferences): Int? {
-    if (customToolbarKeyCodes == null)
-        customToolbarKeyCodes = readCustomKeyCodes(prefs)
-    return customToolbarKeyCodes!![key]?.second
+    val codes = customToolbarKeyCodes ?: readCustomKeyCodes(prefs).also { customToolbarKeyCodes = it }
+    return codes[key]?.second
 }
 
 fun clearCustomToolbarKeyCodes() {

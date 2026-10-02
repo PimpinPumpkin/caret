@@ -61,7 +61,7 @@ class ClipboardAdapter(
                 setBackgroundResource(itemBackgroundId)
                 isHapticFeedbackEnabled = false
             }
-            Settings.getValues().mColors.setBackground(view, ColorType.KEY_BACKGROUND)
+            Settings.values.colors.setBackground(view, ColorType.KEY_BACKGROUND)
             pinnedIconView = view.findViewById<ImageView>(R.id.clipboard_entry_pinned_icon).apply {
                 visibility = View.GONE
                 setImageResource(pinnedIconResId)
@@ -73,7 +73,7 @@ class ClipboardAdapter(
             }
             contentImageView = view.findViewById(R.id.clipboard_entry_image_content)
             clipboardLayoutParams.setItemProperties(view)
-            val colors = Settings.getValues().mColors
+            val colors = Settings.values.colors
             colors.setColor(pinnedIconView, ColorType.CLIPBOARD_PIN)
         }
 

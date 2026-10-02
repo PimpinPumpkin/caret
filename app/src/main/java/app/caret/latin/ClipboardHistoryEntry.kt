@@ -29,7 +29,7 @@ class ClipboardHistoryEntry(
     override fun compareTo(other: ClipboardHistoryEntry): Int {
         val result = other.isPinned.compareTo(isPinned)
         if (result == 0) return other.timeStamp.compareTo(timeStamp)
-        if (Settings.getValues()?.clipboardHistoryPinnedFirst == false) return -result
+        if (Settings.values?.clipboardHistoryPinnedFirst == false) return -result
         return result
     }
 
@@ -68,13 +68,13 @@ class ClipboardHistoryEntry(
             else "\n" + textView.context.getString(R.string.item_description, text)
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
             val info = imageView.context.contentResolver.getTypeInfo(mimeTypes[0])
-            info.icon.setTint(Settings.getValues().mColors.get(ColorType.EMOJI_CATEGORY))
+            info.icon.setTint(Settings.values.colors.get(ColorType.EMOJI_CATEGORY))
             imageView.setImageIcon(info.icon)
             textView.text = textView.context.getString(R.string.item_type, info.label.toString()) + description
             return
         }
         imageView.setImageResource(R.drawable.ic_dictionary)
-        Settings.getValues().mColors.setColor(imageView, ColorType.EMOJI_CATEGORY)
+        Settings.values.colors.setColor(imageView, ColorType.EMOJI_CATEGORY)
         textView.text = textView.context.getString(R.string.item_type, mimeTypes.first()) + description
     }
 }

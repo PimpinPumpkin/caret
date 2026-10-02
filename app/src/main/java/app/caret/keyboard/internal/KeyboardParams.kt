@@ -97,7 +97,7 @@ open class KeyboardParams {
     val iconsSet = KeyboardIconsSet.instance
     // todo: not good, this only works because params are currently always created for the active subtype
     @JvmField
-    val secondaryLocales: List<Locale> = Settings.getValues().secondaryLocales
+    val secondaryLocales: List<Locale> = Settings.values.secondaryLocales
     @JvmField
     val popupKeyOrder = ArrayList<String>()
     @JvmField
@@ -217,7 +217,7 @@ open class KeyboardParams {
         val keyAttr = if (attr == null)
             context.obtainStyledAttributes(attr, R.styleable.Keyboard_Key)
             else context.getResources().obtainAttributes(attr, R.styleable.Keyboard_Key)
-        val sv = Settings.getValues()
+        val sv = Settings.values
         try {
             val height = id.height
             val width = id.width
@@ -279,7 +279,7 @@ open class KeyboardParams {
             keyAttr.recycle()
             keyboardAttr.recycle()
         }
-        setTabletExtraKeys = Settings.getInstance().isTablet() && !id.subtype.isCustom
+        setTabletExtraKeys = Settings.instance.isTablet() && !id.subtype.isCustom
     }
 
     companion object {

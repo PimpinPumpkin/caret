@@ -65,7 +65,7 @@ open class KeyboardBuilder<KP : KeyboardParams>(protected val context: Context, 
     }
 
     private fun setupParams() {
-        val sv = Settings.getValues()
+        val sv = Settings.values
         mParams.allowRedundantPopupKeys = !sv.removeRedundantPopups
         mParams.proximityCharsCorrectionEnabled = mParams.id.element == KeyboardElement.ALPHABET
                 || (mParams.id.element.isAlphabet && !mParams.id.subtype.hasExtraValue(Constants.Subtype.ExtraValue.NO_SHIFT_PROXIMITY_CORRECTION))
@@ -126,7 +126,7 @@ open class KeyboardBuilder<KP : KeyboardParams>(protected val context: Context, 
     }
 
     private fun addSplit() {
-        val spacerRelativeWidth = Settings.getValues().splitKeyboardSpacerRelativeWidth
+        val spacerRelativeWidth = Settings.values.splitKeyboardSpacerRelativeWidth
         // adjust gaps for the whole keyboard, so it's the same for all rows
         mParams.relativeHorizontalGap *= 1f / (1f + spacerRelativeWidth)
         mParams.horizontalGap = (mParams.relativeHorizontalGap * mParams.id.width).toInt()

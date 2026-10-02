@@ -47,14 +47,14 @@ class DynamicGridKeyboard private constructor(
         val paddingWidth = this.occupiedWidth - this.baseWidth
         this.baseWidth = width - paddingWidth
         this.occupiedWidth = width
-        val spacerWidth = Settings.getValues().splitKeyboardSpacerRelativeWidth * this.baseWidth
+        val spacerWidth = Settings.values.splitKeyboardSpacerRelativeWidth * this.baseWidth
         val key0 = getTemplateKey(Constants.RECENTS_TEMPLATE_KEY_CODE_0)
         val key1 = getTemplateKey(Constants.RECENTS_TEMPLATE_KEY_CODE_1)
         val templateGap = Math.abs(key1.getX() - key0.getX()) - key0.width
         val widthScale = determineWidthScale((key0.width + templateGap).toFloat())
         horizontalGap = (templateGap * widthScale).toInt()
         horizontalStep = ((key0.width + templateGap) * widthScale).toInt()
-        verticalStep = ((key0.height + this.verticalGap) / Math.sqrt(Settings.getValues().keyboardHeightScale.toDouble())).toInt()
+        verticalStep = ((key0.height + this.verticalGap) / Math.sqrt(Settings.values.keyboardHeightScale.toDouble())).toInt()
         columnsNum = this.baseWidth / horizontalStep
         if (spacerWidth > 0)
             setSpacerColumns(spacerWidth)

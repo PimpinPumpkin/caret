@@ -22,10 +22,10 @@ import app.caret.latin.utils.TypefaceUtils
 
 class MoreSuggestions(params: MoreSuggestionsParam, suggestedWords: SuggestedWords) : Keyboard(params) {
     @JvmField
-    val mSuggestedWords: SuggestedWords
+    val suggestedWords: SuggestedWords
 
     init {
-        mSuggestedWords = suggestedWords
+        this.suggestedWords = suggestedWords
     }
 
     // not private as in Java: it is the type argument of the public Builder's supertype
@@ -35,15 +35,16 @@ class MoreSuggestions(params: MoreSuggestionsParam, suggestedWords: SuggestedWor
         private val columnOrders = IntArray(SuggestedWords.MAX_SUGGESTIONS)
         private val numColumnsInRow = IntArray(SuggestedWords.MAX_SUGGESTIONS)
         private var numRows = 0
-        var mDivider: Drawable? = null
+        var divider: Drawable? = null
         var dividerWidth = 0
 
         fun layout(suggestedWords: SuggestedWords, fromIndex: Int,
                 maxWidth: Int, minWidth: Int, maxRow: Int, paint: Paint,
                 context: Context): Int {
             clearKeys()
-            mDivider = ContextCompat.getDrawable(context, R.drawable.more_suggestions_divider)
-            dividerWidth = if (mDivider == null) 0 else mDivider!!.intrinsicWidth
+            val divider = ContextCompat.getDrawable(context, R.drawable.more_suggestions_divider)
+            this.divider = divider
+            dividerWidth = if (divider == null) 0 else divider.intrinsicWidth
             val padding = context.resources.getDimension(R.dimen.config_more_suggestions_key_horizontal_padding)
 
             var row = 0
@@ -162,13 +163,13 @@ class MoreSuggestions(params: MoreSuggestionsParam, suggestedWords: SuggestedWor
 
     class Builder(context: Context, paneView: MoreSuggestionsView) :
             KeyboardBuilder<MoreSuggestionsParam>(context, MoreSuggestionsParam()) {
-        private val mPaneView: MoreSuggestionsView
-        private lateinit var mSuggestedWords: SuggestedWords
-        private var mFromIndex = 0
+        private val paneView: MoreSuggestionsView
+        private lateinit var suggestedWords: SuggestedWords
+        private var fromIndex = 0
         private var toIndex = 0
 
         init {
-            mPaneView = paneView
+            this.paneView = paneView
         }
 
         fun layout(suggestedWords: SuggestedWords, fromIndex: Int,
@@ -179,30 +180,30 @@ class MoreSuggestions(params: MoreSuggestionsParam, suggestedWords: SuggestedWor
             readAttributes(xmlId)
             mParams.topPadding = parentKeyboard.verticalGap / 2
             mParams.verticalGap = mParams.topPadding
-            mPaneView.updateKeyboardGeometry(mParams.defaultAbsoluteRowHeight)
+            paneView.updateKeyboardGeometry(mParams.defaultAbsoluteRowHeight)
             val count = mParams.layout(suggestedWords, fromIndex, maxWidth, minWidth, maxRow,
-                    mPaneView.newLabelPaint(null /* key */), this.context)
-            mFromIndex = fromIndex
+                    paneView.newLabelPaint(null /* key */), this.context)
+            this.fromIndex = fromIndex
             toIndex = fromIndex + count
-            mSuggestedWords = suggestedWords
+            this.suggestedWords = suggestedWords
             return this
         }
 
         override fun build(): MoreSuggestions {
             val params = mParams
-            for (index in mFromIndex until toIndex) {
+            for (index in fromIndex until toIndex) {
                 val x = params.getX(index)
                 val y = params.getY(index)
                 val width = params.getWidth(index)
                 val word: String?
                 val info: String?
-                if (isIndexSubjectToAutoCorrection(mSuggestedWords, index)) {
+                if (isIndexSubjectToAutoCorrection(suggestedWords, index)) {
                     // INDEX_OF_AUTO_CORRECTION and INDEX_OF_TYPED_WORD got swapped.
-                    word = mSuggestedWords.getLabel(SuggestedWords.INDEX_OF_TYPED_WORD)
-                    info = mSuggestedWords.getDebugString(SuggestedWords.INDEX_OF_TYPED_WORD)
+                    word = suggestedWords.getLabel(SuggestedWords.INDEX_OF_TYPED_WORD)
+                    info = suggestedWords.getDebugString(SuggestedWords.INDEX_OF_TYPED_WORD)
                 } else {
-                    word = mSuggestedWords.getLabel(index)
-                    info = mSuggestedWords.getDebugString(index)
+                    word = suggestedWords.getLabel(index)
+                    info = suggestedWords.getDebugString(index)
                 }
                 val key: Key = MoreSuggestionKey(word, info, index, params)
                 params.markAsEdgeKey(key, index)
@@ -210,12 +211,12 @@ class MoreSuggestions(params: MoreSuggestionsParam, suggestedWords: SuggestedWor
                 val columnNumber = params.getColumnNumber(index)
                 val numColumnInRow = params.getNumColumnInRow(index)
                 if (columnNumber < numColumnInRow - 1) {
-                    val divider = Divider(params, params.mDivider, x + width, y,
+                    val divider = Divider(params, params.divider, x + width, y,
                             params.dividerWidth, params.defaultAbsoluteRowHeight)
                     params.onAddKey(divider)
                 }
             }
-            return MoreSuggestions(params, mSuggestedWords)
+            return MoreSuggestions(params, suggestedWords)
         }
     }
 
@@ -234,18 +235,18 @@ class MoreSuggestions(params: MoreSuggestionsParam, suggestedWords: SuggestedWor
 
     private class Divider(params: KeyboardParams, icon: Drawable?, x: Int,
             y: Int, width: Int, height: Int) : Key.Spacer(params, x, y, width, height) {
-        private val mIcon: Drawable?
+        private val icon: Drawable?
 
         init {
-            mIcon = icon
+            this.icon = icon
         }
 
         override fun getIcon(iconSet: KeyboardIconsSet, alpha: Int): Drawable? {
             // KeyboardIconsSet and alpha are unused. Use the icon that has been passed to the
             // constructor.
             // TODO: Drawable itself should have an alpha value.
-            mIcon!!.setAlpha(128)
-            return mIcon
+            icon!!.setAlpha(128)
+            return icon
         }
     }
 

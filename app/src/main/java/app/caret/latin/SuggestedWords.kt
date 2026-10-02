@@ -256,7 +256,7 @@ open class SuggestedWords(
 
         fun isAppropriateForAutoCorrection(): Boolean {
             return (kindAndFlags and KIND_FLAG_APPROPRIATE_FOR_AUTO_CORRECTION) != 0
-                    || (isKindOf(KIND_SHORTCUT) && Settings.getValues().autoCorrectShortcuts)
+                    || (isKindOf(KIND_SHORTCUT) && Settings.values.autoCorrectShortcuts)
         }
 
         fun setDebugString(str: String?) {

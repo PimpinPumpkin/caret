@@ -240,9 +240,9 @@ object FormatSpec {
      * Options global to the dictionary.
      */
     class DictionaryOptions(attributes: HashMap<String, String>) {
-        @JvmField val mAttributes: HashMap<String, String>
+        @JvmField val attributes: HashMap<String, String>
         init {
-            mAttributes = attributes
+            this.attributes = attributes
         }
         override fun toString(): String { // Convenience method
             return toString(0, false)
@@ -257,15 +257,15 @@ object FormatSpec {
                 }
             }
             val s = StringBuilder()
-            for (optionKey in mAttributes.keys) {
+            for (optionKey in attributes.keys) {
                 s.append(indent)
                 s.append(optionKey)
                 s.append(" = ")
                 if ("date" == optionKey && !plumbing) {
                     // Date needs a number of milliseconds, but the dictionary contains seconds
-                    s.append(Date(1000 * java.lang.Long.parseLong(mAttributes[optionKey])))
+                    s.append(Date(1000 * java.lang.Long.parseLong(attributes[optionKey])))
                 } else {
-                    s.append(mAttributes[optionKey])
+                    s.append(attributes[optionKey])
                 }
                 s.append("\n")
             }

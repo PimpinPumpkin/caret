@@ -95,16 +95,17 @@ fun LoadGestureLibPreference(setting: Setting) {
             }
         )
     }
-    if (tempFilePath != null)
+    tempFilePath?.let { path ->
         ConfirmationDialog(
             onDismissRequest = {
-                File(tempFilePath!!).delete()
+                File(path).delete()
                 tempFilePath = null
             },
             content = { Text(stringResource(R.string.checksum_mismatch_message, abi)) },
             onConfirmed = {
-                val tempFile = File(tempFilePath!!)
+                val tempFile = File(path)
                 renameToLibFileAndRestart(tempFile, ChecksumCalculator.checksum(tempFile) ?: "")
             }
         )
+    }
 }

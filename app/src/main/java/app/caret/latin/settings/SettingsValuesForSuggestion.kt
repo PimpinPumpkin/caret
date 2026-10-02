@@ -8,16 +8,16 @@ package app.caret.latin.settings
 
 class SettingsValuesForSuggestion {
     @JvmField
-    val mBlockPotentiallyOffensive: Boolean
+    val blockPotentiallyOffensive: Boolean
 
     constructor(
             blockPotentiallyOffensive: Boolean,
             spaceAwareGesture: Boolean
             ) {
-        mBlockPotentiallyOffensive = blockPotentiallyOffensive
-        mSpaceAwareGesture = spaceAwareGesture
+        this.blockPotentiallyOffensive = blockPotentiallyOffensive
+        this.spaceAwareGesture = spaceAwareGesture
     }
 
     @JvmField
-    val mSpaceAwareGesture: Boolean
+    val spaceAwareGesture: Boolean
 }

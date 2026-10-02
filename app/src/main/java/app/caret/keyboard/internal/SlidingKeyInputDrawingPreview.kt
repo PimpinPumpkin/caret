@@ -28,7 +28,7 @@ class SlidingKeyInputDrawingPreview(mainKeyboardViewAttr: TypedArray) : Abstract
     private val paint = Paint()
 
     init {
-        val previewColor = Settings.getValues().mColors.get(ColorType.GESTURE_TRAIL)
+        val previewColor = Settings.values.colors.get(ColorType.GESTURE_TRAIL)
         val previewRadius = mainKeyboardViewAttr.getDimension(
                 R.styleable.MainKeyboardView_slidingKeyInputPreviewWidth, 0f) / 2.0f
         val PERCENTAGE_INT = 100

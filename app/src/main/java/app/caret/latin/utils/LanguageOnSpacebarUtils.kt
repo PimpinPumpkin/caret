@@ -23,25 +23,25 @@ object LanguageOnSpacebarUtils {
     const val FORMAT_TYPE_LANGUAGE_ONLY = 1
     const val FORMAT_TYPE_FULL_LOCALE = 2
 
-    private var sEnabledSubtypes: List<InputMethodSubtype> = Collections.emptyList()
+    private var enabledSubtypes: List<InputMethodSubtype> = Collections.emptyList()
     private var isSystemLanguageSameAsInputLanguage = false
 
     @JvmStatic
     fun getLanguageOnSpacebarFormatType(subtype: RichInputMethodSubtype): Int {
-        if (!Settings.getValues().spaceBarText.isEmpty())
+        if (!Settings.values.spaceBarText.isEmpty())
             return FORMAT_TYPE_FULL_LOCALE
         if (subtype.isNoLanguage) {
             return FORMAT_TYPE_FULL_LOCALE
         }
         // Only this subtype is enabled and equals to the system locale.
-        if (sEnabledSubtypes.size < 2 && isSystemLanguageSameAsInputLanguage && Settings.getValues().secondaryLocales.isEmpty()) {
+        if (enabledSubtypes.size < 2 && isSystemLanguageSameAsInputLanguage && Settings.values.secondaryLocales.isEmpty()) {
             return FORMAT_TYPE_NONE
         }
         val locale = subtype.locale
         val keyboardLanguage = locale.getLanguage()
         val keyboardLayout = subtype.mainLayoutName
         var sameLanguageAndLayoutCount = 0
-        for (ims in sEnabledSubtypes) {
+        for (ims in enabledSubtypes) {
             val language = ims.locale().getLanguage()
             if (keyboardLanguage == language && keyboardLayout == ims.mainLayoutNameOrQwerty()) {
                 sameLanguageAndLayoutCount++
@@ -55,7 +55,7 @@ object LanguageOnSpacebarUtils {
 
     @JvmStatic
     fun setEnabledSubtypes(enabledSubtypes: List<InputMethodSubtype>) {
-        sEnabledSubtypes = enabledSubtypes
+        this.enabledSubtypes = enabledSubtypes
     }
 
     @JvmStatic

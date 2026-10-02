@@ -458,9 +458,10 @@ private fun MainLayoutRow(
                 )
             }
         }
-        if (showLayoutEditDialog != null) {
-            val layoutName = showLayoutEditDialog!!.first
-            val startContent = showLayoutEditDialog?.second
+        val layoutEdit = showLayoutEditDialog
+        if (layoutEdit != null) {
+            val layoutName = layoutEdit.first
+            val startContent = layoutEdit.second
                 ?: if (layoutName in appLayouts) LayoutUtils.getContentWithPlus(layoutName, currentSubtype.locale, ctx)
                 else null
             LayoutEditDialog(

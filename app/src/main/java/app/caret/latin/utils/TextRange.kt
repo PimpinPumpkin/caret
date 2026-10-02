@@ -17,26 +17,24 @@ import java.util.Objects
  * Represents a range of text, relative to the current cursor position.
  */
 class TextRange {
-    private val mTextAtCursor: CharSequence
-    private val mWordAtCursorStartIndex: Int
-    private val mWordAtCursorEndIndex: Int
-    private val mCursorIndex: Int
+    private val textAtCursor: CharSequence
+    private val wordAtCursorStartIndex: Int
+    private val wordAtCursorEndIndex: Int
+    private val cursorIndex: Int
 
     @JvmField
-    val mWord: CharSequence
+    val word: CharSequence
     @JvmField
-    val mHasUrlSpans: Boolean
+    val hasUrlSpans: Boolean
 
-    fun getNumberOfCharsInWordBeforeCursor(): Int {
-        return mCursorIndex - mWordAtCursorStartIndex
-    }
+    val numberOfCharsInWordBeforeCursor: Int
+        get() = cursorIndex - wordAtCursorStartIndex
 
-    fun getNumberOfCharsInWordAfterCursor(): Int {
-        return mWordAtCursorEndIndex - mCursorIndex
-    }
+    val numberOfCharsInWordAfterCursor: Int
+        get() = wordAtCursorEndIndex - cursorIndex
 
     fun length(): Int {
-        return mWord.length
+        return word.length
     }
 
     /**
@@ -46,10 +44,10 @@ class TextRange {
      */
     @Suppress("UNCHECKED_CAST")
     fun getSuggestionSpansAtWord(): Array<SuggestionSpan> {
-        if (!(mTextAtCursor is Spanned && mWord is Spanned)) {
+        if (!(textAtCursor is Spanned && word is Spanned)) {
             return arrayOfNulls<SuggestionSpan>(0) as Array<SuggestionSpan>
         }
-        val text: Spanned = mTextAtCursor
+        val text: Spanned = textAtCursor
         // Note: it's fine to pass indices negative or greater than the length of the string
         // to the #getSpans() method. The reason we need to get from -1 to +1 is that, the
         // spans were cut at the cursor position, and #getSpans(start, end) does not return
@@ -67,8 +65,8 @@ class TextRange {
         // -1 ~ +1 is enough.
         // Of course this is only relevant if the cursor is at one end of the word. If it's
         // in the middle, the -1 and +1 are not necessary, but they are harmless.
-        val spans: Array<SuggestionSpan?> = text.getSpans(mWordAtCursorStartIndex - 1,
-                mWordAtCursorEndIndex + 1, SuggestionSpan::class.java)
+        val spans: Array<SuggestionSpan?> = text.getSpans(wordAtCursorStartIndex - 1,
+                wordAtCursorEndIndex + 1, SuggestionSpan::class.java)
         var readIndex = 0
         var writeIndex = 0
         while (readIndex < spans.size) {
@@ -93,7 +91,7 @@ class TextRange {
                     spans[i] = null
                 }
             }
-            if (spanStart == mWordAtCursorStartIndex && spanEnd == mWordAtCursorEndIndex) {
+            if (spanStart == wordAtCursorStartIndex && spanEnd == wordAtCursorEndIndex) {
                 // If the span does not start and stop here, ignore it. It probably extends
                 // past the start or end of the word, as happens in missing space correction
                 // or EasyEditSpans put by voice input.
@@ -107,20 +105,20 @@ class TextRange {
     override fun equals(other: Any?): Boolean {
         if (other !is TextRange) return false
         val textRange: TextRange = other
-        return mWordAtCursorStartIndex == textRange.mWordAtCursorStartIndex
-            && mWordAtCursorEndIndex == textRange.mWordAtCursorEndIndex
-            && mCursorIndex == textRange.mCursorIndex
-            && mHasUrlSpans == textRange.mHasUrlSpans
-            && TextUtils.equals(mTextAtCursor, textRange.mTextAtCursor)
-            && TextUtils.equals(mWord, textRange.mWord)
+        return wordAtCursorStartIndex == textRange.wordAtCursorStartIndex
+            && wordAtCursorEndIndex == textRange.wordAtCursorEndIndex
+            && cursorIndex == textRange.cursorIndex
+            && hasUrlSpans == textRange.hasUrlSpans
+            && TextUtils.equals(textAtCursor, textRange.textAtCursor)
+            && TextUtils.equals(word, textRange.word)
     }
 
     override fun hashCode(): Int {
-        return Objects.hash(mTextAtCursor, mWordAtCursorStartIndex, mWordAtCursorEndIndex, mCursorIndex, mWord, mHasUrlSpans)
+        return Objects.hash(textAtCursor, wordAtCursorStartIndex, wordAtCursorEndIndex, cursorIndex, word, hasUrlSpans)
     }
 
     override fun toString(): String {
-        return mTextAtCursor.toString() + ", " + mWord + ", " + mCursorIndex
+        return textAtCursor.toString() + ", " + word + ", " + cursorIndex
     }
 
     constructor(textAtCursor: CharSequence, wordAtCursorStartIndex: Int,
@@ -130,11 +128,11 @@ class TextRange {
                 || wordAtCursorEndIndex > textAtCursor.length) {
             throw IndexOutOfBoundsException()
         }
-        mTextAtCursor = textAtCursor
-        mWordAtCursorStartIndex = wordAtCursorStartIndex
-        mWordAtCursorEndIndex = wordAtCursorEndIndex
-        mCursorIndex = cursorIndex
-        mHasUrlSpans = hasUrlSpans
-        mWord = mTextAtCursor.subSequence(mWordAtCursorStartIndex, mWordAtCursorEndIndex)
+        this.textAtCursor = textAtCursor
+        this.wordAtCursorStartIndex = wordAtCursorStartIndex
+        this.wordAtCursorEndIndex = wordAtCursorEndIndex
+        this.cursorIndex = cursorIndex
+        this.hasUrlSpans = hasUrlSpans
+        word = textAtCursor.subSequence(wordAtCursorStartIndex, wordAtCursorEndIndex)
     }
 }

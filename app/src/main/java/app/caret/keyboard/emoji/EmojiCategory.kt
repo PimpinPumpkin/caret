@@ -145,7 +145,7 @@ internal class EmojiCategory(private val context: Context, private val layoutSet
             val categoryKeyboardMapKey = getCategoryKeyboardMapKey(category, id)
             categoryKeyboardMap[categoryKeyboardMapKey]?.let { return it }
 
-            val currentWidth = ResourceUtils.getKeyboardWidth(context, Settings.getValues())
+            val currentWidth = ResourceUtils.getKeyboardWidth(context, Settings.values)
             if (category == Category.RECENTS) {
                 val kbd = DynamicGridKeyboard.ofKeyCount(
                     prefs,
@@ -179,7 +179,7 @@ internal class EmojiCategory(private val context: Context, private val layoutSet
     private fun computeMaxKeyCountPerPage(): Int {
         val tempKeyboard = DynamicGridKeyboard.ofKeyCount(prefs,
             layoutSet.getKeyboard(KeyboardElement.EMOJI_RECENTS),
-            0, true, ResourceUtils.getKeyboardWidth(context, Settings.getValues())
+            0, true, ResourceUtils.getKeyboardWidth(context, Settings.values)
         )
         return MAX_LINE_COUNT_PER_PAGE * tempKeyboard.occupiedColumnCount
     }

@@ -125,10 +125,10 @@ fun DictionaryScreen(
             }
         )
     }
-    if (selectedLocale != null) {
+    selectedLocale?.let { locale ->
         DictionaryDialog(
             onDismissRequest = { selectedLocale = null },
-            locale = selectedLocale!!
+            locale = locale
         )
     }
 }

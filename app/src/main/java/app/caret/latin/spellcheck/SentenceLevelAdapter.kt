@@ -37,14 +37,14 @@ class SentenceLevelAdapter(res: Resources, locale: Locale) {
         @JvmField
         val textInfo: TextInfo
         @JvmField
-        val mStart: Int
+        val start: Int
         @JvmField
-        val mLength: Int
+        val length: Int
 
         init {
             textInfo = ti
-            mStart = start
-            mLength = end - start
+            this.start = start
+            length = end - start
         }
     }
 
@@ -53,15 +53,15 @@ class SentenceLevelAdapter(res: Resources, locale: Locale) {
      */
     class SentenceTextInfoParams(ti: TextInfo, items: ArrayList<SentenceWordItem>) {
         @JvmField
-        val mOriginalTextInfo: TextInfo
+        val originalTextInfo: TextInfo
         @JvmField
-        val mItems: ArrayList<SentenceWordItem>
+        val items: ArrayList<SentenceWordItem>
         @JvmField
         val size: Int
 
         init {
-            mOriginalTextInfo = ti
-            mItems = items
+            originalTextInfo = ti
+            this.items = items
             size = items.size
         }
     }
@@ -115,16 +115,16 @@ class SentenceLevelAdapter(res: Resources, locale: Locale) {
         }
     }
 
-    private val mWordIterator: WordIterator
+    private val wordIterator: WordIterator
 
     init {
-        mWordIterator = WordIterator(res, locale)
+        wordIterator = WordIterator(res, locale)
     }
 
     fun getSplitWords(originalTextInfo: TextInfo?): SentenceTextInfoParams {
-        val wordIterator = mWordIterator
-        val originalText = originalTextInfo!!.charSequence
-        val cookie = originalTextInfo.cookie
+        val textInfo = originalTextInfo!!
+        val originalText = textInfo.charSequence
+        val cookie = textInfo.cookie
         val start = -1
         val end = originalText.length
         val wordItems = ArrayList<SentenceWordItem>()
@@ -142,16 +142,15 @@ class SentenceLevelAdapter(res: Resources, locale: Locale) {
             }
             wordEnd = wordIterator.getEndOfWord(originalText, wordStart)
         }
-        return SentenceTextInfoParams(originalTextInfo, wordItems)
+        return SentenceTextInfoParams(textInfo, wordItems)
     }
 
     companion object {
         private val EMPTY_SUGGESTIONS_INFO = SuggestionsInfo(0, null)
 
         @JvmStatic
-        fun getEmptySentenceSuggestionsInfo(): Array<SentenceSuggestionsInfo?> {
-            return EmptySentenceSuggestionsInfosInitializationHolder.EMPTY_SENTENCE_SUGGESTIONS_INFOS
-        }
+        val emptySentenceSuggestionsInfo: Array<SentenceSuggestionsInfo?>
+            get() = EmptySentenceSuggestionsInfosInitializationHolder.EMPTY_SENTENCE_SUGGESTIONS_INFOS
 
         @JvmStatic
         fun reconstructSuggestions(
@@ -162,16 +161,16 @@ class SentenceLevelAdapter(res: Resources, locale: Locale) {
             if (originalTextInfoParams == null) {
                 return null
             }
-            val originalCookie = originalTextInfoParams.mOriginalTextInfo.cookie
+            val originalCookie = originalTextInfoParams.originalTextInfo.cookie
             val originalSequence =
-                    originalTextInfoParams.mOriginalTextInfo.sequence
+                    originalTextInfoParams.originalTextInfo.sequence
 
             val querySize = originalTextInfoParams.size
             val offsets = IntArray(querySize)
             val lengths = IntArray(querySize)
             val reconstructedSuggestions = arrayOfNulls<SuggestionsInfo>(querySize)
             for (i in 0 until querySize) {
-                val item = originalTextInfoParams.mItems[i]
+                val item = originalTextInfoParams.items[i]
                 var result: SuggestionsInfo? = null
                 for (cur in results) {
                     if (cur != null && cur.sequence == item.textInfo.sequence) {
@@ -180,8 +179,8 @@ class SentenceLevelAdapter(res: Resources, locale: Locale) {
                         break
                     }
                 }
-                offsets[i] = item.mStart
-                lengths[i] = item.mLength
+                offsets[i] = item.start
+                lengths[i] = item.length
                 reconstructedSuggestions[i] = if (result != null) result else EMPTY_SUGGESTIONS_INFO
             }
             return SentenceSuggestionsInfo(reconstructedSuggestions, offsets, lengths)

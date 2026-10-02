@@ -12,33 +12,33 @@ import app.caret.latin.utils.CombinedFormatUtils
 import java.util.Arrays
 
 class ProbabilityInfo {
-    @JvmField val mProbability: Int
-    // mTimestamp, mLevel and mCount are historical info. These values are depend on the
+    @JvmField val probability: Int
+    // timestamp, level and count are historical info. These values are depend on the
     // implementation in native code; thus, we must not use them and have any assumptions about
     // them except for tests.
-    @JvmField val mTimestamp: Int
-    @JvmField val mLevel: Int
-    @JvmField val mCount: Int
+    @JvmField val timestamp: Int
+    @JvmField val level: Int
+    @JvmField val count: Int
 
     constructor(probability: Int) : this(probability, BinaryDictionary.NOT_A_VALID_TIMESTAMP, 0, 0)
 
     constructor(probability: Int, timestamp: Int, level: Int,
             count: Int) {
-        mProbability = probability
-        mTimestamp = timestamp
-        mLevel = level
-        mCount = count
+        this.probability = probability
+        this.timestamp = timestamp
+        this.level = level
+        this.count = count
     }
 
     fun hasHistoricalInfo(): Boolean {
-        return mTimestamp != BinaryDictionary.NOT_A_VALID_TIMESTAMP
+        return timestamp != BinaryDictionary.NOT_A_VALID_TIMESTAMP
     }
 
     override fun hashCode(): Int {
         if (hasHistoricalInfo()) {
-            return Arrays.hashCode(arrayOf<Any>(mProbability, mTimestamp, mLevel, mCount))
+            return Arrays.hashCode(arrayOf<Any>(probability, timestamp, level, count))
         }
-        return Arrays.hashCode(arrayOf<Any>(mProbability))
+        return Arrays.hashCode(arrayOf<Any>(probability))
     }
 
     override fun toString(): String {
@@ -49,10 +49,10 @@ class ProbabilityInfo {
         if (o === this) return true
         if (o !is ProbabilityInfo) return false
         if (!hasHistoricalInfo() && !o.hasHistoricalInfo()) {
-            return mProbability == o.mProbability
+            return probability == o.probability
         }
-        return mProbability == o.mProbability && mTimestamp == o.mTimestamp && mLevel == o.mLevel
-                && mCount == o.mCount
+        return probability == o.probability && timestamp == o.timestamp && level == o.level
+                && count == o.count
     }
 
     companion object {
@@ -65,7 +65,7 @@ class ProbabilityInfo {
             if (probabilityInfo2 == null) {
                 return probabilityInfo1
             }
-            return if (probabilityInfo1.mProbability > probabilityInfo2.mProbability) probabilityInfo1
+            return if (probabilityInfo1.probability > probabilityInfo2.probability) probabilityInfo1
                     else probabilityInfo2
         }
     }

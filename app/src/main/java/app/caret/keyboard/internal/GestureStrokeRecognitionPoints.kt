@@ -86,7 +86,7 @@ class GestureStrokeRecognitionPoints(private val pointerId: Int,
     fun addDownEventPoint(x: Int, y: Int, elapsedTimeSinceFirstDown: Int,
             elapsedTimeSinceLastTyping: Int) {
         reset()
-        if (elapsedTimeSinceLastTyping < Settings.getValues().gestureFastTypingCooldown) {
+        if (elapsedTimeSinceLastTyping < Settings.values.gestureFastTypingCooldown) {
             afterFastTyping = true
         }
         if (DEBUG) {

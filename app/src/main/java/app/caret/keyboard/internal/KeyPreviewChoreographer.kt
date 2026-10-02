@@ -105,7 +105,7 @@ class KeyPreviewChoreographer(params: KeyPreviewDrawParams) {
         }
         val hasPopupKeys = (key.popupKeys != null)
         keyPreviewView.setPreviewBackground(hasPopupKeys, keyPreviewPosition)
-        val colors = Settings.getValues().mColors
+        val colors = Settings.values.colors
         colors.setBackground(keyPreviewView, ColorType.KEY_PREVIEW_BACKGROUND)
 
         // The key preview is placed vertically above the top edge of the parent key with an

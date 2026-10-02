@@ -20,18 +20,19 @@ import app.caret.latin.common.InputPointers
  */
 class InputLogicHandler(latinIMEHandler: LatinIME.UIHandler, inputLogic: InputLogic) : Handler.Callback {
     val nonUIThreadHandler: Handler
-    val mLatinIMEHandler: LatinIME.UIHandler
-    val mInputLogic: InputLogic
+    val latinIMEHandler: LatinIME.UIHandler
+    val inputLogic: InputLogic
     private val lock = Any()
-    private var inBatchInput = false // synchronized using {@link #mLock}.
+    var isInBatchInput = false // synchronized using {@link #mLock}.
+        private set
 
     init {
         val handlerThread = HandlerThread(
                 InputLogicHandler::class.java.simpleName)
         handlerThread.start()
         nonUIThreadHandler = Handler(handlerThread.looper, this)
-        mLatinIMEHandler = latinIMEHandler
-        mInputLogic = inputLogic
+        this.latinIMEHandler = latinIMEHandler
+        this.inputLogic = inputLogic
     }
 
     fun reset() {
@@ -52,12 +53,8 @@ class InputLogicHandler(latinIMEHandler: LatinIME.UIHandler, inputLogic: InputLo
     // Called on the UI thread by InputLogic.
     fun onStartBatchInput() {
         synchronized(lock) {
-            inBatchInput = true
+            isInBatchInput = true
         }
-    }
-
-    fun isInBatchInput(): Boolean {
-        return inBatchInput
     }
 
     /**
@@ -75,12 +72,12 @@ class InputLogicHandler(latinIMEHandler: LatinIME.UIHandler, inputLogic: InputLo
     private fun updateBatchInput(batchPointers: InputPointers,
             sequenceNumber: Int, isTailBatchInput: Boolean) {
         synchronized(lock) {
-            if (!inBatchInput) {
+            if (!isInBatchInput) {
                 // Batch input has ended or canceled while the message was being delivered.
                 return
             }
-            mInputLogic.wordComposer.setBatchInputPointers(batchPointers)
-            getSuggestedWords(Runnable { mInputLogic.getSuggestedWords(
+            inputLogic.wordComposer.setBatchInputPointers(batchPointers)
+            getSuggestedWords(Runnable { inputLogic.getSuggestedWords(
                 if (isTailBatchInput) SuggestedWords.INPUT_STYLE_TAIL_BATCH else SuggestedWords.INPUT_STYLE_UPDATE_BATCH, sequenceNumber,
                 object : OnGetSuggestedWordsCallback {
                     override fun onGetSuggestedWords(suggestedWords: SuggestedWords) {
@@ -101,16 +98,16 @@ class InputLogicHandler(latinIMEHandler: LatinIME.UIHandler, inputLogic: InputLo
             // Previous suggestions are found in InputLogic#mSuggestedWords.
             // Since these are the most recent ones and we just recomputed
             // new ones to update them, then the previous ones are there.
-            suggestedWordsToShowSuggestions = mInputLogic.suggestedWords
+            suggestedWordsToShowSuggestions = inputLogic.suggestedWords
         } else {
             suggestedWordsToShowSuggestions = suggestedWordsForBatchInput
         }
-        mLatinIMEHandler.showGesturePreviewAndSetSuggestions(suggestedWordsToShowSuggestions, isTailBatchInput)
+        latinIMEHandler.showGesturePreviewAndSetSuggestions(suggestedWordsToShowSuggestions, isTailBatchInput)
         if (isTailBatchInput) {
-            inBatchInput = false
+            isInBatchInput = false
             // The following call schedules onEndBatchInputInternal
             // to be called on the UI thread.
-            mLatinIMEHandler.showTailBatchInputResult(suggestedWordsToShowSuggestions)
+            latinIMEHandler.showTailBatchInputResult(suggestedWordsToShowSuggestions)
         }
     }
 
@@ -138,7 +135,7 @@ class InputLogicHandler(latinIMEHandler: LatinIME.UIHandler, inputLogic: InputLo
     // Called on the UI thread by InputLogic.
     fun onCancelBatchInput() {
         synchronized(lock) {
-            inBatchInput = false
+            isInBatchInput = false
         }
     }
 

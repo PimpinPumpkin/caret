@@ -18,27 +18,27 @@ import java.util.Locale
 class DictionaryHeader(
     @JvmField val dictionaryOptions: DictionaryOptions,
 ) {
-    val localeString = dictionaryOptions.mAttributes[DICTIONARY_LOCALE_KEY]
+    val localeString = dictionaryOptions.attributes[DICTIONARY_LOCALE_KEY]
         ?: throw UnsupportedFormatException("Cannot create a FileHeader without a locale")
     @JvmField
-    val versionString = dictionaryOptions.mAttributes[DICTIONARY_VERSION_KEY]
+    val versionString = dictionaryOptions.attributes[DICTIONARY_VERSION_KEY]
         ?: throw UnsupportedFormatException(
             "Cannot create a FileHeader without a version"
         )
     @JvmField
-    val idString = dictionaryOptions.mAttributes[DICTIONARY_ID_KEY]
+    val idString = dictionaryOptions.attributes[DICTIONARY_ID_KEY]
         ?: throw UnsupportedFormatException("Cannot create a FileHeader without an ID")
-    private val mDate = dictionaryOptions.mAttributes[DICTIONARY_DATE_KEY]?.toIntOrNull()
+    private val date = dictionaryOptions.attributes[DICTIONARY_DATE_KEY]?.toIntOrNull()
 
     val description: String?
         // Helper method to get the description
-        get() = dictionaryOptions.mAttributes[DICTIONARY_DESCRIPTION_KEY]
+        get() = dictionaryOptions.attributes[DICTIONARY_DESCRIPTION_KEY]
 
     fun info(locale: Locale): String {
-        val date = if (mDate == null) ""
-            else DateFormat.getDateInstance(DateFormat.SHORT, locale).format(Date(mDate * 1000L)) + "\n"
+        val dateText = if (date == null) ""
+            else DateFormat.getDateInstance(DateFormat.SHORT, locale).format(Date(date * 1000L)) + "\n"
         return idString + "\n" + localeString.constructLocale().getDisplayName(locale) +
-                "\nv" + versionString + "\n" + date + description
+                "\nv" + versionString + "\n" + dateText + description
     }
 
     companion object {

@@ -22,42 +22,42 @@ import java.util.Arrays
  * This is chiefly used to iterate a dictionary.
  */
 class WordProperty : Comparable<WordProperty> {
-    @JvmField val mWord: String
-    @JvmField val mProbabilityInfo: ProbabilityInfo
-    @JvmField val mShortcutTargets: ArrayList<WeightedString>
-    @JvmField val mNgrams: ArrayList<NgramProperty>?
-    // TODO: Support mIsBeginningOfSentence.
-    @JvmField val mIsBeginningOfSentence: Boolean
-    @JvmField val mIsNotAWord: Boolean
-    @JvmField val mIsPossiblyOffensive: Boolean
-    @JvmField val mHasShortcuts: Boolean
+    @JvmField val word: String
+    @JvmField val probabilityInfo: ProbabilityInfo
+    @JvmField val shortcutTargets: ArrayList<WeightedString>
+    @JvmField val ngrams: ArrayList<NgramProperty>?
+    // TODO: Support isBeginningOfSentence.
+    @JvmField val isBeginningOfSentence: Boolean
+    @JvmField val isNotAWord: Boolean
+    @JvmField val isPossiblyOffensive: Boolean
+    @JvmField val hasShortcuts: Boolean
     @JvmField val hasNgrams: Boolean
 
-    private var mHashCode = 0
+    private var cachedHashCode = 0
 
     // TODO: Support n-gram.
     constructor(word: String, probabilityInfo: ProbabilityInfo,
             shortcutTargets: ArrayList<WeightedString>?,
             bigrams: ArrayList<WeightedString>?,
             isNotAWord: Boolean, isPossiblyOffensive: Boolean) {
-        mWord = word
-        mProbabilityInfo = probabilityInfo
-        mShortcutTargets = shortcutTargets!!
+        this.word = word
+        this.probabilityInfo = probabilityInfo
+        this.shortcutTargets = shortcutTargets!!
         if (null == bigrams) {
-            mNgrams = null
+            this.ngrams = null
         } else {
             val ngrams = ArrayList<NgramProperty>()
-            mNgrams = ngrams
-            val ngramContext = NgramContext(WordInfo(mWord))
+            this.ngrams = ngrams
+            val ngramContext = NgramContext(WordInfo(word))
             for (bigramTarget in bigrams) {
                 ngrams.add(NgramProperty(bigramTarget, ngramContext))
             }
         }
-        mIsBeginningOfSentence = false
-        mIsNotAWord = isNotAWord
-        mIsPossiblyOffensive = isPossiblyOffensive
+        isBeginningOfSentence = false
+        this.isNotAWord = isNotAWord
+        this.isPossiblyOffensive = isPossiblyOffensive
         hasNgrams = bigrams != null && !bigrams.isEmpty()
-        mHasShortcuts = shortcutTargets != null && !shortcutTargets.isEmpty()
+        hasShortcuts = shortcutTargets != null && !shortcutTargets.isEmpty()
     }
 
     // Construct word property using information from native code.
@@ -70,14 +70,14 @@ class WordProperty : Comparable<WordProperty> {
             ngramTargets: ArrayList<IntArray>, ngramProbabilityInfo: ArrayList<IntArray>,
             shortcutTargets: ArrayList<IntArray>,
             shortcutProbabilities: ArrayList<Int>) {
-        mWord = StringUtils.getStringFromNullTerminatedCodePointArray(codePoints)
-        mProbabilityInfo = createProbabilityInfoFromArray(probabilityInfo)
-        mShortcutTargets = ArrayList()
+        word = StringUtils.getStringFromNullTerminatedCodePointArray(codePoints)
+        this.probabilityInfo = createProbabilityInfoFromArray(probabilityInfo)
+        this.shortcutTargets = ArrayList()
         val ngrams = ArrayList<NgramProperty>()
-        mIsBeginningOfSentence = isBeginningOfSentence
-        mIsNotAWord = isNotAWord
-        mIsPossiblyOffensive = isPossiblyOffensive
-        mHasShortcuts = hasShortcuts
+        this.isBeginningOfSentence = isBeginningOfSentence
+        this.isNotAWord = isNotAWord
+        this.isPossiblyOffensive = isPossiblyOffensive
+        this.hasShortcuts = hasShortcuts
         hasNgrams = hasBigram
 
         val relatedNgramCount = ngramTargets.size
@@ -100,34 +100,33 @@ class WordProperty : Comparable<WordProperty> {
             val ngramContext = NgramContext(*wordInfoArray)
             ngrams.add(NgramProperty(ngramTarget, ngramContext))
         }
-        mNgrams = if (ngrams.isEmpty()) null else ngrams
+        this.ngrams = if (ngrams.isEmpty()) null else ngrams
 
         val shortcutTargetCount = shortcutTargets.size
         for (i in 0 until shortcutTargetCount) {
             val shortcutTargetString =
                     StringUtils.getStringFromNullTerminatedCodePointArray(shortcutTargets[i])
-            mShortcutTargets.add(
+            this.shortcutTargets.add(
                     WeightedString(shortcutTargetString, shortcutProbabilities[i]))
         }
     }
 
     // TODO: Remove
     fun getBigrams(): ArrayList<WeightedString>? {
-        if (null == mNgrams) {
+        if (null == ngrams) {
             return null
         }
         val bigrams = ArrayList<WeightedString>()
-        for (ngram in mNgrams) {
-            if (ngram.mNgramContext.prevWordCount == 1) {
-                bigrams.add(ngram.mTargetWord)
+        for (ngram in ngrams) {
+            if (ngram.ngramContext.prevWordCount == 1) {
+                bigrams.add(ngram.targetWord)
             }
         }
         return bigrams
     }
 
-    fun getProbability(): Int {
-        return mProbabilityInfo.mProbability
-    }
+    val probability: Int
+        get() = probabilityInfo.probability
 
     /**
      * Three-way comparison.
@@ -136,9 +135,9 @@ class WordProperty : Comparable<WordProperty> {
      * frequency, they are sorted in lexicographic order.
      */
     override fun compareTo(other: WordProperty): Int {
-        if (getProbability() < other.getProbability()) return 1
-        if (getProbability() > other.getProbability()) return -1
-        return mWord.compareTo(other.mWord)
+        if (probability < other.probability) return 1
+        if (probability > other.probability) return -1
+        return word.compareTo(other.word)
     }
 
     /**
@@ -151,22 +150,21 @@ class WordProperty : Comparable<WordProperty> {
         if (other === this) return true
         if (other !is WordProperty) return false
         val w = other
-        return mProbabilityInfo == w.mProbabilityInfo && mWord == w.mWord
-                && mShortcutTargets == w.mShortcutTargets && equals(mNgrams, w.mNgrams)
-                && mIsNotAWord == w.mIsNotAWord && mIsPossiblyOffensive == w.mIsPossiblyOffensive
-                && hasNgrams == w.hasNgrams && mHasShortcuts && w.hasNgrams
+        return probabilityInfo == w.probabilityInfo && word == w.word
+                && shortcutTargets == w.shortcutTargets && equals(ngrams, w.ngrams)
+                && isNotAWord == w.isNotAWord && isPossiblyOffensive == w.isPossiblyOffensive
+                && hasNgrams == w.hasNgrams && hasShortcuts && w.hasNgrams
     }
 
     override fun hashCode(): Int {
-        if (mHashCode == 0) {
-            mHashCode = computeHashCode(this)
+        if (cachedHashCode == 0) {
+            cachedHashCode = computeHashCode(this)
         }
-        return mHashCode
+        return cachedHashCode
     }
 
-    fun isValid(): Boolean {
-        return getProbability() != Dictionary.NOT_A_PROBABILITY
-    }
+    val isValid: Boolean
+        get() = probability != Dictionary.NOT_A_PROBABILITY
 
     override fun toString(): String {
         return CombinedFormatUtils.formatWordProperty(this)
@@ -183,12 +181,12 @@ class WordProperty : Comparable<WordProperty> {
 
         private fun computeHashCode(word: WordProperty): Int {
             return Arrays.hashCode(arrayOf<Any?>(
-                    word.mWord,
-                    word.mProbabilityInfo,
-                    word.mShortcutTargets,
-                    word.mNgrams,
-                    word.mIsNotAWord,
-                    word.mIsPossiblyOffensive
+                    word.word,
+                    word.probabilityInfo,
+                    word.shortcutTargets,
+                    word.ngrams,
+                    word.isNotAWord,
+                    word.isPossiblyOffensive
             ))
         }
 

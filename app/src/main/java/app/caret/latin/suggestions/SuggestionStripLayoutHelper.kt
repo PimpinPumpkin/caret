@@ -53,17 +53,18 @@ class SuggestionStripLayoutHelper(
     @JvmField val suggestionsStripHeight: Int
     private val suggestionsCountInStrip: Int
     @JvmField val moreSuggestionsRowHeight: Int
-    private var mMaxMoreSuggestionsRow: Int
+    var maxMoreSuggestionsRow: Int
+        private set
     @JvmField val minMoreSuggestionsWidth: Float
     @JvmField val moreSuggestionsBottomGap: Int
     private var moreSuggestionsAvailable = false
 
     // The index of these {@link ArrayList} is the position in the suggestion strip. The indices
     // increase towards the right for LTR scripts and the left for RTL scripts, starting with 0.
-    // The position of the most important suggestion is in {@link #mCenterPositionInStrip}
-    private val mWordViews: ArrayList<TextView>
-    private val mDividerViews: ArrayList<View>
-    private val mDebugInfoViews: ArrayList<TextView>
+    // The position of the most important suggestion is in {@link #centerPositionInStrip}
+    private val wordViews: ArrayList<TextView>
+    private val dividerViews: ArrayList<View>
+    private val debugInfoViews: ArrayList<TextView>
 
     private val colorValidTypedWord: Int
     private val colorTypedWord: Int
@@ -71,16 +72,16 @@ class SuggestionStripLayoutHelper(
     private val colorSuggested: Int
     private val alphaObsoleted: Float
     private val centerSuggestionWeight: Float
-    private val mCenterPositionInStrip: Int
+    private val centerPositionInStrip: Int
     private val typedWordPositionWhenAutocorrect: Int
-    private val mMoreSuggestionsHint: Drawable
+    private val moreSuggestionsHint: Drawable
 
     private val suggestionStripOptions: Int
 
     init {
-        mWordViews = wordViews
-        mDividerViews = dividerViews
-        mDebugInfoViews = debugInfoViews
+        this.wordViews = wordViews
+        this.dividerViews = dividerViews
+        this.debugInfoViews = debugInfoViews
 
         val wordView = wordViews.get(0)
         val dividerView = dividerViews.get(0)
@@ -100,7 +101,7 @@ class SuggestionStripLayoutHelper(
         suggestionStripOptions = a.getInt(R.styleable.SuggestionStripView_suggestionStripOptions, 0)
         alphaObsoleted = ResourceUtils.getFraction(a, R.styleable.SuggestionStripView_alphaObsoleted, 1.0f)
 
-        val colors = Settings.getValues().mColors
+        val colors = Settings.values.colors
         colorValidTypedWord = colors.get(ColorType.SUGGESTION_VALID_WORD)
         colorTypedWord = colors.get(ColorType.SUGGESTION_TYPED_WORD)
         colorAutoCorrect = colors.get(ColorType.SUGGESTION_AUTO_CORRECT)
@@ -116,7 +117,7 @@ class SuggestionStripLayoutHelper(
             R.styleable.SuggestionStripView_centerSuggestionPercentile,
             DEFAULT_CENTER_SUGGESTION_PERCENTILE
         )
-        mMaxMoreSuggestionsRow = a.getInt(
+        maxMoreSuggestionsRow = a.getInt(
             R.styleable.SuggestionStripView_maxMoreSuggestionsRow,
             DEFAULT_MAX_MORE_SUGGESTIONS_ROW
         )
@@ -126,16 +127,16 @@ class SuggestionStripLayoutHelper(
         )
         a.recycle()
 
-        mMoreSuggestionsHint = getMoreSuggestionsHint(
+        moreSuggestionsHint = getMoreSuggestionsHint(
             res,
             res.getDimension(R.dimen.config_more_suggestions_hint_text_size),
             colorMoreSuggestionsHint
         )
-        mCenterPositionInStrip = suggestionsCountInStrip / 2
+        centerPositionInStrip = suggestionsCountInStrip / 2
         // Assuming there are at least three suggestions. Also, note that the suggestions are
         // laid out according to script direction, so this is left of the center for LTR scripts
         // and right of the center for RTL scripts.
-        typedWordPositionWhenAutocorrect = mCenterPositionInStrip - 1
+        typedWordPositionWhenAutocorrect = centerPositionInStrip - 1
         moreSuggestionsBottomGap = res.getDimensionPixelOffset(
             R.dimen.config_more_suggestions_bottom_gap
         )
@@ -144,12 +145,8 @@ class SuggestionStripLayoutHelper(
         )
     }
 
-    fun getMaxMoreSuggestionsRow(): Int {
-        return mMaxMoreSuggestionsRow
-    }
-
     private fun getMoreSuggestionsHeight(): Int {
-        return mMaxMoreSuggestionsRow * moreSuggestionsRowHeight + moreSuggestionsBottomGap
+        return maxMoreSuggestionsRow * moreSuggestionsRowHeight + moreSuggestionsBottomGap
     }
 
     fun setMoreSuggestionsHeight(remainingHeight: Int) {
@@ -157,7 +154,7 @@ class SuggestionStripLayoutHelper(
         if (currentHeight <= remainingHeight) {
             return
         }
-        mMaxMoreSuggestionsRow = (remainingHeight - moreSuggestionsBottomGap) / moreSuggestionsRowHeight
+        maxMoreSuggestionsRow = (remainingHeight - moreSuggestionsBottomGap) / moreSuggestionsRowHeight
     }
 
     private fun getStyledSuggestedWord(
@@ -202,14 +199,14 @@ class SuggestionStripLayoutHelper(
         indexInSuggestedWords: Int,
         suggestedWords: SuggestedWords
     ): Int {
-        val settingsValues = Settings.getValues()
+        val settingsValues = Settings.values
         val shouldOmitTypedWord = shouldOmitTypedWord(
             suggestedWords.inputStyle,
             settingsValues.gestureFloatingPreviewTextEnabled, true
         )
         return getPositionInSuggestionStrip(
             indexInSuggestedWords, suggestedWords.willAutoCorrect,
-            shouldOmitTypedWord, mCenterPositionInStrip, typedWordPositionWhenAutocorrect
+            shouldOmitTypedWord, centerPositionInStrip, typedWordPositionWhenAutocorrect
         )
     }
 
@@ -261,9 +258,9 @@ class SuggestionStripLayoutHelper(
         val startIndexOfMoreSuggestions = setupWordViewsAndReturnStartIndexOfMoreSuggestions(
             suggestedWords, suggestionsCountInStrip
         )
-        val centerWordView = mWordViews.get(mCenterPositionInStrip)
+        val centerWordView = wordViews.get(centerPositionInStrip)
         val stripWidth = stripView.getWidth()
-        val centerWidth = getSuggestionWidth(mCenterPositionInStrip, stripWidth)
+        val centerWidth = getSuggestionWidth(centerPositionInStrip, stripWidth)
         if (wordCountToShow == 1 || getTextScaleX(
                 centerWordView.getText(), centerWidth,
                 centerWordView.getPaint()
@@ -273,11 +270,11 @@ class SuggestionStripLayoutHelper(
             // by consolidating all slots in the strip.
             val countInStrip = 1
             moreSuggestionsAvailable = (wordCountToShow > countInStrip)
-            layoutWord(context, mCenterPositionInStrip, stripWidth - padding)
+            layoutWord(context, centerPositionInStrip, stripWidth - padding)
             stripView.addView(centerWordView)
             setLayoutWeight(centerWordView, 1.0f, ViewGroup.LayoutParams.MATCH_PARENT)
             if (SuggestionStripView.DEBUG_SUGGESTIONS) {
-                layoutDebugInfo(mCenterPositionInStrip, placerView, stripWidth)
+                layoutDebugInfo(centerPositionInStrip, placerView, stripWidth)
             }
             val lastIndex = centerWordView.getTag() as Int?
             return (if (lastIndex == null) 0 else lastIndex) + 1
@@ -289,7 +286,7 @@ class SuggestionStripLayoutHelper(
         var x = 0
         for (positionInStrip in 0 until countInStrip) {
             if (positionInStrip != 0) {
-                val divider = mDividerViews.get(positionInStrip)
+                val divider = dividerViews.get(positionInStrip)
                 // Add divider if this isn't the left most suggestion in suggestions strip.
                 addDivider(stripView, divider)
                 x += divider.getMeasuredWidth()
@@ -309,14 +306,14 @@ class SuggestionStripLayoutHelper(
     }
 
     /**
-     * Format appropriately the suggested word in {@link #mWordViews} specified by
+     * Format appropriately the suggested word in {@link #wordViews} specified by
      * <code>positionInStrip</code>. When the suggested word doesn't exist, the corresponding
      * {@link TextView} will be disabled and never respond to user interaction. The suggested word
      * may be shrunk or ellipsized to fit in the specified width.
      * <p>
      * The <code>positionInStrip</code> argument is the index in the suggestion strip. The indices
      * increase towards the right for LTR scripts and the left for RTL scripts, starting with 0.
-     * The position of the most important suggestion is in {@link #mCenterPositionInStrip}. This
+     * The position of the most important suggestion is in {@link #centerPositionInStrip}. This
      * usually doesn't match the index in <code>suggedtedWords</code> -- see
      * {@link #getPositionInSuggestionStrip(int,SuggestedWords)}.
      *
@@ -325,13 +322,13 @@ class SuggestionStripLayoutHelper(
      * @return the {@link TextView} containing the suggested word appropriately formatted.
      */
     private fun layoutWord(context: Context, positionInStrip: Int, width: Int): TextView {
-        val wordView = mWordViews.get(positionInStrip)
+        val wordView = wordViews.get(positionInStrip)
         val word: CharSequence? = wordView.getText()
-        if (positionInStrip == mCenterPositionInStrip && moreSuggestionsAvailable) {
+        if (positionInStrip == centerPositionInStrip && moreSuggestionsAvailable) {
             // TODO: This "more suggestions hint" should have a nicely designed icon.
-            wordView.setCompoundDrawablesWithIntrinsicBounds(null, null, null, mMoreSuggestionsHint)
+            wordView.setCompoundDrawablesWithIntrinsicBounds(null, null, null, moreSuggestionsHint)
             // HACK: Align with other TextViews that have no compound drawables.
-            wordView.setCompoundDrawablePadding(-mMoreSuggestionsHint.getIntrinsicHeight())
+            wordView.setCompoundDrawablePadding(-moreSuggestionsHint.getIntrinsicHeight())
         } else {
             wordView.setCompoundDrawablesWithIntrinsicBounds(null, null, null, null)
         }
@@ -364,7 +361,7 @@ class SuggestionStripLayoutHelper(
         positionInStrip: Int, placerView: ViewGroup,
         x: Int
     ) {
-        val debugInfoView = mDebugInfoViews.get(positionInStrip)
+        val debugInfoView = debugInfoViews.get(positionInStrip)
         val debugInfo: CharSequence? = debugInfoView.getText()
         if (debugInfo == null) {
             return
@@ -383,7 +380,7 @@ class SuggestionStripLayoutHelper(
     }
 
     private fun getSuggestionWeight(positionInStrip: Int): Float {
-        if (positionInStrip == mCenterPositionInStrip) {
+        if (positionInStrip == centerPositionInStrip) {
             return centerSuggestionWeight
         }
         // TODO: Revisit this for cases of 5 or more suggestions
@@ -395,12 +392,12 @@ class SuggestionStripLayoutHelper(
     ): Int {
         // Clear all suggestions first
         for (positionInStrip in 0 until maxSuggestionInStrip) {
-            val wordView = mWordViews.get(positionInStrip)
+            val wordView = wordViews.get(positionInStrip)
             wordView.setText(null as CharSequence?)
             wordView.setTag(null)
             // Make this inactive for touches in {@link #layoutWord(int,int)}.
             if (SuggestionStripView.DEBUG_SUGGESTIONS) {
-                mDebugInfoViews.get(positionInStrip).setText(null as CharSequence?)
+                debugInfoViews.get(positionInStrip).setText(null as CharSequence?)
             }
         }
         var count = 0
@@ -414,7 +411,7 @@ class SuggestionStripLayoutHelper(
                 indexInSuggestedWords++
                 continue
             }
-            val wordView = mWordViews.get(positionInStrip)
+            val wordView = wordViews.get(positionInStrip)
             // {@link TextView#getTag()} is used to get the index in suggestedWords at
             // {@link SuggestionStripView#onClick(View)}.
             wordView.setTag(indexInSuggestedWords)
@@ -422,7 +419,7 @@ class SuggestionStripLayoutHelper(
             wordView.setTextColor(getSuggestionTextColor(suggestedWords, indexInSuggestedWords))
             KeyboardTypeface.applyToTextView(wordView)
             if (SuggestionStripView.DEBUG_SUGGESTIONS) {
-                mDebugInfoViews.get(positionInStrip).setText(suggestedWords.getDebugString(indexInSuggestedWords))
+                debugInfoViews.get(positionInStrip).setText(suggestedWords.getDebugString(indexInSuggestedWords))
             }
             count++
             indexInSuggestedWords++
@@ -437,10 +434,10 @@ class SuggestionStripLayoutHelper(
         for (positionInStrip in 0 until countInStrip) {
             if (positionInStrip != 0) {
                 // Add divider if this isn't the left most suggestion in suggestions strip.
-                addDivider(stripView, mDividerViews.get(positionInStrip))
+                addDivider(stripView, dividerViews.get(positionInStrip))
             }
 
-            val wordView = mWordViews.get(positionInStrip)
+            val wordView = wordViews.get(positionInStrip)
             val punctuation = punctuationSuggestions.getLabel(positionInStrip)
             // {@link TextView#getTag()} is used to get the index in suggestedWords at
             // {@link SuggestionStripView#onClick(View)}.
@@ -632,10 +629,10 @@ class SuggestionStripLayoutHelper(
         }
 
         private fun getTextWidth(text: CharSequence?, paint: TextPaint): Int {
-            if (TextUtils.isEmpty(text)) {
+            if (text.isNullOrEmpty()) {
                 return 0
             }
-            val length = text!!.length
+            val length = text.length
             val widths = FloatArray(length)
             val savedTypeface = paint.getTypeface()
             val count: Int = try {

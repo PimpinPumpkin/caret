@@ -52,7 +52,7 @@ class SettingsValues(context: Context, prefs: SharedPreferences, res: Resources,
     @JvmField val spacingAndPunctuations: SpacingAndPunctuations
     @JvmField val doubleSpacePeriodTimeout: Long
     // From configuration:
-    @JvmField val mLocale: Locale
+    @JvmField val locale: Locale
     @JvmField val hasHardwareKeyboard: Boolean
     @JvmField val displayOrientation: Int
     // From preferences
@@ -162,7 +162,7 @@ class SettingsValues(context: Context, prefs: SharedPreferences, res: Resources,
     @JvmField val longPressSymbolsForNumpad: Boolean
 
     // From the input box
-    @JvmField val mInputAttributes: InputAttributes
+    @JvmField val inputAttributes: InputAttributes
 
     // Deduced settings
     @JvmField val suggestionStripHiddenPerUserSettings: Boolean
@@ -173,15 +173,15 @@ class SettingsValues(context: Context, prefs: SharedPreferences, res: Resources,
     @JvmField val isLocked: Boolean
 
     // User-defined colors
-    @JvmField val mColors: Colors
+    @JvmField val colors: Colors
 
     init {
-        mLocale = res.configuration.locale()
+        this.locale = res.configuration.locale()
         displayOrientation = res.configuration.orientation
         val selectedSubtype = SubtypeSettings.getSelectedSubtype(prefs)
 
         // Store the input attributes
-        mInputAttributes = inputAttributes
+        this.inputAttributes = inputAttributes
 
         // Get the settings preferences
         isLocked = isDeviceLocked(context)
@@ -189,7 +189,7 @@ class SettingsValues(context: Context, prefs: SharedPreferences, res: Resources,
         toolbarMode = if (isLocked) ToolbarMode.HIDDEN else Settings.readToolbarMode(prefs)
         toolbarSwipeDownToHide = prefs.getBoolean(Settings.PREF_TOOLBAR_SWIPE_DOWN_TO_HIDE, Defaults.PREF_TOOLBAR_SWIPE_DOWN_TO_HIDE)
         toolbarHidingGlobal = isLocked || prefs.getBoolean(Settings.PREF_TOOLBAR_HIDING_GLOBAL, Defaults.PREF_TOOLBAR_HIDING_GLOBAL)
-        autoCap = prefs.getBoolean(Settings.PREF_AUTO_CAP, Defaults.PREF_AUTO_CAP) && ScriptUtils.scriptSupportsUppercase(mLocale)
+        autoCap = prefs.getBoolean(Settings.PREF_AUTO_CAP, Defaults.PREF_AUTO_CAP) && ScriptUtils.scriptSupportsUppercase(locale)
         vibrateOn = Settings.readVibrationEnabled(prefs)
         vibrateInDndMode = prefs.getBoolean(Settings.PREF_VIBRATE_IN_DND_MODE, Defaults.PREF_VIBRATE_IN_DND_MODE)
         soundOn = prefs.getBoolean(Settings.PREF_SOUND_ON, Defaults.PREF_SOUND_ON)
@@ -199,7 +199,7 @@ class SettingsValues(context: Context, prefs: SharedPreferences, res: Resources,
         keyPreviewPopupOn = prefs.getBoolean(Settings.PREF_POPUP_ON, Defaults.PREF_POPUP_ON)
         slidingKeyInputPreviewEnabled = prefs.getBoolean(
                 DebugSettings.PREF_SLIDING_KEY_INPUT_PREVIEW, Defaults.PREF_SLIDING_KEY_INPUT_PREVIEW)
-        showsVoiceInputKey = mInputAttributes.shouldShowVoiceInputKey
+        showsVoiceInputKey = inputAttributes.shouldShowVoiceInputKey
         val languagePref = prefs.getString(Settings.PREF_LANGUAGE_SWITCH_KEY, Defaults.PREF_LANGUAGE_SWITCH_KEY)
         languageSwitchKeyToOtherImes = languagePref!! == "input_method" || languagePref == "both"
         languageSwitchKeyToOtherSubtypes = isLocked || languagePref == "internal" || languagePref == "both"
@@ -223,8 +223,8 @@ class SettingsValues(context: Context, prefs: SharedPreferences, res: Resources,
         urlDetectionEnabled = prefs.getBoolean(Settings.PREF_URL_DETECTION, Defaults.PREF_URL_DETECTION)
         autoCorrectionEnabledPerUserSettings = prefs.getBoolean(Settings.PREF_AUTO_CORRECTION, Defaults.PREF_AUTO_CORRECTION)
         autoCorrectEnabled = autoCorrectionEnabledPerUserSettings
-                && (mInputAttributes.inputTypeShouldAutoCorrect || prefs.getBoolean(Settings.PREF_MORE_AUTO_CORRECTION, Defaults.PREF_MORE_AUTO_CORRECTION))
-                && (urlDetectionEnabled || !InputTypeUtils.isUriOrEmailType(mInputAttributes.inputType))
+                && (inputAttributes.inputTypeShouldAutoCorrect || prefs.getBoolean(Settings.PREF_MORE_AUTO_CORRECTION, Defaults.PREF_MORE_AUTO_CORRECTION))
+                && (urlDetectionEnabled || !InputTypeUtils.isUriOrEmailType(inputAttributes.inputType))
         centerSuggestionTextToEnter = prefs.getBoolean(Settings.PREF_CENTER_SUGGESTION_TEXT_TO_ENTER, Defaults.PREF_CENTER_SUGGESTION_TEXT_TO_ENTER)
         val autoCorrectConfidence = prefs.getFloat(Settings.PREF_AUTO_CORRECT_CONFIDENCE, Defaults.PREF_AUTO_CORRECT_CONFIDENCE)
         // confidence -> threshold and score limit are just some formulas that give something similar to the old values, so that confidence can be in a nice 0-1 range
@@ -257,20 +257,20 @@ class SettingsValues(context: Context, prefs: SharedPreferences, res: Resources,
         enableEmojiAltPhysicalKey = prefs.getBoolean(Settings.PREF_ENABLE_EMOJI_ALT_PHYSICAL_KEY, Defaults.PREF_ENABLE_EMOJI_ALT_PHYSICAL_KEY)
         gestureInputEnabled = JniUtils.haveGestureLib && prefs.getBoolean(Settings.PREF_GESTURE_INPUT, Defaults.PREF_GESTURE_INPUT)
         gestureTrailEnabled = prefs.getBoolean(Settings.PREF_GESTURE_PREVIEW_TRAIL, Defaults.PREF_GESTURE_PREVIEW_TRAIL)
-        gestureFloatingPreviewTextEnabled = !mInputAttributes.disableGestureFloatingPreviewText
+        gestureFloatingPreviewTextEnabled = !inputAttributes.disableGestureFloatingPreviewText
                 && prefs.getBoolean(Settings.PREF_GESTURE_FLOATING_PREVIEW_TEXT, Defaults.PREF_GESTURE_FLOATING_PREVIEW_TEXT)
         gestureFloatingPreviewDynamicEnabled = Settings.readGestureDynamicPreviewEnabled(prefs)
         gestureFastTypingCooldown = prefs.getInt(Settings.PREF_GESTURE_FAST_TYPING_COOLDOWN, Defaults.PREF_GESTURE_FAST_TYPING_COOLDOWN)
         gestureTrailFadeoutDuration = prefs.getInt(Settings.PREF_GESTURE_TRAIL_FADEOUT_DURATION, Defaults.PREF_GESTURE_TRAIL_FADEOUT_DURATION)
         suggestionStripHiddenPerUserSettings = toolbarMode == ToolbarMode.HIDDEN || toolbarMode == ToolbarMode.TOOLBAR_KEYS
-        overrideShowingSuggestions = mInputAttributes.mayOverrideShowingSuggestions
+        overrideShowingSuggestions = inputAttributes.mayOverrideShowingSuggestions
                 && prefs.getBoolean(Settings.PREF_ALWAYS_SHOW_SUGGESTIONS, Defaults.PREF_ALWAYS_SHOW_SUGGESTIONS)
                 && ((inputAttributes.inputType and InputType.TYPE_MASK_VARIATION) != InputType.TYPE_TEXT_VARIATION_WEB_EDIT_TEXT
                   || !prefs.getBoolean(Settings.PREF_ALWAYS_SHOW_SUGGESTIONS_EXCEPT_WEB_TEXT, Defaults.PREF_ALWAYS_SHOW_SUGGESTIONS_EXCEPT_WEB_TEXT))
         suggestionsEnabled = prefs.getBoolean(Settings.PREF_SHOW_SUGGESTIONS, Defaults.PREF_SHOW_SUGGESTIONS)
-            && (mInputAttributes.shouldShowSuggestions || overrideShowingSuggestions) && !suggestionStripHiddenPerUserSettings
-        incognitoModeEnabled = prefs.getBoolean(Settings.PREF_ALWAYS_INCOGNITO_MODE, Defaults.PREF_ALWAYS_INCOGNITO_MODE) || mInputAttributes.noLearning
-                || mInputAttributes.isPasswordField
+            && (inputAttributes.shouldShowSuggestions || overrideShowingSuggestions) && !suggestionStripHiddenPerUserSettings
+        incognitoModeEnabled = prefs.getBoolean(Settings.PREF_ALWAYS_INCOGNITO_MODE, Defaults.PREF_ALWAYS_INCOGNITO_MODE) || inputAttributes.noLearning
+                || inputAttributes.isPasswordField
         bottomRowScale = Settings.readBottomRowScale(prefs, isLandscape, isFolded)
         spaceSwipeHorizontal = Settings.readHorizontalSpaceSwipe(prefs)
         spaceSwipeVertical = Settings.readVerticalSpaceSwipe(prefs)
@@ -306,7 +306,7 @@ class SettingsValues(context: Context, prefs: SharedPreferences, res: Resources,
         secondaryLocales = getSecondaryLocales(selectedSubtype.extraValue)
         showMorePopupKeys = getMoreKeys(selectedSubtype, prefs,
             if (selectedSubtype.isAsciiCapable) Defaults.PREF_MORE_POPUP_KEYS else LocaleKeyboardInfos.POPUP_KEYS_NORMAL)
-        mColors = KeyboardTheme.getColorsForCurrentTheme(context)
+        colors = KeyboardTheme.getColorsForCurrentTheme(context)
 
         popupKeyOrder = getPopupKeyOrder(selectedSubtype, prefs)
         popupKeyHintOrder = getPopupKeyHintOrder(selectedSubtype, prefs)
@@ -344,7 +344,7 @@ class SettingsValues(context: Context, prefs: SharedPreferences, res: Resources,
     }
 
     fun needsToLookupSuggestions(): Boolean {
-        return (mInputAttributes.shouldShowSuggestions || overrideShowingSuggestions)
+        return (inputAttributes.shouldShowSuggestions || overrideShowingSuggestions)
                 && (autoCorrectEnabled || suggestionsEnabled)
     }
 
@@ -369,7 +369,7 @@ class SettingsValues(context: Context, prefs: SharedPreferences, res: Resources,
     }
 
     fun shouldInsertSpacesAutomatically(): Boolean {
-        return mInputAttributes.shouldInsertSpacesAutomatically
+        return inputAttributes.shouldInsertSpacesAutomatically
     }
 
     fun isLanguageSwitchKeyEnabled(): Boolean {
@@ -388,16 +388,15 @@ class SettingsValues(context: Context, prefs: SharedPreferences, res: Resources,
     }
 
     fun isSameInputType(editorInfo: EditorInfo?): Boolean {
-        return mInputAttributes.isSameInputType(editorInfo)
+        return inputAttributes.isSameInputType(editorInfo)
     }
 
     fun hasSameOrientation(configuration: Configuration): Boolean {
         return displayOrientation == configuration.orientation
     }
 
-    fun isSecondaryStripVisible(): Boolean {
-        return toolbarMode != ToolbarMode.HIDDEN || !toolbarHidingGlobal
-    }
+    val isSecondaryStripVisible: Boolean
+        get() = toolbarMode != ToolbarMode.HIDDEN || !toolbarHidingGlobal
 
     fun dump(): String {
         val sb = StringBuilder("Current settings :")
@@ -436,9 +435,9 @@ class SettingsValues(context: Context, prefs: SharedPreferences, res: Resources,
         sb.append("\n   keyLongpressTimeout = ")
         sb.append("" + keyLongpressTimeout)
         sb.append("\n   mLocale = ")
-        sb.append("" + mLocale)
+        sb.append("" + locale)
         sb.append("\n   mInputAttributes = ")
-        sb.append("" + mInputAttributes)
+        sb.append("" + inputAttributes)
         sb.append("\n   keypressVibrationDuration = ")
         sb.append("" + keypressVibrationDuration)
         sb.append("\n   keypressSoundVolume = ")

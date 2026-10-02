@@ -49,38 +49,38 @@ class CombinedFormatUtils {
         @JvmStatic
         fun formatWordProperty(wordProperty: WordProperty): String {
             val builder = StringBuilder()
-            builder.append(" " + WORD_TAG + "=" + wordProperty.mWord)
+            builder.append(" " + WORD_TAG + "=" + wordProperty.word)
             builder.append(",")
-            builder.append(formatProbabilityInfo(wordProperty.mProbabilityInfo))
-            if (wordProperty.mIsBeginningOfSentence) {
+            builder.append(formatProbabilityInfo(wordProperty.probabilityInfo))
+            if (wordProperty.isBeginningOfSentence) {
                 builder.append("," + BEGINNING_OF_SENTENCE_TAG + "=" + TRUE_VALUE)
             }
-            if (wordProperty.mIsNotAWord) {
+            if (wordProperty.isNotAWord) {
                 builder.append("," + NOT_A_WORD_TAG + "=" + TRUE_VALUE)
             }
-            if (wordProperty.mIsPossiblyOffensive) {
+            if (wordProperty.isPossiblyOffensive) {
                 builder.append("," + POSSIBLY_OFFENSIVE_TAG + "=" + TRUE_VALUE)
             }
             builder.append("\n")
-            if (wordProperty.mHasShortcuts) {
-                for (shortcutTarget in wordProperty.mShortcutTargets) {
-                    builder.append("  " + SHORTCUT_TAG + "=" + shortcutTarget.mWord)
+            if (wordProperty.hasShortcuts) {
+                for (shortcutTarget in wordProperty.shortcutTargets) {
+                    builder.append("  " + SHORTCUT_TAG + "=" + shortcutTarget.word)
                     builder.append(",")
-                    builder.append(formatProbabilityInfo(shortcutTarget.mProbabilityInfo))
+                    builder.append(formatProbabilityInfo(shortcutTarget.probabilityInfo))
                     builder.append("\n")
                 }
             }
             if (wordProperty.hasNgrams) {
-                for (ngramProperty in wordProperty.mNgrams!!) {
-                    builder.append(" " + NGRAM_TAG + "=" + ngramProperty.mTargetWord.mWord)
+                for (ngramProperty in wordProperty.ngrams!!) {
+                    builder.append(" " + NGRAM_TAG + "=" + ngramProperty.targetWord.word)
                     builder.append(",")
-                    builder.append(formatProbabilityInfo(ngramProperty.mTargetWord.mProbabilityInfo))
+                    builder.append(formatProbabilityInfo(ngramProperty.targetWord.probabilityInfo))
                     builder.append("\n")
                     var i = 0
-                    while (i < ngramProperty.mNgramContext.prevWordCount) {
+                    while (i < ngramProperty.ngramContext.prevWordCount) {
                         builder.append("  " + NGRAM_PREV_WORD_TAG + "[" + i + "]="
-                                + ngramProperty.mNgramContext.getNthPrevWord(i + 1))
-                        if (ngramProperty.mNgramContext.isNthPrevWordBeginningOfSentence(i + 1)) {
+                                + ngramProperty.ngramContext.getNthPrevWord(i + 1))
+                        if (ngramProperty.ngramContext.isNthPrevWordBeginningOfSentence(i + 1)) {
                             builder.append("," + BEGINNING_OF_SENTENCE_TAG + "=true")
                         }
                         builder.append("\n")
@@ -94,15 +94,15 @@ class CombinedFormatUtils {
         @JvmStatic
         fun formatProbabilityInfo(probabilityInfo: ProbabilityInfo): String {
             val builder = StringBuilder()
-            builder.append(PROBABILITY_TAG + "=" + probabilityInfo.mProbability)
+            builder.append(PROBABILITY_TAG + "=" + probabilityInfo.probability)
             if (probabilityInfo.hasHistoricalInfo()) {
                 builder.append(",")
                 builder.append(HISTORICAL_INFO_TAG + "=")
-                builder.append(probabilityInfo.mTimestamp)
+                builder.append(probabilityInfo.timestamp)
                 builder.append(HISTORICAL_INFO_SEPARATOR)
-                builder.append(probabilityInfo.mLevel)
+                builder.append(probabilityInfo.level)
                 builder.append(HISTORICAL_INFO_SEPARATOR)
-                builder.append(probabilityInfo.mCount)
+                builder.append(probabilityInfo.count)
             }
             return builder.toString()
         }

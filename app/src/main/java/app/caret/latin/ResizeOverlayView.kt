@@ -31,7 +31,7 @@ class ResizeOverlayView(context: Context, private val onDone: () -> Unit) : View
     private enum class Target { HEIGHT, SIDE_LEFT, SIDE_RIGHT, BOTTOM, RESET, DONE }
 
     private val density = resources.displayMetrics.density
-    private val colors = Settings.getValues().mColors
+    private val colors = Settings.values.colors
     private val scrim = Paint().apply { color = colors.get(ColorType.MAIN_BACKGROUND); alpha = 170 }
     private val handle = Paint(Paint.ANTI_ALIAS_FLAG).apply { color = colors.get(ColorType.ACTION_KEY_BACKGROUND) }
     private val button = Paint(Paint.ANTI_ALIAS_FLAG).apply { color = colors.get(ColorType.FUNCTIONAL_KEY_BACKGROUND) }
@@ -134,7 +134,7 @@ class ResizeOverlayView(context: Context, private val onDone: () -> Unit) : View
     }
 
     private fun prefKey(prefix: String, dimensions: Int): Pair<String, Int> {
-        val values = Settings.getValues()
+        val values = Settings.values
         val landscape = values.displayOrientation == Configuration.ORIENTATION_LANDSCAPE
         val index = if (dimensions == 3) findIndexOfDefaultSetting(landscape, values.isSplitKeyboardEnabled, FoldableUtils.isFolded)
             else findIndexOfDefaultSetting(landscape, FoldableUtils.isFolded)

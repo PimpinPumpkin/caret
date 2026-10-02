@@ -53,7 +53,7 @@ class KeyboardParser(private val params: KeyboardParams, private val context: Co
             KeyboardElement.PHONE -> LayoutType.PHONE
             KeyboardElement.PHONE_SYMBOLS -> LayoutType.PHONE_SYMBOLS
             KeyboardElement.NUMBER -> LayoutType.NUMBER
-            KeyboardElement.NUMPAD -> if (Settings.getValues().displayOrientation == Configuration.ORIENTATION_LANDSCAPE)
+            KeyboardElement.NUMPAD -> if (Settings.values.displayOrientation == Configuration.ORIENTATION_LANDSCAPE)
                 LayoutType.NUMPAD_LANDSCAPE else LayoutType.NUMPAD
             KeyboardElement.DPAD -> LayoutType.DPAD
             KeyboardElement.EMOJI_BOTTOM_ROW -> LayoutType.EMOJI_BOTTOM
@@ -66,7 +66,7 @@ class KeyboardParser(private val params: KeyboardParams, private val context: Co
         if (params.id.element.isBottomRow) {
             heightRescale = 4f
             // to have same height as alpha keyboard we act as if we had the default number of rows
-            val virtualRows = if (Settings.getValues().showsNumberRow) 5 else 4 // determine from Settings, because it's not actually in params for bottom rows
+            val virtualRows = if (Settings.values.showsNumberRow) 5 else 4 // determine from Settings, because it's not actually in params for bottom rows
             // params rescale is not perfect, especially mTopPadding may cause 1 pixel offsets because it's already been converted to int once
             params.occupiedHeight /= virtualRows
             params.baseHeight /= virtualRows
@@ -80,7 +80,7 @@ class KeyboardParser(private val params: KeyboardParams, private val context: Co
         }
         // rescale without changing keyboard height
         if (params.id.element.takesFunctionalKeys) {
-            val bottomRowScale = Settings.getValues().bottomRowScale
+            val bottomRowScale = Settings.values.bottomRowScale
             val otherRowScale = (keysInRows.size - bottomRowScale) / (keysInRows.size - 1)
             keysInRows.forEachIndexed { i, row ->
                 row.forEach { it.height *= if (i == keysInRows.lastIndex) bottomRowScale else otherRowScale }
@@ -106,7 +106,7 @@ class KeyboardParser(private val params: KeyboardParams, private val context: Co
             addSymbolPopupKeys(baseKeys)
         if (element.isAlphaOrSymbol && params.id.numberRowEnabled) {
             val newLabelFlags = defaultLabelFlags or
-                    if (Settings.getValues().showNumberRowHints) 0 else Key.LABEL_FLAGS_DISABLE_HINT_LABEL
+                    if (Settings.values.showNumberRowHints) 0 else Key.LABEL_FLAGS_DISABLE_HINT_LABEL
             baseKeys.add(0, numberRow.mapTo(mutableListOf()) { it.copy(newLabelFlags = newLabelFlags) })
         }
         if (!params.allowRedundantPopupKeys)
@@ -306,7 +306,7 @@ class KeyboardParser(private val params: KeyboardParams, private val context: Co
         val row = LayoutParser.parseLayout(LayoutType.NUMBER_ROW, params, context).first()
         val localizedNumbers = params.localeKeyboardInfos.localizedNumberKeys
         if (localizedNumbers?.size != 10) return row
-        if (Settings.getValues().localizedNumberRow) {
+        if (Settings.values.localizedNumberRow) {
             // replace 0-9 with localized numbers, and move latin number into popup
             for (i in row.indices) {
                 val key = row[i]

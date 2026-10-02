@@ -606,7 +606,7 @@ class PointerTracker private constructor(id: Int) : PointerTrackerQueue.Element,
     }
 
     private fun isSwiper(code: Int): Boolean {
-        val sv = Settings.getValues()
+        val sv = Settings.values
         return when (code) {
             Constants.CODE_SPACE -> sv.spaceSwipeHorizontal != KeyboardActionListener.SwipeAction.NONE
                     || sv.spaceSwipeVertical != KeyboardActionListener.SwipeAction.NONE
@@ -785,7 +785,7 @@ class PointerTracker private constructor(id: Int) : PointerTrackerQueue.Element,
     }
 
     private fun onKeySwipe(code: Int, x: Int, y: Int, eventTime: Long) {
-        val sv = Settings.getValues()
+        val sv = Settings.values
         val fastTypingTimeout = 2 * sv.keyLongpressTimeout / 3
         // we don't want keyswipes to start immediately if the user is fast-typing,
         // see https://github.com/openboard-team/openboard/issues/411
@@ -1017,7 +1017,7 @@ class PointerTracker private constructor(id: Int) : PointerTrackerQueue.Element,
             return
         }
         if (code == KeyCode.LANGUAGE_SWITCH
-                || (code == Constants.CODE_SPACE && key.popupKeys == null && Settings.getValues().spaceForLangChange)
+                || (code == Constants.CODE_SPACE && key.popupKeys == null && Settings.values.spaceForLangChange)
         ) {
             // Long pressing the space key invokes IME switcher dialog.
             if (listener.onCustomRequest(KeyboardActionListener.CustomAction.SHOW_INPUT_METHOD_PICKER)) {
@@ -1126,7 +1126,7 @@ class PointerTracker private constructor(id: Int) : PointerTrackerQueue.Element,
             return
         }
         if (code == KeyCode.SYMBOL_ALPHA
-            && (!Settings.getValues().longPressSymbolsForNumpad
+            && (!Settings.values.longPressSymbolsForNumpad
                 || keyboard?.id?.element != KeyboardElement.SYMBOLS
             )
         ) {
@@ -1139,7 +1139,7 @@ class PointerTracker private constructor(id: Int) : PointerTrackerQueue.Element,
     }
 
     private fun getLongPressTimeout(code: Int): Int {
-        val longpressTimeout = Settings.getValues().keyLongpressTimeout
+        val longpressTimeout = Settings.values.keyLongpressTimeout
         return when (code) {
             Constants.CODE_SPACE, KeyCode.SHIFT, KeyCode.SYMBOL_ALPHA
                 // We use slightly longer timeout for space, shift-lock, and the numpad long-press.

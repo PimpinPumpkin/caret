@@ -70,7 +70,7 @@ class KeyVisualAttributes private constructor(keyAttr: TypedArray) {
                 R.styleable.Keyboard_Key_keyPreviewTextRatio)
 
         // todo: check what colors do, and if irrelevant and no plan to use -> remove here and from attr
-        val colors = Settings.getValues().mColors
+        val colors = Settings.values.colors
         textColor = colors.get(ColorType.KEY_TEXT)
         // when? -> isShiftedLetterActivated, which is a label flag
         textInactivatedColor = keyAttr.getColor(R.styleable.Keyboard_Key_keyTextInactivatedColor, 0)

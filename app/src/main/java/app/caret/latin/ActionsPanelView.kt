@@ -35,7 +35,7 @@ class ActionsPanelView(
     init {
         orientation = VERTICAL
         isClickable = true // swallow touches so they do not reach the keys underneath
-        val colors = Settings.getValues().mColors
+        val colors = Settings.values.colors
         setBackgroundColor(colors.get(ColorType.MAIN_BACKGROUND))
         val textColor = colors.get(ColorType.KEY_TEXT)
         val tileColor = colors.get(ColorType.KEY_BACKGROUND)

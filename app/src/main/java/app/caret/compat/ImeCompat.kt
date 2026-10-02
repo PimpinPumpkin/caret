@@ -20,7 +20,7 @@ object ImeCompat {
 
     fun InputMethodService.shouldSwitchToOtherInputMethods(): Boolean {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) return shouldOfferSwitchingToNextInputMethod()
-        val settingsValues = Settings.getValues()
+        val settingsValues = Settings.values
         val window = window.window ?: return settingsValues.languageSwitchKeyToOtherImes
         val token = window.attributes.token ?: return settingsValues.languageSwitchKeyToOtherImes
         return RichInputMethodManager.getInstance().inputMethodManager.shouldOfferSwitchingToNextInputMethod(token)

@@ -76,7 +76,7 @@ fun getEmojiKeyDimensions(params: KeyboardParams, context: Context): Pair<Float,
     // this is a bit long, but ensures that emoji size stays the same, independent of these settings
     // we also ignore side padding for key width, and prefer fewer keys per row over narrower keys
     val defaultKeyWidth = ResourceUtils.getDefaultKeyboardWidth(context) * params.defaultKeyWidth
-    var keyWidth = defaultKeyWidth * sqrt(Settings.getValues().keyboardHeightScale)
+    var keyWidth = defaultKeyWidth * sqrt(Settings.values.keyboardHeightScale)
     val defaultKeyboardHeight = ResourceUtils.getDefaultKeyboardHeight(context.resources, false)
     val defaultBottomPadding = context.resources.getFraction(
         R.fraction.config_keyboard_bottom_padding_holo, defaultKeyboardHeight, defaultKeyboardHeight
@@ -84,11 +84,11 @@ fun getEmojiKeyDimensions(params: KeyboardParams, context: Context): Pair<Float,
     val emojiKeyboardHeight = defaultKeyboardHeight * 0.75f + params.verticalGap - defaultBottomPadding -
         context.resources.getDimensionPixelSize(R.dimen.config_emoji_category_page_id_height)
     var keyHeight =
-        emojiKeyboardHeight * params.defaultRowHeight * Settings.getValues().keyboardHeightScale // still apply height scale to key
+        emojiKeyboardHeight * params.defaultRowHeight * Settings.values.keyboardHeightScale // still apply height scale to key
 
-    if (Settings.getValues().emojiKeyFit) {
-        keyWidth *= Settings.getValues().fontSizeMultiplierEmoji
-        keyHeight *= Settings.getValues().fontSizeMultiplierEmoji
+    if (Settings.values.emojiKeyFit) {
+        keyWidth *= Settings.values.fontSizeMultiplierEmoji
+        keyHeight *= Settings.values.fontSizeMultiplierEmoji
     }
     return keyWidth to keyHeight
 }

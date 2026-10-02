@@ -513,7 +513,7 @@ abstract class ExpandableBinaryDictionary : Dictionary {
             try {
                 val header = binaryDictionary.getHeader()
                 Log.d(tag, "Format version: " + binaryDictionary.getFormatVersion())
-                Log.d(tag, CombinedFormatUtils.formatAttributeMap(header.dictionaryOptions.mAttributes))
+                Log.d(tag, CombinedFormatUtils.formatAttributeMap(header.dictionaryOptions.attributes))
             } catch (e: UnsupportedFormatException) {
                 Log.d(tag, "Cannot fetch header information.", e)
             }

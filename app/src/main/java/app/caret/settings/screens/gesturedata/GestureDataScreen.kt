@@ -213,7 +213,7 @@ fun GestureDataScreen(
     }
     @Composable fun activeGathering() {
         val availableDicts = remember { getAvailableDictionaries(ctx) }
-        val currentLocale = Settings.getValues().mLocale
+        val currentLocale = Settings.values.locale
         var dict by remember { mutableStateOf(
             LocaleUtils.getBestMatch(currentLocale, availableDicts) { it.locale }
         ) }
@@ -697,15 +697,15 @@ private fun BinaryDictionary.addWords(words: MutableList<WeightedWord>) {
     var added = false
     do {
         val result = getNextWordProperty(token)
-        val word = result.mWordProperty.mWord
+        val word = result.mWordProperty.word
         val length = word.codePointCount(0, word.length)
-        if (!result.mWordProperty.mIsNotAWord
+        if (!result.mWordProperty.isNotAWord
                 && length > 1
-                && !(result.mWordProperty.mIsPossiblyOffensive && Settings.getValues().blockPotentiallyOffensive)
-                && result.mWordProperty.getProbability() > 2 // some minimum value, as there are too many unknown / rare words down there
+                && !(result.mWordProperty.isPossiblyOffensive && Settings.values.blockPotentiallyOffensive)
+                && result.mWordProperty.probability > 2 // some minimum value, as there are too many unknown / rare words down there
                 && (!hasCases || word.uppercase() != word)
             ) {
-            val frequency = result.mWordProperty.getProbability()
+            val frequency = result.mWordProperty.probability
             cumulativeWeight += calculateWordWeight(frequency, length)
             if (added && words.isEmpty())
                 return // crappy workaround for having 2 merged dictionaries when switching dicts while one is still loading

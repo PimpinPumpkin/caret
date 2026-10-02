@@ -20,7 +20,6 @@ open class LeakGuardHandlerWrapper<T> : Handler {
         ownerInstanceRef = WeakReference(ownerInstance)
     }
 
-    fun getOwnerInstance(): T? {
-        return ownerInstanceRef.get()
-    }
+    val ownerInstance: T?
+        get() = ownerInstanceRef.get()
 }

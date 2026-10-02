@@ -199,7 +199,7 @@ class LocaleKeyboardInfos(dataStream: InputStream?, locale: Locale) {
 
         fun addLocaleKeyTextsToParams(context: Context, params: KeyboardParams, popupKeysSetting: String) {
             val locales = params.secondaryLocales + params.id.locale
-            params.localeKeyboardInfos = localeKeyboardInfosCache.getOrPut(locales.joinToString { it.toString() } + Settings.getValues().showMorePopupKeys) {
+            params.localeKeyboardInfos = localeKeyboardInfosCache.getOrPut(locales.joinToString { it.toString() } + Settings.values.showMorePopupKeys) {
                 createLocaleKeyTexts(context, params, popupKeysSetting)
             }
         }
@@ -248,7 +248,7 @@ class LocaleKeyboardInfos(dataStream: InputStream?, locale: Locale) {
 
         // probably could be improved and extended, currently this is what's done in key_styles_currency.xml
         private fun getCurrencyKey(locale: Locale): Pair<String, List<String>> {
-            Settings.getInstance().readCustomCurrencyKey().takeIf { it.isNotBlank() }?.let { currency ->
+            Settings.instance.readCustomCurrencyKey().takeIf { it.isNotBlank() }?.let { currency ->
                 val split = currency.trim().splitOnWhitespace()
                 if (split.isNotEmpty())
                     return split[0] to (split.toSet() + genericCurrencyPopupKeys).filterNot { it == split[0] }.take(6)

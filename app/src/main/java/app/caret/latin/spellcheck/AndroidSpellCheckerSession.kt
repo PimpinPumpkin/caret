@@ -18,7 +18,7 @@ import app.caret.latin.utils.SpannableStringUtils
 
 class AndroidSpellCheckerSession(service: AndroidSpellCheckerService) : AndroidWordLevelSpellCheckerSession(service) {
     private val resources = service.resources
-    private var mSentenceLevelAdapter: SentenceLevelAdapter? = null
+    private var sentenceLevelAdapter: SentenceLevelAdapter? = null
 
     private fun fixWronglyInvalidatedWordWithSingleQuote(textInfo: TextInfo, sentenceSuggestionsInfo: SentenceSuggestionsInfo): SentenceSuggestionsInfo? {
         val typedText = textInfo.charSequence
@@ -54,7 +54,7 @@ class AndroidSpellCheckerSession(service: AndroidSpellCheckerService) : AndroidW
                 if (suggestionsCache.getSuggestionsFromCache(splitText.toString()) == null) {
                     continue
                 }
-                val newLength = splitText!!.length
+                val newLength = splitText.length
                 // Neither RESULT_ATTR_IN_THE_DICTIONARY nor RESULT_ATTR_LOOKS_LIKE_TYPO
                 val newFlags = 0
                 val newSuggestionsInfo = SuggestionsInfo(newFlags, EMPTY_STRING_ARRAY)
@@ -120,27 +120,27 @@ class AndroidSpellCheckerSession(service: AndroidSpellCheckerService) : AndroidW
      */
     private fun splitAndSuggest(textInfos: Array<TextInfo?>?, suggestionsLimit: Int): Array<SentenceSuggestionsInfo?>? {
         if (textInfos.isNullOrEmpty()) {
-            return SentenceLevelAdapter.getEmptySentenceSuggestionsInfo()
+            return SentenceLevelAdapter.emptySentenceSuggestionsInfo
         }
-        var sentenceLevelAdapter: SentenceLevelAdapter?
+        var adapter: SentenceLevelAdapter?
         synchronized(this) {
-            sentenceLevelAdapter = mSentenceLevelAdapter
-            if (sentenceLevelAdapter == null) {
+            adapter = sentenceLevelAdapter
+            if (adapter == null) {
                 val localeString = getLocale()
-                if (!TextUtils.isEmpty(localeString)) {
-                    sentenceLevelAdapter = SentenceLevelAdapter(resources, localeString!!.constructLocale())
-                    mSentenceLevelAdapter = sentenceLevelAdapter
+                if (!localeString.isNullOrEmpty()) {
+                    adapter = SentenceLevelAdapter(resources, localeString.constructLocale())
+                    sentenceLevelAdapter = adapter
                 }
             }
         }
-        if (sentenceLevelAdapter == null) {
-            return SentenceLevelAdapter.getEmptySentenceSuggestionsInfo()
+        if (adapter == null) {
+            return SentenceLevelAdapter.emptySentenceSuggestionsInfo
         }
         val infosSize = textInfos.size
         val retval = arrayOfNulls<SentenceSuggestionsInfo>(infosSize)
         for (i in 0..<infosSize) {
-            val textInfoParams = sentenceLevelAdapter.getSplitWords(textInfos[i])
-            val items = textInfoParams.mItems
+            val textInfoParams = adapter.getSplitWords(textInfos[i])
+            val items = textInfoParams.items
             val itemsSize = items.size
             val splitTextInfos = Array(itemsSize) { items[it].textInfo }
             retval[i] = SentenceLevelAdapter.reconstructSuggestions(

@@ -31,20 +31,20 @@ class StatsUtilsManager {
     }
 
     companion object {
-        private val sInstance = StatsUtilsManager()
-        private var sTestInstance: StatsUtilsManager? = null
+        private val instance = StatsUtilsManager()
+        private var testInstance: StatsUtilsManager? = null
 
         /**
          * @return the singleton instance of {@link StatsUtilsManager}.
          */
         @JvmStatic
         fun getInstance(): StatsUtilsManager {
-            return sTestInstance ?: sInstance
+            return testInstance ?: instance
         }
 
         @JvmStatic
         fun setTestInstance(testInstance: StatsUtilsManager?) {
-            sTestInstance = testInstance
+            this.testInstance = testInstance
         }
     }
 }

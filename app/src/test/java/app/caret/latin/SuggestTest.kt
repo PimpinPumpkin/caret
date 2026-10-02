@@ -617,8 +617,8 @@ class SuggestTest {
 
         suggest.clearNextWordSuggestionsCache()
         return suggest.getSuggestedWords(
-            wc, NgramContext.EMPTY_PREV_WORDS_INFO, Keyboard(params), Settings.getValues().settingsValuesForSuggestion,
-            Settings.getValues().autoCorrectEnabled, 0, 0
+            wc, NgramContext.EMPTY_PREV_WORDS_INFO, Keyboard(params), Settings.values.settingsValuesForSuggestion,
+            Settings.values.autoCorrectEnabled, 0, 0
         )
     }
 
@@ -628,7 +628,7 @@ class SuggestTest {
             putFloat(Settings.PREF_AUTO_CORRECT_CONFIDENCE, autoCorrectThreshold)
             putBoolean(Settings.PREF_MORE_AUTO_CORRECTION, true)
         }
-        suggest.setAutoCorrectionThreshold(Settings.getValues().autoCorrectionThreshold)
+        suggest.setAutoCorrectionThreshold(Settings.values.autoCorrectionThreshold)
     }
 
     private fun shouldBeAutoCorrected(word: String, // typed word

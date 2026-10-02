@@ -246,8 +246,8 @@ class RichInputMethodManager private constructor() {
 
         fun canSwitchLanguage(): Boolean {
             if (!isInitialized()) return false
-            if (Settings.getValues().languageSwitchKeyToOtherSubtypes && instance.hasMultipleEnabledSubtypesInThisIme(false)) return true
-            if (Settings.getValues().languageSwitchKeyToOtherImes && instance.imm.enabledInputMethodList.size > 1) return true
+            if (Settings.values.languageSwitchKeyToOtherSubtypes && instance.hasMultipleEnabledSubtypesInThisIme(false)) return true
+            if (Settings.values.languageSwitchKeyToOtherImes && instance.imm.enabledInputMethodList.size > 1) return true
             return false
         }
     }

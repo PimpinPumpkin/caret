@@ -114,7 +114,7 @@ class KeyboardLayoutSet internal constructor(private val context: Context, priva
         lateinit var subtype: RichInputMethodSubtype
         var settingsValues: SettingsValues? = null
         // When the device is still locked, features like showing the IME setting app need to be locked down.
-        var deviceLocked = Settings.getValues().isLocked
+        var deviceLocked = Settings.values.isLocked
         var isSpellChecker = false
         var keyboardWidth = 0
         var keyboardHeight = 0
@@ -178,9 +178,9 @@ class KeyboardLayoutSet internal constructor(private val context: Context, priva
                 val builder = Builder(context, ei, null)
                 builder.params.mode = KeyboardMode.TEXT
                 builder.params.emojiSearchAvailable = getLocalesWithEmojiDicts(context).isNotEmpty()
-                val width = ResourceUtils.getKeyboardWidth(context, Settings.getValues())
+                val width = ResourceUtils.getKeyboardWidth(context, Settings.values)
                 // actually the keyboard does not have full height, but at this point we use it to get correct key heights
-                val height = ResourceUtils.getKeyboardHeight(context.resources, Settings.getValues())
+                val height = ResourceUtils.getKeyboardHeight(context.resources, Settings.values)
                 builder.setKeyboardGeometry(width, height)
                 builder.setSubtype(getInstance().currentSubtype)
                 return builder.build()
@@ -199,7 +199,7 @@ class KeyboardLayoutSet internal constructor(private val context: Context, priva
                     }
                     InputType.TYPE_CLASS_PHONE -> KeyboardMode.PHONE
                     InputType.TYPE_CLASS_TEXT ->
-                        if (!Settings.getValues().urlEmailLayout) KeyboardMode.TEXT
+                        if (!Settings.values.urlEmailLayout) KeyboardMode.TEXT
                         else if (InputTypeUtils.isEmailVariation(variation)) KeyboardMode.EMAIL
                         else if (variation == InputType.TYPE_TEXT_VARIATION_URI) KeyboardMode.URL
                         else KeyboardMode.TEXT

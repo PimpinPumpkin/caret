@@ -26,8 +26,8 @@ import java.util.Locale
 object LayoutUtilsCustom {
 
     fun checkLayout(layoutContent: String, context: Context): Boolean {
-        if (Settings.getValues() == null)
-            Settings.getInstance().loadSettings(context)
+        if (Settings.values == null)
+            Settings.instance.loadSettings(context)
         val params = KeyboardParams()
         params.id = KeyboardLayoutSet.getFakeKeyboardId(KeyboardElement.ALPHABET)
         params.popupKeyOrder.add(POPUP_KEYS_LAYOUT)

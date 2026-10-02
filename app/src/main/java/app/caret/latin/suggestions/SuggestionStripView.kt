@@ -93,7 +93,7 @@ class SuggestionStripView(context: Context, attrs: AttributeSet?, defStyle: Int)
         inflater.inflate(R.layout.suggestions_strip, this)
         moreSuggestionsContainer = inflater.inflate(R.layout.more_suggestions, null)
 
-        val colors = Settings.getValues().mColors
+        val colors = Settings.values.colors
         colors.setBackground(this, ColorType.STRIP_BACKGROUND)
         repeat(SuggestedWords.MAX_SUGGESTIONS) {
             val word = TextView(context, null, R.attr.suggestionWordStyle)
@@ -132,7 +132,7 @@ class SuggestionStripView(context: Context, attrs: AttributeSet?, defStyle: Int)
     )
 
     init {
-        val colors = Settings.getValues().mColors
+        val colors = Settings.values.colors
 
         // expand key
         // weird way of setting size (default is config_suggestions_strip_edge_key_width)
@@ -150,7 +150,7 @@ class SuggestionStripView(context: Context, attrs: AttributeSet?, defStyle: Int)
         enabledToolKeyBackground.gradientType = GradientDrawable.RADIAL_GRADIENT
         enabledToolKeyBackground.gradientRadius = resources.getDimensionPixelSize(R.dimen.config_suggestions_strip_height) / 2.1f
 
-        val toolbarMode = if (isGone) ToolbarMode.HIDDEN else Settings.getValues().toolbarMode
+        val toolbarMode = if (isGone) ToolbarMode.HIDDEN else Settings.values.toolbarMode
         if (toolbarMode == ToolbarMode.TOOLBAR_KEYS) {
             setToolbarVisibility(true)
         }
@@ -182,7 +182,7 @@ class SuggestionStripView(context: Context, attrs: AttributeSet?, defStyle: Int)
                 pinnedKeys.addView(button, pinnedKeys.childCount - if (pinnedKeys.findViewWithTag<View>(ToolbarKey.VOICE) != null) 1 else 0)
             }
             val pinnedKeyInToolbar = toolbar.findViewWithTag<View>(pinnedKey)
-            if (pinnedKeyInToolbar != null && Settings.getValues().quickPinToolbarKeys)
+            if (pinnedKeyInToolbar != null && Settings.values.quickPinToolbarKeys)
                 pinnedKeyInToolbar.background = enabledToolKeyBackground
         }
         toolbarContainer.doOnNextLayout {
@@ -206,7 +206,7 @@ class SuggestionStripView(context: Context, attrs: AttributeSet?, defStyle: Int)
                 val dy = me.y - down.y
                 val dx = me.x - down.x
 
-                if (Settings.getValues().toolbarSwipeDownToHide && dy > 50.dpToPx(resources) && abs(dy) > abs(dx)) {
+                if (Settings.values.toolbarSwipeDownToHide && dy > 50.dpToPx(resources) && abs(dy) > abs(dx)) {
                     listener.onSwipeDownOnToolbar()
                     return true
                 }
@@ -231,7 +231,7 @@ class SuggestionStripView(context: Context, attrs: AttributeSet?, defStyle: Int)
 
     fun setRtl(isRtlLanguage: Boolean) {
         val newLayoutDirection: Int
-        if (!Settings.getValues().varToolbarDirection)
+        if (!Settings.values.varToolbarDirection)
             newLayoutDirection = LAYOUT_DIRECTION_LOCALE
         else {
             newLayoutDirection = if (isRtlLanguage) LAYOUT_DIRECTION_RTL else LAYOUT_DIRECTION_LTR
@@ -282,7 +282,7 @@ class SuggestionStripView(context: Context, attrs: AttributeSet?, defStyle: Int)
 
             val closeButton = createToolbarKey(context, ToolbarKey.CLOSE_HISTORY)
             closeButton.layoutParams = toolbarKeyLayoutParams
-            setupKey(closeButton, Settings.getValues().mColors)
+            setupKey(closeButton, Settings.values.colors)
             closeButton.setOnClickListener {
                 listener.removeExternalSuggestions()
             }
@@ -291,7 +291,7 @@ class SuggestionStripView(context: Context, attrs: AttributeSet?, defStyle: Int)
             suggestionsStrip.addView(view)
         }
 
-        if (Settings.getValues().autoHideToolbar) setToolbarVisibility(false)
+        if (Settings.values.autoHideToolbar) setToolbarVisibility(false)
     }
 
     fun setMoreSuggestionsHeight(remainingHeight: Int) {
@@ -382,7 +382,7 @@ class SuggestionStripView(context: Context, attrs: AttributeSet?, defStyle: Int)
 
     private fun onLongClickToolbarKey(view: View) {
         val tag = view.tag as? ToolbarKey ?: return
-        if (!Settings.getValues().quickPinToolbarKeys || view.parent === pinnedKeys) {
+        if (!Settings.values.quickPinToolbarKeys || view.parent === pinnedKeys) {
             onLongClickToolbarKey(view) { code, isRepeat -> listener.onCodeInput(code, Constants.SUGGESTION_STRIP_COORDINATE, Constants.SUGGESTION_STRIP_COORDINATE, isRepeat) }
         } else if (view.parent === toolbar) {
             AudioAndHapticFeedbackManager.getInstance().performHapticFeedback(this, HapticEvent.KEY_LONG_PRESS)
@@ -410,7 +410,7 @@ class SuggestionStripView(context: Context, attrs: AttributeSet?, defStyle: Int)
         }
         if (showIcon) {
             val icon = KeyboardIconsSet.instance.getNewDrawable(KeyboardIconsSet.NAME_BIN, context)!!
-            Settings.getValues().mColors.setColor(icon, ColorType.REMOVE_SUGGESTION_ICON)
+            Settings.values.colors.setColor(icon, ColorType.REMOVE_SUGGESTION_ICON)
             val w = icon.intrinsicWidth
             val h = icon.intrinsicHeight
             wordView.setCompoundDrawablesWithIntrinsicBounds(icon, null, null, null)
@@ -464,7 +464,8 @@ class SuggestionStripView(context: Context, attrs: AttributeSet?, defStyle: Int)
         val info = suggestedWords.getInfo(index)
         if (info.word != word) return
 
-        val text = info.sourceDict!!.dictType + ":" + info.sourceDict!!.locale
+        val sourceDict = info.sourceDict!!
+        val text = sourceDict.dictType + ":" + sourceDict.locale
         if (isShowingMoreSuggestionPanel) {
             moreSuggestionsView.dismissPopupKeysPanel()
         }
@@ -491,7 +492,7 @@ class SuggestionStripView(context: Context, attrs: AttributeSet?, defStyle: Int)
         suggestionsStrip.isVisible = true
 
         // Show the toolbar if no suggestions are left and the "Auto show toolbar" setting is enabled
-        if (this.suggestedWords.isEmpty && Settings.getValues().autoShowToolbar) {
+        if (this.suggestedWords.isEmpty && Settings.values.autoShowToolbar) {
             setToolbarVisibility(true)
         }
     }
@@ -517,7 +518,7 @@ class SuggestionStripView(context: Context, attrs: AttributeSet?, defStyle: Int)
     }
 
     fun updateVoiceKey() {
-        val show = Settings.getValues().showsVoiceInputKey
+        val show = Settings.values.showsVoiceInputKey
         toolbar.findViewWithTag<View>(ToolbarKey.VOICE)?.isVisible = show
         pinnedKeys.findViewWithTag<View>(ToolbarKey.VOICE)?.isVisible = show
         pinnedKeysStart.findViewWithTag<View>(ToolbarKey.VOICE)?.isVisible = show
@@ -525,7 +526,7 @@ class SuggestionStripView(context: Context, attrs: AttributeSet?, defStyle: Int)
 
     private fun updateKeys() {
         updateVoiceKey()
-        val settingsValues = Settings.getValues()
+        val settingsValues = Settings.values
 
         val toolbarIsExpandable = settingsValues.toolbarMode == ToolbarMode.EXPANDABLE
         if (settingsValues.incognitoModeEnabled) {
@@ -554,7 +555,7 @@ class SuggestionStripView(context: Context, attrs: AttributeSet?, defStyle: Int)
         copy.setImageDrawable(original.drawable)
         copy.layoutParams = original.layoutParams
         copy.isActivated = original.isActivated
-        setupKey(copy, Settings.getValues().mColors)
+        setupKey(copy, Settings.values.colors)
         pinnedKeys.addView(copy)
     }
 

@@ -981,7 +981,7 @@ class InputLogic(
     private fun handleNonFunctionalEvent(event: Event, inputTransaction: InputTransaction, handler: LatinIME.UIHandler) {
         inputTransaction.setDidAffectContents()
         if (event.codePoint == Constants.CODE_ENTER) {
-            val editorInfo = getCurrentInputEditorInfo()
+            val editorInfo = currentInputEditorInfo
             val imeOptionsActionId = InputTypeUtils.getImeOptionsActionIdFromEditorInfo(editorInfo)
             if (InputTypeUtils.IME_ACTION_CUSTOM_LABEL == imeOptionsActionId) {
                 // Either we have an actionLabel and we should performEditorAction with
@@ -1197,7 +1197,7 @@ class InputLogic(
 
         if (swapWeakSpace && trySwapSwapperAndSpace(event, inputTransaction)) {
             spaceState = SpaceState.WEAK
-        } else if ((settingsValues.mInputAttributes.inputType and InputType.TYPE_MASK_CLASS) != InputType.TYPE_CLASS_TEXT
+        } else if ((settingsValues.inputAttributes.inputType and InputType.TYPE_MASK_CLASS) != InputType.TYPE_CLASS_TEXT
                 && codePoint >= '0'.code && codePoint <= '9'.code) {
             // weird issue when committing text: https://github.com/HeliBorg/HeliBoard/issues/585
             // but at the same time we don't always want to do it for numbers because it might interfere with url detection
@@ -1417,7 +1417,7 @@ class InputLogic(
         val result: BackspaceResult
         if (connection.hasSelection()) {
             result = backspaceSelection(settingsValues)
-        } else if (settingsValues.mInputAttributes.isTypeNull
+        } else if (settingsValues.inputAttributes.isTypeNull
                 || Constants.NOT_A_CURSOR_POSITION == connection.expectedSelectionEnd) {
             result = backspaceWithKeyEvents(settingsValues, currentKeyboardScript)
         } else {
@@ -1584,7 +1584,7 @@ class InputLogic(
             //  To make this more interesting, web browsers, and apps that are basically
             // browsers under the hood, in too many cases don't understand "deleteSurroundingText".
             // So we try to send a backspace keypress instead.
-            if ((getCurrentInputEditorInfo()!!.inputType and InputType.TYPE_MASK_VARIATION)
+            if ((currentInputEditorInfo!!.inputType and InputType.TYPE_MASK_VARIATION)
                     == InputType.TYPE_TEXT_VARIATION_WEB_EDIT_TEXT)
                 sendDownUpKeyEvent(KeyEvent.KEYCODE_DEL)
             else connection.deleteTextBeforeCursor(1)
@@ -1633,7 +1633,7 @@ class InputLogic(
                 && settingsValues.spacingAndPunctuations.currentLanguageHasSpaces) {
             val range = connection.getWordRangeAtCursor(settingsValues.spacingAndPunctuations, currentKeyboardScript)
             if (range != null) {
-                return range.mWord.toString()
+                return range.word.toString()
             }
         }
         return ""
@@ -1800,7 +1800,7 @@ class InputLogic(
      * @param settingsValues The current settings values.
      */
     private fun performRecapitalization(settingsValues: SettingsValues) {
-        if (!connection.hasSelection() || !recapitalizeStatus.isEnabled()) {
+        if (!connection.hasSelection() || !recapitalizeStatus.isEnabled) {
             return // No selection or recapitalize is disabled for now
         }
         val selectionStart = connection.expectedSelectionStart
@@ -1813,11 +1813,11 @@ class InputLogic(
             return
         }
         // If we have a recapitalize in progress, use it; otherwise, start a new one.
-        if (!recapitalizeStatus.isStarted()
+        if (!recapitalizeStatus.isStarted
                 || !recapitalizeStatus.isSetAt(selectionStart, selectionEnd)) {
             val selectedText = connection.getSelectedText(0 /* flags, 0 for no styles */)
             if (TextUtils.isEmpty(selectedText)) return // Race condition with the input connection
-            recapitalizeStatus.start(selectedText.toString(), selectionStart, settingsValues.mLocale,
+            recapitalizeStatus.start(selectedText.toString(), selectionStart, settingsValues.locale,
                     settingsValues.spacingAndPunctuations.sortedWordSeparators)
         }
         connection.finishComposingText()
@@ -1958,7 +1958,7 @@ class InputLogic(
                 // If we are currently in a batch input, we must not resume suggestions, or the result
                 // of the batch input will replace the new composition. This may happen in the corner case
                 // that the app moves the cursor on its own accord during a batch input.
-                || inputLogicHandler.isInBatchInput()
+                || inputLogicHandler.isInBatchInput
                 // If the cursor is not touching a word, or if there is a selection, return right away.
                 || connection.hasSelection()
                 // If we don't know the cursor location, return.
@@ -1996,12 +1996,12 @@ class InputLogic(
         }
         // If for some strange reason (editor bug or so) we measure the text before the cursor as
         // longer than what the entire text is supposed to be, the safe thing to do is bail out.
-        if (range.mHasUrlSpans) return
+        if (range.hasUrlSpans) return
         // If there are links, we don't resume suggestions. Making
         // edits to a linkified text through batch commands would ruin the URL spans, and unless
         // we take very complicated steps to preserve the whole link, we can't do things right so
         // we just do not resume because it's safer.
-        if (!isResumableWord(settingsValues, range.mWord.toString())) {
+        if (!isResumableWord(settingsValues, range.word.toString())) {
             suggestionStripViewAccessor.setNeutralSuggestionStrip()
             // "unselect" the previous text
             connection.finishComposingText()
@@ -2011,11 +2011,11 @@ class InputLogic(
     }
 
     private fun restartSuggestions(range: TextRange) {
-        val numberOfCharsInWordBeforeCursor = range.getNumberOfCharsInWordBeforeCursor()
+        val numberOfCharsInWordBeforeCursor = range.numberOfCharsInWordBeforeCursor
         val expectedCursorPosition = connection.expectedSelectionStart
         if (numberOfCharsInWordBeforeCursor > expectedCursorPosition) return
         val suggestions = ArrayList<SuggestedWordInfo>()
-        val typedWordString = range.mWord.toString()
+        val typedWordString = range.word.toString()
         val typedWordInfo = SuggestedWordInfo(typedWordString,
                 "" /* prevWordsContext */, SuggestedWords.MAX_SUGGESTIONS + 1,
                 SuggestedWordInfo.KIND_TYPED, Dictionary.DICTIONARY_USER_TYPED,
@@ -2040,7 +2040,7 @@ class InputLogic(
         wordComposer.setComposingWord(codePoints, latinIME.getCoordinatesForCurrentKeyboard(codePoints))
         wordComposer.setCursorPositionWithinWord(typedWordString.codePointCount(0, numberOfCharsInWordBeforeCursor))
         connection.setComposingRegion(expectedCursorPosition - numberOfCharsInWordBeforeCursor,
-                expectedCursorPosition + range.getNumberOfCharsInWordAfterCursor())
+                expectedCursorPosition + range.numberOfCharsInWordAfterCursor)
         if (suggestions.size <= 1) {
             // If there weren't any suggestion spans on this word, suggestions#size() will be 1
             // if shouldIncludeResumedWordInSuggestions is true, 0 otherwise. In this case, we
@@ -2170,7 +2170,7 @@ class InputLogic(
             }
         }
         // Add the suggestion list to the list of suggestions.
-        textToCommit.setSpan(SuggestionSpan(latinIME, settingsValues.mLocale,
+        textToCommit.setSpan(SuggestionSpan(latinIME, settingsValues.locale,
                 suggestions.toTypedArray(), 0, null),
                 0, lastCharIndex, 0)
         return textToCommit
@@ -2211,7 +2211,7 @@ class InputLogic(
     fun getCurrentAutoCapsState(settingsValues: SettingsValues): Int {
         if (!settingsValues.autoCap) return Constants.TextUtils.CAP_MODE_OFF
 
-        val ei = getCurrentInputEditorInfo()
+        val ei = currentInputEditorInfo
         if (ei == null) return Constants.TextUtils.CAP_MODE_OFF
         val inputType = ei.inputType
         // Warning: this depends on spaceState, which may not be the most current value. If
@@ -2221,21 +2221,20 @@ class InputLogic(
     }
 
     fun getCurrentRecapitalizeState(): RecapitalizeMode? {
-        if (!recapitalizeStatus.isStarted()
+        if (!recapitalizeStatus.isStarted
                 || !recapitalizeStatus.isSetAt(connection.expectedSelectionStart,
                         connection.expectedSelectionEnd)) {
             // Not recapitalizing at the moment
             return null
         }
-        return recapitalizeStatus.getCurrentMode()
+        return recapitalizeStatus.currentMode
     }
 
     /**
      * @return the editor info for the current editor
      */
-    private fun getCurrentInputEditorInfo(): EditorInfo? {
-        return latinIME.getCurrentInputEditorInfo()
-    }
+    private val currentInputEditorInfo: EditorInfo?
+        get() = latinIME.getCurrentInputEditorInfo()
 
     /**
      * Get n-gram context from the nth previous word before the cursor as context
@@ -2426,7 +2425,7 @@ class InputLogic(
 
     private fun textBeforeCursorMayBeUrlOrSimilar(settingsValues: SettingsValues, forAutoSpace: Boolean): Boolean {
         // URL / mail field and no space -> may be URL
-        if (InputTypeUtils.isUriOrEmailType(settingsValues.mInputAttributes.inputType) &&
+        if (InputTypeUtils.isUriOrEmailType(settingsValues.inputAttributes.inputType) &&
                 // we never want to commit the first part of the url, but we want to insert autospace if text might be a normal word
                 (if (forAutoSpace) connection.nonWordCodePointAndNoSpaceBeforeCursor(settingsValues.spacingAndPunctuations) // avoid detecting URL if it could be a word
                 else !connection.spaceBeforeCursor()))
@@ -2654,7 +2653,7 @@ class InputLogic(
             searchForEmojiInline(sequenceNumber, callback)
             return
         }
-        val settingsValues = Settings.getValues()
+        val settingsValues = Settings.values
         wordComposer.adviseCapitalizedModeBeforeFetchingSuggestions(
                 getActualCapsMode(settingsValues, KeyboardSwitcher.getInstance().getKeyboardCapsMode()))
         try {
@@ -2734,9 +2733,8 @@ class InputLogic(
      * underlying editor.
      * @return An object for sending private commands to the underlying editor.
      */
-    fun getPrivateCommandPerformer(): PrivateCommandPerformer {
-        return connection
-    }
+    val privateCommandPerformer: PrivateCommandPerformer
+        get() = connection
 
     /**
      * Gets the expected index of the first char of the composing span within the editor's text.
@@ -2766,9 +2764,8 @@ class InputLogic(
      */
     // TODO: try and see if we can get rid of this method. Ideally the users of this class should
     // never need to know this.
-    fun getComposingLength(): Int {
-        return wordComposer.size()
-    }
+    val composingLength: Int
+        get() = wordComposer.size()
 
     private fun paste(packageName: String) {
         // some apps ignore KeyEvent.KEYCODE_PASTE, other apps ignore CRTL+V
@@ -2806,7 +2803,7 @@ class InputLogic(
 
     private fun setInlineEmojiSearchAction(on: Boolean) {
         if (on != isInlineEmojiSearchAction()) {
-            KeyboardSwitcher.getInstance().loadKeyboard(latinIME.getCurrentInputEditorInfo(), Settings.getValues(),
+            KeyboardSwitcher.getInstance().loadKeyboard(latinIME.getCurrentInputEditorInfo(), Settings.values,
                             latinIME.getCurrentAutoCapsState(), latinIME.getCurrentRecapitalizeState(),
                             if (on) KeyboardLayoutSet.InternalAction(KeyCode.INLINE_EMOJI_SEARCH_DONE,"!icon/close_history") else null)
         }
@@ -2861,7 +2858,7 @@ class InputLogic(
     }
 
     fun updateEmojiDictionary(locale: Locale) {
-        if (Settings.getValues().inlineEmojiSearch && Settings.getValues().needsToLookupSuggestions() && ! latinIME.isEmojiSearch()) {
+        if (Settings.values.inlineEmojiSearch && Settings.values.needsToLookupSuggestions() && ! latinIME.isEmojiSearch()) {
             val facilitator = emojiDictionaryFacilitator
             if (facilitator == null || ! facilitator.isForLocale(locale)) {
                 closeEmojiDictionary()
@@ -2978,7 +2975,7 @@ class InputLogic(
                 return null
             }
 
-            if (markerIndex > 0 && ! isValidInlineEmojiSearchPreviousChar(text.codePointAt(markerIndex - 1), Settings.getValues())) {
+            if (markerIndex > 0 && ! isValidInlineEmojiSearchPreviousChar(text.codePointAt(markerIndex - 1), Settings.values)) {
                 return null
             }
 

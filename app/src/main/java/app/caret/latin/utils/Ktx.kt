@@ -134,9 +134,9 @@ fun InputMethodService.updateSoftInputWindowLayoutParameters(inputView: View?) {
         ViewGroup.LayoutParams.WRAP_CONTENT
     else
         ViewGroup.LayoutParams.MATCH_PARENT
-    val inputArea = window.findViewById<View?>(R.id.inputArea)
-    ViewLayoutUtils.updateLayoutHeightOf(inputArea!!, layoutHeight)
-    ViewLayoutUtils.updateLayoutGravityOf(inputArea!!, Gravity.BOTTOM)
+    val inputArea = window.findViewById<View?>(R.id.inputArea)!!
+    ViewLayoutUtils.updateLayoutHeightOf(inputArea, layoutHeight)
+    ViewLayoutUtils.updateLayoutGravityOf(inputArea, Gravity.BOTTOM)
     ViewLayoutUtils.updateLayoutHeightOf(inputView, layoutHeight)
 }
 

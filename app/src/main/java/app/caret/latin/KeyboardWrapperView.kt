@@ -117,12 +117,12 @@ class KeyboardWrapperView @JvmOverloads constructor(
                     val changePercent = 2 * sign * (x - motionEvent.rawX) / context.resources.displayMetrics.density
                     if (abs(changePercent) < 1) return@setOnTouchListener true
                     x = motionEvent.rawX
-                    val landscape = Settings.getValues().displayOrientation == Configuration.ORIENTATION_LANDSCAPE
-                    val split = Settings.getValues().isSplitKeyboardEnabled
+                    val landscape = Settings.values.displayOrientation == Configuration.ORIENTATION_LANDSCAPE
+                    val split = Settings.values.isSplitKeyboardEnabled
                     val oldScale = Settings.readOneHandedModeScale(context.prefs(), landscape, split, FoldableUtils.isFolded)
                     val newScale = (oldScale + changePercent / 100f).coerceAtMost(2.5f).coerceAtLeast(0.5f)
                     if (newScale == oldScale) return@setOnTouchListener true
-                    Settings.getInstance().writeOneHandedModeScale(newScale)
+                    Settings.instance.writeOneHandedModeScale(newScale)
                     KeyboardSwitcher.getInstance().setOneHandedModeEnabled(true, true)
                 }
                 else -> x = 0f
@@ -130,7 +130,7 @@ class KeyboardWrapperView @JvmOverloads constructor(
             true
         }
 
-        val colors = Settings.getValues().mColors
+        val colors = Settings.values.colors
         colors.setColor(stopOneHandedModeBtn, ColorType.ONE_HANDED_MODE_BUTTON)
         colors.setColor(switchOneHandedModeBtn, ColorType.ONE_HANDED_MODE_BUTTON)
         colors.setColor(resizeOneHandedModeBtn, ColorType.ONE_HANDED_MODE_BUTTON)
@@ -187,7 +187,7 @@ class KeyboardWrapperView @JvmOverloads constructor(
                 keyboardView.measuredHeight
         )
 
-        val scale = Settings.getValues().keyboardHeightScale
+        val scale = Settings.values.keyboardHeightScale
         // scale one-handed mode button height if keyboard height scale is < 80%
         val heightScale = if (scale < 0.8f) scale + 0.2f else 1f
         val buttonsLeft = if (isLeftGravity) keyboardView.measuredWidth else 0

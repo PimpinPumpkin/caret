@@ -6,31 +6,30 @@ package app.caret.latin.utils
  * Tokenizes strings by groupings of non-space characters, making them iterable. Note that letters,
  * punctuations, etc. are all treated the same by this construct.
  */
-class SpacedTokens(phrase: String) : Iterable<String> {
-    private val mPhrase = phrase
+class SpacedTokens(private val phrase: String) : Iterable<String> {
     private val length = phrase.length
-    private val mStartPos = phrase.indexOfFirst { !Character.isWhitespace(it) }
+    private val startPos = phrase.indexOfFirst { !Character.isWhitespace(it) }
     // the iterator should start at the first non-whitespace character
 
     override fun iterator() = object : Iterator<String> {
-        private var startPos = mStartPos
+        private var tokenStart = startPos
 
         override fun hasNext(): Boolean {
-            return startPos < length && startPos != -1
+            return tokenStart < length && tokenStart != -1
         }
 
         override fun next(): String {
-            var endPos = startPos
+            var endPos = tokenStart
 
             do if (++endPos >= length) break
-            while (!Character.isWhitespace(mPhrase[endPos]))
-            val word = mPhrase.substring(startPos, endPos)
+            while (!Character.isWhitespace(phrase[endPos]))
+            val word = phrase.substring(tokenStart, endPos)
 
             if (endPos < length) {
                 do if (++endPos >= length) break
-                while (Character.isWhitespace(mPhrase[endPos]))
+                while (Character.isWhitespace(phrase[endPos]))
             }
-            startPos = endPos
+            tokenStart = endPos
 
             return word
         }

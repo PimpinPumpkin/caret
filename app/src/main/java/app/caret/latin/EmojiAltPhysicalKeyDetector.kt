@@ -152,7 +152,7 @@ class EmojiAltPhysicalKeyDetector(resources: Resources) {
         private const val DEBUG = false
 
         private fun shouldProcessEvent(keyEvent: KeyEvent): Boolean {
-            if (!Settings.getValues().enableEmojiAltPhysicalKey) {
+            if (!Settings.values.enableEmojiAltPhysicalKey) {
                 // The feature is disabled.
                 if (DEBUG) {
                     Log.d(TAG, "shouldProcessEvent(): Disabled")

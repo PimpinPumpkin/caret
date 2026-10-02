@@ -691,7 +691,7 @@ private object AppUpgrade {
                 }
             }
             prefs.edit {
-                if (!prefs.getBoolean("narrow_key_gaps", false) && !Settings.getInstance().isTablet()) {
+                if (!prefs.getBoolean("narrow_key_gaps", false) && !Settings.instance.isTablet()) {
                     putFloat(createPrefKeyForBooleanSettings(Settings.PREF_KEY_GAP_SCALE_PREFIX, 0, 2), 1.75f)
                     putFloat(createPrefKeyForBooleanSettings(Settings.PREF_KEY_GAP_SCALE_PREFIX, 1, 2), 1.1f)
                     putFloat(createPrefKeyForBooleanSettings(Settings.PREF_KEY_GAP_SCALE_PREFIX, 2, 2), 1.75f)

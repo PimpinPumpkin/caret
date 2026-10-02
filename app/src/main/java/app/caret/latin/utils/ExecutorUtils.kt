@@ -17,16 +17,16 @@ import java.util.concurrent.TimeUnit
 class ExecutorUtils {
 
     private class ExecutorFactory(name: String) : ThreadFactory {
-        private val mName: String
+        private val name: String
 
         init {
-            mName = name
+            this.name = name
         }
 
         override fun newThread(runnable: Runnable): Thread {
             val thread = Thread(runnable, TAG)
             thread.setUncaughtExceptionHandler { thread1, ex ->
-                    Log.w(mName, runnable.javaClass.getSimpleName(), ex) }
+                    Log.w(name, runnable.javaClass.getSimpleName(), ex) }
             return thread
         }
     }
@@ -34,21 +34,17 @@ class ExecutorUtils {
     // The constructor was private in Java; Kotlin does not let the outer class call a nested
     // class's private constructor, so it is public here.
     class RunnableChain(vararg runnables: Runnable) : Runnable {
-        private val mRunnables: Array<out Runnable>
+        val runnables: Array<out Runnable>
 
         init {
             if (runnables.size == 0) {
                 throw IllegalArgumentException("Attempting to construct an empty chain")
             }
-            mRunnables = runnables
-        }
-
-        fun getRunnables(): Array<out Runnable> {
-            return mRunnables
+            this.runnables = runnables
         }
 
         override fun run() {
-            for (runnable in mRunnables) {
+            for (runnable in runnables) {
                 if (Thread.interrupted()) {
                     return
                 }
@@ -74,12 +70,12 @@ class ExecutorUtils {
             return Executors.newScheduledThreadPool(threads, ExecutorFactory(name))
         }
 
-        private var sExecutorServiceForTests: ScheduledExecutorService? = null
+        private var executorServiceForTests: ScheduledExecutorService? = null
 
         @JvmStatic
         fun setExecutorServiceForTests(
                 executorServiceForTests: ScheduledExecutorService?) {
-            sExecutorServiceForTests = executorServiceForTests
+            this.executorServiceForTests = executorServiceForTests
         }
 
         //
@@ -92,10 +88,7 @@ class ExecutorUtils {
          */
         @JvmStatic
         fun getBackgroundExecutor(name: String): ScheduledExecutorService {
-            val executorServiceForTests = sExecutorServiceForTests
-            if (executorServiceForTests != null) {
-                return executorServiceForTests
-            }
+            executorServiceForTests?.let { return it }
             return when (name) {
                 KEYBOARD -> keyboardExecutorService
                 SPELLING -> spellingExecutorService
@@ -113,7 +106,7 @@ class ExecutorUtils {
             } catch (e: InterruptedException) {
                 Log.wtf(TAG, "Failed to shut down: " + name)
             }
-            if (executorService === sExecutorServiceForTests) {
+            if (executorService === executorServiceForTests) {
                 // Don't do anything to the test service.
                 return
             }

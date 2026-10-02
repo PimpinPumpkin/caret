@@ -10,7 +10,7 @@ import kotlinx.serialization.json.Json
 
 // manages recently used emojis
 object RecentEmojis {
-    private val prefs = Settings.getCurrentContext().prefs()
+    private val prefs = Settings.currentContext.prefs()
 
     fun set(emojis: List<String>) {
         prefs.edit { putString(Settings.PREF_RECENT_EMOJIS, Json.encodeToString(emojis)) }

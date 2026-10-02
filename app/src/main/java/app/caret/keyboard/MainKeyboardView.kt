@@ -154,8 +154,8 @@ class MainKeyboardView @JvmOverloads constructor(context: Context, attrs: Attrib
         backgroundDimAlphaPaint.setAlpha(backgroundDimAlpha)
         languageOnSpacebarTextRatio = mainKeyboardViewAttr.getFraction(
                 R.styleable.MainKeyboardView_languageOnSpacebarTextRatio, 1, 1, 1.0f) *
-                Settings.getValues().fontSizeMultiplier
-        val colors: Colors = Settings.getValues().mColors
+                Settings.values.fontSizeMultiplier
+        val colors: Colors = Settings.values.colors
         languageOnSpacebarTextColor = colors.get(ColorType.SPACE_BAR_TEXT)
         languageOnSpacebarTextShadowRadius = mainKeyboardViewAttr.getFloat(
                 R.styleable.MainKeyboardView_languageOnSpacebarTextShadowRadius,
@@ -181,7 +181,7 @@ class MainKeyboardView @JvmOverloads constructor(context: Context, attrs: Attrib
         configShowPopupKeysKeyboardAtTouchedPoint = mainKeyboardViewAttr.getBoolean(
                 R.styleable.MainKeyboardView_showPopupKeysKeyboardAtTouchedPoint, false)
 
-        val gestureTrailFadeoutDuration = Settings.getValues().gestureTrailFadeoutDuration
+        val gestureTrailFadeoutDuration = Settings.values.gestureTrailFadeoutDuration
         gestureFloatingPreviewTextLingerTimeout = gestureTrailFadeoutDuration / 4
 
         gestureFloatingTextDrawingPreview = GestureFloatingTextDrawingPreview(mainKeyboardViewAttr)
@@ -669,7 +669,7 @@ class MainKeyboardView @JvmOverloads constructor(context: Context, attrs: Attrib
                 drawLanguageOnSpacebar(key, canvas, paint)
             }
             // Whether space key needs to show the "..." popup hint for special purposes
-            if (key.isLongPressEnabled && hasMultipleEnabledIMEsOrSubtypes && Settings.getValues().spaceForLangChange) {
+            if (key.isLongPressEnabled && hasMultipleEnabledIMEsOrSubtypes && Settings.values.spaceForLangChange) {
                 drawKeyPopupHint(key, canvas, paint, params)
             }
         } else if (code == KeyCode.LANGUAGE_SWITCH) {
@@ -699,7 +699,7 @@ class MainKeyboardView @JvmOverloads constructor(context: Context, attrs: Attrib
             subtype: RichInputMethodSubtype, width: Int): String {
         // Choose appropriate language name to fit into the width.
 
-        val secondaryLocales = Settings.getValues().secondaryLocales
+        val secondaryLocales = Settings.values.secondaryLocales
         // avoid showing same language twice
         val secondaryLocalesToUse = withoutDuplicateLanguages(secondaryLocales, subtype.locale.getLanguage())
         if (!secondaryLocalesToUse.isEmpty()) {
@@ -766,7 +766,7 @@ class MainKeyboardView @JvmOverloads constructor(context: Context, attrs: Attrib
         val height = key.height
         paint.setTextAlign(Align.CENTER)
         paint.setTextSize(languageOnSpacebarTextSize)
-        val customText = Settings.getValues().spaceBarText
+        val customText = Settings.values.spaceBarText
         val spaceText: String
         if (!customText.isEmpty()) {
             spaceText = customText

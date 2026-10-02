@@ -113,7 +113,7 @@ const val TAG = "emoji-search"
  * This activity is displayed in a gap created for it above the keyboard and below the host app, and disables the host app.
  */
 class EmojiSearchActivity : ComponentActivity() {
-    private val colors = Settings.getValues().mColors
+    private val colors = Settings.values.colors
     private var imeOpened = false
     private var firstSearchDone = false
     private var screenHeight by Delegates.notNull<Int>()
@@ -213,7 +213,7 @@ class EmojiSearchActivity : ComponentActivity() {
                                     hintLocales = hintLocales,
                                     platformImeOptions = PlatformImeOptions(encodePrivateImeOptions(PrivateImeOptions(heightPx)))),
                                 keyboardActions = KeyboardActions(onDone = {
-                                    if (Settings.getValues().autoCorrectEnabled) pressedKey = firstKey
+                                    if (Settings.values.autoCorrectEnabled) pressedKey = firstKey
                                     finish()
                                 }),
                                 singleLine = true,
@@ -290,7 +290,7 @@ class EmojiSearchActivity : ComponentActivity() {
         screenHeight = windowManager.defaultDisplay.height
         Log.d(TAG, "screenHeight: $screenHeight")
         hintLocales = LocaleList(DictionaryInfoUtils.getLocalesWithEmojiDicts(this).map { Locale(it.toLanguageTag()) })
-        val keyboardWidth = ResourceUtils.getKeyboardWidth(this, Settings.getValues())
+        val keyboardWidth = ResourceUtils.getKeyboardWidth(this, Settings.values)
         val layoutSet = KeyboardLayoutSet.Builder(this, null, null).setSubtype(RichInputMethodSubtype.emojiSubtype)
             .setKeyboardGeometry(keyboardWidth, EmojiLayoutParams(resources).emojiKeyboardHeight).build()
         val keyboard = DynamicGridKeyboard.ofRowCount(prefs(), layoutSet.getKeyboard(KeyboardElement.EMOJI_RECENTS),
@@ -320,9 +320,9 @@ class EmojiSearchActivity : ComponentActivity() {
                 finish()
             }
 
-            override fun getDescription(emoji: String?): String? = if (Settings.getValues().showEmojiDescriptions)
+            override fun getDescription(emoji: String?): String? = if (Settings.values.showEmojiDescriptions)
                 dictionaryFacilitator?.getWordProperty(getEmojiNeutralVersion(emoji!!))?.let {
-                    if (it.mHasShortcuts) it.mShortcutTargets[0]?.mWord else null
+                    if (it.hasShortcuts) it.shortcutTargets[0]?.word else null
                 } else null
 
             override fun onRemoveRecentsKey(key: Key) {}

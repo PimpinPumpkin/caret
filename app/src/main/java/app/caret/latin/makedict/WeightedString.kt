@@ -14,31 +14,30 @@ import java.util.Arrays
  * This represents an "attribute", that is either a bigram or a shortcut.
  */
 class WeightedString {
-    @JvmField val mWord: String
-    @JvmField var mProbabilityInfo: ProbabilityInfo
+    @JvmField val word: String
+    @JvmField var probabilityInfo: ProbabilityInfo
 
     constructor(word: String, probability: Int) : this(word, ProbabilityInfo(probability))
 
     constructor(word: String, probabilityInfo: ProbabilityInfo) {
-        mWord = word
-        mProbabilityInfo = probabilityInfo
+        this.word = word
+        this.probabilityInfo = probabilityInfo
     }
 
-    fun getProbability(): Int {
-        return mProbabilityInfo.mProbability
-    }
+    val probability: Int
+        get() = probabilityInfo.probability
 
     fun setProbability(probability: Int) {
-        mProbabilityInfo = ProbabilityInfo(probability)
+        probabilityInfo = ProbabilityInfo(probability)
     }
 
     override fun hashCode(): Int {
-        return Arrays.hashCode(arrayOf<Any>(mWord, mProbabilityInfo))
+        return Arrays.hashCode(arrayOf<Any>(word, probabilityInfo))
     }
 
     override fun equals(o: Any?): Boolean {
         if (o === this) return true
         if (o !is WeightedString) return false
-        return mWord == o.mWord && mProbabilityInfo == o.mProbabilityInfo
+        return word == o.word && probabilityInfo == o.probabilityInfo
     }
 }

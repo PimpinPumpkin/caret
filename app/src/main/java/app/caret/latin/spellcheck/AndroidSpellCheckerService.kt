@@ -52,7 +52,8 @@ class AndroidSpellCheckerService : SpellCheckerService(),
     private val keyboardCache = ConcurrentHashMap<Locale, Keyboard>()
 
     // The threshold for a suggestion to be considered "recommended".
-    private var mRecommendedThreshold = 0f
+    var recommendedThreshold = 0f
+        private set
     private lateinit var settingsValuesForSuggestion: SettingsValuesForSuggestion
 
     init {
@@ -63,17 +64,13 @@ class AndroidSpellCheckerService : SpellCheckerService(),
 
     override fun onCreate() {
         super.onCreate()
-        mRecommendedThreshold = getString(R.string.spellchecker_recommended_threshold_value).toFloat()
+        recommendedThreshold = getString(R.string.spellchecker_recommended_threshold_value).toFloat()
         val prefs = prefs()
         prefs.registerOnSharedPreferenceChangeListener(this)
         onSharedPreferenceChanged(prefs, Settings.PREF_USE_CONTACTS)
         onSharedPreferenceChanged(prefs, Settings.PREF_USE_APPS)
         val blockOffensive = prefs.getBoolean(Settings.PREF_BLOCK_POTENTIALLY_OFFENSIVE, Defaults.PREF_BLOCK_POTENTIALLY_OFFENSIVE)
         settingsValuesForSuggestion = SettingsValuesForSuggestion(blockOffensive, false)
-    }
-
-    fun getRecommendedThreshold(): Float {
-        return mRecommendedThreshold
     }
 
     override fun onSharedPreferenceChanged(prefs: SharedPreferences?, key: String?) {
@@ -160,13 +157,13 @@ class AndroidSpellCheckerService : SpellCheckerService(),
     }
 
     private fun createKeyboardForLocale(locale: Locale): Keyboard {
-        if (Settings.getValues() == null) {
+        if (Settings.values == null) {
             // creating a keyboard reads SettingsValues from Settings instance
             // maybe it would be "more correct" to create an instance of SettingsValues and use that one instead
             // but creating a global one if not existing should be fine too
             val editorInfo = EditorInfo()
             editorInfo.inputType = InputType.TYPE_CLASS_TEXT
-            Settings.getInstance().loadSettings(this, locale, InputAttributes(editorInfo, false, getPackageName()))
+            Settings.instance.loadSettings(this, locale, InputAttributes(editorInfo, false, getPackageName()))
         }
         val mainLayoutName = SubtypeSettings.getMatchingMainLayoutNameForLocale(locale)
         val subtype = SubtypeUtilsAdditional.createDummyAdditionalSubtype(locale, mainLayoutName)

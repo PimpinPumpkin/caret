@@ -78,15 +78,15 @@ class ClipboardHistoryView @JvmOverloads constructor(
         super.onMeasure(widthMeasureSpec, heightMeasureSpec)
         val res = context.resources
         // The main keyboard expands to the entire this {@link KeyboardView}.
-        val width = ResourceUtils.getKeyboardWidth(context, Settings.getValues()) + paddingLeft + paddingRight
-        val height = ResourceUtils.getSecondaryKeyboardHeight(res, Settings.getValues()) + paddingTop + paddingBottom
+        val width = ResourceUtils.getKeyboardWidth(context, Settings.values) + paddingLeft + paddingRight
+        val height = ResourceUtils.getSecondaryKeyboardHeight(res, Settings.values) + paddingTop + paddingBottom
         setMeasuredDimension(width, height)
     }
 
     @SuppressLint("ClickableViewAccessibility")
     private fun initialize() { // needs to be delayed for access to ClipboardStrip, which is not a child of this view
         if (this::clipboardAdapter.isInitialized) return
-        val colors = Settings.getValues().mColors
+        val colors = Settings.values.colors
         clipboardAdapter = ClipboardAdapter(clipboardLayoutParams, this).apply {
             itemBackgroundId = keyBackgroundId
             pinnedIconResId = pinIconId
@@ -155,7 +155,7 @@ class ClipboardHistoryView @JvmOverloads constructor(
 
         val params = KeyDrawParams()
         params.updateParams(clipboardLayoutParams.bottomRowKeyboardHeight, keyVisualAttr)
-        val settings = Settings.getInstance()
+        val settings = Settings.instance
         KeyboardTypeface.customTypeface()?.let { params.typeface = it }
         setupClipKey(params)
         setupBottomRowKeyboard(editorInfo, keyboardActionListener)
@@ -167,7 +167,7 @@ class ClipboardHistoryView @JvmOverloads constructor(
         }
         clipboardRecyclerView.apply {
             adapter = clipboardAdapter
-            val keyboardWidth = ResourceUtils.getKeyboardWidth(context, settings.getCurrent())
+            val keyboardWidth = ResourceUtils.getKeyboardWidth(context, settings.current)
             layoutParams.width = keyboardWidth
             // new ClipboardLayoutParams means ClipboardAdapter has wrong gaps, but that's ok (only relevant when resizing floating keyboard)
             ClipboardLayoutParams(context).setListProperties(this)
@@ -177,10 +177,10 @@ class ClipboardHistoryView @JvmOverloads constructor(
                 null, R.styleable.Keyboard, R.attr.keyboardStyle, R.style.Keyboard)
             val leftPadding = (keyboardAttr.getFraction(R.styleable.Keyboard_keyboardLeftPadding,
                 keyboardWidth, keyboardWidth, 0f)
-                    * settings.getCurrent().sidePaddingScale).toInt()
+                    * settings.current.sidePaddingScale).toInt()
             val rightPadding =  (keyboardAttr.getFraction(R.styleable.Keyboard_keyboardRightPadding,
                 keyboardWidth, keyboardWidth, 0f)
-                    * settings.getCurrent().sidePaddingScale).toInt()
+                    * settings.current.sidePaddingScale).toInt()
             keyboardAttr.recycle()
             setPadding(leftPadding, paddingTop, rightPadding, paddingBottom)
         }
@@ -223,7 +223,7 @@ class ClipboardHistoryView @JvmOverloads constructor(
         if (clipContent?.filename != null) keyboardActionListener.onContent(clipContent.getContentInfo(context))
         else keyboardActionListener.onTextInput(clipContent?.text)
         keyboardActionListener.onReleaseKey(KeyCode.NOT_SPECIFIED, false)
-        if (Settings.getValues().alphaAfterClipHistoryEntry)
+        if (Settings.values.alphaAfterClipHistoryEntry)
             keyboardActionListener.onCodeInput(KeyCode.ALPHA, Constants.NOT_A_COORDINATE, Constants.NOT_A_COORDINATE, false)
     }
 
@@ -248,7 +248,7 @@ class ClipboardHistoryView @JvmOverloads constructor(
         // The setting can only be changed from a settings screen, but adding it to this listener seems necessary: https://github.com/HeliBorg/HeliBoard/pull/1903#issuecomment-3478424606
         if (::clipboardHistoryManager.isInitialized && key == Settings.PREF_CLIPBOARD_HISTORY_PINNED_FIRST) {
             // Ensure settings are reloaded first
-            Settings.getInstance().onSharedPreferenceChanged(prefs, key)
+            Settings.instance.onSharedPreferenceChanged(prefs, key)
             clipboardHistoryManager.sortHistoryEntries()
             clipboardAdapter.notifyDataSetChanged()
         }

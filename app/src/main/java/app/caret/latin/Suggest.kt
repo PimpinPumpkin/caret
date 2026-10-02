@@ -120,7 +120,7 @@ class Suggest(private val dictionaryFacilitator: DictionaryFacilitator) {
             else suggestionsContainer
 
         val inputStyle = if (resultsArePredictions) {
-            if (suggestionResults.mIsBeginningOfSentence) SuggestedWords.INPUT_STYLE_BEGINNING_OF_SENTENCE_PREDICTION
+            if (suggestionResults.isBeginningOfSentence) SuggestedWords.INPUT_STYLE_BEGINNING_OF_SENTENCE_PREDICTION
             else SuggestedWords.INPUT_STYLE_PREDICTION
         } else {
             inputStyleIfNotPrediction
@@ -131,12 +131,12 @@ class Suggest(private val dictionaryFacilitator: DictionaryFacilitator) {
         // If there is an incoming autocorrection, make sure typed word is shown, so user is able to override it.
         // Otherwise, if the relevant setting is enabled, show the typed word in the middle.
         val typedWordWasCapitalized = capitalizedTypedWord != typedWordString
-        val correctToCapitalizedWord = typedWordWasCapitalized && isCorrectionEnabled && Settings.getValues().autoCorrectCapitalizedSuggestion
+        val correctToCapitalizedWord = typedWordWasCapitalized && isCorrectionEnabled && Settings.values.autoCorrectCapitalizedSuggestion
             && !wordComposer.isCursorFrontOrMiddleOfComposingWord() && typedWordString.drop(1).none { it.isUpperCase() }
         val indexOfTypedWord = 1 + if (hasAutoCorrection) SuggestedWords.INDEX_OF_AUTO_CORRECTION else SuggestedWords.INDEX_OF_TYPED_WORD
         if (
             (hasAutoCorrection
-                || (Settings.getValues().centerSuggestionTextToEnter && !wordComposer.isResumed)
+                || (Settings.values.centerSuggestionTextToEnter && !wordComposer.isResumed)
                 || typedWordWasCapitalized
             ) && suggestionsList.size >= indexOfTypedWord && capitalizedTypedWord.isNotEmpty()) {
             if (typedWordFirstOccurrenceWordInfo != null) {
@@ -171,7 +171,7 @@ class Suggest(private val dictionaryFacilitator: DictionaryFacilitator) {
         val consideredWord = typedWordString.dropLast(trailingSingleQuotesCount)
         val firstAndTypedEmptyInfos by lazy { getEmptyWordSuggestions() }
 
-        val scoreLimit = Settings.getValues().scoreLimitForAutocorrect
+        val scoreLimit = Settings.values.scoreLimitForAutocorrect
         // We allow auto-correction if whitelisting is not required or the word is whitelisted,
         // or if the word had more than one char and was not suggested.
         val allowsToBeAutoCorrected: Boolean
@@ -221,7 +221,7 @@ class Suggest(private val dictionaryFacilitator: DictionaryFacilitator) {
             hasAutoCorrection = false
         } else {
             val firstSuggestion = firstSuggestionInContainer ?: suggestionResults.first()
-            if (suggestionResults.mFirstSuggestionExceedsConfidenceThreshold && firstOccurrenceOfTypedWordInSuggestions != 0) {
+            if (suggestionResults.firstSuggestionExceedsConfidenceThreshold && firstOccurrenceOfTypedWordInSuggestions != 0) {
                 // mFirstSuggestionExceedsConfidenceThreshold is always set to false, so currently this branch is useless
                 return true to true
             }
@@ -341,7 +341,7 @@ class Suggest(private val dictionaryFacilitator: DictionaryFacilitator) {
             BackgroundGatheringCache.addWord(wordData)
         }
 
-        val autocorrectCapitalization = addCapitalizedSuggestion && Settings.getValues().autoCorrectCapitalizedSuggestion && isCorrectionEnabled && !wordComposer.isCursorFrontOrMiddleOfComposingWord()
+        val autocorrectCapitalization = addCapitalizedSuggestion && Settings.values.autoCorrectCapitalizedSuggestion && isCorrectionEnabled && !wordComposer.isCursorFrontOrMiddleOfComposingWord()
         return SuggestedWords(suggestionsList, suggestionResults.rawSuggestions, pseudoTypedWordInfo, true,
             autocorrectCapitalization, false, inputStyle, sequenceNumber)
     }
@@ -547,7 +547,7 @@ class Suggest(private val dictionaryFacilitator: DictionaryFacilitator) {
             suggestionsContainer: ArrayList<SuggestedWordInfo>,
             nextWordSuggestions: SuggestionResults, rejected: SuggestedWordInfo?
         ): SuggestedWordInfo? {
-            if (pseudoTypedWordInfo == null || !Settings.getValues().usePersonalizedDicts
+            if (pseudoTypedWordInfo == null || !Settings.values.usePersonalizedDicts
                 || pseudoTypedWordInfo.sourceDict!!.dictType != Dictionary.TYPE_MAIN || suggestionsContainer.size < 2
             ) return pseudoTypedWordInfo
             val goodNextSuggestions = nextWordSuggestions.filter { it.score >= 170 } // we only want reasonably often typed words, value may require tuning

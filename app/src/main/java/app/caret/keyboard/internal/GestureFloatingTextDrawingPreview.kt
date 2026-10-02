@@ -42,8 +42,8 @@ class GestureFloatingTextDrawingPreview(mainKeyboardViewAttr: TypedArray) : Abst
         private val paint = Paint()
 
         init {
-            val colors = Settings.getValues().mColors
-            gesturePreviewDynamic = Settings.getValues().gestureFloatingPreviewDynamicEnabled
+            val colors = Settings.values.colors
+            gesturePreviewDynamic = Settings.values.gestureFloatingPreviewDynamicEnabled
             gesturePreviewTextSize = mainKeyboardViewAttr.getDimensionPixelSize(
                     R.styleable.MainKeyboardView_gestureFloatingPreviewTextSize, 0)
             gesturePreviewTextColor = colors.get(ColorType.KEY_TEXT)

@@ -22,10 +22,10 @@ class SuggestionResults : TreeSet<SuggestedWordInfo> {
     // TODO: Instead of a boolean , we may want to include the context of this suggestion results,
     // such as {@link NgramContext}.
     @JvmField
-    val mIsBeginningOfSentence: Boolean
+    val isBeginningOfSentence: Boolean
     @JvmField
-    val mFirstSuggestionExceedsConfidenceThreshold: Boolean
-    private val mCapacity: Int
+    val firstSuggestionExceedsConfidenceThreshold: Boolean
+    private val capacity: Int
 
     constructor(capacity: Int, isBeginningOfSentence: Boolean,
             firstSuggestionExceedsConfidenceThreshold: Boolean) :
@@ -35,18 +35,18 @@ class SuggestionResults : TreeSet<SuggestedWordInfo> {
     private constructor(comparator: Comparator<SuggestedWordInfo>, capacity: Int,
             isBeginningOfSentence: Boolean,
             firstSuggestionExceedsConfidenceThreshold: Boolean) : super(comparator) {
-        mCapacity = capacity
+        this.capacity = capacity
         if (ProductionFlags.INCLUDE_RAW_SUGGESTIONS) {
             rawSuggestions = ArrayList()
         } else {
             rawSuggestions = null
         }
-        mIsBeginningOfSentence = isBeginningOfSentence
-        mFirstSuggestionExceedsConfidenceThreshold = firstSuggestionExceedsConfidenceThreshold
+        this.isBeginningOfSentence = isBeginningOfSentence
+        this.firstSuggestionExceedsConfidenceThreshold = firstSuggestionExceedsConfidenceThreshold
     }
 
     override fun add(e: SuggestedWordInfo): Boolean {
-        if (size < mCapacity) return super.add(e)
+        if (size < capacity) return super.add(e)
         if (comparator().compare(e, last()) > 0) return false
         super.add(e)
         pollLast() // removes the last element

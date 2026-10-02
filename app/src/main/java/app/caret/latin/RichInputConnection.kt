@@ -649,7 +649,7 @@ class RichInputConnection(private val parent: InputMethodService) : PrivateComma
             if (DebugFlags.DEBUG_ENABLED)
                 Log.d(TAG, "setting composing text of length "+text.length) // don't log actual text
             ic.setComposingText(text, newCursorPosition)
-            if (!Settings.getValues().mInputAttributes.shouldShowSuggestions && text.length > 0) {
+            if (!Settings.values.inputAttributes.shouldShowSuggestions && text.length > 0) {
                 // We have a field that disables suggestions, but still committed text is set.
                 // This might lead to weird bugs (e.g. https://github.com/HeliBorg/HeliBoard/issues/225), so better do
                 // a sanity check whether the wanted text has been set.
@@ -719,7 +719,7 @@ class RichInputConnection(private val parent: InputMethodService) : PrivateComma
         if (range == null) return
         // getWordRangeAtCursor refreshed the connection and returns null when there is none,
         // so read the field again instead of using the one captured above
-        this.ic?.setSelection(expectedSelectionStart - range.getNumberOfCharsInWordBeforeCursor(), expectedSelectionStart + range.getNumberOfCharsInWordAfterCursor())
+        this.ic?.setSelection(expectedSelectionStart - range.numberOfCharsInWordBeforeCursor, expectedSelectionStart + range.numberOfCharsInWordAfterCursor)
     }
 
     fun copyText(getSelection: Boolean) {

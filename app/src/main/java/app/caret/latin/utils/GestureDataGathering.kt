@@ -118,17 +118,17 @@ object BackgroundGatheringCache {
 
         if (DEBUG) Log.i(TAG, "replace selection \"$selection\", before: \"$before\", after: \"$after\"")
         val script = RichInputMethodManager.getInstance().currentSubtypeLocale.script
-        val spacingAndPunctuations = Settings.getValues().spacingAndPunctuations
+        val spacingAndPunctuations = Settings.values.spacingAndPunctuations
         val wordAtStart = getTouchedWordRange(before, "$selection$after", script, spacingAndPunctuations)
         val wordAtEnd = getTouchedWordRange("$before$selection", after, script, spacingAndPunctuations)
-        if (DEBUG) Log.i(TAG, "at start \"${wordAtStart.mWord}\", at end \"${wordAtEnd.mWord}\"")
+        if (DEBUG) Log.i(TAG, "at start \"${wordAtStart.word}\", at end \"${wordAtEnd.word}\"")
         val trimmed = selection.trim()
         if (
-            (wordAtEnd.mWord == wordAtStart.mWord && selection in wordAtStart.mWord)
+            (wordAtEnd.word == wordAtStart.word && selection in wordAtStart.word)
             || (trimmed != selection && (wordAtStart == trimmed || wordAtEnd == trimmed)) // treat word + space like word
         ) {
             if (DEBUG) Log.i(TAG, "word or part of word selected, removing word")
-            cachedWords.removeAll { it.topSuggestion == wordAtStart.mWord || it.targetWord == wordAtStart.mWord }
+            cachedWords.removeAll { it.topSuggestion == wordAtStart.word || it.targetWord == wordAtStart.word }
         } else {
             // more than one word selected, we do nothing because deleting much is unlikely to happen because of bad gesture typing
         }
@@ -174,7 +174,7 @@ fun setUseBackgroundGathering(context: Context, editorInfo: EditorInfo): Boolean
 private fun isBackgroundGatheringUsed(context: Context, editorInfo: EditorInfo): Boolean {
     if (!JniUtils.haveGestureLib) return false
     if (!GestureDataGatheringSettings.isBackgroundGatheringEnabled(context.prefs())) return false
-    if (Settings.getValues().incognitoModeEnabled) return false
+    if (Settings.values.incognitoModeEnabled) return false
     val inputAttributes = InputAttributes(editorInfo, false, "")
     if (inputAttributes.inputType and InputType.TYPE_CLASS_TEXT == 0)
         return false // undefined (e.g. terminal apps) type should work, but will likely not allow to track corrections
@@ -247,7 +247,10 @@ class WordData(
         val dictionariesInUsedSuggestions = LinkedHashMap<Dictionary, Int>().apply { // linked because we need the order (well, not any more...)
             filteredSuggestions.forEach { if (!containsKey(it.sourceDict)) put(it.sourceDict!!, dictCount++) }
             // we always want all main known dictionaries
-            suggestions.forEach { if (!containsKey(it.sourceDict) && it.isFromKnownMainDict(context)) put(it.sourceDict!!, dictCount++) }
+            suggestions.forEach {
+                val dict = it.sourceDict
+                if (dict != null && !containsKey(dict) && it.isFromKnownMainDict(context)) put(dict, dictCount++)
+            }
         }
 
         val data = GestureData(
@@ -312,7 +315,7 @@ class WordData(
         if (activeMode)
             // active mode should be fine, the check is just an addition in case there is a bug that sets the wrong mode or dictionary facilitator
             return suggestions.all { it.sourceDict == suggestions.first().sourceDict }
-        if (Settings.getValues().incognitoModeEnabled)
+        if (Settings.values.incognitoModeEnabled)
             return false // don't save in incognito mode
         if (!GestureDataGatheringSettings.isBackgroundGatheringEnabled(context.prefs()))
             return false
@@ -352,11 +355,12 @@ class WordData(
 
 private var knownHashes: Set<String>? = null
 fun getKnownDictHashes(context: Context): Set<String> {
-    if (knownHashes == null)
-        knownHashes = context.assets.open("known_dict_hashes.txt")
-            .use { it.reader().readLines() }.filterNot { it.isBlank() || it.startsWith("#") }
-            .toHashSet()
-    return knownHashes!!
+    knownHashes?.let { return it }
+    val hashes = context.assets.open("known_dict_hashes.txt")
+        .use { it.reader().readLines() }.filterNot { it.isBlank() || it.startsWith("#") }
+        .toHashSet()
+    knownHashes = hashes
+    return hashes
 }
 
 data class GestureDataInfo(val id: Long, val targetWord: String, val timestamp: Long, val exported: Boolean, val activeMode: Boolean)

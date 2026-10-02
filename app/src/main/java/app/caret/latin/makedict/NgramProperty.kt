@@ -9,21 +9,21 @@ package app.caret.latin.makedict
 import app.caret.latin.NgramContext
 
 class NgramProperty(targetWord: WeightedString, ngramContext: NgramContext) {
-    @JvmField val mTargetWord: WeightedString
-    @JvmField val mNgramContext: NgramContext
+    @JvmField val targetWord: WeightedString
+    @JvmField val ngramContext: NgramContext
 
     init {
-        mTargetWord = targetWord
-        mNgramContext = ngramContext
+        this.targetWord = targetWord
+        this.ngramContext = ngramContext
     }
 
     override fun hashCode(): Int {
-        return mTargetWord.hashCode() xor mNgramContext.hashCode()
+        return targetWord.hashCode() xor ngramContext.hashCode()
     }
 
     override fun equals(o: Any?): Boolean {
         if (o === this) return true
         if (o !is NgramProperty) return false
-        return mTargetWord == o.mTargetWord && mNgramContext == o.mNgramContext
+        return targetWord == o.targetWord && ngramContext == o.ngramContext
     }
 }

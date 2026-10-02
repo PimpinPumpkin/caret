@@ -84,8 +84,8 @@ fun PersonalDictionaryScreen(
             }
         }
     )
-    if (selectedWord != null) {
-        EditWordDialog(selectedWord!!, locale) { selectedWord = null }
+    selectedWord?.let { word ->
+        EditWordDialog(word, locale) { selectedWord = null }
     }
     ExtendedFloatingActionButton(
         onClick = { selectedWord = Word("", null, null) },

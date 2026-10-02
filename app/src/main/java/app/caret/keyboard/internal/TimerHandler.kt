@@ -28,7 +28,7 @@ class TimerHandler(ownerInstance: DrawingProxy,
     }
 
     override fun handleMessage(msg: Message) {
-        val drawingProxy = getOwnerInstance()
+        val drawingProxy = this.ownerInstance
         if (drawingProxy == null) {
             return
         }
@@ -124,7 +124,7 @@ class TimerHandler(ownerInstance: DrawingProxy,
 
         val isTyping = isTypingState()
         removeMessages(MSG_TYPING_STATE_EXPIRED)
-        val drawingProxy = getOwnerInstance()
+        val drawingProxy = this.ownerInstance
         if (drawingProxy == null) {
             return
         }

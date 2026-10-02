@@ -53,9 +53,9 @@ import androidx.core.content.edit
 import kotlinx.serialization.json.Json
 
 class Settings : SharedPreferences.OnSharedPreferenceChangeListener {
-    private var mContext: Context? = null
-    private lateinit var mPrefs: SharedPreferences
-    private var mSettingsValues: SettingsValues? = null
+    private var context: Context? = null
+    private lateinit var prefs: SharedPreferences
+    private var settingsValues: SettingsValues? = null
     private val settingsValuesLock = ReentrantLock()
 
     private constructor() {
@@ -63,13 +63,13 @@ class Settings : SharedPreferences.OnSharedPreferenceChangeListener {
     }
 
     private fun onCreate(context: Context) {
-        mContext = context
-        mPrefs = context.prefs()
-        mPrefs.registerOnSharedPreferenceChangeListener(this)
+        this.context = context
+        prefs = context.prefs()
+        prefs.registerOnSharedPreferenceChangeListener(this)
     }
 
     fun onDestroy() {
-        mPrefs.unregisterOnSharedPreferenceChangeListener(this)
+        prefs.unregisterOnSharedPreferenceChangeListener(this)
     }
 
     override fun onSharedPreferenceChanged(prefs: SharedPreferences?, key: String?) {
@@ -77,27 +77,27 @@ class Settings : SharedPreferences.OnSharedPreferenceChangeListener {
             return
         settingsValuesLock.lock()
         try {
-            val settingsValues = mSettingsValues
-            if (settingsValues == null) {
+            val oldValues = settingsValues
+            if (oldValues == null) {
                 // TODO: Introduce a static function to register this class and ensure that
                 // loadSettings must be called before "onSharedPreferenceChanged" is called.
                 Log.w(TAG, "onSharedPreferenceChanged called before loadSettings.")
                 return
             }
             clearCustomToolbarKeyCodes()
-            loadSettings(mContext!!, settingsValues.mLocale, settingsValues.mInputAttributes)
-            StatsUtils.onLoadSettings(mSettingsValues)
+            loadSettings(context!!, oldValues.locale, oldValues.inputAttributes)
+            StatsUtils.onLoadSettings(settingsValues)
         } finally {
             settingsValuesLock.unlock()
         }
         if (PREF_ADDITIONAL_SUBTYPES == key) {
-            SubtypeSettings.reloadEnabledSubtypes(mContext!!)
+            SubtypeSettings.reloadEnabledSubtypes(context!!)
         }
     }
 
     /** convenience function for the rare situations where we need to load settings but may not have a keyboard */
     fun loadSettings(context: Context) {
-        if (mSettingsValues != null) return
+        if (settingsValues != null) return
         val locale = context.resources.configuration.locale()
         val inputAttributes = InputAttributes(EditorInfo(), false, context.packageName)
         loadSettings(context, locale, inputAttributes)
@@ -106,12 +106,12 @@ class Settings : SharedPreferences.OnSharedPreferenceChangeListener {
     fun loadSettings(context: Context, locale: Locale,
                      inputAttributes: InputAttributes) {
         settingsValuesLock.lock()
-        mContext = context
+        this.context = context
         try {
-            val prefs = mPrefs
+            val currentPrefs = prefs
             Log.i(TAG, "loadSettings")
-            mSettingsValues = runInLocale(context, locale) { ctx ->
-                SettingsValues(ctx, prefs, ctx.resources, inputAttributes)
+            settingsValues = runInLocale(context, locale) { ctx ->
+                SettingsValues(ctx, currentPrefs, ctx.resources, inputAttributes)
             }
         } finally {
             settingsValuesLock.unlock()
@@ -119,48 +119,51 @@ class Settings : SharedPreferences.OnSharedPreferenceChangeListener {
     }
 
     fun stopListener() {
-        mPrefs.unregisterOnSharedPreferenceChangeListener(this)
+        prefs.unregisterOnSharedPreferenceChangeListener(this)
     }
 
     fun startListener() {
-        mPrefs.registerOnSharedPreferenceChangeListener(this)
+        prefs.registerOnSharedPreferenceChangeListener(this)
     }
 
     // TODO: Remove this method and add proxy method to SettingsValues.
     // The return type is deliberately left to inference from Class.cast, which gives the same platform type
     // the Java method had: null before loadSettings (some callers check for that), no null check forced on
     // the many callers that do not.
-    fun getCurrent() = SettingsValues::class.java.cast(mSettingsValues)
+    val current get() = SettingsValues::class.java.cast(settingsValues)
 
     fun toggleAutoCorrect() {
-        val oldValue = mPrefs.getBoolean(PREF_AUTO_CORRECTION, Defaults.PREF_AUTO_CORRECTION)
-        mPrefs.edit().putBoolean(PREF_AUTO_CORRECTION, !oldValue).apply()
+        val oldValue = prefs.getBoolean(PREF_AUTO_CORRECTION, Defaults.PREF_AUTO_CORRECTION)
+        prefs.edit().putBoolean(PREF_AUTO_CORRECTION, !oldValue).apply()
     }
 
     fun toggleAlwaysIncognitoMode() {
-        val oldValue = mPrefs.getBoolean(PREF_ALWAYS_INCOGNITO_MODE, Defaults.PREF_ALWAYS_INCOGNITO_MODE)
-        mPrefs.edit().putBoolean(PREF_ALWAYS_INCOGNITO_MODE, !oldValue).apply()
+        val oldValue = prefs.getBoolean(PREF_ALWAYS_INCOGNITO_MODE, Defaults.PREF_ALWAYS_INCOGNITO_MODE)
+        prefs.edit().putBoolean(PREF_ALWAYS_INCOGNITO_MODE, !oldValue).apply()
     }
 
     fun writeOneHandedModeEnabled(enabled: Boolean) {
-        val landscape = mSettingsValues!!.displayOrientation == Configuration.ORIENTATION_LANDSCAPE
-        val index = findIndexOfDefaultSetting(landscape, mSettingsValues!!.isSplitKeyboardEnabled, FoldableUtils.isFolded)
+        val sv = settingsValues!!
+        val landscape = sv.displayOrientation == Configuration.ORIENTATION_LANDSCAPE
+        val index = findIndexOfDefaultSetting(landscape, sv.isSplitKeyboardEnabled, FoldableUtils.isFolded)
         val key = createPrefKeyForBooleanSettings(PREF_ONE_HANDED_MODE_PREFIX, index, 3)
-        mPrefs.edit().putBoolean(key, enabled).apply()
+        prefs.edit().putBoolean(key, enabled).apply()
     }
 
     fun writeOneHandedModeScale(scale: Float) {
-        val landscape = mSettingsValues!!.displayOrientation == Configuration.ORIENTATION_LANDSCAPE
-        val index = findIndexOfDefaultSetting(landscape, mSettingsValues!!.isSplitKeyboardEnabled, FoldableUtils.isFolded)
+        val sv = settingsValues!!
+        val landscape = sv.displayOrientation == Configuration.ORIENTATION_LANDSCAPE
+        val index = findIndexOfDefaultSetting(landscape, sv.isSplitKeyboardEnabled, FoldableUtils.isFolded)
         val key = createPrefKeyForBooleanSettings(PREF_ONE_HANDED_SCALE_PREFIX, index, 3)
-        mPrefs.edit().putFloat(key, scale).apply()
+        prefs.edit().putFloat(key, scale).apply()
     }
 
     fun writeOneHandedModeGravity(gravity: Int) {
-        val landscape = mSettingsValues!!.displayOrientation == Configuration.ORIENTATION_LANDSCAPE
-        val index = findIndexOfDefaultSetting(landscape, mSettingsValues!!.isSplitKeyboardEnabled, FoldableUtils.isFolded)
+        val sv = settingsValues!!
+        val landscape = sv.displayOrientation == Configuration.ORIENTATION_LANDSCAPE
+        val index = findIndexOfDefaultSetting(landscape, sv.isSplitKeyboardEnabled, FoldableUtils.isFolded)
         val key = createPrefKeyForBooleanSettings(PREF_ONE_HANDED_GRAVITY_PREFIX, index, 3)
-        mPrefs.edit().putInt(key, gravity).apply()
+        prefs.edit().putInt(key, gravity).apply()
     }
 
     fun writeSplitKeyboardEnabled(enabled: Boolean, isLandscape: Boolean, isFolded: Boolean) {
@@ -168,49 +171,50 @@ class Settings : SharedPreferences.OnSharedPreferenceChangeListener {
                 (if (isFolded) PREF_ENABLE_SPLIT_KEYBOARD_FOLDED_LANDSCAPE else PREF_ENABLE_SPLIT_KEYBOARD_LANDSCAPE)
             else
                 (if (isFolded) PREF_ENABLE_SPLIT_KEYBOARD_FOLDED else PREF_ENABLE_SPLIT_KEYBOARD)
-        mPrefs.edit().putBoolean(pref, enabled).apply()
+        prefs.edit().putBoolean(pref, enabled).apply()
     }
 
     fun readShowToolbarOnly(): Boolean {
-        return mSettingsValues!!.hasHardwareKeyboard
-            && mPrefs.getBoolean(PREF_SHOW_ONLY_TOOLBAR_WITH_HARDWARE_KEYBOARD, Defaults.PREF_SHOW_ONLY_TOOLBAR_WITH_HARDWARE_KEYBOARD)
+        return settingsValues!!.hasHardwareKeyboard
+            && prefs.getBoolean(PREF_SHOW_ONLY_TOOLBAR_WITH_HARDWARE_KEYBOARD, Defaults.PREF_SHOW_ONLY_TOOLBAR_WITH_HARDWARE_KEYBOARD)
     }
 
     fun isTablet(): Boolean {
-        return mContext!!.resources.getInteger(R.integer.config_screen_metrics) >= 3
+        return context!!.resources.getInteger(R.integer.config_screen_metrics) >= 3
     }
 
     @SuppressLint("DiscouragedApi")
     fun getStringResIdByName(name: String?): Int {
-        return mContext!!.resources.getIdentifier(name, "string", mContext!!.packageName)
+        val ctx = context!!
+        return ctx.resources.getIdentifier(name, "string", ctx.packageName)
     }
 
     fun getInLocale(@StringRes resId: Int, locale: Locale): String {
-        return runInLocale(mContext!!, locale) { ctx -> ctx.getString(resId) }
+        return runInLocale(context!!, locale) { ctx -> ctx.getString(resId) }
     }
 
     fun readCustomCurrencyKey(): String {
-        return mPrefs.getString(PREF_CUSTOM_CURRENCY_KEY, Defaults.PREF_CUSTOM_CURRENCY_KEY)!!
+        return prefs.getString(PREF_CUSTOM_CURRENCY_KEY, Defaults.PREF_CUSTOM_CURRENCY_KEY)!!
     }
 
     fun getCustomToolbarKeyCode(key: ToolbarKey): Int? {
-        return getCustomKeyCode(key, mPrefs)
+        return getCustomKeyCode(key, prefs)
     }
 
     fun getCustomToolbarLongpressCode(key: ToolbarKey): Int? {
-        return getCustomLongpressKeyCode(key, mPrefs)
+        return getCustomLongpressKeyCode(key, prefs)
     }
 
     fun saveSubtypeForApp(subtype: RichInputMethodSubtype, packageName: String?) {
         if (isSubtypePerApp() && !StringUtils.isEmpty(packageName)) {
-            mPrefs.edit().putString(PREF_SAVED_APP_SUBTYPE_PREFIX + packageName,
+            prefs.edit().putString(PREF_SAVED_APP_SUBTYPE_PREFIX + packageName,
                                     subtype.rawSubtype.toSettingsSubtype().toPref()).apply()
         }
     }
 
     fun getSubtypeForApp(packageName: String?): RichInputMethodSubtype? {
         if (!isSubtypePerApp() || StringUtils.isEmpty(packageName)) return null
-        val subtypePref = mPrefs.getString(PREF_SAVED_APP_SUBTYPE_PREFIX + packageName, null)
+        val subtypePref = prefs.getString(PREF_SAVED_APP_SUBTYPE_PREFIX + packageName, null)
         if (subtypePref == null) return null
         val settingsSubtype = subtypePref.toSettingsSubtype()
         var subtype = settingsSubtype.toEnabledSubtype()
@@ -219,7 +223,7 @@ class Settings : SharedPreferences.OnSharedPreferenceChangeListener {
     }
 
     private fun isSubtypePerApp(): Boolean {
-        return mPrefs.getBoolean(PREF_SAVE_SUBTYPE_PER_APP, Defaults.PREF_SAVE_SUBTYPE_PER_APP)
+        return prefs.getBoolean(PREF_SAVE_SUBTYPE_PER_APP, Defaults.PREF_SAVE_SUBTYPE_PER_APP)
     }
 
     companion object {
@@ -387,7 +391,8 @@ class Settings : SharedPreferences.OnSharedPreferenceChangeListener {
         // static cache for background images to avoid potentially slow reload on every settings reload
         private val cachedBackgroundImages = arrayOfNulls<Drawable>(4)
 
-        private val sInstance = Settings()
+        @JvmStatic
+        val instance = Settings()
 
         // preferences that are not used in SettingsValues and thus should not trigger reload when changed
         private fun reloadOnChanged(key: String): Boolean {
@@ -398,23 +403,18 @@ class Settings : SharedPreferences.OnSharedPreferenceChangeListener {
             }
         }
 
-        @JvmStatic
-        fun getInstance(): Settings {
-            return sInstance
-        }
-
         // Return type inferred from Class.cast on purpose (platform type, may be null before loadSettings),
-        // see getCurrent.
+        // see current.
         @JvmStatic
-        fun getValues() = SettingsValues::class.java.cast(sInstance.mSettingsValues)
+        val values get() = SettingsValues::class.java.cast(instance.settingsValues)
 
-        // Return type inferred from Class.cast on purpose (platform type, null before init), see getCurrent.
+        // Return type inferred from Class.cast on purpose (platform type, null before init), see current.
         @JvmStatic
-        fun getCurrentContext() = Context::class.java.cast(sInstance.mContext)
+        val currentContext get() = Context::class.java.cast(instance.context)
 
         @JvmStatic
         fun init(context: Context) {
-            sInstance.onCreate(context)
+            instance.onCreate(context)
         }
 
         @JvmStatic

@@ -181,12 +181,12 @@ class EmojiPalettesView(context: Context, attrs: AttributeSet?, defStyle: Int) :
     constructor(context: Context, attrs: AttributeSet?) : this(context, attrs, R.attr.emojiPalettesViewStyle)
 
     init {
-        colors = Settings.getValues().mColors
+        colors = Settings.values.colors
         val builder = KeyboardLayoutSet.Builder(context, null, null)
         val res = context.resources
         emojiLayoutParams = EmojiLayoutParams(res)
         builder.setSubtype(RichInputMethodSubtype.emojiSubtype)
-        builder.setKeyboardGeometry(ResourceUtils.getKeyboardWidth(context, Settings.getValues()),
+        builder.setKeyboardGeometry(ResourceUtils.getKeyboardWidth(context, Settings.values),
                 emojiLayoutParams.emojiKeyboardHeight)
         val layoutSet = builder.build()
         val emojiPalettesViewAttr = context.obtainStyledAttributes(attrs,
@@ -200,9 +200,9 @@ class EmojiPalettesView(context: Context, attrs: AttributeSet?, defStyle: Int) :
         super.onMeasure(widthMeasureSpec, heightMeasureSpec)
         val res = getContext().resources
         // The main keyboard expands to the entire this {@link KeyboardView}.
-        val width = (ResourceUtils.getKeyboardWidth(getContext(), Settings.getValues())
+        val width = (ResourceUtils.getKeyboardWidth(getContext(), Settings.values)
                 + paddingLeft + paddingRight)
-        val height = (ResourceUtils.getSecondaryKeyboardHeight(res, Settings.getValues())
+        val height = (ResourceUtils.getSecondaryKeyboardHeight(res, Settings.values)
                 + paddingTop + paddingBottom)
         emojiCategoryPageIndicatorView!!.indicatorWidth = width
         setMeasuredDimension(width, height)
@@ -234,7 +234,7 @@ class EmojiPalettesView(context: Context, attrs: AttributeSet?, defStyle: Int) :
         if (initialized) return
         emojiCategory.initialize()
         tabStrip = KeyboardSwitcher.getInstance().emojiTabStrip as LinearLayout?
-        if (Settings.getValues().isSecondaryStripVisible()) {
+        if (Settings.values.isSecondaryStripVisible) {
             for (properties in emojiCategory.shownCategories) {
                 addTab(tabStrip, properties.category)
             }
@@ -293,7 +293,7 @@ class EmojiPalettesView(context: Context, attrs: AttributeSet?, defStyle: Int) :
             keyboardActionListener.onCodeInput(code, NOT_A_COORDINATE, NOT_A_COORDINATE, false)
         }
         keyboardActionListener.onReleaseKey(code, false)
-        if (Settings.getValues().alphaAfterEmojiInEmojiView)
+        if (Settings.values.alphaAfterEmojiInEmojiView)
             keyboardActionListener.onCodeInput(KeyCode.ALPHA, NOT_A_COORDINATE, NOT_A_COORDINATE, false)
     }
 
@@ -317,11 +317,11 @@ class EmojiPalettesView(context: Context, attrs: AttributeSet?, defStyle: Int) :
         }
 
         val wordProperty = facilitator.getWordProperty(getEmojiNeutralVersion(emoji!!))
-        if (wordProperty == null || !wordProperty.mHasShortcuts) {
+        if (wordProperty == null || !wordProperty.hasShortcuts) {
             return null
         }
 
-        return wordProperty.mShortcutTargets.get(0).mWord
+        return wordProperty.shortcutTargets.get(0).word
     }
 
     fun setHardwareAcceleratedDrawingEnabled(enabled: Boolean) {
@@ -344,7 +344,7 @@ class EmojiPalettesView(context: Context, attrs: AttributeSet?, defStyle: Int) :
     }
 
     private fun addRecentKey(key: Key) {
-        if (Settings.getValues().incognitoModeEnabled) {
+        if (Settings.values.incognitoModeEnabled) {
             // We do not want to log recent keys while being in incognito
             return
         }
@@ -366,7 +366,7 @@ class EmojiPalettesView(context: Context, attrs: AttributeSet?, defStyle: Int) :
     }
 
     private fun setupSidePadding() {
-        val sv = Settings.getValues()
+        val sv = Settings.values
         val keyboardWidth = ResourceUtils.getKeyboardWidth(getContext(), sv)
         val keyboardAttr = getContext().obtainStyledAttributes(
                 null, R.styleable.Keyboard, R.attr.keyboardStyle, R.style.Keyboard)
@@ -425,15 +425,15 @@ class EmojiPalettesView(context: Context, attrs: AttributeSet?, defStyle: Int) :
                                 emojiCategory.currentCategory), !initial && !isAnimationsDisabled())
             }
 
-            if (Settings.getValues().isSecondaryStripVisible()) {
+            if (Settings.values.isSecondaryStripVisible) {
                 val strip = tabStrip!!
                 val old: View? = strip.findViewWithTag(oldCategory)
                 val current: View? = strip.findViewWithTag(category)
 
                 if (old is ImageView)
-                    Settings.getValues().mColors.setColor(old, ColorType.EMOJI_CATEGORY)
+                    Settings.values.colors.setColor(old, ColorType.EMOJI_CATEGORY)
                 if (current is ImageView)
-                    Settings.getValues().mColors.setColor(current, ColorType.EMOJI_CATEGORY_SELECTED)
+                    Settings.values.colors.setColor(current, ColorType.EMOJI_CATEGORY_SELECTED)
             }
         }
     }
@@ -454,7 +454,7 @@ class EmojiPalettesView(context: Context, attrs: AttributeSet?, defStyle: Int) :
     }
 
     private fun initDictionaryFacilitator() {
-        if (Settings.getValues().showEmojiDescriptions) {
+        if (Settings.values.showEmojiDescriptions) {
             val locale = RichInputMethodManager.getInstance().currentSubtype.locale
             val facilitator = dictionaryFacilitator
             if (facilitator == null || !facilitator.isForLocale(locale)) {

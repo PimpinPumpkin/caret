@@ -11,7 +11,7 @@ import app.caret.latin.utils.SubtypeSettings
 fun initPreview(context: Context) {
     Settings.init(context)
     SubtypeSettings.init(context)
-    Settings.getInstance().loadSettings(context)
+    Settings.instance.loadSettings(context)
     SettingsActivity.settingsContainer = SettingsContainer(context)
     KeyboardIconsSet.instance.loadIcons(context)
 }
