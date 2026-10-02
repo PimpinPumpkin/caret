@@ -293,10 +293,9 @@ public final class InputLogic {
             deleteTextReplacedByEmoji();
         }
 
-        SuggestedWords suggestedWords = mSuggestedWords;
-        String suggestion = suggestionInfo.mWord;
+        final String suggestion = suggestionInfo.mWord;
         // If this is a punctuation picked from the suggestion strip, pass it to onCodeInput
-        if (suggestion.length() == 1 && suggestedWords.isPunctuationSuggestions()) {
+        if (suggestion.length() == 1 && mSuggestedWords.isPunctuationSuggestions()) {
             // We still want to log a suggestion click.
             StatsUtils.onPickSuggestionManually(mSuggestedWords, suggestionInfo, mDictionaryFacilitator);
             // Word separators are suggested before the user inputs something.
@@ -319,19 +318,7 @@ public final class InputLogic {
         // for the sequence of language switching.
         inputTransaction.setDidAffectContents();
         mConnection.beginBatchEdit();
-        if (SpaceState.PHANTOM == mSpaceState && suggestion.length() > 0
-                // In the batch input mode, a manually picked suggested word should just replace
-                // the current batch input text and there is no need for a phantom space.
-                && !mWordComposer.isBatchMode()
-                // when a commit was reverted and user chose a different suggestion, we don't want
-                // to insert a space before the picked word
-                && !mJustRevertedACommit) {
-            final int firstChar = Character.codePointAt(suggestion, 0);
-            if (!settingsValues.isWordSeparator(firstChar)
-                    || settingsValues.isUsuallyPrecededBySpace(firstChar)) {
-                insertAutomaticSpaceIfOptionsAndTextAllow(settingsValues);
-            }
-        }
+        insertSpaceBeforePickedSuggestionIfNeeded(settingsValues, suggestion);
         mJustRevertedACommit = false;
 
         // TODO: We should not need the following branch. We should be able to take the same
@@ -348,32 +335,7 @@ public final class InputLogic {
             return inputTransaction;
         }
 
-        // A word can extend before the composing region when it starts with characters that don't
-        // start composition on their own, such as digits (e.g. "2u2j"): the leading part is
-        // committed immediately, while only the rest ("u2j") is composing. Committing the picked
-        // suggestion, which includes the leading part, would then duplicate it. If the picked word
-        // starts with the whole word before the cursor, extend the composing region to cover it so
-        // that committing replaces the whole word rather than only the composing part. (#2611)
-        if (mWordComposer.isComposingWord() && !mWordComposer.isBatchMode()) {
-            final String typedWord = mWordComposer.getTypedWord();
-            final int cursor = mConnection.getExpectedSelectionStart();
-            final CharSequence before = mConnection.getTextBeforeCursor(Constants.EDITOR_CONTENTS_CACHE_SIZE, 0);
-            if (before != null && cursor >= 0 && before.length() >= typedWord.length()) {
-                // Non-separator characters committed right before the composing word still belong
-                // to the same word (e.g. leading digits), so include them in the word to replace.
-                int start = before.length() - typedWord.length();
-                while (start > 0) {
-                    final int cp = Character.codePointBefore(before, start);
-                    if (settingsValues.isWordSeparator(cp) || Character.isWhitespace(cp)) break;
-                    start -= Character.charCount(cp);
-                }
-                final String wordBeforeCursor = before.subSequence(start, before.length()).toString();
-                if (wordBeforeCursor.length() > typedWord.length() && suggestion.startsWith(wordBeforeCursor)) {
-                    mConnection.setComposingRegion(cursor - wordBeforeCursor.length(), cursor);
-                }
-            }
-        }
-
+        extendComposingRegionOverLeadingPart(settingsValues, suggestion);
         commitChosenWord(settingsValues, suggestion, LastComposedWord.COMMIT_TYPE_MANUAL_PICK, LastComposedWord.NOT_A_SEPARATOR);
         mConnection.endBatchEdit();
         // Don't allow cancellation of manual pick
@@ -396,6 +358,53 @@ public final class InputLogic {
         StatsUtils.onPickSuggestionManually(mSuggestedWords, suggestionInfo, mDictionaryFacilitator);
         StatsUtils.onWordCommitSuggestionPickedManually(suggestionInfo.mWord, mWordComposer.isBatchMode());
         return inputTransaction;
+    }
+
+    /**
+     * A picked word that follows another word needs the space the keyboard still owes (the
+     * "phantom" space), unless the pick only replaces what is already there.
+     */
+    private void insertSpaceBeforePickedSuggestionIfNeeded(final SettingsValues settingsValues, final String suggestion) {
+        if (SpaceState.PHANTOM != mSpaceState || suggestion.isEmpty()) return;
+        // In the batch input mode, a manually picked suggested word should just replace
+        // the current batch input text and there is no need for a phantom space.
+        if (mWordComposer.isBatchMode()) return;
+        // when a commit was reverted and user chose a different suggestion, we don't want
+        // to insert a space before the picked word
+        if (mJustRevertedACommit) return;
+        final int firstChar = Character.codePointAt(suggestion, 0);
+        if (!settingsValues.isWordSeparator(firstChar) || settingsValues.isUsuallyPrecededBySpace(firstChar)) {
+            insertAutomaticSpaceIfOptionsAndTextAllow(settingsValues);
+        }
+    }
+
+    /**
+     * A word can extend before the composing region when it starts with characters that don't
+     * start composition on their own, such as digits (e.g. "2u2j"): the leading part is
+     * committed immediately, while only the rest ("u2j") is composing. Committing the picked
+     * suggestion, which includes the leading part, would then duplicate it. If the picked word
+     * starts with the whole word before the cursor, extend the composing region to cover it so
+     * that committing replaces the whole word rather than only the composing part.
+     * See <a href="https://github.com/HeliBorg/HeliBoard/issues/2611">HeliBoard issue 2611</a>.
+     */
+    private void extendComposingRegionOverLeadingPart(final SettingsValues settingsValues, final String suggestion) {
+        if (!mWordComposer.isComposingWord() || mWordComposer.isBatchMode()) return;
+        final String typedWord = mWordComposer.getTypedWord();
+        final int cursor = mConnection.getExpectedSelectionStart();
+        final CharSequence before = mConnection.getTextBeforeCursor(Constants.EDITOR_CONTENTS_CACHE_SIZE, 0);
+        if (before == null || cursor < 0 || before.length() < typedWord.length()) return;
+        // Non-separator characters committed right before the composing word still belong
+        // to the same word (e.g. leading digits), so include them in the word to replace.
+        int start = before.length() - typedWord.length();
+        while (start > 0) {
+            final int cp = Character.codePointBefore(before, start);
+            if (settingsValues.isWordSeparator(cp) || Character.isWhitespace(cp)) break;
+            start -= Character.charCount(cp);
+        }
+        final String wordBeforeCursor = before.subSequence(start, before.length()).toString();
+        if (wordBeforeCursor.length() > typedWord.length() && suggestion.startsWith(wordBeforeCursor)) {
+            mConnection.setComposingRegion(cursor - wordBeforeCursor.length(), cursor);
+        }
     }
 
     /** indicates that the next selection update is expected to be a cursor move (though not needed for arrow keys) */
@@ -2524,58 +2533,26 @@ public final class InputLogic {
      */
     private void commitChosenWord(final SettingsValues settingsValues, final String chosenWord,
             final int commitType, final String separatorString) {
-        long startTimeMillis = 0;
         if (DebugFlags.DEBUG_ENABLED) {
-            startTimeMillis = SystemClock.elapsedRealtime();
             Log.d(TAG, "commitChosenWord() : [" + chosenWord + "]");
         }
         // essentially reverted https://github.com/lineageos/android_packages_inputmethods_LatinIME/commit/ee6de1466bc98e27bd414c9a7451f2aee3f9e721
         // can't find any drawback (performance, neither when setting nor when reading)
         final CharSequence chosenWordWithSuggestions = getTextWithSuggestionSpan(mLatinIME, chosenWord,
                 mSuggestedWords, getDictionaryFacilitatorLocale());
-        if (DebugFlags.DEBUG_ENABLED) {
-            long runTimeMillis = SystemClock.elapsedRealtime() - startTimeMillis;
-            Log.d(TAG, "commitChosenWord() : " + runTimeMillis + " ms to run "
-                    + "SuggestionSpanUtils.getTextWithSuggestionSpan()");
-            startTimeMillis = SystemClock.elapsedRealtime();
-        }
         // When we are composing word, get n-gram context from the 2nd previous word because the
         // 1st previous word is the word to be committed. Otherwise get n-gram context from the 1st
         // previous word.
         final NgramContext ngramContext = mConnection.getNgramContextFromNthPreviousWord(
                 settingsValues.mSpacingAndPunctuations, mWordComposer.isComposingWord() ? 2 : 1);
-        if (DebugFlags.DEBUG_ENABLED) {
-            long runTimeMillis = SystemClock.elapsedRealtime() - startTimeMillis;
-            Log.d(TAG, "commitChosenWord() : " + runTimeMillis + " ms to run "
-                    + "Connection.getNgramContextFromNthPreviousWord()");
-            Log.d(TAG, "commitChosenWord() : NgramContext = " + ngramContext);
-            startTimeMillis = SystemClock.elapsedRealtime();
-        }
         mConnection.commitText(chosenWordWithSuggestions, 1);
-        if (DebugFlags.DEBUG_ENABLED) {
-            long runTimeMillis = SystemClock.elapsedRealtime() - startTimeMillis;
-            Log.d(TAG, "commitChosenWord() : " + runTimeMillis + " ms to run "
-                    + "Connection.commitText");
-            startTimeMillis = SystemClock.elapsedRealtime();
-        }
         // Add the word to the user history dictionary
         performAdditionToUserHistoryDictionary(settingsValues, chosenWord, ngramContext);
-        if (DebugFlags.DEBUG_ENABLED) {
-            long runTimeMillis = SystemClock.elapsedRealtime() - startTimeMillis;
-            Log.d(TAG, "commitChosenWord() : " + runTimeMillis + " ms to run "
-                    + "performAdditionToUserHistoryDictionary()");
-            startTimeMillis = SystemClock.elapsedRealtime();
-        }
         // TODO: figure out here if this is an auto-correct or if the best word is actually
         // what user typed. Note: currently this is done much later in
         // LastComposedWord#didCommitTypedWord by string equality of the remembered
         // strings.
         mLastComposedWord = mWordComposer.commitWord(commitType, chosenWord, separatorString, ngramContext);
-        if (DebugFlags.DEBUG_ENABLED) {
-            long runTimeMillis = SystemClock.elapsedRealtime() - startTimeMillis;
-            Log.d(TAG, "commitChosenWord() : " + runTimeMillis + " ms to run "
-                    + "WordComposer.commitWord()");
-        }
     }
 
     /**
