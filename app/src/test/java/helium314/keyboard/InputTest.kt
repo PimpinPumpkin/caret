@@ -85,6 +85,83 @@ class InputTest {
         assertEquals(KeyboardElement.ALPHABET_SHIFT_LOCKED, keyboardSwitcher.keyboard?.mId?.element)
     }
 
+    // ------- Caret: taps, layout switching, key repeat, two fingers -------
+
+    private var clock = 1000L
+
+    /** Down and up in the middle of a key, with time moving on so nothing counts as touch noise. */
+    private fun tap(code: Int) {
+        clock += 200
+        touchCenter(code, MotionEvent.ACTION_DOWN, clock)
+        clock += 40
+        touchCenter(code, MotionEvent.ACTION_UP, clock)
+    }
+
+    private fun touchCenter(code: Int, action: Int, eventTime: Long) {
+        val key = keyboardSwitcher.keyboard!!.getKey(code)!!
+        val me = MotionEvent.obtain(0L, eventTime, action, key.x + key.width / 2f, key.y + key.height / 2f, 0)
+        keyboardSwitcher.mainKeyboardView.onTouchEvent(me)
+    }
+
+    @Test fun `tapping letters types them`() {
+        "hi".forEach { tap(it.code) }
+        assertEquals("hi", ShadowInputMethodService.text)
+    }
+
+    @Test fun `tapping space and more letters types two words`() {
+        "hi".forEach { tap(it.code) }
+        tap(' '.code)
+        "yo".forEach { tap(it.code) }
+        assertEquals("hi yo", ShadowInputMethodService.text)
+    }
+
+    @Test fun `tapping backspace removes the last letter`() {
+        "hey".forEach { tap(it.code) }
+        tap(KeyCode.DELETE)
+        assertEquals("he", ShadowInputMethodService.text)
+    }
+
+    @Test fun `the symbols key switches to symbols and back`() {
+        tap(KeyCode.SYMBOL_ALPHA)
+        assertEquals(KeyboardElement.SYMBOLS, keyboardSwitcher.keyboard?.mId?.element)
+        tap(KeyCode.SYMBOL_ALPHA)
+        assertEquals(KeyboardElement.ALPHABET, keyboardSwitcher.keyboard?.mId?.element)
+    }
+
+    @Test fun `a digit typed on the symbols page arrives`() {
+        tap(KeyCode.SYMBOL_ALPHA)
+        tap('1'.code)
+        assertEquals("1", ShadowInputMethodService.text)
+    }
+
+    @Test fun `shift then a letter types one capital and returns to lowercase`() {
+        tap(KeyCode.SHIFT)
+        tap('A'.code) // the shifted keyboard has the capital on that key
+        tap('b'.code) // and this key only exists again once the keyboard is back in lowercase
+        assertEquals("Ab", ShadowInputMethodService.text)
+    }
+
+    @Test fun `sliding from one letter to another types the one the finger left on`() {
+        clock += 200
+        touchCenter('a'.code, MotionEvent.ACTION_DOWN, clock)
+        clock += 30
+        touchCenter('s'.code, MotionEvent.ACTION_MOVE, clock)
+        clock += 30
+        touchCenter('s'.code, MotionEvent.ACTION_UP, clock)
+        assertEquals("s", ShadowInputMethodService.text)
+    }
+
+    @Test fun `holding backspace keeps deleting`() {
+        "hello there".forEach { tap(it.code) }
+        clock += 200
+        touchCenter(KeyCode.DELETE, MotionEvent.ACTION_DOWN, clock)
+        ShadowLooper.idleMainLooper(1200, java.util.concurrent.TimeUnit.MILLISECONDS)
+        clock += 1200
+        touchCenter(KeyCode.DELETE, MotionEvent.ACTION_UP, clock)
+        val left = ShadowInputMethodService.text
+        assert("hello there".startsWith(left) && left.length <= 8) { "expected several characters gone, left '$left'" }
+    }
+
     private fun touchKey(code: Int, action: Int, eventTime: Long = 0L) {
         val kb = keyboardSwitcher.keyboard!!
         val key = kb.getKey(code)!!
