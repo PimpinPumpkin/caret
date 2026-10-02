@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<manifest xmlns:android="http://schemas.android.com/apk/res/android">
+    <application>
+        <!-- A speech recognizer that plays back a script, so dictation inside the keyboard can be
+             tested on an emulator without a microphone or a speech model. Debug builds only. -->
+        <service
+            android:name="app.caret.debug.ScriptedRecognitionService"
+            android:exported="true"
+            android:label="Caret scripted recognizer">
+            <intent-filter>
+                <action android:name="android.speech.RecognitionService" />
+            </intent-filter>
+        </service>
+    </application>
+</manifest>

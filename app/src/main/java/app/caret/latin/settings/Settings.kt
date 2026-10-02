@@ -307,6 +307,7 @@ class Settings : SharedPreferences.OnSharedPreferenceChangeListener {
         const val PREF_LM_NEXT_WORD = "lm_next_word"
         // Caret: the microphone key dictates inside the keyboard instead of switching keyboards
         const val PREF_INLINE_DICTATION = "inline_dictation"
+        const val PREF_DICTATION_SOUND = "dictation_sound"
         // Caret: hide copied card numbers, tokens, keys and seed phrases where the clipboard is shown
         const val PREF_MASK_CLIPBOARD_SECRETS = "mask_clipboard_secrets"
         // Caret: arrow keys of a remote move between keys; on by default on a TV

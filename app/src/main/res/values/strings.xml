@@ -1032,6 +1032,8 @@ New dictionary:
     <string name="inline_dictation">Dictate inside the keyboard</string>
     <string name="inline_dictation_summary">The microphone key listens right here and types what you say. Uses Alyo\'s speech service when it is switched on in Alyo, otherwise the phone\'s speech recognizer. Without either, the key switches to the voice keyboard as before.</string>
     <string name="inline_dictation_no_service">No speech recognition service found. In Alyo, switch on its use as the phone\'s speech recognizer.</string>
+    <string name="dictation_sound">Sound when dictation starts and stops</string>
+    <string name="dictation_sound_summary">Two short notes when the microphone opens and when it closes</string>
     <string name="dictation_starting">Starting…</string>
     <string name="dictation_error_permission">Speech service has no microphone access</string>
     <string name="dictation_error">Speech recognition is not set up</string>

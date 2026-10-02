@@ -32,6 +32,12 @@ class InlineDictation(private val context: Context, private val host: Host) {
         fun codePointBeforeCursor(): Int
         /** Language to listen for. */
         fun locale(): Locale
+        /** The microphone is open (true) or has been closed again (false). */
+        fun onListening(listening: Boolean)
+        /** How loud the voice is right now, 0 to 1. Only called when the speech service reports it. */
+        fun onLevel(level: Float)
+        /** Whether to play a short sound when listening starts and stops. */
+        fun soundsEnabled(): Boolean
     }
 
     private var recognizer: SpeechRecognizer? = null
@@ -41,6 +47,8 @@ class InlineDictation(private val context: Context, private val host: Host) {
         private set
     /** Set by a tap while listening: finish this utterance, then stop. */
     private var stopAfterResult = false
+    /** True once the service has said the microphone is open, until dictation ends. */
+    private var listening = false
 
     /**
      * Starts listening, or stops when it is listening already. False when dictation cannot run
@@ -96,6 +104,11 @@ class InlineDictation(private val context: Context, private val host: Host) {
     }
 
     private fun end() {
+        if (listening) {
+            listening = false
+            host.onListening(false)
+            if (host.soundsEnabled()) DictationChime.stop()
+        }
         isActive = false
         recognizer?.destroy()
         recognizer = null
@@ -104,7 +117,14 @@ class InlineDictation(private val context: Context, private val host: Host) {
 
     private val listener = object : RecognitionListener {
         override fun onReadyForSpeech(params: Bundle?) {
-            if (isActive) host.showStatus(context.getString(app.caret.latin.R.string.dictation_listening))
+            if (!isActive) return
+            host.showStatus(context.getString(app.caret.latin.R.string.dictation_listening))
+            // the service is asked again for every utterance; only the first time is a start
+            if (!listening) {
+                listening = true
+                host.onListening(true)
+                if (host.soundsEnabled()) DictationChime.start()
+            }
         }
 
         override fun onPartialResults(partialResults: Bundle?) {
@@ -142,7 +162,10 @@ class InlineDictation(private val context: Context, private val host: Host) {
         }
 
         override fun onBeginningOfSpeech() = Unit
-        override fun onRmsChanged(rmsdB: Float) = Unit
+        override fun onRmsChanged(rmsdB: Float) {
+            // recognizers report roughly -2 (silence) to 10 (loud)
+            if (isActive) host.onLevel(((rmsdB - RMS_SILENCE) / (RMS_LOUD - RMS_SILENCE)).coerceIn(0f, 1f))
+        }
         override fun onBufferReceived(buffer: ByteArray?) = Unit
         override fun onEndOfSpeech() = Unit
         override fun onEvent(eventType: Int, params: Bundle?) = Unit
@@ -161,6 +184,8 @@ class InlineDictation(private val context: Context, private val host: Host) {
     companion object {
         private const val TAG = "InlineDictation"
         private const val MAX_STATUS_LENGTH = 60
+        private const val RMS_SILENCE = -2f
+        private const val RMS_LOUD = 10f
         private const val ERROR_MESSAGE_MILLIS = 3000L
         private const val ALYO_PACKAGE = "app.alyo"
         private val NO_SPACE_AFTER = setOf('('.code, '['.code, '{'.code, '"'.code, '\''.code, '/'.code, '@'.code)

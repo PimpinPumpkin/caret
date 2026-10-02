@@ -30,11 +30,16 @@ class InlineDictationTest {
     private val context: Context = ApplicationProvider.getApplicationContext<App>()
     private val typed = StringBuilder()
     private var status: String? = null
+    private var listening = false
+    private var level = -1f
     private val host = object : InlineDictation.Host {
         override fun insertText(text: String) { typed.append(text) }
         override fun showStatus(text: String?) { status = text }
         override fun codePointBeforeCursor() = typed.lastOrNull()?.code ?: -1
         override fun locale(): Locale = Locale.US
+        override fun onListening(listening: Boolean) { this@InlineDictationTest.listening = listening }
+        override fun onLevel(level: Float) { this@InlineDictationTest.level = level }
+        override fun soundsEnabled() = false
     }
     private val dictation = InlineDictation(context, host)
 
@@ -117,6 +122,20 @@ class InlineDictationTest {
         assertNull(status)
     }
 
+    @Test fun `the microphone circle is on while it listens and follows the voice`() {
+        dictation.toggle()
+        assertFalse(listening, "not before the service has opened the microphone")
+        val speech = recognizer()
+        speech.triggerOnReadyForSpeech(Bundle())
+        assertTrue(listening)
+        speech.triggerOnRmsChanged(4f)
+        assertEquals(0.5f, level)
+        speech.triggerOnRmsChanged(40f)
+        assertEquals(1f, level)
+        speech.triggerOnError(SpeechRecognizer.ERROR_NO_MATCH)
+        assertFalse(listening)
+    }
+
     @Test fun `leaving the field drops what was being said`() {
         dictation.toggle()
         recognizer().triggerOnPartialResults(results("half a sent"))
@@ -124,5 +143,15 @@ class InlineDictationTest {
         assertFalse(dictation.isActive)
         assertNull(status)
         assertEquals("", typed.toString())
+    }
+}
+
+class DictationChimeTest {
+    @Test fun `the chime is short, quiet and ends in silence`() {
+        val samples = app.caret.latin.voice.DictationChime.notes(660.0, 990.0)
+        assertTrue(samples.size < 22050 / 4, "under a quarter of a second")
+        assertTrue(samples.maxOf { kotlin.math.abs(it.toInt()) } < Short.MAX_VALUE / 3)
+        assertEquals(0, samples.first().toInt())
+        assertTrue(kotlin.math.abs(samples.last().toInt()) < 400)
     }
 }

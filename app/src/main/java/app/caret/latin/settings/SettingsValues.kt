@@ -6,6 +6,7 @@
 
 package app.caret.latin.settings
 
+import app.caret.latin.voice.InlineDictation
 import android.Manifest
 import android.content.Context
 import android.content.SharedPreferences
@@ -110,6 +111,7 @@ class SettingsValues(context: Context, prefs: SharedPreferences, res: Resources,
     @JvmField val bigramPredictionEnabled: Boolean // Use bigrams to predict the next word when there is no input for it yet
     @JvmField val remoteNavigation: Boolean // Caret: arrow keys of a remote move between keys
     @JvmField val maskClipboardSecrets: Boolean // Caret: hide copied secrets where the clipboard is shown
+    @JvmField val dictationSound: Boolean // Caret: a short sound when dictation starts and stops listening
     @JvmField val inlineDictation: Boolean // Caret: the microphone key dictates inside the keyboard
     @JvmField val lmNextWordEnabled: Boolean // Caret: let the language model of the swipe models rank those predictions
     @JvmField val suggestPunctuation: Boolean
@@ -203,7 +205,11 @@ class SettingsValues(context: Context, prefs: SharedPreferences, res: Resources,
         keyPreviewPopupOn = prefs.getBoolean(Settings.PREF_POPUP_ON, Defaults.PREF_POPUP_ON)
         slidingKeyInputPreviewEnabled = prefs.getBoolean(
                 DebugSettings.PREF_SLIDING_KEY_INPUT_PREVIEW, Defaults.PREF_SLIDING_KEY_INPUT_PREVIEW)
+        // the key needs something to hand the voice to: a voice keyboard, or dictation right here
         showsVoiceInputKey = inputAttributes.shouldShowVoiceInputKey
+                || (inputAttributes.fieldAllowsMicrophone
+                    && prefs.getBoolean(Settings.PREF_INLINE_DICTATION, Defaults.PREF_INLINE_DICTATION)
+                    && InlineDictation.hasPermission(context) && InlineDictation.findService(context) != null)
         val languagePref = prefs.getString(Settings.PREF_LANGUAGE_SWITCH_KEY, Defaults.PREF_LANGUAGE_SWITCH_KEY)
         languageSwitchKeyToOtherImes = languagePref!! == "input_method" || languagePref == "both"
         languageSwitchKeyToOtherSubtypes = isLocked || languagePref == "internal" || languagePref == "both"
@@ -242,6 +248,7 @@ class SettingsValues(context: Context, prefs: SharedPreferences, res: Resources,
         bigramPredictionEnabled = prefs.getBoolean(Settings.PREF_BIGRAM_PREDICTIONS, Defaults.PREF_BIGRAM_PREDICTIONS)
         remoteNavigation = prefs.getBoolean(Settings.PREF_REMOTE_NAVIGATION, Settings.isTelevision(context))
         maskClipboardSecrets = prefs.getBoolean(Settings.PREF_MASK_CLIPBOARD_SECRETS, Defaults.PREF_MASK_CLIPBOARD_SECRETS)
+        dictationSound = prefs.getBoolean(Settings.PREF_DICTATION_SOUND, Defaults.PREF_DICTATION_SOUND)
         inlineDictation = prefs.getBoolean(Settings.PREF_INLINE_DICTATION, Defaults.PREF_INLINE_DICTATION)
         lmNextWordEnabled = prefs.getBoolean(Settings.PREF_LM_NEXT_WORD, Defaults.PREF_LM_NEXT_WORD)
         suggestPunctuation = prefs.getBoolean(Settings.PREF_SUGGEST_PUNCTUATION, Defaults.PREF_SUGGEST_PUNCTUATION)

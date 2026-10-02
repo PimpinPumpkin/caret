@@ -32,6 +32,8 @@ class InputAttributes {
     @JvmField val applicationSpecifiedCompletionOn: Boolean
     @JvmField val shouldInsertSpacesAutomatically: Boolean
     @JvmField val shouldShowVoiceInputKey: Boolean
+    /** The field does not rule out a microphone key (not a password or email field, no opt-out). */
+    @JvmField val fieldAllowsMicrophone: Boolean
     @JvmField val noLearning: Boolean
     /**
      * Whether the floating gesture preview should be disabled. If true, this should override the
@@ -74,6 +76,7 @@ class InputAttributes {
             applicationSpecifiedCompletionOn = false
             shouldInsertSpacesAutomatically = false
             shouldShowVoiceInputKey = false
+            fieldAllowsMicrophone = false
             disableGestureFloatingPreviewText = false
             isGeneralTextInput = false
             noLearning = false
@@ -93,12 +96,12 @@ class InputAttributes {
 
         shouldInsertSpacesAutomatically = InputTypeUtils.isAutoSpaceFriendlyType(inputType)
 
-        val noMicrophone = isPasswordField
+        fieldAllowsMicrophone = !(isPasswordField
                 || InputTypeUtils.isEmailVariation(variation)
-                || hasNoMicrophoneKeyOption()
-                || !RichInputMethodManager.isInitialized() // avoid crash when only using spell checker
-                || !RichInputMethodManager.getInstance().isShortcutImeReady
-        shouldShowVoiceInputKey = !noMicrophone
+                || hasNoMicrophoneKeyOption())
+        shouldShowVoiceInputKey = fieldAllowsMicrophone
+                && RichInputMethodManager.isInitialized() // avoid crash when only using spell checker
+                && RichInputMethodManager.getInstance().isShortcutImeReady
 
         disableGestureFloatingPreviewText = InputAttributes.inPrivateImeOptions(
                 packageNameForPrivateImeOptions, NO_FLOATING_GESTURE_PREVIEW, editorInfo)

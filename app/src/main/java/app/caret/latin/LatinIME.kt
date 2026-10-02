@@ -188,23 +188,35 @@ class LatinIME : InputMethodService(),
         override fun insertText(text: String) = onTextInput(text)
         override fun codePointBeforeCursor() = inputLogic.connection.getCodePointBeforeCursor()
         override fun locale(): Locale = richImm.currentSubtypeLocale
+        override fun onListening(listening: Boolean) { suggestionStripView?.setMicListening(listening) }
+        override fun onLevel(level: Float) { suggestionStripView?.setMicLevel(level) }
+        override fun soundsEnabled() = settings.current.dictationSound
         override fun showStatus(text: String?) {
             val stripView = suggestionStripView ?: return
             if (text == null) {
+                dictationText = null
                 setNeutralSuggestionStrip()
                 return
             }
-            val view = TextView(stripView.context)
+            // one view for the whole session; the words appear from the left and, once the line is
+            // full, the start scrolls out so the newest words stay in sight
+            val view = dictationText?.takeIf { it.isAttachedToWindow } ?: TextView(stripView.context).also {
+                it.gravity = android.view.Gravity.START or android.view.Gravity.CENTER_VERTICAL
+                it.maxLines = 1
+                it.ellipsize = android.text.TextUtils.TruncateAt.START
+                it.setTextColor(settings.current.colors.get(app.caret.latin.common.ColorType.KEY_TEXT))
+                val side = (12 * resources.displayMetrics.density).toInt()
+                it.setPadding(side, 0, side, 0)
+                it.layoutParams = android.view.ViewGroup.LayoutParams(android.view.ViewGroup.LayoutParams.MATCH_PARENT, android.view.ViewGroup.LayoutParams.MATCH_PARENT)
+                it.setOnClickListener { stopDictation() }
+                stripView.setExternalSuggestionView(it, false)
+                dictationText = it
+            }
             view.text = text
-            view.gravity = android.view.Gravity.CENTER
-            view.maxLines = 1
-            view.ellipsize = android.text.TextUtils.TruncateAt.START
-            view.setTextColor(settings.current.colors.get(app.caret.latin.common.ColorType.KEY_TEXT))
-            view.layoutParams = android.view.ViewGroup.LayoutParams(android.view.ViewGroup.LayoutParams.MATCH_PARENT, android.view.ViewGroup.LayoutParams.MATCH_PARENT)
-            view.setOnClickListener { stopDictation() }
-            stripView.setExternalSuggestionView(view, false)
         }
     })
+
+    private var dictationText: TextView? = null
 
     private val remoteNavigation = RemoteNavigation { keyboardSwitcher.getMainKeyboardView() }
 

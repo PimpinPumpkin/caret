@@ -5,6 +5,7 @@
  */
 package app.caret.latin.suggestions
 
+import app.caret.latin.voice.MicPulseDrawable
 import android.annotation.SuppressLint
 import android.content.Context
 import android.content.SharedPreferences
@@ -266,6 +267,32 @@ class SuggestionStripView(context: Context, attrs: AttributeSet?, defStyle: Int)
         )
         isExternalSuggestionVisible = false
         updateKeys()
+    }
+
+    private var micPulse: MicPulseDrawable? = null
+    private var micBackgrounds = HashMap<View, android.graphics.drawable.Drawable?>()
+
+    /** Shows or removes the pulsing circle behind the microphone key. */
+    fun setMicListening(listening: Boolean) {
+        val mics = listOfNotNull<View>(pinnedKeys.findViewWithTag(ToolbarKey.VOICE), pinnedKeysStart.findViewWithTag(ToolbarKey.VOICE),
+            toolbar.findViewWithTag(ToolbarKey.VOICE))
+        if (listening) {
+            val pulse = MicPulseDrawable(Settings.values.colors.get(ColorType.ACTION_KEY_BACKGROUND))
+            micPulse = pulse
+            mics.forEach {
+                if (it !in micBackgrounds) micBackgrounds[it] = it.background
+                it.background = pulse
+            }
+        } else {
+            micBackgrounds.forEach { (view, background) -> view.background = background }
+            micBackgrounds.clear()
+            micPulse = null
+        }
+    }
+
+    /** Loudness of the voice for the circle behind the microphone key, 0 to 1. */
+    fun setMicLevel(level: Float) {
+        micPulse?.setLevel(level)
     }
 
     fun setExternalSuggestionView(view: View?, addCloseButton: Boolean) {
