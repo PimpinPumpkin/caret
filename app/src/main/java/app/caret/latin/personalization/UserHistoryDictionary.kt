@@ -25,7 +25,7 @@ import java.util.Locale
 class UserHistoryDictionary
 // TODO: Make this constructor private
 constructor(context: Context, locale: Locale?) : ExpandableBinaryDictionary(
-        context, getUserHistoryDictName(NAME, locale, null), locale, Dictionary.TYPE_USER_HISTORY, null) {
+        context, getUserHistoryDictName(NAME, locale, null), locale!!, Dictionary.TYPE_USER_HISTORY, null) {
 
     init {
         if (mLocale != null && mLocale.toString().length > 1) {
@@ -59,7 +59,7 @@ constructor(context: Context, locale: Locale?) : ExpandableBinaryDictionary(
          */
         @JvmStatic
         fun getUserHistoryDictName(name: String, locale: Locale?, dictFile: File?): String {
-            return ExpandableBinaryDictionary.getDictName(name, locale, dictFile)
+            return ExpandableBinaryDictionary.getDictName(name, locale!!, dictFile)
         }
 
         @JvmStatic

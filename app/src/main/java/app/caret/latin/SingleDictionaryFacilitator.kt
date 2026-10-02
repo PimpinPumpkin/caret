@@ -96,7 +96,7 @@ class SingleDictionaryFacilitator(private val dict: Dictionary) : DictionaryFaci
 
     override fun isActive(): Boolean = true
 
-    override fun getMainLocale(): Locale = dict.mLocale
+    override fun getMainLocale(): Locale = dict.mLocale!!
 
     override fun getCurrentLocale(): Locale = getMainLocale()
 
@@ -108,9 +108,9 @@ class SingleDictionaryFacilitator(private val dict: Dictionary) : DictionaryFaci
                                    usePersonalizedDicts: Boolean, forceReloadMainDictionary: Boolean, dictNamePrefix: String, listener: DictionaryInitializationListener?
     ) { }
 
-    override fun hasAtLeastOneInitializedMainDictionary(): Boolean = dict.isInitialized
+    override fun hasAtLeastOneInitializedMainDictionary(): Boolean = dict.isInitialized()
 
-    override fun hasAtLeastOneUninitializedMainDictionary(): Boolean = !dict.isInitialized
+    override fun hasAtLeastOneUninitializedMainDictionary(): Boolean = !dict.isInitialized()
 
     override fun waitForLoadingMainDictionaries(timeout: Long, unit: TimeUnit) {
     }

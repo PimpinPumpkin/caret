@@ -245,7 +245,7 @@ class DictionaryFacilitatorImpl : DictionaryFacilitator {
                         Log.w(TAG, "Expected a dictionary group for $it but none found")
                         return@mapNotNull null // This should never happen
                     }
-                    if (dictionaryGroup.getDict(Dictionary.TYPE_MAIN)?.isInitialized == true) null
+                    if (dictionaryGroup.getDict(Dictionary.TYPE_MAIN)?.isInitialized() == true) null
                     else dictionaryGroup to DictionaryFactory.createMainDictionaryCollection(context, it, useEmojiDict)
                 }
                 synchronized(this) {
@@ -278,10 +278,10 @@ class DictionaryFacilitatorImpl : DictionaryFacilitator {
 
     // The main dictionaries are loaded asynchronously. Don't cache the return value of these methods.
     override fun hasAtLeastOneInitializedMainDictionary(): Boolean =
-        dictionaryGroups.any { it.getDict(Dictionary.TYPE_MAIN)?.isInitialized == true }
+        dictionaryGroups.any { it.getDict(Dictionary.TYPE_MAIN)?.isInitialized() == true }
 
     override fun hasAtLeastOneUninitializedMainDictionary(): Boolean =
-        dictionaryGroups.any { it.getDict(Dictionary.TYPE_MAIN)?.isInitialized != true }
+        dictionaryGroups.any { it.getDict(Dictionary.TYPE_MAIN)?.isInitialized() != true }
 
     @Throws(InterruptedException::class)
     override fun waitForLoadingMainDictionaries(timeout: Long, unit: TimeUnit) {
@@ -529,7 +529,7 @@ class DictionaryFacilitatorImpl : DictionaryFacilitator {
         val sourceDict = group.getDict(Dictionary.TYPE_MAIN) ?: Dictionary.DICTIONARY_USER_TYPED
         val userWords = {
             listOf(Dictionary.TYPE_USER, Dictionary.TYPE_USER_HISTORY, Dictionary.TYPE_CONTACTS).flatMap { type ->
-                group.getSubDict(type)?.wordPropertiesForSyncing?.mapNotNull { property ->
+                group.getSubDict(type)?.getWordPropertiesForSyncing()?.mapNotNull { property ->
                     if (property == null || property.mIsNotAWord || property.mIsBeginningOfSentence) null
                     else property.mWord to property.mProbabilityInfo.mProbability
                 } ?: emptyList()
@@ -641,7 +641,7 @@ class DictionaryFacilitatorImpl : DictionaryFacilitator {
 
     override fun getDictionaryStats(context: Context): List<DictionaryStats> =
         DictionaryFacilitator.DYNAMIC_DICTIONARY_TYPES.flatMap { dictType ->
-            dictionaryGroups.mapNotNull { it.getSubDict(dictType)?.dictionaryStats }
+            dictionaryGroups.mapNotNull { it.getSubDict(dictType)?.getDictionaryStats() }
         }
 
     override fun dump(context: Context) = getDictionaryStats(context).joinToString("\n")
