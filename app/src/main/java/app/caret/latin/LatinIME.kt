@@ -113,13 +113,13 @@ class LatinIME : InputMethodService(),
         SuggestionStripView.Listener, SuggestionStripViewAccessor,
         DictionaryFacilitator.DictionaryInitializationListener {
 
-    @JvmField val mSettings: Settings
+    @JvmField val settings: Settings
     @JvmField val keyboardActionListener: KeyboardActionListener
     private var originalNavBarColor = 0
     private var originalNavBarFlags = 0
 
     // UIHandler is needed when creating InputLogic
-    @JvmField val mHandler: UIHandler = UIHandler(this)
+    @JvmField val handler: UIHandler = UIHandler(this)
     private var dictionaryFacilitator: DictionaryFacilitator = // non-final for active gesture data gathering, revert when data gathering phase is done (end of 2026 latest)
             DictionaryFacilitatorProvider.getDictionaryFacilitator(false)
     private val originalDictionaryFacilitator: DictionaryFacilitator = dictionaryFacilitator
@@ -139,7 +139,7 @@ class LatinIME : InputMethodService(),
     private var isExecutingStartShowingInputView = false
 
     // Used for re-initialize keyboard layout after onConfigurationChange.
-    private var displayContext: Context? = null
+    private lateinit var displayContext: Context
 
     // Object for reacting to adding/removing a dictionary pack.
     private val dictionaryPackInstallReceiver: BroadcastReceiver =
@@ -247,7 +247,7 @@ class LatinIME : InputMethodService(),
                 MSG_UPDATE_SUGGESTION_STRIP -> {
                     cancelUpdateSuggestionStrip()
                     latinIme.inputLogic.performUpdateSuggestionStripSync(
-                            latinIme.mSettings.getCurrent(), msg.arg1 /* inputStyle */)
+                            latinIme.settings.getCurrent(), msg.arg1 /* inputStyle */)
                 }
                 MSG_UPDATE_SHIFT_STATE ->
                     latinIme.keyboardSwitcher.updateShiftState(latinIme.getCurrentAutoCapsState(),
@@ -262,7 +262,7 @@ class LatinIME : InputMethodService(),
                     }
                 MSG_RESUME_SUGGESTIONS ->
                     latinIme.inputLogic.restartSuggestionsOnWordTouchedByCursor(
-                            latinIme.mSettings.getCurrent(),
+                            latinIme.settings.getCurrent(),
                             latinIme.keyboardSwitcher.getCurrentKeyboardScript())
                 MSG_REOPEN_DICTIONARIES -> {
                     // We need to re-evaluate the currently composing word in case the script has
@@ -273,12 +273,12 @@ class LatinIME : InputMethodService(),
                 MSG_UPDATE_TAIL_BATCH_INPUT_COMPLETED -> {
                     val suggestedWords = msg.obj as SuggestedWords
                     latinIme.inputLogic.onUpdateTailBatchInputCompleted(
-                            latinIme.mSettings.getCurrent(),
+                            latinIme.settings.getCurrent(),
                             suggestedWords, latinIme.keyboardSwitcher)
                     latinIme.onTailBatchInputResultShown(suggestedWords)
                 }
                 MSG_RESET_CACHES -> {
-                    val settingsValues = latinIme.mSettings.getCurrent()
+                    val settingsValues = latinIme.settings.getCurrent()
                     if (latinIme.inputLogic.retryResetCachesAndReturnSuccess(
                             msg.arg1 == ARG1_TRUE /* tryResumeSuggestions */,
                             msg.arg2 /* remainingTries */, this /* handler */)) {
@@ -310,7 +310,7 @@ class LatinIME : InputMethodService(),
             if (latinIme == null) {
                 return
             }
-            if (!latinIme.mSettings.getCurrent().needsToLookupSuggestions()) {
+            if (!latinIme.settings.getCurrent().needsToLookupSuggestions()) {
                 return
             }
             removeMessages(MSG_RESUME_SUGGESTIONS)
@@ -525,7 +525,7 @@ class LatinIME : InputMethodService(),
 
     // (Java constructor body; runs after all field initializers above, as in Java)
     init {
-        mSettings = Settings.getInstance()
+        settings = Settings.getInstance()
         keyboardSwitcher = KeyboardSwitcher.getInstance()
         statsUtilsManager = StatsUtilsManager.getInstance()
         keyboardActionListener = KeyboardActionListenerImpl(this, inputLogic)
@@ -534,7 +534,7 @@ class LatinIME : InputMethodService(),
     }
 
     override fun onCreate() {
-        mSettings.startListener()
+        settings.startListener()
         KeyboardIconsSet.instance.loadIcons(this)
         richImm = RichInputMethodManager.getInstance()
         AudioAndHapticFeedbackManager.init(this)
@@ -546,7 +546,7 @@ class LatinIME : InputMethodService(),
 
         loadSettings()
         clipboardHistoryManager.onCreate()
-        mHandler.onCreate()
+        handler.onCreate()
         if (FoldableUtils.isFoldable)
             foldableObserver = FoldableUtils.FoldableObserver(this)
 
@@ -580,7 +580,7 @@ class LatinIME : InputMethodService(),
         emojiSearchFilter.addAction(EmojiSearchActivity.EMOJI_SEARCH_DONE_ACTION)
         ContextCompat.registerReceiver(this, emojiSearchReceiver, emojiSearchFilter, ContextCompat.RECEIVER_NOT_EXPORTED)
 
-        StatsUtils.onCreate(mSettings.getCurrent(), richImm)
+        StatsUtils.onCreate(settings.getCurrent(), richImm)
     }
 
     private fun loadSettings() {
@@ -588,13 +588,13 @@ class LatinIME : InputMethodService(),
         val editorInfo = getCurrentInputEditorInfo()
         val inputAttributes = InputAttributes(
                 editorInfo, isFullscreenMode(), getPackageName())
-        mSettings.loadSettings(this, locale, inputAttributes)
-        val currentSettingsValues = mSettings.getCurrent()
+        settings.loadSettings(this, locale, inputAttributes)
+        val currentSettingsValues = settings.getCurrent()
         AudioAndHapticFeedbackManager.getInstance().onSettingsChanged(currentSettingsValues)
         // This method is called on startup and language switch, before the new layout has
         // been displayed. Opening dictionaries never affects responsivity as dictionaries are
         // asynchronously loaded.
-        if (!mHandler.hasPendingReopenDictionaries()) {
+        if (!handler.hasPendingReopenDictionaries()) {
             resetDictionaryFacilitatorIfNecessary()
         }
         refreshPersonalizationDictionarySession(currentSettingsValues)
@@ -618,9 +618,9 @@ class LatinIME : InputMethodService(),
         if (mainKeyboardView != null) {
             mainKeyboardView.setMainDictionaryAvailability(isMainDictionaryAvailable)
         }
-        if (mHandler.hasPendingWaitForDictionaryLoad()) {
-            mHandler.cancelWaitForDictionaryLoad()
-            mHandler.postResumeSuggestions(false /* shouldDelay */)
+        if (handler.hasPendingWaitForDictionaryLoad()) {
+            handler.cancelWaitForDictionaryLoad()
+            handler.postResumeSuggestions(false /* shouldDelay */)
         }
     }
 
@@ -639,12 +639,12 @@ class LatinIME : InputMethodService(),
         }
         val locales = ArrayList<Locale>()
         locales.add(subtypeLocale)
-        locales.addAll(mSettings.getCurrent().mSecondaryLocales)
+        locales.addAll(settings.getCurrent().mSecondaryLocales)
         if (dictionaryFacilitator.usesSameSettings(
                 locales,
-                mSettings.getCurrent().mUseContactsDictionary,
-                mSettings.getCurrent().mUseAppsDictionary,
-                mSettings.getCurrent().mUsePersonalizedDicts
+                settings.getCurrent().mUseContactsDictionary,
+                settings.getCurrent().mUseAppsDictionary,
+                settings.getCurrent().mUsePersonalizedDicts
         )) {
             return
         }
@@ -659,7 +659,7 @@ class LatinIME : InputMethodService(),
      */
     // TODO: make sure the current settings always have the right locales, and read from them.
     private fun resetDictionaryFacilitator(locale: Locale) {
-        val settingsValues = mSettings.getCurrent()
+        val settingsValues = settings.getCurrent()
         try {
             dictionaryFacilitator.resetDictionaries(this, locale,
                 settingsValues.mUseContactsDictionary, settingsValues.mUseAppsDictionary,
@@ -675,7 +675,7 @@ class LatinIME : InputMethodService(),
      * Reset suggest by loading the main dictionary of the current locale.
      */
     /* package private */ fun resetSuggestMainDict() {
-        val settingsValues = mSettings.getCurrent()
+        val settingsValues = settings.getCurrent()
         dictionaryFacilitator.resetDictionaries(this, dictionaryFacilitator.getMainLocale(),
                 settingsValues.mUseContactsDictionary, settingsValues.mUseAppsDictionary,
                 settingsValues.mUsePersonalizedDicts, true, "", this)
@@ -692,9 +692,8 @@ class LatinIME : InputMethodService(),
     override fun onDestroy() {
         clipboardHistoryManager.onDestroy()
         dictionaryFacilitator.closeDictionaries()
-        mSettings.onDestroy()
-        if (foldableObserver != null)
-            foldableObserver!!.unregister(this)
+        settings.onDestroy()
+        foldableObserver?.unregister(this)
         unregisterReceiver(ringerModeChangeReceiver)
         unregisterReceiver(dictionaryPackInstallReceiver)
         unregisterReceiver(dictionaryDumpBroadcastReceiver)
@@ -702,22 +701,22 @@ class LatinIME : InputMethodService(),
         unregisterReceiver(emojiSearchReceiver)
         statsUtilsManager.onDestroy(this /* context */)
         super.onDestroy()
-        mHandler.removeCallbacksAndMessages(null)
+        handler.removeCallbacksAndMessages(null)
         deallocateMemory()
     }
 
     private fun isImeSuppressedByHardwareKeyboard(): Boolean {
         return !onEvaluateInputViewShown() && keyboardSwitcher.isImeSuppressedByHardwareKeyboard(
-                mSettings.getCurrent(), keyboardSwitcher.getKeyboardSwitchState())
+                settings.getCurrent(), keyboardSwitcher.getKeyboardSwitchState())
     }
 
     override fun onConfigurationChanged(conf: Configuration) {
-        val settingsValues = mSettings.getCurrent()
+        val settingsValues = settings.getCurrent()
         Log.i(TAG, "onConfigurationChanged")
         SubtypeSettings.reloadSystemLocales(this)
         if (settingsValues.mDisplayOrientation != conf.orientation) {
-            mHandler.startOrientationChanging()
-            inputLogic.onOrientationChange(mSettings.getCurrent())
+            handler.startOrientationChanging()
+            inputLogic.onOrientationChange(settings.getCurrent())
         }
         if (settingsValues.mHasHardwareKeyboard != Settings.readHasHardwareKeyboard(conf)) {
             // If the state of having a hardware keyboard changed, then we want to reload the
@@ -742,7 +741,7 @@ class LatinIME : InputMethodService(),
     override fun onInitializeInterface() {
         displayContext = this.getDisplayContext()
         Log.d(TAG, "onInitializeInterface")
-        keyboardSwitcher.updateKeyboardTheme(displayContext!!)
+        keyboardSwitcher.updateKeyboardTheme(displayContext)
     }
 
     override fun onCreateInputView(): View? {
@@ -759,11 +758,16 @@ class LatinIME : InputMethodService(),
     }
 
     fun updateSuggestionStripView(view: View?) {
-        suggestionStripView = if (mSettings.getCurrent().mToolbarMode == ToolbarMode.HIDDEN || isEmojiSearch())
-                        null else view!!.findViewById<SuggestionStripView>(R.id.suggestion_strip_view)
-        if (hasSuggestionStripView()) {
-            suggestionStripView!!.setRtl(richImm.currentSubtype.isRtlSubtype)
-            suggestionStripView!!.setListener(this, view!!)
+        if (settings.getCurrent().mToolbarMode == ToolbarMode.HIDDEN || isEmojiSearch()) {
+            suggestionStripView = null
+            return
+        }
+        val nonNullView = view!!
+        val stripView: SuggestionStripView? = nonNullView.findViewById(R.id.suggestion_strip_view)
+        suggestionStripView = stripView
+        if (stripView != null) {
+            stripView.setRtl(richImm.currentSubtype.isRtlSubtype)
+            stripView.setListener(this, nonNullView)
         }
     }
 
@@ -772,24 +776,24 @@ class LatinIME : InputMethodService(),
     }
 
     override fun onStartInput(editorInfo: EditorInfo?, restarting: Boolean) {
-        mHandler.onStartInput(editorInfo, restarting)
+        handler.onStartInput(editorInfo, restarting)
     }
 
     override fun onStartInputView(editorInfo: EditorInfo?, restarting: Boolean) {
-        mHandler.onStartInputView(editorInfo, restarting)
+        handler.onStartInputView(editorInfo, restarting)
         statsUtilsManager.onStartInputView()
     }
 
     override fun onFinishInputView(finishingInput: Boolean) {
         StatsUtils.onFinishInputView()
-        mHandler.onFinishInputView(finishingInput)
+        handler.onFinishInputView(finishingInput)
         statsUtilsManager.onFinishInputView()
         gestureConsumer = GestureConsumer.NULL_GESTURE_CONSUMER
         BackgroundGatheringCache.saveOrClear(this)
     }
 
     override fun onFinishInput() {
-        mHandler.onFinishInput()
+        handler.onFinishInput()
         BackgroundGatheringCache.saveOrClear(this)
     }
 
@@ -813,12 +817,10 @@ class LatinIME : InputMethodService(),
         StatsUtils.onSubtypeChanged(oldSubtype, subtype)
         richImm.onSubtypeChanged(subtype)
         inputLogic.onSubtypeChanged(SubtypeLocaleUtils.getCombiningRulesExtraValue(subtype),
-                mSettings.getCurrent())
+                settings.getCurrent())
         loadKeyboard()
-        if (hasSuggestionStripView()) {
-            suggestionStripView!!.setRtl(richImm.currentSubtype.isRtlSubtype)
-        }
-        mSettings.saveSubtypeForApp(richImm.currentSubtype, getCurrentInputEditorInfo().packageName)
+        suggestionStripView?.setRtl(richImm.currentSubtype.isRtlSubtype)
+        settings.saveSubtypeForApp(richImm.currentSubtype, getCurrentInputEditorInfo().packageName)
     }
 
     /** alias to onCurrentInputMethodSubtypeChanged with a better name, as it's also used for internal switching */
@@ -831,14 +833,14 @@ class LatinIME : InputMethodService(),
 
         val subtypeForApp = if (editorInfo == null)
             null else
-            mSettings.getSubtypeForApp(editorInfo.packageName)
+            settings.getSubtypeForApp(editorInfo.packageName)
         val hintLocales = EditorInfoCompatUtils.getHintLocales(editorInfo)
         val subtypeForLocales = subtypeState.getSubtypeForLocales(richImm, hintLocales, subtypeForApp)
         if (DebugFlags.DEBUG_ENABLED)
             Log.d(TAG, "onStartInputInternal: hint locales " + hintLocales + ", found matching subtype: " + (subtypeForLocales != null))
         if (subtypeForLocales != null) {
             // found a better subtype using hint locales and saved-per-app subtype, that we should switch to.
-            mHandler.postSwitchLanguage(subtypeForLocales)
+            handler.postSwitchLanguage(subtypeForLocales)
         }
     }
 
@@ -856,20 +858,19 @@ class LatinIME : InputMethodService(),
 
         // If we are starting input in a different text field from before, we'll have to reload
         // settings, so currentSettingsValues can't be final.
-        var currentSettingsValues = mSettings.getCurrent()
+        var currentSettingsValues = settings.getCurrent()
         val inputTypeChanged = !currentSettingsValues.isSameInputType(editorInfo)
         val isDifferentTextField = !restarting || inputTypeChanged
 
         // we want to reload the settings before calling updateKeyboardTheme, because updateKeyboardTheme reads SettingsValues.mToolbarMode
         if (isDifferentTextField || !currentSettingsValues.hasSameOrientation(getResources().getConfiguration())) {
             loadSettings()
-            if (hasSuggestionStripView())
-                suggestionStripView!!.updateVoiceKey()
+            suggestionStripView?.updateVoiceKey()
         }
 
-        switcher.updateKeyboardTheme(displayContext!!)
+        switcher.updateKeyboardTheme(displayContext)
         val mainKeyboardView: MainKeyboardView? = switcher.getMainKeyboardView()
-        currentSettingsValues = mSettings.getCurrent() // settingsValues may have been reloaded
+        currentSettingsValues = settings.getCurrent() // settingsValues may have been reloaded
 
         if (editorInfo == null) {
             Log.e(TAG, "Null EditorInfo in onStartInputView()")
@@ -922,11 +923,12 @@ class LatinIME : InputMethodService(),
         showKeyboardForField(mainKeyboardView, currentSettingsValues, isDifferentTextField, restarting, needToCallLoadKeyboardLater)
 
         // Set neutral suggestions and show the toolbar if the "Auto show toolbar" setting is enabled.
-        if (!mHandler.hasPendingResumeSuggestions()) {
-            mHandler.cancelUpdateSuggestionStrip()
+        if (!handler.hasPendingResumeSuggestions()) {
+            handler.cancelUpdateSuggestionStrip()
             setNeutralSuggestionStrip()
-            if (hasSuggestionStripView() && currentSettingsValues.mAutoShowToolbar && !tryShowClipboardSuggestion()) {
-                suggestionStripView!!.setToolbarVisibility(true)
+            val stripView = suggestionStripView
+            if (stripView != null && currentSettingsValues.mAutoShowToolbar && !tryShowClipboardSuggestion()) {
+                stripView.setToolbarVisibility(true)
             }
         }
 
@@ -957,23 +959,23 @@ class LatinIME : InputMethodService(),
         resetDictionaryFacilitatorIfNecessary()
 
         // TODO[IL]: Can the following be moved to InputLogic#startInput?
-        if (!inputLogic.mConnection.resetCachesUponCursorMoveAndReturnSuccess(
+        if (!inputLogic.connection.resetCachesUponCursorMoveAndReturnSuccess(
                 editorInfo.initialSelStart, editorInfo.initialSelEnd,
                 false /* shouldFinishComposition */)) {
             // Sometimes, while rotating, for some reason the framework tells the app we are not
             // connected to it and that means we can't refresh the cache. In this case, schedule
             // a refresh later.
             // We try resetting the caches up to 5 times before giving up.
-            mHandler.postResetCaches(isDifferentTextField, 5 /* remainingTries */)
+            handler.postResetCaches(isDifferentTextField, 5 /* remainingTries */)
             return false
         }
         // When rotating, and when input is starting again in a field from where the focus
         // didn't move (the keyboard having been closed with the back key),
         // initialSelStart and initialSelEnd sometimes are lying. Make a best effort to
         // work around this bug.
-        inputLogic.mConnection.tryFixIncorrectCursorPosition()
-        if (inputLogic.mConnection.isCursorTouchingWord(currentSettingsValues.mSpacingAndPunctuations, true)) {
-            mHandler.postResumeSuggestions(true /* shouldDelay */)
+        inputLogic.connection.tryFixIncorrectCursorPosition()
+        if (inputLogic.connection.isCursorTouchingWord(currentSettingsValues.mSpacingAndPunctuations, true)) {
+            handler.postResumeSuggestions(true /* shouldDelay */)
         }
         return true
     }
@@ -1043,7 +1045,7 @@ class LatinIME : InputMethodService(),
 
     private fun cleanupInternalStateForFinishInput() {
         // Remove pending messages related to update suggestions
-        mHandler.cancelUpdateSuggestionStrip()
+        handler.cancelUpdateSuggestionStrip()
         // Should do the following in onFinishInputInternal but until JB MR2 it's not called :(
         inputLogic.finishInput()
         keyboardActionListener.resetMetaState()
@@ -1068,14 +1070,15 @@ class LatinIME : InputMethodService(),
         // not attempt recorrection. This is true even with a hardware keyboard connected: if the
         // view is not displayed we have no means of showing suggestions anyway, and if it is then
         // we want to show suggestions anyway.
-        val settingsValues = mSettings.getCurrent()
+        val settingsValues = settings.getCurrent()
         if (isInputViewShown()
                 && inputLogic.onUpdateSelection(oldSelStart, oldSelEnd, newSelStart, newSelEnd,
                 composingSpanStart, composingSpanEnd, settingsValues)) {
             // we don't want to update a manually set shift state if selection changed towards one side
             // because this may end the manual shift, which is unwanted in case of shift + arrow keys for changing selection
             // todo: this is not fully implemented yet, and maybe should be behind a setting
-            if (keyboardSwitcher.getKeyboard() != null && keyboardSwitcher.getKeyboard()!!.mId.element.isAlphabetShiftedManually
+            val keyboard = keyboardSwitcher.getKeyboard()
+            if (keyboard != null && keyboard.mId.element.isAlphabetShiftedManually
                 && ((oldSelEnd == newSelEnd && oldSelStart != newSelStart) || (oldSelEnd != newSelEnd && oldSelStart == newSelStart)))
                 return
             keyboardSwitcher.updateShiftState(getCurrentAutoCapsState(), getCurrentRecapitalizeState())
@@ -1091,7 +1094,7 @@ class LatinIME : InputMethodService(),
      * cause the suggestions strip to disappear and re-appear.
      */
     override fun onExtractedTextClicked() {
-        if (mSettings.getCurrent().needsToLookupSuggestions()) {
+        if (settings.getCurrent().needsToLookupSuggestions()) {
             return
         }
 
@@ -1108,7 +1111,7 @@ class LatinIME : InputMethodService(),
      * cause the suggestions strip to disappear and re-appear.
      */
     override fun onExtractedCursorMovement(dx: Int, dy: Int) {
-        if (mSettings.getCurrent().needsToLookupSuggestions()) {
+        if (settings.getCurrent().needsToLookupSuggestions()) {
             return
         }
 
@@ -1117,13 +1120,15 @@ class LatinIME : InputMethodService(),
 
     override fun hideWindow() {
         Log.i(TAG, "hideWindow")
-        if (hasSuggestionStripView() && mSettings.getCurrent().mToolbarMode == ToolbarMode.EXPANDABLE)
-            suggestionStripView!!.setToolbarVisibility(false)
+        val stripView = suggestionStripView
+        if (stripView != null && settings.getCurrent().mToolbarMode == ToolbarMode.EXPANDABLE)
+            stripView.setToolbarVisibility(false)
         keyboardSwitcher.onHideWindow()
 
         if (TRACE) Debug.stopMethodTracing()
-        if (isShowingOptionDialog()) {
-            optionsDialog!!.dismiss()
+        val dialog = optionsDialog
+        if (dialog != null && dialog.isShowing()) {
+            dialog.dismiss()
             optionsDialog = null
         }
         super.hideWindow()
@@ -1147,12 +1152,12 @@ class LatinIME : InputMethodService(),
                 }
             }
         }
-        if (!mSettings.getCurrent().mInputAttributes.mApplicationSpecifiedCompletionOn) {
+        if (!settings.getCurrent().mInputAttributes.mApplicationSpecifiedCompletionOn) {
             return
         }
         // If we have an update request in flight, we need to cancel it so it does not override
         // these completions.
-        mHandler.cancelUpdateSuggestionStrip()
+        handler.cancelUpdateSuggestionStrip()
         if (applicationSpecifiedCompletions == null) {
             setNeutralSuggestionStrip()
             return
@@ -1176,20 +1181,23 @@ class LatinIME : InputMethodService(),
     override fun onComputeInsets(outInsets: InputMethodService.Insets?) {
         super.onComputeInsets(outInsets)
         // This method may be called before {@link #setInputView(View)}.
-        if (inputView == null) {
+        val currentInputView = inputView
+        if (currentInputView == null) {
             return
         }
         val visibleKeyboardView = keyboardSwitcher.getWrapperView()
         if (visibleKeyboardView == null) {
             return
         }
-        val inputHeight = inputView!!.getHeight()
+        // outInsets is nullable only because of the SDK signature
+        val insets = outInsets!!
+        val inputHeight = currentInputView.getHeight()
         if (isImeSuppressedByHardwareKeyboard() && !visibleKeyboardView.isShown()) {
             // If there is a hardware keyboard and a visible software keyboard view has been hidden,
             // no visual element will be shown on the screen.
             // for some reason setting contentTopInsets and visibleTopInsets broke somewhere along the
             // way from OpenBoard to HeliBoard (GH-702, GH-1455), but not setting anything seems to work
-            insetsUpdater.setInsets(outInsets!!)
+            insetsUpdater.setInsets(insets)
             return
         }
         val stripHeight = if (keyboardSwitcher.isShowingStripContainer()) keyboardSwitcher.getStripContainer().getHeight() else 0
@@ -1197,9 +1205,7 @@ class LatinIME : InputMethodService(),
         if (Settings.getValues().mIsFloatingKeyboard)
             visibleTopY = getResources().getDisplayMetrics().heightPixels
 
-        if (hasSuggestionStripView()) {
-            suggestionStripView!!.setMoreSuggestionsHeight(visibleTopY)
-        }
+        suggestionStripView?.setMoreSuggestionsHeight(visibleTopY)
 
         // Need to set expanded touchable region only if a keyboard view is being shown.
         if (visibleKeyboardView.isShown()) {
@@ -1207,23 +1213,23 @@ class LatinIME : InputMethodService(),
             var touchTop = if (keyboardSwitcher.isShowingPopupKeysPanel()) 0 else visibleTopY
             var touchRight = visibleKeyboardView.getWidth()
             var touchBottom = inputHeight + EXTENDED_TOUCHABLE_REGION_HEIGHT // Extend touchable region below the keyboard.
-            if (mSettings.getCurrent().mIsFloatingKeyboard) {
+            if (settings.getCurrent().mIsFloatingKeyboard) {
                 val xy = FloatingKeyboardUtils.readPosition(this, Int.MAX_VALUE, Int.MAX_VALUE)
                 touchLeft = xy.component1()
                 touchTop = xy.component2()
-                touchRight = touchLeft + mSettings.getCurrent().mFloatingWidth
+                touchRight = touchLeft + settings.getCurrent().mFloatingWidth
                 touchBottom = touchTop + inputHeight
             }
-            outInsets!!.touchableInsets = InputMethodService.Insets.TOUCHABLE_INSETS_REGION
-            outInsets.touchableRegion.set(touchLeft, touchTop, touchRight, touchBottom)
+            insets.touchableInsets = InputMethodService.Insets.TOUCHABLE_INSETS_REGION
+            insets.touchableRegion.set(touchLeft, touchTop, touchRight, touchBottom)
         }
 
         // Has to be subtracted after calculating touchableRegion
         visibleTopY -= getEmojiSearchActivityHeight()
 
-        outInsets!!.contentTopInsets = visibleTopY
-        outInsets.visibleTopInsets = visibleTopY
-        insetsUpdater.setInsets(outInsets)
+        insets.contentTopInsets = visibleTopY
+        insets.visibleTopInsets = visibleTopY
+        insetsUpdater.setInsets(insets)
     }
 
     fun startShowingInputView(needsToLoadKeyboard: Boolean) {
@@ -1256,7 +1262,7 @@ class LatinIME : InputMethodService(),
     }
 
     override fun onEvaluateFullscreenMode(): Boolean {
-        if (isImeSuppressedByHardwareKeyboard() || mSettings.getCurrent().mIsFloatingKeyboard) {
+        if (isImeSuppressedByHardwareKeyboard() || settings.getCurrent().mIsFloatingKeyboard) {
             // If there is a hardware keyboard or we're floating, disable full screen mode.
             return false
         }
@@ -1272,8 +1278,9 @@ class LatinIME : InputMethodService(),
             val noExtractUi = (ei.imeOptions and EditorInfo.IME_FLAG_NO_EXTRACT_UI) != 0
             val noFullscreen = (ei.imeOptions and EditorInfo.IME_FLAG_NO_FULLSCREEN) != 0
             if (noExtractUi || noFullscreen) return false
-            if (keyboardSwitcher.getVisibleKeyboardView() == null || suggestionStripView == null) return false
-            val usedHeight = keyboardSwitcher.getVisibleKeyboardView().getHeight() + suggestionStripView!!.getHeight()
+            val stripView = suggestionStripView
+            if (keyboardSwitcher.getVisibleKeyboardView() == null || stripView == null) return false
+            val usedHeight = keyboardSwitcher.getVisibleKeyboardView().getHeight() + stripView.getHeight()
             val availableHeight = getResources().getDisplayMetrics().heightPixels
             return usedHeight > availableHeight * 0.6 // if we have less than 40% available, use fullscreen mode
         }
@@ -1310,7 +1317,7 @@ class LatinIME : InputMethodService(),
         val inlineSuggestionView: View = InlineAutofillUtils.createView(inlineSuggestions, displayContext)
 
         // Without this function the inline autofill suggestions will not be visible
-        mHandler.cancelResumeSuggestions()
+        handler.cancelResumeSuggestions()
 
         suggestionStripView!!.setExternalSuggestionView(inlineSuggestionView, true)
 
@@ -1318,7 +1325,7 @@ class LatinIME : InputMethodService(),
     }
 
     fun getCurrentAutoCapsState(): Int {
-        return inputLogic.getCurrentAutoCapsState(mSettings.getCurrent())
+        return inputLogic.getCurrentAutoCapsState(settings.getCurrent())
     }
 
     fun getCurrentRecapitalizeState(): RecapitalizeMode? {
@@ -1345,21 +1352,22 @@ class LatinIME : InputMethodService(),
     fun showInputPickerDialog(): Boolean {
         if (isShowingOptionDialog()) return false
         if (richImm.hasMultipleEnabledIMEsOrSubtypes(true)) {
-            optionsDialog = createInputMethodPickerDialog(this, richImm, keyboardSwitcher.getMainKeyboardView().getWindowToken())
-            optionsDialog!!.show()
+            val dialog = createInputMethodPickerDialog(this, richImm, keyboardSwitcher.getMainKeyboardView().getWindowToken())
+            optionsDialog = dialog
+            dialog.show()
             return true
         }
         return false
     }
 
     private fun isShowingOptionDialog(): Boolean {
-        return optionsDialog != null && optionsDialog!!.isShowing()
+        return optionsDialog?.isShowing() == true
     }
 
     // called when language switch key is pressed (either the keyboard key, or long-press comma)
     fun switchToNextSubtype() {
-        val switchSubtype = mSettings.getCurrent().mLanguageSwitchKeyToOtherSubtypes
-        val switchIme = mSettings.getCurrent().mLanguageSwitchKeyToOtherImes
+        val switchSubtype = settings.getCurrent().mLanguageSwitchKeyToOtherSubtypes
+        val switchIme = settings.getCurrent().mLanguageSwitchKeyToOtherImes
 
         // switch IME if wanted and possible
         if (switchIme && !switchSubtype && this.switchInputMethod())
@@ -1401,9 +1409,9 @@ class LatinIME : InputMethodService(),
             richImm.switchToShortcutIme(this)
         }
         val completeInputTransaction =
-                inputLogic.onCodeInput(mSettings.getCurrent(), event,
+                inputLogic.onCodeInput(settings.getCurrent(), event,
                         keyboardSwitcher.getKeyboardCapsMode(),
-                        keyboardSwitcher.getCurrentKeyboardScript(), mHandler)
+                        keyboardSwitcher.getCurrentKeyboardScript(), handler)
         updateStateAfterInputTransaction(completeInputTransaction)
         keyboardSwitcher.onEvent(event, getCurrentAutoCapsState(), getCurrentRecapitalizeState())
     }
@@ -1412,15 +1420,15 @@ class LatinIME : InputMethodService(),
         if (rawText == null) return
         // TODO: have the keyboard pass the correct key code when we need it.
         val event = Event.createSoftwareTextEvent(rawText, KeyCode.MULTIPLE_CODE_POINTS, null)
-        val completeInputTransaction = inputLogic.onTextInput(mSettings.getCurrent(),
-            event, keyboardSwitcher.getKeyboardCapsMode(), mHandler)
+        val completeInputTransaction = inputLogic.onTextInput(settings.getCurrent(),
+            event, keyboardSwitcher.getKeyboardCapsMode(), handler)
         updateStateAfterInputTransaction(completeInputTransaction)
-        inputLogic.restartSuggestionsOnWordTouchedByCursor(mSettings.getCurrent(), keyboardSwitcher.getCurrentKeyboardScript())
+        inputLogic.restartSuggestionsOnWordTouchedByCursor(settings.getCurrent(), keyboardSwitcher.getCurrentKeyboardScript())
         keyboardSwitcher.onEvent(event, getCurrentAutoCapsState(), getCurrentRecapitalizeState())
     }
 
     fun onStartBatchInput() {
-        inputLogic.onStartBatchInput(mSettings.getCurrent(), keyboardSwitcher, mHandler)
+        inputLogic.onStartBatchInput(settings.getCurrent(), keyboardSwitcher, handler)
         gestureConsumer.onGestureStarted(richImm.currentSubtypeLocale, keyboardSwitcher.getKeyboard())
     }
 
@@ -1434,7 +1442,7 @@ class LatinIME : InputMethodService(),
     }
 
     fun onCancelBatchInput() {
-        inputLogic.onCancelBatchInput(mHandler)
+        inputLogic.onCancelBatchInput(handler)
         gestureConsumer.onGestureCanceled()
     }
 
@@ -1465,12 +1473,10 @@ class LatinIME : InputMethodService(),
     }
 
     private fun setSuggestedWords(suggestedWords: SuggestedWords) {
-        val currentSettingsValues = mSettings.getCurrent()
+        val currentSettingsValues = settings.getCurrent()
         inputLogic.setSuggestedWords(suggestedWords)
         // TODO: Modify this when we support suggestions with hard keyboard
-        if (!hasSuggestionStripView()) {
-            return
-        }
+        val stripView = suggestionStripView ?: return
         if (!onEvaluateInputViewShown()) {
             return
         }
@@ -1486,11 +1492,11 @@ class LatinIME : InputMethodService(),
                 || currentSettingsValues.mInputAttributes.mApplicationSpecifiedCompletionOn
                 // We should clear the contextual strip if there is no suggestion from dictionaries.
                 || noSuggestionsFromDictionaries) {
-            suggestionStripView!!.setSuggestions(suggestedWords,
+            stripView.setSuggestions(suggestedWords,
                     richImm.currentSubtype.isRtlSubtype)
             // Auto hide the toolbar if dictionary suggestions are available
             if (currentSettingsValues.mAutoHideToolbar && !noSuggestionsFromDictionaries) {
-                suggestionStripView!!.setToolbarVisibility(false)
+                stripView.setToolbarVisibility(false)
             }
         }
     }
@@ -1511,19 +1517,17 @@ class LatinIME : InputMethodService(),
     }
 
     override fun showSuggestionStrip() {
-        if (hasSuggestionStripView()) {
-            suggestionStripView!!.setToolbarVisibility(false)
-        }
+        suggestionStripView?.setToolbarVisibility(false)
     }
 
     // Called from {@link SuggestionStripView} through the {@link SuggestionStripView#Listener}
     // interface
     override fun pickSuggestionManually(suggestionInfo: SuggestedWordInfo?) {
         val completeInputTransaction = inputLogic.onPickSuggestionManually(
-                mSettings.getCurrent(), suggestionInfo!!,
+                settings.getCurrent(), suggestionInfo!!,
                 keyboardSwitcher.getKeyboardCapsMode(),
                 keyboardSwitcher.getCurrentKeyboardScript(),
-                mHandler)
+                handler)
         updateStateAfterInputTransaction(completeInputTransaction)
     }
 
@@ -1532,10 +1536,10 @@ class LatinIME : InputMethodService(),
      *  returns whether a clipboard suggestion has been set.
      */
     fun tryShowClipboardSuggestion(): Boolean {
-        if (!hasSuggestionStripView()) return false
-        val clipboardView = clipboardHistoryManager.getClipboardSuggestionView(getCurrentInputEditorInfo(), suggestionStripView)
+        val stripView = suggestionStripView ?: return false
+        val clipboardView = clipboardHistoryManager.getClipboardSuggestionView(getCurrentInputEditorInfo(), stripView)
         if (clipboardView != null) {
-            suggestionStripView!!.setExternalSuggestionView(clipboardView, false)
+            stripView.setExternalSuggestionView(clipboardView, false)
             return true
         }
         return false
@@ -1547,23 +1551,24 @@ class LatinIME : InputMethodService(),
     // Then, the toolbar will be shown automatically if the relevant setting is enabled
     // and there is a selection of text or it's the start of a line.
     override fun setNeutralSuggestionStrip() {
-        val currentSettings = mSettings.getCurrent()
+        val currentSettings = settings.getCurrent()
         if (tryShowClipboardSuggestion()) {
             // clipboard suggestion has been set
-            if (hasSuggestionStripView() && currentSettings.mAutoHideToolbar)
-                suggestionStripView!!.setToolbarVisibility(false)
+            if (currentSettings.mAutoHideToolbar)
+                suggestionStripView?.setToolbarVisibility(false)
             return
         }
         val neutralSuggestions: SuggestedWords = if (currentSettings.mSuggestPunctuation)
                 currentSettings.mPunctuationSuggestions
                 else SuggestedWords.getEmptyInstance()
         setSuggestedWords(neutralSuggestions)
-        if (hasSuggestionStripView() && currentSettings.mAutoShowToolbar) {
-            val codePointBeforeCursor = inputLogic.mConnection.getCodePointBeforeCursor()
-            if (inputLogic.mConnection.hasSelection()
+        val stripView = suggestionStripView
+        if (stripView != null && currentSettings.mAutoShowToolbar) {
+            val codePointBeforeCursor = inputLogic.connection.getCodePointBeforeCursor()
+            if (inputLogic.connection.hasSelection()
                     || codePointBeforeCursor == Constants.NOT_A_CODE
                     || codePointBeforeCursor == Constants.CODE_ENTER) {
-                suggestionStripView!!.setToolbarVisibility(true)
+                stripView.setToolbarVisibility(true)
             }
         }
     }
@@ -1574,7 +1579,7 @@ class LatinIME : InputMethodService(),
 
     override fun removeExternalSuggestions() {
         setNeutralSuggestionStrip()
-        mHandler.postResumeSuggestions(false)
+        handler.postResumeSuggestions(false)
     }
 
     private fun loadKeyboard() {
@@ -1583,7 +1588,7 @@ class LatinIME : InputMethodService(),
         // the screen. Anything we do right now will delay this, so wait until the next frame
         // before we do the rest, like reopening dictionaries and updating suggestions. So we
         // post a message.
-        mHandler.postReopenDictionaries()
+        handler.postReopenDictionaries()
         loadSettings()
         if (keyboardSwitcher.getMainKeyboardView() != null) {
             // Reload keyboard because the current language has been changed.
@@ -1599,7 +1604,7 @@ class LatinIME : InputMethodService(),
      */
     private fun updateStateAfterInputTransaction(inputTransaction: InputTransaction) {
         when (inputTransaction.requiredShiftUpdate) {
-            InputTransaction.SHIFT_UPDATE_LATER -> mHandler.postUpdateShiftState()
+            InputTransaction.SHIFT_UPDATE_LATER -> handler.postUpdateShiftState()
             InputTransaction.SHIFT_UPDATE_NOW -> keyboardSwitcher
                     .updateShiftState(getCurrentAutoCapsState(), getCurrentRecapitalizeState())
             else -> {
@@ -1615,7 +1620,7 @@ class LatinIME : InputMethodService(),
             } else {
                 inputStyle = SuggestedWords.INPUT_STYLE_TYPING
             }
-            mHandler.postUpdateSuggestionStrip(inputStyle)
+            handler.postUpdateSuggestionStrip(inputStyle)
         }
         if (inputTransaction.didAffectContents()) {
             subtypeState.setCurrentSubtypeHasBeenUsed()
@@ -1633,10 +1638,10 @@ class LatinIME : InputMethodService(),
             // No need to feedback when repeat delete/cursor keys will have no effect.
             when (code) {
                 KeyCode.DELETE, KeyCode.ARROW_LEFT, KeyCode.ARROW_UP, KeyCode.WORD_LEFT, KeyCode.PAGE_UP ->
-                    if (!inputLogic.mConnection.canDeleteCharacters())
+                    if (!inputLogic.connection.canDeleteCharacters())
                         return
                 KeyCode.ARROW_RIGHT, KeyCode.ARROW_DOWN, KeyCode.WORD_RIGHT, KeyCode.PAGE_DOWN ->
-                    if (!inputLogic.mConnection.hasTextAfterCursor())
+                    if (!inputLogic.connection.hasTextAfterCursor())
                         return
             }
             // TODO: Use event time that the last feedback has been generated instead of relying on
@@ -1676,7 +1681,7 @@ class LatinIME : InputMethodService(),
     }
 
     fun launchSettings() {
-        inputLogic.commitTyped(mSettings.getCurrent(), LastComposedWord.NOT_A_SEPARATOR)
+        inputLogic.commitTyped(settings.getCurrent(), LastComposedWord.NOT_A_SEPARATOR)
         requestHideSelf(0)
         val mainKeyboardView = keyboardSwitcher.getMainKeyboardView()
         if (mainKeyboardView != null) {
@@ -1703,7 +1708,7 @@ class LatinIME : InputMethodService(),
             if (isImeClosed(intent)) {
                 requestHideSelf(0)
             } else {
-                mHandler.postDelayed(keyboardSwitcher::setEmojiKeyboard, 100)
+                handler.postDelayed(keyboardSwitcher::setEmojiKeyboard, 100)
                 if (intent.hasExtra(EmojiSearchActivity.EMOJI_KEY)) {
                      onTextInput(intent.getStringExtra(EmojiSearchActivity.EMOJI_KEY))
                 }
@@ -1727,7 +1732,7 @@ class LatinIME : InputMethodService(),
     }
 
     fun debugDumpStateAndCrashWithException(context: String) {
-        val settingsValues = mSettings.getCurrent()
+        val settingsValues = settings.getCurrent()
         val s = settingsValues.toString() + "\nAttributes : " + settingsValues.mInputAttributes +
                 "\nContext : " + context
         throw RuntimeException(s)
@@ -1743,7 +1748,7 @@ class LatinIME : InputMethodService(),
         val keyboard = keyboardSwitcher.getKeyboard()
         val keyboardMode = if (keyboard != null) keyboard.mId.mode else null
         p.println("  Keyboard mode = " + keyboardMode)
-        val settingsValues = mSettings.getCurrent()
+        val settingsValues = settings.getCurrent()
         p.println(settingsValues.dump())
         p.println(dictionaryFacilitator.dump(this))
     }
@@ -1751,7 +1756,7 @@ class LatinIME : InputMethodService(),
     // slightly modified from Simple Keyboard: https://github.com/rkkr/simple-keyboard/blob/master/app/src/main/java/rkr/simplekeyboard/inputmethod/latin/LatinIME.java
     @Suppress("DEPRECATION")
     private fun setNavigationBarColor() {
-        val settingsValues = mSettings.getCurrent()
+        val settingsValues = settings.getCurrent()
         if (!settingsValues.mCustomNavBarColor)
             return
         val color = settingsValues.mColors.get(ColorType.NAVIGATION_BAR)
@@ -1774,7 +1779,7 @@ class LatinIME : InputMethodService(),
 
     @Suppress("DEPRECATION")
     private fun clearNavigationBarColor() {
-        val settingsValues = mSettings.getCurrent()
+        val settingsValues = settings.getCurrent()
         if (!settingsValues.mCustomNavBarColor)
             return
         val window = getWindow().getWindow()

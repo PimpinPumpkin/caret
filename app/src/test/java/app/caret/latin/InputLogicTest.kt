@@ -59,7 +59,7 @@ class InputLogicTest {
     private val latinIME = Robolectric.setupService(LatinIME::class.java)
     private val settingsValues get() = Settings.getValues()
     private val inputLogic get() = latinIME.inputLogic
-    private val connection: RichInputConnection get() = inputLogic.mConnection
+    private val connection: RichInputConnection get() = inputLogic.connection
     private val composerReader = InputLogic::class.java.getDeclaredField("wordComposer").apply { isAccessible = true }
     private val composer get() = composerReader.get(inputLogic) as WordComposer
     private val spaceStateReader = InputLogic::class.java.getDeclaredField("spaceState").apply { isAccessible = true }
@@ -88,7 +88,7 @@ class InputLogicTest {
         assertEquals("c", getTextFromConnection())
         assertEquals("", textAfterCursor)
         assertEquals("c", composingText)
-        latinIME.mHandler.onFinishInput()
+        latinIME.handler.onFinishInput()
         assertEquals("", composingText)
     }
 
@@ -870,7 +870,7 @@ class InputLogicTest {
 
     /** A whole swipe: the start, which commits what was being typed, then the recognized word. */
     private fun swipe(word: String) {
-        latinIME.inputLogic.onStartBatchInput(settingsValues, KeyboardSwitcher.getInstance(), latinIME.mHandler)
+        latinIME.inputLogic.onStartBatchInput(settingsValues, KeyboardSwitcher.getInstance(), latinIME.handler)
         handleMessages()
         glideTypingInput(word)
         handleMessages()
@@ -1269,8 +1269,8 @@ class InputLogicTest {
         ei.inputType = currentInputType
         ei.initialSelStart = newText.length
         ei.initialSelEnd = newText.length
-        latinIME.mHandler.onStartInput(ei, false)
-        latinIME.mHandler.onStartInputView(ei, false)
+        latinIME.handler.onStartInput(ei, false)
+        latinIME.handler.onStartInputView(ei, false)
         handleMessages()
     }
 
@@ -1294,8 +1294,8 @@ class InputLogicTest {
         ei.inputType = currentInputType
         ei.initialSelStart = 0
         ei.initialSelEnd = 0
-        latinIME.mHandler.onStartInput(ei, false)
-        latinIME.mHandler.onStartInputView(ei, false)
+        latinIME.handler.onStartInput(ei, false)
+        latinIME.handler.onStartInputView(ei, false)
         handleMessages()
         rawType("there")
         assertEquals("hello there", text)
@@ -1308,8 +1308,8 @@ class InputLogicTest {
         ei.inputType = currentInputType
         ei.initialSelStart = selectionStart
         ei.initialSelEnd = selectionEnd
-        latinIME.mHandler.onStartInput(ei, restarting)
-        latinIME.mHandler.onStartInputView(ei, restarting)
+        latinIME.handler.onStartInput(ei, restarting)
+        latinIME.handler.onStartInputView(ei, restarting)
         handleMessages()
     }
 
@@ -1366,7 +1366,7 @@ class InputLogicTest {
 
         if (!latinIME.prefs().getString(Settings.PREF_SELECTED_SUBTYPE, "")!!.contains("CombiningRules") // check fails if combiner merges symbols
             && !(codePoint == Constants.CODE_SPACE && oldBefore.lastOrNull() == ' ') // check fails when 2 spaces are converted into a period
-            && !latinIME.inputLogic.mSuggestedWords.mWillAutoCorrect // autocorrect obviously creates inconsistencies
+            && !latinIME.inputLogic.suggestedWords.mWillAutoCorrect // autocorrect obviously creates inconsistencies
             ) {
             if (phantomSpaceToInsert.isEmpty())
                 assertEquals(oldBefore + insert, textBeforeCursor)
@@ -1431,8 +1431,8 @@ class InputLogicTest {
         handleMessages()
 
         if (weirdTextField) {
-            latinIME.mHandler.onStartInput(ei, true) // essentially does nothing
-            latinIME.mHandler.onStartInputView(ei, true) // does the thing
+            latinIME.handler.onStartInput(ei, true) // essentially does nothing
+            latinIME.handler.onStartInputView(ei, true) // does the thing
             handleMessages()
         }
 
@@ -1461,8 +1461,8 @@ class InputLogicTest {
         // restarting is false, so this is seen as a new text field
         val ei = EditorInfo()
         ei.inputType = currentInputType
-        latinIME.mHandler.onStartInput(ei, false)
-        latinIME.mHandler.onStartInputView(ei, false)
+        latinIME.handler.onStartInput(ei, false)
+        latinIME.handler.onStartInputView(ei, false)
         handleMessages() // this is important so the composing span is set correctly
         checkConnectionConsistency()
     }
@@ -1521,17 +1521,17 @@ class InputLogicTest {
     // always need to handle messages for proper simulation
     private fun handleMessages() {
         while (messages.isNotEmpty()) {
-            latinIME.mHandler.handleMessage(messages.first())
+            latinIME.handler.handleMessage(messages.first())
             messages.removeAt(0)
         }
         while (delayedMessages.isNotEmpty()) {
             val msg = delayedMessages.first()
             if (msg.what != 2) // MSG_UPDATE_SUGGESTION_STRIP, we want to ignore it because it's irrelevant and has a 500 ms timeout
-                latinIME.mHandler.handleMessage(delayedMessages.first())
+                latinIME.handler.handleMessage(delayedMessages.first())
             delayedMessages.removeAt(0)
             // delayed messages may post further messages, handle before next delayed message
             while (messages.isNotEmpty()) {
-                latinIME.mHandler.handleMessage(messages.first())
+                latinIME.handler.handleMessage(messages.first())
                 messages.removeAt(0)
             }
         }

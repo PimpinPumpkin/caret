@@ -72,8 +72,8 @@ class PointerTracker private constructor(id: Int) : PointerTrackerQueue.Element,
 
     // The {@link KeyDetector} is set whenever the down event is processed. Also this is updated
     // when new {@link Keyboard} is set by {@link #setKeyDetector(KeyDetector)}.
-    private var mKeyDetector: KeyDetector = KeyDetector()
-    private var mKeyboard: Keyboard? = null
+    private var keyDetector: KeyDetector = KeyDetector()
+    private var keyboard: Keyboard? = null
     private val bogusMoveEventDetector = BogusMoveEventDetector()
 
     private var isDetectingGesture = false // per PointerTracker.
@@ -84,14 +84,14 @@ class PointerTracker private constructor(id: Int) : PointerTrackerQueue.Element,
     private var upTime: Long = 0
 
     // The current key where this pointer is.
-    private var mCurrentKey: Key? = null
+    private var currentKey: Key? = null
     // The position where the current key was recognized for the first time.
     private var keyX: Int = 0
     private var keyY: Int = 0
 
     // Last pointer position.
-    private var mLastX: Int = 0
-    private var mLastY: Int = 0
+    private var lastX: Int = 0
+    private var lastY: Int = 0
     private var startX: Int = 0
     private var startY: Int = 0
     private var startTime: Long = 0
@@ -99,22 +99,22 @@ class PointerTracker private constructor(id: Int) : PointerTrackerQueue.Element,
     private var inVerticalSwipe = false
 
     // true if keyboard layout has been changed.
-    private var mKeyboardLayoutHasBeenChanged: Boolean = false
+    private var keyboardLayoutHasBeenChanged: Boolean = false
     private var keyboardChangeOccupiedHeightDifference: Int = 0
 
     // true if this pointer is no longer triggering any action because it has been canceled.
     private var isTrackingForActionDisabled: Boolean = false
 
     // the popup keys panel currently being shown. equals null if no panel is active.
-    private var mPopupKeysPanel: PopupKeysPanel? = null
+    private var popupKeysPanel: PopupKeysPanel? = null
 
     // true if this pointer is in the dragging finger mode.
-    private var mIsInDraggingFinger = false
+    private var inDraggingFinger = false
     // true if this pointer is sliding from a modifier key and in the sliding key input mode,
     // so that further modifier keys should be ignored.
-    private var mIsInSlidingKeyInput = false
+    private var isInSlidingKeyInput = false
     // if not a NOT_A_CODE, the key of this code is repeating
-    private var mCurrentRepeatingKeyCode: Int = Constants.NOT_A_CODE
+    private var currentRepeatingKeyCode: Int = Constants.NOT_A_CODE
 
     // true if dragging finger is allowed.
     private var isAllowedDraggingFinger: Boolean = false
@@ -142,7 +142,7 @@ class PointerTracker private constructor(id: Int) : PointerTrackerQueue.Element,
         if (inGesture || isDetectingGesture || isTrackingForActionDisabled) {
             return false
         }
-        val ignoreModifierKey = mIsInDraggingFinger && key.isModifier()
+        val ignoreModifierKey = inDraggingFinger && key.isModifier()
         if (DEBUG_LISTENER) {
             Log.d(TAG, String.format(Locale.US, "[%d] onPress    : %s%s%s%s", pointerId,
                 Constants.printableCode(key.getCode()),
@@ -156,11 +156,11 @@ class PointerTracker private constructor(id: Int) : PointerTrackerQueue.Element,
         }
         if (key.isEnabled()) {
             val hapticEvent = if (repeatCount == 0) HapticEvent.KEY_PRESS else HapticEvent.KEY_REPEAT
-            sListener.onPressKey(key.getCode(), repeatCount, getActivePointerTrackerCount(), hapticEvent)
-            val keyboardLayoutHasBeenChanged = mKeyboardLayoutHasBeenChanged
-            mKeyboardLayoutHasBeenChanged = false
-            sTimerProxy.startTypingStateTimer(key)
-            return keyboardLayoutHasBeenChanged
+            listener.onPressKey(key.getCode(), repeatCount, getActivePointerTrackerCount(), hapticEvent)
+            val layoutHasBeenChanged = keyboardLayoutHasBeenChanged
+            keyboardLayoutHasBeenChanged = false
+            timerProxy.startTypingStateTimer(key)
+            return layoutHasBeenChanged
         }
         return false
     }
@@ -170,9 +170,9 @@ class PointerTracker private constructor(id: Int) : PointerTrackerQueue.Element,
     private fun callListenerOnCodeInput(key: Key, primaryCode: Int, x: Int,
             y: Int, eventTime: Long, isKeyRepeat: Boolean) {
         val keyCode = key.getCode()
-        val ignoreModifierKey = mIsInDraggingFinger && key.isModifier()
+        val ignoreModifierKey = inDraggingFinger && key.isModifier()
                 && keyCode != KeyCode.NUMPAD && keyCode != KeyCode.DPAD // we allow these to be activated from sliding input
-        val altersCode = key.altCodeWhileTyping() && sTimerProxy.isTypingState() && !isClearlyInsideKey(key, x, y)
+        val altersCode = key.altCodeWhileTyping() && timerProxy.isTypingState() && !isClearlyInsideKey(key, x, y)
         val code = if (altersCode) key.getAltCode() else primaryCode
         if (DEBUG_LISTENER) {
             val output = if (code == KeyCode.MULTIPLE_CODE_POINTS)
@@ -188,12 +188,13 @@ class PointerTracker private constructor(id: Int) : PointerTrackerQueue.Element,
         if (key.isEnabled() || altersCode) {
             typingTimeRecorder.onCodeInput(code, eventTime)
             if (code == KeyCode.MULTIPLE_CODE_POINTS) {
-                sListener.onTextInput(key.getOutputText())
+                listener.onTextInput(key.getOutputText())
             } else if (code != KeyCode.NOT_SPECIFIED) {
-                if (mKeyboard!!.hasProximityCharsCorrection(code)) {
-                    sListener.onCodeInput(code, x, y, isKeyRepeat)
+                val kb = keyboard ?: return
+                if (kb.hasProximityCharsCorrection(code)) {
+                    listener.onCodeInput(code, x, y, isKeyRepeat)
                 } else {
-                    sListener.onCodeInput(code, Constants.NOT_A_COORDINATE, Constants.NOT_A_COORDINATE, isKeyRepeat)
+                    listener.onCodeInput(code, Constants.NOT_A_COORDINATE, Constants.NOT_A_COORDINATE, isKeyRepeat)
                 }
             }
         }
@@ -206,7 +207,7 @@ class PointerTracker private constructor(id: Int) : PointerTrackerQueue.Element,
         if (inGesture || isDetectingGesture || isTrackingForActionDisabled) {
             return
         }
-        val ignoreModifierKey = mIsInDraggingFinger && key.isModifier()
+        val ignoreModifierKey = inDraggingFinger && key.isModifier()
         if (DEBUG_LISTENER) {
             Log.d(TAG, String.format(Locale.US, "[%d] onRelease  : %s%s%s%s", pointerId,
                     Constants.printableCode(primaryCode),
@@ -217,7 +218,7 @@ class PointerTracker private constructor(id: Int) : PointerTrackerQueue.Element,
             return
         }
         if (key.isEnabled()) {
-            sListener.onReleaseKey(primaryCode, withSliding)
+            listener.onReleaseKey(primaryCode, withSliding)
         }
     }
 
@@ -225,56 +226,58 @@ class PointerTracker private constructor(id: Int) : PointerTrackerQueue.Element,
         if (DEBUG_LISTENER) {
             Log.d(TAG, String.format(Locale.US, "[%d] onFinishSlidingInput", pointerId))
         }
-        sListener.onFinishSlidingInput()
+        listener.onFinishSlidingInput()
     }
 
     private fun callListenerOnCancelInput() {
         if (DEBUG_LISTENER) {
             Log.d(TAG, String.format(Locale.US, "[%d] onCancelInput", pointerId))
         }
-        sListener.onCancelInput()
+        listener.onCancelInput()
     }
 
-    private fun setKeyDetectorInner(keyDetector: KeyDetector) {
-        val keyboard = keyDetector.getKeyboard()
-        if (keyboard == null) {
+    private fun setKeyDetectorInner(newKeyDetector: KeyDetector) {
+        val newKeyboard = newKeyDetector.getKeyboard()
+        if (newKeyboard == null) {
             return
         }
-        if (keyDetector === mKeyDetector && keyboard === mKeyboard) {
+        val oldKeyboard = keyboard
+        if (newKeyDetector === keyDetector && newKeyboard === oldKeyboard) {
             return
         }
-        if (mKeyboard != null) {
+        if (oldKeyboard != null) {
             // changing keyboards may change height
             // since y is measured from top of view, this change needs to be considered in some places
-            keyboardChangeOccupiedHeightDifference = keyboard.mOccupiedHeight - mKeyboard!!.mOccupiedHeight
+            keyboardChangeOccupiedHeightDifference = newKeyboard.mOccupiedHeight - oldKeyboard.mOccupiedHeight
         }
-        mKeyDetector = keyDetector
-        mKeyboard = keyboard
+        keyDetector = newKeyDetector
+        keyboard = newKeyboard
         // Mark that keyboard layout has been changed.
-        mKeyboardLayoutHasBeenChanged = true
-        val keyWidth = mKeyboard!!.mMostCommonKeyWidth
-        val keyHeight = mKeyboard!!.mMostCommonKeyHeight
-        batchInputArbiter.setKeyboardGeometry(keyWidth, mKeyboard!!.mOccupiedHeight)
-        // Keep {@link #mCurrentKey} that comes from previous keyboard. The key preview of
-        // {@link #mCurrentKey} will be dismissed by {@setReleasedKeyGraphics(Key)} via
+        keyboardLayoutHasBeenChanged = true
+        val keyWidth = newKeyboard.mMostCommonKeyWidth
+        val keyHeight = newKeyboard.mMostCommonKeyHeight
+        batchInputArbiter.setKeyboardGeometry(keyWidth, newKeyboard.mOccupiedHeight)
+        // Keep {@link #currentKey} that comes from previous keyboard. The key preview of
+        // {@link #currentKey} will be dismissed by {@setReleasedKeyGraphics(Key)} via
         // {@link onMoveEventInternal(int,int,long)} or {@link #onUpEventInternal(int,int,long)}.
         bogusMoveEventDetector.setKeyboardGeometry(keyWidth, keyHeight)
     }
 
     override fun isInDraggingFinger(): Boolean {
-        return mIsInDraggingFinger
+        return inDraggingFinger
     }
 
     fun getKey(): Key? {
-        return mCurrentKey
+        return currentKey
     }
 
     override fun isModifier(): Boolean {
-        return mCurrentKey != null && mCurrentKey!!.isModifier()
+        val key = currentKey
+        return key != null && key.isModifier()
     }
 
     fun getKeyOn(x: Int, y: Int): Key? {
-        return mKeyDetector.detectHitKey(x, y)
+        return keyDetector.detectHitKey(x, y)
     }
 
     private fun setReleasedKeyGraphics(key: Key?, withAnimation: Boolean) {
@@ -282,25 +285,27 @@ class PointerTracker private constructor(id: Int) : PointerTrackerQueue.Element,
             return
         }
 
-        sDrawingProxy.onKeyReleased(key, withAnimation)
+        drawingProxy.onKeyReleased(key, withAnimation)
 
+        // A non-null key always comes from a keyboard that was set on this tracker.
+        val kb = keyboard ?: return
         if (key.isShift()) {
-            for (shiftKey in mKeyboard!!.mShiftKeys) {
+            for (shiftKey in kb.mShiftKeys) {
                 if (shiftKey !== key) {
-                    sDrawingProxy.onKeyReleased(shiftKey, false)
+                    drawingProxy.onKeyReleased(shiftKey, false)
                 }
             }
         }
 
         if (key.altCodeWhileTyping()) {
             val altCode = key.getAltCode()
-            val altKey = mKeyboard!!.getKey(altCode)
+            val altKey = kb.getKey(altCode)
             if (altKey != null) {
-                sDrawingProxy.onKeyReleased(altKey, false)
+                drawingProxy.onKeyReleased(altKey, false)
             }
-            for (k in mKeyboard!!.mAltCodeKeysWhileTyping) {
+            for (k in kb.mAltCodeKeysWhileTyping) {
                 if (k !== key && k.getAltCode() == altCode) {
-                    sDrawingProxy.onKeyReleased(k, false)
+                    drawingProxy.onKeyReleased(k, false)
                 }
             }
         }
@@ -312,32 +317,34 @@ class PointerTracker private constructor(id: Int) : PointerTrackerQueue.Element,
         }
 
         // Even if the key is disabled, it should respond if it is in the altCodeWhileTyping state.
-        val altersCode = key.altCodeWhileTyping() && sTimerProxy.isTypingState()
+        val altersCode = key.altCodeWhileTyping() && timerProxy.isTypingState()
         val needsToUpdateGraphics = key.isEnabled() || altersCode
         if (!needsToUpdateGraphics) {
             return
         }
 
         val noKeyPreview = inGesture || needsToSuppressKeyPreviewPopup(eventTime)
-        sDrawingProxy.onKeyPressed(key, !noKeyPreview)
+        drawingProxy.onKeyPressed(key, !noKeyPreview)
 
+        // A non-null key always comes from a keyboard that was set on this tracker.
+        val kb = keyboard ?: return
         if (key.isShift()) {
-            for (shiftKey in mKeyboard!!.mShiftKeys) {
+            for (shiftKey in kb.mShiftKeys) {
                 if (shiftKey !== key) {
-                    sDrawingProxy.onKeyPressed(shiftKey, false)
+                    drawingProxy.onKeyPressed(shiftKey, false)
                 }
             }
         }
 
         if (altersCode) {
             val altCode = key.getAltCode()
-            val altKey = mKeyboard!!.getKey(altCode)
+            val altKey = kb.getKey(altCode)
             if (altKey != null) {
-                sDrawingProxy.onKeyPressed(altKey, false)
+                drawingProxy.onKeyPressed(altKey, false)
             }
-            for (k in mKeyboard!!.mAltCodeKeysWhileTyping) {
+            for (k in kb.mAltCodeKeysWhileTyping) {
                 if (k !== key && k.getAltCode() == altCode) {
-                    sDrawingProxy.onKeyPressed(k, false)
+                    drawingProxy.onKeyPressed(k, false)
                 }
             }
         }
@@ -349,7 +356,7 @@ class PointerTracker private constructor(id: Int) : PointerTrackerQueue.Element,
     }
 
     fun getLastCoordinates(outCoords: IntArray) {
-        CoordinateUtils.set(outCoords, mLastX, mLastY)
+        CoordinateUtils.set(outCoords, lastX, lastY)
     }
 
     fun getDownTime(): Long {
@@ -368,10 +375,10 @@ class PointerTracker private constructor(id: Int) : PointerTrackerQueue.Element,
     }
 
     private fun onMoveKeyInternal(x: Int, y: Int): Key? {
-        bogusMoveEventDetector.onMoveKey(getDistance(x, y, mLastX, mLastY))
-        mLastX = x
-        mLastY = y
-        return mKeyDetector.detectHitKey(x, y)
+        bogusMoveEventDetector.onMoveKey(getDistance(x, y, lastX, lastY))
+        lastX = x
+        lastY = y
+        return keyDetector.detectHitKey(x, y)
     }
 
     private fun onMoveKey(x: Int, y: Int): Key? {
@@ -379,7 +386,7 @@ class PointerTracker private constructor(id: Int) : PointerTrackerQueue.Element,
     }
 
     private fun onMoveToNewKey(newKey: Key?, x: Int, y: Int): Key? {
-        mCurrentKey = newKey
+        currentKey = newKey
         keyX = x
         keyY = y
         return newKey
@@ -394,9 +401,9 @@ class PointerTracker private constructor(id: Int) : PointerTrackerQueue.Element,
         if (DEBUG_LISTENER) {
             Log.d(TAG, String.format(Locale.US, "[%d] onStartBatchInput", pointerId))
         }
-        sListener.onStartBatchInput()
+        listener.onStartBatchInput()
         dismissAllPopupKeysPanels()
-        sTimerProxy.cancelLongPressTimersOf(this)
+        timerProxy.cancelLongPressTimersOf(this)
     }
 
     private fun showGestureTrail() {
@@ -404,7 +411,7 @@ class PointerTracker private constructor(id: Int) : PointerTrackerQueue.Element,
             return
         }
         // A gesture floating preview text will be shown at the oldest pointer/finger on the screen.
-        sDrawingProxy.showGestureTrail(this, isOldestTrackerInQueue())
+        drawingProxy.showGestureTrail(this, isOldestTrackerInQueue())
     }
 
     fun updateBatchInputByTimer(syntheticMoveEventTime: Long) {
@@ -417,18 +424,18 @@ class PointerTracker private constructor(id: Int) : PointerTrackerQueue.Element,
             Log.d(TAG, String.format(Locale.US, "[%d] onUpdateBatchInput: batchPoints=%d", pointerId,
                     aggregatedPointers.getPointerSize()))
         }
-        sListener.onUpdateBatchInput(aggregatedPointers)
+        listener.onUpdateBatchInput(aggregatedPointers)
     }
 
     // Implements {@link BatchInputArbiterListener}.
     override fun onStartUpdateBatchInputTimer() {
-        sTimerProxy.startUpdateBatchInputTimer(this)
+        timerProxy.startUpdateBatchInputTimer(this)
     }
 
     // Implements {@link BatchInputArbiterListener}.
     override fun onEndBatchInput(aggregatedPointers: InputPointers, eventTime: Long) {
         typingTimeRecorder.onEndBatchInput(eventTime)
-        sTimerProxy.cancelAllUpdateBatchInputTimers()
+        timerProxy.cancelAllUpdateBatchInputTimers()
         if (isTrackingForActionDisabled) {
             return
         }
@@ -436,7 +443,7 @@ class PointerTracker private constructor(id: Int) : PointerTrackerQueue.Element,
             Log.d(TAG, String.format(Locale.US, "[%d] onEndBatchInput   : batchPoints=%d",
                     pointerId, aggregatedPointers.getPointerSize()))
         }
-        sListener.onEndBatchInput(aggregatedPointers)
+        listener.onEndBatchInput(aggregatedPointers)
     }
 
     private fun cancelBatchInput() {
@@ -449,7 +456,7 @@ class PointerTracker private constructor(id: Int) : PointerTrackerQueue.Element,
         if (DEBUG_LISTENER) {
             Log.d(TAG, String.format(Locale.US, "[%d] onCancelBatchInput", pointerId))
         }
-        sListener.onCancelBatchInput()
+        listener.onCancelBatchInput()
     }
 
     fun processMotionEvent(me: MotionEvent, keyDetector: KeyDetector) {
@@ -484,15 +491,15 @@ class PointerTracker private constructor(id: Int) : PointerTrackerQueue.Element,
     }
 
     private fun onDownEvent(x: Int, y: Int, eventTime: Long,
-            keyDetector: KeyDetector) {
-        setKeyDetectorInner(keyDetector)
+            newKeyDetector: KeyDetector) {
+        setKeyDetectorInner(newKeyDetector)
         if (DEBUG_EVENT) {
             printTouchEvent("onDownEvent:", x, y, eventTime)
         }
         // Naive up-to-down noise filter.
         val deltaT = eventTime - upTime
         if (deltaT < params.touchNoiseThresholdTime) {
-            val distance = getDistance(x, y, mLastX, mLastY)
+            val distance = getDistance(x, y, lastX, lastY)
             if (distance < params.touchNoiseThresholdDistance) {
                 if (DEBUG_MODE)
                     Log.w(TAG, String.format(Locale.US, "[%d] onDownEvent:"
@@ -522,7 +529,8 @@ class PointerTracker private constructor(id: Int) : PointerTrackerQueue.Element,
         }
         // A gesture should start only from a non-modifier key. Note that the gesture detection is
         // disabled when the key is repeating.
-        isDetectingGesture = (mKeyboard != null) && mKeyboard!!.mId.element.isAlphabet
+        val kb = keyboard
+        isDetectingGesture = (kb != null) && kb.mId.element.isAlphabet
                 && key != null && !key.isModifier() && !keySwipeAllowed && !inKeySwipe
         if (isDetectingGesture) {
             batchInputArbiter.addDownEventPoint(x, y, eventTime,
@@ -533,13 +541,14 @@ class PointerTracker private constructor(id: Int) : PointerTrackerQueue.Element,
     }
 
     /* package */ fun isShowingPopupKeysPanel(): Boolean {
-        return (mPopupKeysPanel != null)
+        return (popupKeysPanel != null)
     }
 
     private fun dismissPopupKeysPanel() {
-        if (isShowingPopupKeysPanel()) {
-            mPopupKeysPanel!!.dismissPopupKeysPanel()
-            mPopupKeysPanel = null
+        val panel = popupKeysPanel
+        if (panel != null) {
+            panel.dismissPopupKeysPanel()
+            popupKeysPanel = null
         }
     }
 
@@ -551,12 +560,12 @@ class PointerTracker private constructor(id: Int) : PointerTrackerQueue.Element,
         // {@link PopupKeysKeyboard}.
         isAllowedDraggingFinger = params.keySelectionByDraggingFinger
                 || (key != null && key.isModifier())
-                || mKeyDetector.alwaysAllowsKeySelectionByDraggingFinger()
+                || keyDetector.alwaysAllowsKeySelectionByDraggingFinger()
         if (key != null && isSwiper(key.getCode()) && !inGesture) {
             keySwipeAllowed = true
             inKeySwipe = true
         }
-        mKeyboardLayoutHasBeenChanged = false
+        keyboardLayoutHasBeenChanged = false
         isTrackingForActionDisabled = false
         resetKeySelectionByDraggingFinger()
         if (key != null) {
@@ -581,24 +590,26 @@ class PointerTracker private constructor(id: Int) : PointerTrackerQueue.Element,
     }
 
     private fun startKeySelectionByDraggingFinger(key: Key) {
-        if (!mIsInDraggingFinger) {
+        if (!inDraggingFinger) {
             // the meta lock keys stay enabled after sliding input, but should not
             // (even without sliding input they actually behave the same... this is just about the graphics)
             val code = key.getCode()
             if (key.isModifier() && code != KeyCode.CTRL_LOCK && code != KeyCode.ALT_LOCK && code != KeyCode.FN_LOCK && code != KeyCode.META_LOCK) {
-                val element = mKeyboard!!.mId.element
-                mIsInSlidingKeyInput = !(code == KeyCode.SHIFT && (element == KeyboardElement.ALPHABET_SHIFT_LOCKED || element == KeyboardElement.DPAD))
+                // A non-null key always comes from a keyboard that was set on this tracker.
+                val kb = keyboard ?: return
+                val element = kb.mId.element
+                isInSlidingKeyInput = !(code == KeyCode.SHIFT && (element == KeyboardElement.ALPHABET_SHIFT_LOCKED || element == KeyboardElement.DPAD))
             } else {
-                mIsInSlidingKeyInput = false
+                isInSlidingKeyInput = false
             }
         }
-        mIsInDraggingFinger = true
+        inDraggingFinger = true
     }
 
     private fun resetKeySelectionByDraggingFinger() {
-        mIsInDraggingFinger = false
-        mIsInSlidingKeyInput = false
-        sDrawingProxy.showSlidingKeyInputPreview(null)
+        inDraggingFinger = false
+        isInSlidingKeyInput = false
+        drawingProxy.showSlidingKeyInputPreview(null)
     }
 
     private fun isSwiper(code: Int): Boolean {
@@ -632,7 +643,7 @@ class PointerTracker private constructor(id: Int) : PointerTrackerQueue.Element,
         }
         if (!inGesture && key != null && Character.isLetter(key.getCode())
                 && batchInputArbiter.mayStartBatchInput(this)) {
-            sListener.resetMetaState() // avoid metaState getting stuck, doesn't work with gesture typing anyway
+            listener.resetMetaState() // avoid metaState getting stuck, doesn't work with gesture typing anyway
             inGesture = true
         }
         if (inGesture) {
@@ -663,13 +674,14 @@ class PointerTracker private constructor(id: Int) : PointerTrackerQueue.Element,
             }
         }
 
-        if (isShowingPopupKeysPanel()) {
-            val translatedX = mPopupKeysPanel!!.translateX(x)
-            val translatedY = mPopupKeysPanel!!.translateY(y)
-            mPopupKeysPanel!!.onMoveEvent(translatedX, translatedY, pointerId, eventTime)
+        val panel = popupKeysPanel
+        if (panel != null) {
+            val translatedX = panel.translateX(x)
+            val translatedY = panel.translateY(y)
+            panel.onMoveEvent(translatedX, translatedY, pointerId, eventTime)
             onMoveKey(x, y)
-            if (mIsInSlidingKeyInput) {
-                sDrawingProxy.showSlidingKeyInputPreview(this)
+            if (isInSlidingKeyInput) {
+                drawingProxy.showSlidingKeyInputPreview(this)
             }
             return
         }
@@ -693,10 +705,11 @@ class PointerTracker private constructor(id: Int) : PointerTrackerQueue.Element,
     }
 
     private fun processProximateBogusDownMoveUpEventHack(key: Key, x: Int, y: Int,
-            eventTime: Long, oldKey: Key, lastX: Int, lastY: Int) {
-        if (DEBUG_MODE) {
+            eventTime: Long, oldKey: Key, prevLastX: Int, prevLastY: Int) {
+        val kb = keyboard
+        if (DEBUG_MODE && kb != null) {
             val keyDiagonal = Math.hypot(
-                    mKeyboard!!.mMostCommonKeyWidth.toDouble(), mKeyboard!!.mMostCommonKeyHeight.toDouble()).toFloat()
+                    kb.mMostCommonKeyWidth.toDouble(), kb.mMostCommonKeyHeight.toDouble()).toFloat()
             val radiusRatio =
                     bogusMoveEventDetector.getDistanceFromDownEvent(x, y) /
                     keyDiagonal
@@ -704,7 +717,7 @@ class PointerTracker private constructor(id: Int) : PointerTrackerQueue.Element,
                     + " bogus down-move-up event (raidus=%.2f key diagonal) is "
                     + " translated to up[%d,%d,%s]/down[%d,%d,%s] events",
                     pointerId, radiusRatio,
-                    lastX, lastY, Constants.printableCode(oldKey.getCode()),
+                    prevLastX, prevLastY, Constants.printableCode(oldKey.getCode()),
                     x, y, Constants.printableCode(key.getCode())))
         }
         onUpEventInternal(x, y, eventTime)
@@ -715,11 +728,11 @@ class PointerTracker private constructor(id: Int) : PointerTrackerQueue.Element,
         setReleasedKeyGraphics(oldKey, true)
         callListenerOnRelease(oldKey, oldKey.getCode(), true)
         startKeySelectionByDraggingFinger(oldKey)
-        sTimerProxy.cancelKeyTimersOf(this)
+        timerProxy.cancelKeyTimersOf(this)
     }
 
     private fun dragFingerFromOldKeyToNewKey(key: Key, x: Int, y: Int,
-            eventTime: Long, oldKey: Key, lastX: Int, lastY: Int) {
+            eventTime: Long, oldKey: Key, prevLastX: Int, prevLastY: Int) {
         // The pointer has been slid in to the new key from the previous key, we must call
         // onRelease() first to notify that the previous key has been released, then call
         // onPress() to notify that the new key is being pressed.
@@ -733,7 +746,7 @@ class PointerTracker private constructor(id: Int) : PointerTrackerQueue.Element,
         // these events into separate up and down events.
         else if (typingTimeRecorder.isInFastTyping(eventTime)
                 && bogusMoveEventDetector.isCloseToActualDownEvent(x, y)) {
-            processProximateBogusDownMoveUpEventHack(key, x, y, eventTime, oldKey, lastX, lastY)
+            processProximateBogusDownMoveUpEventHack(key, x, y, eventTime, oldKey, prevLastX, prevLastY)
         }
         // HACK: If there are currently multiple touches, register the key even if the finger
         // slides off the key. This defends against noise from some touch panels when there are
@@ -792,16 +805,16 @@ class PointerTracker private constructor(id: Int) : PointerTrackerQueue.Element,
             val dY = y - startY
 
             // Touchpad mode
-            touchpadHandler.enableTouchpadMove(x, y, sListener)
+            touchpadHandler.enableTouchpadMove(x, y, listener)
 
             // Vertical movement
             val stepsY = dY / pointerStep
             if (stepsY != 0 && abs(dX) < abs(dY) && !inHorizontalSwipe) {
                 if (!inVerticalSwipe) {
-                    sTimerProxy.cancelKeyTimersOf(this)
+                    timerProxy.cancelKeyTimersOf(this)
                     inVerticalSwipe = true
                 } else if (oneShotSwipe(sv.mSpaceSwipeVertical)) return
-                if (sListener.onVerticalSpaceSwipe(stepsY)) {
+                if (listener.onVerticalSpaceSwipe(stepsY)) {
                     startY += stepsY * pointerStep
                 }
                 return
@@ -811,10 +824,10 @@ class PointerTracker private constructor(id: Int) : PointerTrackerQueue.Element,
             val stepsX = dX / pointerStep
             if (stepsX != 0 && !inVerticalSwipe) {
                 if (!inHorizontalSwipe) {
-                    sTimerProxy.cancelKeyTimersOf(this)
+                    timerProxy.cancelKeyTimersOf(this)
                     inHorizontalSwipe = true
                 } else if (oneShotSwipe(sv.mSpaceSwipeHorizontal)) return
-                if (sListener.onHorizontalSpaceSwipe(stepsX)) {
+                if (listener.onHorizontalSpaceSwipe(stepsX)) {
                     startX += stepsX * pointerStep
                 }
             }
@@ -823,17 +836,17 @@ class PointerTracker private constructor(id: Int) : PointerTrackerQueue.Element,
             val steps = (x - startX) / pointerStep
             if (steps != 0) {
                 if (!inHorizontalSwipe) {
-                    sTimerProxy.cancelKeyTimersOf(this)
+                    timerProxy.cancelKeyTimersOf(this)
                     inHorizontalSwipe = true
                 }
                 startX += steps * pointerStep
-                sListener.onMoveDeletePointer(steps)
+                listener.onMoveDeletePointer(steps)
             }
         }
     }
 
     private fun onMoveEventInternal(x: Int, y: Int, eventTime: Long) {
-        val oldKey = mCurrentKey
+        val oldKey = currentKey
 
         // todo (later): move key swipe stuff to KeyboardActionListener (and finally extend it)
         if (keySwipeAllowed) {
@@ -842,14 +855,14 @@ class PointerTracker private constructor(id: Int) : PointerTrackerQueue.Element,
         }
 
         val newKey = onMoveKey(x, y)
-        val lastX = mLastX
-        val lastY = mLastY
+        val prevLastX = lastX
+        val prevLastY = lastY
 
         if (gestureEnabler.shouldHandleGesture()) {
             // Register move event on gesture tracker.
             onGestureMoveEvent(x, y, eventTime, true, newKey)
             if (inGesture) {
-                mCurrentKey = null
+                currentKey = null
                 setReleasedKeyGraphics(oldKey, true)
                 return
             }
@@ -857,7 +870,7 @@ class PointerTracker private constructor(id: Int) : PointerTrackerQueue.Element,
 
         if (newKey != null) {
             if (oldKey != null && isMajorEnoughMoveToBeOnNewKey(x, y, eventTime, newKey)) {
-                dragFingerFromOldKeyToNewKey(newKey, x, y, eventTime, oldKey, lastX, lastY)
+                dragFingerFromOldKeyToNewKey(newKey, x, y, eventTime, oldKey, prevLastX, prevLastY)
             } else if (oldKey == null) {
                 // The pointer has been slid in to the new key, but the finger was not on any keys.
                 // In this case, we must call onPress() to notify that the new key is being pressed.
@@ -868,8 +881,8 @@ class PointerTracker private constructor(id: Int) : PointerTrackerQueue.Element,
                 dragFingerOutFromOldKey(oldKey, x, y)
             }
         }
-        if (mIsInSlidingKeyInput) {
-            sDrawingProxy.showSlidingKeyInputPreview(this)
+        if (isInSlidingKeyInput) {
+            drawingProxy.showSlidingKeyInputPreview(this)
         }
     }
 
@@ -878,9 +891,10 @@ class PointerTracker private constructor(id: Int) : PointerTrackerQueue.Element,
             printTouchEvent("onUpEvent  :", x, y, eventTime)
         }
 
-        sTimerProxy.cancelUpdateBatchInputTimer(this)
+        timerProxy.cancelUpdateBatchInputTimer(this)
         if (!inGesture) {
-            if (mCurrentKey != null && mCurrentKey!!.isModifier()) {
+            val key = currentKey
+            if (key != null && key.isModifier()) {
                 // Before processing an up event of modifier key, all pointers already being
                 // tracked should be released.
                 pointerTrackerQueue.releaseAllPointersExcept(this, eventTime)
@@ -897,43 +911,43 @@ class PointerTracker private constructor(id: Int) : PointerTrackerQueue.Element,
     // "virtual" up event.
     override fun onPhantomUpEvent(eventTime: Long) {
         if (DEBUG_EVENT) {
-            printTouchEvent("onPhntEvent:", mLastX, mLastY, eventTime)
+            printTouchEvent("onPhntEvent:", lastX, lastY, eventTime)
         }
-        onUpEventInternal(mLastX, mLastY, eventTime)
+        onUpEventInternal(lastX, lastY, eventTime)
         cancelTrackingForAction()
     }
 
     private fun onUpEventInternal(x: Int, y: Int, eventTime: Long) {
-        sTimerProxy.cancelKeyTimersOf(this)
-        val isInDraggingFinger = mIsInDraggingFinger
-        val isInSlidingKeyInput = mIsInSlidingKeyInput
+        timerProxy.cancelKeyTimersOf(this)
+        val wasInDraggingFinger = inDraggingFinger
+        val wasInSlidingKeyInput = isInSlidingKeyInput
         resetKeySelectionByDraggingFinger()
         isDetectingGesture = false
-        val currentKey = mCurrentKey
-        mCurrentKey = null
-        val currentRepeatingKeyCode = mCurrentRepeatingKeyCode
-        mCurrentRepeatingKeyCode = Constants.NOT_A_CODE
+        val releasedKey = currentKey
+        currentKey = null
+        val repeatingKeyCode = currentRepeatingKeyCode
+        currentRepeatingKeyCode = Constants.NOT_A_CODE
         // Release the last pressed key.
-        setReleasedKeyGraphics(currentKey, true)
+        setReleasedKeyGraphics(releasedKey, true)
 
-        if (inHorizontalSwipe && currentKey!!.getCode() == KeyCode.DELETE) {
-            sListener.onUpWithDeletePointerActive()
+        if (inHorizontalSwipe && releasedKey!!.getCode() == KeyCode.DELETE) {
+            listener.onUpWithDeletePointerActive()
         }
 
-        if (isShowingPopupKeysPanel()) {
+        val panel = popupKeysPanel
+        if (panel != null) {
             if (!isTrackingForActionDisabled) {
-                // For KeyCode.TOGGLE_FLOATING_KEYBOARD, mPopupKeysPanel.onUpEvent will trigger a cancel MoveEvent, which will result
+                // For KeyCode.TOGGLE_FLOATING_KEYBOARD, popupKeysPanel.onUpEvent will trigger a cancel MoveEvent, which will result
                 // in PointerTrackerQueue.releaseAllPointersOlderThan, which calls onUpEventInternal, thus dispatching the key twice.
-                // To prevent the duplicate input, we set mPopupKeysPanel null before calling onUpEvent, so isShowingPopupKeysPanel returns false
-                val panel = mPopupKeysPanel
-                mPopupKeysPanel = null
-                val translatedX = panel!!.translateX(x)
+                // To prevent the duplicate input, we set popupKeysPanel null before calling onUpEvent, so isShowingPopupKeysPanel returns false
+                popupKeysPanel = null
+                val translatedX = panel.translateX(x)
                 val translatedY = panel.translateY(y)
                 panel.onUpEvent(translatedX, translatedY, pointerId, eventTime)
                 panel.dismissPopupKeysPanel()
             }
             dismissPopupKeysPanel()
-            if (isInSlidingKeyInput)
+            if (wasInSlidingKeyInput)
                 callListenerOnFinishSlidingInput()
             return
         }
@@ -948,14 +962,14 @@ class PointerTracker private constructor(id: Int) : PointerTrackerQueue.Element,
             if (inHorizontalSwipe || inVerticalSwipe) {
                 inHorizontalSwipe = false
                 inVerticalSwipe = false
-                sListener.onEndSpaceSwipe()
+                listener.onEndSpaceSwipe()
                 return
             }
         }
 
         if (inGesture) {
-            if (currentKey != null) {
-                callListenerOnRelease(currentKey, currentKey.getCode(), true)
+            if (releasedKey != null) {
+                callListenerOnRelease(releasedKey, releasedKey.getCode(), true)
             }
             if (batchInputArbiter.mayEndBatchInput(
                     eventTime, getActivePointerTrackerCount(), this)) {
@@ -968,12 +982,12 @@ class PointerTracker private constructor(id: Int) : PointerTrackerQueue.Element,
         if (isTrackingForActionDisabled) {
             return
         }
-        if (currentKey != null && currentKey.isRepeatable()
-                && (currentKey.getCode() == currentRepeatingKeyCode) && !isInDraggingFinger) {
+        if (releasedKey != null && releasedKey.isRepeatable()
+                && (releasedKey.getCode() == repeatingKeyCode) && !wasInDraggingFinger) {
             return
         }
-        detectAndSendKey(currentKey, keyX, keyY, eventTime)
-        if (isInSlidingKeyInput) {
+        detectAndSendKey(releasedKey, keyX, keyY, eventTime)
+        if (wasInSlidingKeyInput) {
             callListenerOnFinishSlidingInput()
         }
     }
@@ -991,7 +1005,7 @@ class PointerTracker private constructor(id: Int) : PointerTrackerQueue.Element,
         }
 
     fun onLongPressed() {
-        sTimerProxy.cancelLongPressTimersOf(this)
+        timerProxy.cancelLongPressTimersOf(this)
         if (isShowingPopupKeysPanel()) {
             return
         }
@@ -1000,39 +1014,39 @@ class PointerTracker private constructor(id: Int) : PointerTrackerQueue.Element,
             return
         }
         val code = key.getCode()
-        sListener.onLongPressKey(code)
+        listener.onLongPressKey(code)
         if (key.hasNoPanelAutoPopupKey()) {
             cancelKeyTracking()
             val popupKeyCode = key.getPopupKeys()!![0].mCode
-            sListener.onPressKey(popupKeyCode, 0, 1, HapticEvent.NO_HAPTICS)
-            sListener.onCodeInput(popupKeyCode, Constants.NOT_A_COORDINATE, Constants.NOT_A_COORDINATE, false)
-            sListener.onReleaseKey(popupKeyCode, false)
+            listener.onPressKey(popupKeyCode, 0, 1, HapticEvent.NO_HAPTICS)
+            listener.onCodeInput(popupKeyCode, Constants.NOT_A_COORDINATE, Constants.NOT_A_COORDINATE, false)
+            listener.onReleaseKey(popupKeyCode, false)
             return
         }
         if (code == KeyCode.LANGUAGE_SWITCH
                 || (code == Constants.CODE_SPACE && key.getPopupKeys() == null && Settings.getValues().mSpaceForLangChange)
         ) {
             // Long pressing the space key invokes IME switcher dialog.
-            if (sListener.onCustomRequest(KeyboardActionListener.CustomAction.SHOW_INPUT_METHOD_PICKER)) {
+            if (listener.onCustomRequest(KeyboardActionListener.CustomAction.SHOW_INPUT_METHOD_PICKER)) {
                 cancelKeyTracking()
-                sListener.onReleaseKey(code, false)
+                listener.onReleaseKey(code, false)
                 return
             }
         }
         if (code == KeyCode.SYMBOL_ALPHA) {
-            sListener.onLongPressAlphaSymbolForNumpad()
+            listener.onLongPressAlphaSymbolForNumpad()
             return
         }
 
         setReleasedKeyGraphics(key, false)
-        val popupKeysPanel = sDrawingProxy.showPopupKeysKeyboard(key, this)
-        if (popupKeysPanel == null) {
+        val panel = drawingProxy.showPopupKeysKeyboard(key, this)
+        if (panel == null) {
             return
         }
-        val translatedX = popupKeysPanel.translateX(mLastX)
-        val translatedY = popupKeysPanel.translateY(mLastY)
-        popupKeysPanel.onDownEvent(translatedX, translatedY, pointerId, SystemClock.uptimeMillis())
-        mPopupKeysPanel = popupKeysPanel
+        val translatedX = panel.translateX(lastX)
+        val translatedY = panel.translateY(lastY)
+        panel.onDownEvent(translatedX, translatedY, pointerId, SystemClock.uptimeMillis())
+        popupKeysPanel = panel
         if (keySwipeAllowed) {
             keySwipeAllowed = false
             inKeySwipe = false
@@ -1042,7 +1056,7 @@ class PointerTracker private constructor(id: Int) : PointerTrackerQueue.Element,
     private fun cancelKeyTracking() {
         resetKeySelectionByDraggingFinger()
         cancelTrackingForAction()
-        setReleasedKeyGraphics(mCurrentKey, true)
+        setReleasedKeyGraphics(currentKey, true)
         pointerTrackerQueue.remove(this)
     }
 
@@ -1058,15 +1072,15 @@ class PointerTracker private constructor(id: Int) : PointerTrackerQueue.Element,
     }
 
     private fun onCancelEventInternal() {
-        sTimerProxy.cancelKeyTimersOf(this)
-        setReleasedKeyGraphics(mCurrentKey, true)
+        timerProxy.cancelKeyTimersOf(this)
+        setReleasedKeyGraphics(currentKey, true)
         resetKeySelectionByDraggingFinger()
         dismissPopupKeysPanel()
     }
 
     private fun isMajorEnoughMoveToBeOnNewKey(x: Int, y: Int, eventTime: Long,
             newKey: Key?): Boolean {
-        val curKey = mCurrentKey
+        val curKey = currentKey
         if (newKey === curKey) {
             return false
         }
@@ -1074,11 +1088,12 @@ class PointerTracker private constructor(id: Int) : PointerTrackerQueue.Element,
             return true
         }
         // Here curKey points to the different key from newKey.
-        val keyHysteresisDistanceSquared = mKeyDetector.getKeyHysteresisDistanceSquared(mIsInSlidingKeyInput)
+        val keyHysteresisDistanceSquared = keyDetector.getKeyHysteresisDistanceSquared(isInSlidingKeyInput)
         val distanceFromKeyEdgeSquared = curKey.squaredDistanceToEdge(x, y)
         if (distanceFromKeyEdgeSquared >= keyHysteresisDistanceSquared) {
-            if (DEBUG_MODE) {
-                val distanceToEdgeRatio = Math.sqrt(distanceFromKeyEdgeSquared.toDouble()).toFloat() / mKeyboard!!.mMostCommonKeyWidth
+            val kb = keyboard
+            if (DEBUG_MODE && kb != null) {
+                val distanceToEdgeRatio = Math.sqrt(distanceFromKeyEdgeSquared.toDouble()).toFloat() / kb.mMostCommonKeyWidth
                 Log.d(TAG, String.format(Locale.US, "[%d] isMajorEnoughMoveToBeOnNewKey:"
                         +" %.2f key width from key edge", pointerId, distanceToEdgeRatio))
             }
@@ -1086,8 +1101,9 @@ class PointerTracker private constructor(id: Int) : PointerTrackerQueue.Element,
         }
         if (!isAllowedDraggingFinger && typingTimeRecorder.isInFastTyping(eventTime)
                 && bogusMoveEventDetector.hasTraveledLongDistance(x, y)) {
-            if (DEBUG_MODE) {
-                val keyDiagonal = Math.hypot(mKeyboard!!.mMostCommonKeyWidth.toDouble(), mKeyboard!!.mMostCommonKeyHeight.toDouble()).toFloat()
+            val kb = keyboard
+            if (DEBUG_MODE && kb != null) {
+                val keyDiagonal = Math.hypot(kb.mMostCommonKeyWidth.toDouble(), kb.mMostCommonKeyHeight.toDouble()).toFloat()
                 val lengthFromDownRatio = bogusMoveEventDetector.getAccumulatedDistanceFromDownKey() / keyDiagonal
                 Log.d(TAG, String.format(Locale.US, "[%d] isMajorEnoughMoveToBeOnNewKey:"
                         + " %.2f key diagonal from virtual down point", pointerId, lengthFromDownRatio))
@@ -1100,8 +1116,8 @@ class PointerTracker private constructor(id: Int) : PointerTrackerQueue.Element,
     private fun startLongPressTimer(key: Key?) {
         // Note that we need to cancel all active long press shift and symbol key timers if
         // any whenever we start a new long press timer for both non-shift and shift keys.
-        sTimerProxy.cancelLongPressShiftKeyTimer()
-        sTimerProxy.cancelLongPressAlphaSymbolKeyTimer()
+        timerProxy.cancelLongPressShiftKeyTimer()
+        timerProxy.cancelLongPressAlphaSymbolKeyTimer()
         if (inGesture) return
         if (key == null) return
         if (!key.isLongPressEnabled()) return
@@ -1111,14 +1127,14 @@ class PointerTracker private constructor(id: Int) : PointerTrackerQueue.Element,
         // We always need to start the long press timer if the key has its popup keys regardless of
         // whether or not we are in the dragging finger mode.
         val code = key.getCode()
-        if (mIsInDraggingFinger && (code == KeyCode.SHIFT || key.getPopupKeys() == null)) return
+        if (inDraggingFinger && (code == KeyCode.SHIFT || key.getPopupKeys() == null)) return
         if (code == KeyCode.SHIFT && isShiftLongPressSuppressed) {
             isShiftLongPressSuppressed = false
             return
         }
         if (code == KeyCode.SYMBOL_ALPHA
             && (!Settings.getValues().mLongPressSymbolsForNumpad
-                || mKeyboard!!.mId.element != KeyboardElement.SYMBOLS
+                || keyboard?.mId?.element != KeyboardElement.SYMBOLS
             )
         ) {
             return
@@ -1126,7 +1142,7 @@ class PointerTracker private constructor(id: Int) : PointerTrackerQueue.Element,
 
         val delay = getLongPressTimeout(code)
         if (delay <= 0) return
-        sTimerProxy.startLongPressTimerOf(this, delay)
+        timerProxy.startLongPressTimerOf(this, delay)
     }
 
     private fun getLongPressTimeout(code: Int): Int {
@@ -1136,7 +1152,7 @@ class PointerTracker private constructor(id: Int) : PointerTrackerQueue.Element,
                 // We use slightly longer timeout for space, shift-lock, and the numpad long-press.
                 -> longpressTimeout * 3 / 2
 
-            else -> if (mIsInSlidingKeyInput)
+            else -> if (isInSlidingKeyInput)
                 // We use longer timeout for sliding finger input started from a modifier key.
                 longpressTimeout * 3
             else
@@ -1166,7 +1182,7 @@ class PointerTracker private constructor(id: Int) : PointerTrackerQueue.Element,
         if (key == null) return
         if (!key.isRepeatable()) return
         // Don't start key repeat when we are in the dragging finger mode.
-        if (mIsInDraggingFinger) return
+        if (inDraggingFinger) return
         val startRepeatCount = 1
         startKeyRepeatTimer(startRepeatCount)
     }
@@ -1174,10 +1190,10 @@ class PointerTracker private constructor(id: Int) : PointerTrackerQueue.Element,
     fun onKeyRepeat(code: Int, repeatCount: Int) {
         val key = getKey()
         if (key == null || key.getCode() != code) {
-            mCurrentRepeatingKeyCode = Constants.NOT_A_CODE
+            currentRepeatingKeyCode = Constants.NOT_A_CODE
             return
         }
-        mCurrentRepeatingKeyCode = code
+        currentRepeatingKeyCode = code
         if (keySwipeAllowed) {
             keySwipeAllowed = false
             inKeySwipe = false
@@ -1191,12 +1207,12 @@ class PointerTracker private constructor(id: Int) : PointerTrackerQueue.Element,
 
     private fun startKeyRepeatTimer(repeatCount: Int) {
         val delay = if (repeatCount == 1) params.keyRepeatStartTimeout else params.keyRepeatInterval
-        sTimerProxy.startKeyRepeatTimerOf(this, repeatCount, delay)
+        timerProxy.startKeyRepeatTimerOf(this, repeatCount, delay)
     }
 
     private fun printTouchEvent(title: String, x: Int, y: Int,
             eventTime: Long) {
-        val key = mKeyDetector.detectHitKey(x, y)
+        val key = keyDetector.detectHitKey(x, y)
         val code = (if (key == null) "none" else Constants.printableCode(key.getCode()))
         Log.d(TAG, String.format(Locale.US, "[%d]%s%s %4d %4d %5d %s", pointerId,
                 (if (isTrackingForActionDisabled) "-" else " "), title, x, y, eventTime, code))
@@ -1224,15 +1240,15 @@ class PointerTracker private constructor(id: Int) : PointerTrackerQueue.Element,
         @JvmStatic
         @Suppress("UNCHECKED_CAST")
         fun switchTo(drawingProxy: DrawingProxy) {
-            sDrawingProxy = drawingProxy
-            val thatArray = proxyMap.get(drawingProxy) // if it's null, the view we're switching to should not exist
-            params = thatArray!![0] as PointerTrackerParams
+            this.drawingProxy = drawingProxy
+            val thatArray = proxyMap.get(drawingProxy)!! // if it's null, the view we're switching to should not exist
+            params = thatArray[0] as PointerTrackerParams
             gestureStrokeRecognitionParams = thatArray[1] as GestureStrokeRecognitionParams
             gestureStrokeDrawingParams = thatArray[2] as GestureStrokeDrawingParams
             typingTimeRecorder = thatArray[3] as TypingTimeRecorder
-            sTimerProxy = thatArray[4] as TimerProxy
+            timerProxy = thatArray[4] as TimerProxy
             //noinspection unchecked
-            sTrackers = thatArray[5] as ArrayList<PointerTracker>
+            trackers = thatArray[5] as ArrayList<PointerTracker>
         }
 
         private val gestureEnabler = GestureEnabler()
@@ -1243,12 +1259,12 @@ class PointerTracker private constructor(id: Int) : PointerTrackerQueue.Element,
         private lateinit var gestureStrokeRecognitionParams: GestureStrokeRecognitionParams
         private lateinit var gestureStrokeDrawingParams: GestureStrokeDrawingParams
 
-        private var sTrackers = ArrayList<PointerTracker>()
+        private var trackers = ArrayList<PointerTracker>()
         private val pointerTrackerQueue = PointerTrackerQueue()
 
-        private lateinit var sDrawingProxy: DrawingProxy
-        private lateinit var sTimerProxy: TimerProxy
-        private var sListener: KeyboardActionListener = KeyboardActionListener.EMPTY_LISTENER
+        private lateinit var drawingProxy: DrawingProxy
+        private lateinit var timerProxy: TimerProxy
+        private var listener: KeyboardActionListener = KeyboardActionListener.EMPTY_LISTENER
 
         private var inGesture = false
         private lateinit var typingTimeRecorder: TypingTimeRecorder
@@ -1271,17 +1287,17 @@ class PointerTracker private constructor(id: Int) : PointerTrackerQueue.Element,
             val res = mainKeyboardViewAttr.getResources()
             BogusMoveEventDetector.init(res)
 
-            sTimerProxy = timerProxy
-            sDrawingProxy = drawingProxy
-            sTrackers = ArrayList()
+            this.timerProxy = timerProxy
+            this.drawingProxy = drawingProxy
+            trackers = ArrayList()
 
             proxyMap.put(drawingProxy, arrayOf<Any>(
                     params,
                     gestureStrokeRecognitionParams,
                     gestureStrokeDrawingParams,
                     typingTimeRecorder,
-                    sTimerProxy,
-                    sTrackers
+                    timerProxy,
+                    trackers
             ))
         }
 
@@ -1298,17 +1314,17 @@ class PointerTracker private constructor(id: Int) : PointerTrackerQueue.Element,
 
         @JvmStatic
         fun getPointerTracker(id: Int): PointerTracker {
-            val trackers = sTrackers
+            val trackerList = trackers
 
             // Create pointer trackers until we can get 'id+1'-th tracker, if needed.
-            var i = trackers.size
+            var i = trackerList.size
             while (i <= id) {
                 val tracker = PointerTracker(i)
-                trackers.add(tracker)
+                trackerList.add(tracker)
                 i++
             }
 
-            return trackers.get(id)
+            return trackerList.get(id)
         }
 
         @JvmStatic
@@ -1328,7 +1344,7 @@ class PointerTracker private constructor(id: Int) : PointerTrackerQueue.Element,
 
         @JvmStatic
         fun setKeyboardActionListener(listener: KeyboardActionListener) {
-            sListener = listener
+            this.listener = listener
         }
 
         @JvmStatic
@@ -1337,9 +1353,9 @@ class PointerTracker private constructor(id: Int) : PointerTrackerQueue.Element,
             if (keyboard == null) {
                 return
             }
-            val trackersSize = sTrackers.size
+            val trackersSize = trackers.size
             for (i in 0 until trackersSize) {
-                val tracker = sTrackers.get(i)
+                val tracker = trackers.get(i)
                 tracker.setKeyDetectorInner(keyDetector)
             }
             gestureEnabler.setPasswordMode(keyboard.mId.isPasswordInput)
@@ -1347,18 +1363,18 @@ class PointerTracker private constructor(id: Int) : PointerTrackerQueue.Element,
 
         @JvmStatic
         fun setReleasedKeyGraphicsToAllKeys() {
-            val trackersSize = sTrackers.size
+            val trackersSize = trackers.size
             for (i in 0 until trackersSize) {
-                val tracker = sTrackers.get(i)
+                val tracker = trackers.get(i)
                 tracker.setReleasedKeyGraphics(tracker.getKey(), true)
             }
         }
 
         @JvmStatic
         fun dismissAllPopupKeysPanels() {
-            val trackersSize = sTrackers.size
+            val trackersSize = trackers.size
             for (i in 0 until trackersSize) {
-                val tracker = sTrackers.get(i)
+                val tracker = trackers.get(i)
                 tracker.dismissPopupKeysPanel()
             }
         }

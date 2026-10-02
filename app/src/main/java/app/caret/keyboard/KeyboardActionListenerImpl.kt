@@ -36,7 +36,7 @@ import kotlin.math.abs
 
 class KeyboardActionListenerImpl(private val latinIME: LatinIME, private val inputLogic: InputLogic) : KeyboardActionListener {
 
-    private val connection = inputLogic.mConnection
+    private val connection = inputLogic.connection
     private val emojiAltPhysicalKeyDetector by lazy { EmojiAltPhysicalKeyDetector(latinIME.resources) }
 
     // We expect to have only one decoder in almost all cases, hence the default capacity of 1.
@@ -97,7 +97,7 @@ class KeyboardActionListenerImpl(private val latinIME: LatinIME, private val inp
                 settings.current, event,
                 keyboardSwitcher.getKeyboardCapsMode(), // TODO: this is not necessarily correct for a hardware keyboard right now
                 keyboardSwitcher.getCurrentKeyboardScript(),
-                latinIME.mHandler
+                latinIME.handler
             )
             return true
         }

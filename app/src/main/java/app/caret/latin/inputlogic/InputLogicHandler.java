@@ -99,7 +99,7 @@ class InputLogicHandler implements Handler.Callback {
             // Previous suggestions are found in InputLogic#mSuggestedWords.
             // Since these are the most recent ones and we just recomputed
             // new ones to update them, then the previous ones are there.
-            suggestedWordsToShowSuggestions = mInputLogic.mSuggestedWords;
+            suggestedWordsToShowSuggestions = mInputLogic.suggestedWords;
         } else {
             suggestedWordsToShowSuggestions = suggestedWordsForBatchInput;
         }

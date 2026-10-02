@@ -152,9 +152,7 @@ class RichInputConnection(private val parent: InputMethodService) : PrivateComma
     fun beginBatchEdit() {
         if (++nestLevel == 1) {
             ic = parent.getCurrentInputConnection()
-            if (isConnected()) {
-                ic!!.beginBatchEdit()
-            }
+            ic?.beginBatchEdit()
         } else {
             if (DBG) {
                 throw RuntimeException("Nest level too deep")
@@ -167,8 +165,8 @@ class RichInputConnection(private val parent: InputMethodService) : PrivateComma
 
     fun endBatchEdit() {
         if (nestLevel <= 0) Log.e(TAG, "Batch edit not in progress!") // TODO: exception instead
-        if (--nestLevel == 0 && isConnected()) {
-            ic!!.endBatchEdit()
+        if (--nestLevel == 0) {
+            ic?.endBatchEdit()
         }
         if (DEBUG_PREVIOUS_TEXT) checkConsistencyForDebug()
     }
@@ -206,8 +204,8 @@ class RichInputConnection(private val parent: InputMethodService) : PrivateComma
                 Log.i(TAG, "resetCachesUponCursorMove: tried to set "+newSelStart+"/"+newSelEnd+", but input field has "+expectedSelStart+"/"+expectedSelEnd)
             }
         }
-        if (isConnected() && shouldFinishComposition) {
-            ic!!.finishComposingText()
+        if (shouldFinishComposition) {
+            ic?.finishComposingText()
         }
         return true
     }
@@ -244,8 +242,8 @@ class RichInputConnection(private val parent: InputMethodService) : PrivateComma
     }
 
     private fun reloadCursorPosition() {
-        if (!isConnected()) return
-        val et = ic!!.getExtractedText(ExtractedTextRequest(), 0)
+        val ic = ic ?: return
+        val et = ic.getExtractedText(ExtractedTextRequest(), 0)
         if (et == null) return
         expectedSelStart = et.selectionStart + et.startOffset
         expectedSelEnd = et.selectionEnd + et.startOffset
@@ -267,9 +265,7 @@ class RichInputConnection(private val parent: InputMethodService) : PrivateComma
         // it works, but it's wrong and should be fixed.
         committedTextBeforeComposingText.append(composingText)
         composingText.setLength(0)
-        if (isConnected()) {
-            ic!!.finishComposingText()
-        }
+        ic?.finishComposingText()
     }
 
     fun commitCodePoint(codePoint: Int) {
@@ -282,19 +278,21 @@ class RichInputConnection(private val parent: InputMethodService) : PrivateComma
      * @param text The text to commit. This may include styles.
      * @param newCursorPosition The new cursor position around the text.
      */
-    fun commitText(text: CharSequence?, newCursorPosition: Int) {
+    fun commitText(nullableText: CharSequence?, newCursorPosition: Int) {
         if (DEBUG_BATCH_NESTING) checkBatchEdit()
         if (DEBUG_PREVIOUS_TEXT) checkConsistencyForDebug()
+        val text = nullableText!!
         if (DebugFlags.DEBUG_ENABLED)
-            Log.d(TAG, "committing "+text!!.length+" characters")
+            Log.d(TAG, "committing "+text.length+" characters")
         committedTextBeforeComposingText.append(text)
         // TODO: the following is exceedingly error-prone. Right now when the cursor is in the
         //  middle of the composing word composingText only holds the part of the composing text
         //  that is before the cursor, so this actually works, but it's terribly confusing. Fix this.
-        expectedSelStart += text!!.length - composingText.length
+        expectedSelStart += text.length - composingText.length
         expectedSelEnd = expectedSelStart
         composingText.setLength(0)
-        if (isConnected()) {
+        val ic = ic
+        if (ic != null) {
             tempObjectForCommitText.clear()
             tempObjectForCommitText.append(text)
             val spans = tempObjectForCommitText.getSpans(
@@ -316,12 +314,12 @@ class RichInputConnection(private val parent: InputMethodService) : PrivateComma
                     }
                 }
             }
-            ic!!.commitText(tempObjectForCommitText, newCursorPosition)
+            ic.commitText(tempObjectForCommitText, newCursorPosition)
         }
     }
 
     fun getSelectedText(flags: Int): CharSequence? {
-        return if (isConnected()) ic!!.getSelectedText(flags) else null
+        return ic?.getSelectedText(flags)
     }
 
     fun canDeleteCharacters(): Boolean {
@@ -432,11 +430,9 @@ class RichInputConnection(private val parent: InputMethodService) : PrivateComma
     private fun getTextBeforeCursorAndDetectLaggyConnection(
             operation: Int, timeout: Long, n: Int, flags: Int): CharSequence? {
         ic = parent.getCurrentInputConnection()
-        if (!isConnected()) {
-            return null
-        }
+        val ic = ic ?: return null
         val startTime = SystemClock.uptimeMillis()
-        val result = ic!!.getTextBeforeCursor(n, flags)
+        val result = ic.getTextBeforeCursor(n, flags)
         detectLaggyConnection(operation, timeout, startTime)
 
         // only do the consistency check if we actually have text (i.e. we're not coming from some reload / reset)
@@ -500,11 +496,9 @@ class RichInputConnection(private val parent: InputMethodService) : PrivateComma
     private fun getTextAfterCursorAndDetectLaggyConnection(
             operation: Int, timeout: Long, n: Int, flags: Int): CharSequence? {
         ic = parent.getCurrentInputConnection()
-        if (!isConnected()) {
-            return null
-        }
+        val ic = ic ?: return null
         val startTime = SystemClock.uptimeMillis()
-        val result = ic!!.getTextAfterCursor(n, flags)
+        val result = ic.getTextAfterCursor(n, flags)
         detectLaggyConnection(operation, timeout, startTime)
         return result
     }
@@ -549,17 +543,13 @@ class RichInputConnection(private val parent: InputMethodService) : PrivateComma
             expectedSelEnd -= expectedSelStart
             expectedSelStart = 0
         }
-        if (isConnected()) {
-            ic!!.deleteSurroundingText(beforeLength, 0)
-        }
+        ic?.deleteSurroundingText(beforeLength, 0)
         if (DEBUG_PREVIOUS_TEXT) checkConsistencyForDebug()
     }
 
     fun performEditorAction(actionId: Int) {
         ic = parent.getCurrentInputConnection()
-        if (isConnected()) {
-            ic!!.performEditorAction(actionId)
-        }
+        ic?.performEditorAction(actionId)
     }
 
 
@@ -615,9 +605,7 @@ class RichInputConnection(private val parent: InputMethodService) : PrivateComma
                 }
             }
         }
-        if (isConnected()) {
-            ic!!.sendKeyEvent(keyEvent)
-        }
+        ic?.sendKeyEvent(keyEvent)
     }
 
     fun setComposingRegion(start: Int, end: Int) {
@@ -630,20 +618,18 @@ class RichInputConnection(private val parent: InputMethodService) : PrivateComma
         // also clear composing text, otherwise we may append existing text
         // this can happen when we're a little out of sync with the editor
         composingText.setLength(0)
-        if (!TextUtils.isEmpty(textBeforeCursor)) {
+        if (!textBeforeCursor.isNullOrEmpty()) {
             // The cursor is not necessarily at the end of the composing text, but we have its
             // position in expectedSelStart and expectedSelEnd. In this case we want the start
             // of the text, so we should use expectedSelStart. In other words, the composing
             // text starts (expectedSelStart - start) characters before the end of textBeforeCursor
-            val indexOfStartOfComposingText = Math.max(textBeforeCursor!!.length - moveBy, 0)
+            val indexOfStartOfComposingText = Math.max(textBeforeCursor.length - moveBy, 0)
             composingText.append(textBeforeCursor.subSequence(indexOfStartOfComposingText,
                     textBeforeCursor.length))
             committedTextBeforeComposingText.append(
                     textBeforeCursor.subSequence(0, indexOfStartOfComposingText))
         }
-        if (isConnected()) {
-            ic!!.setComposingRegion(start, end)
-        }
+        ic?.setComposingRegion(start, end)
     }
 
     // return whether the text was (probably) set correctly
@@ -657,18 +643,19 @@ class RichInputConnection(private val parent: InputMethodService) : PrivateComma
         composingText.append(text)
         // TODO: support values of newCursorPosition != 1. At this time, this is never called with
         //  newCursorPosition != 1.
-        if (isConnected()) {
+        val ic = ic
+        if (ic != null) {
             if (DebugFlags.DEBUG_ENABLED)
                 Log.d(TAG, "setting composing text of length "+text.length) // don't log actual text
-            ic!!.setComposingText(text, newCursorPosition)
+            ic.setComposingText(text, newCursorPosition)
             if (!Settings.getValues().mInputAttributes.mShouldShowSuggestions && text.length > 0) {
                 // We have a field that disables suggestions, but still committed text is set.
                 // This might lead to weird bugs (e.g. https://github.com/HeliBorg/HeliBoard/issues/225), so better do
                 // a sanity check whether the wanted text has been set.
                 // Note that the check may also fail because the text field is not yet updated, so we don't want to check everything!
-                val lastChar = ic!!.getTextBeforeCursor(1, 0)
+                val lastChar = ic.getTextBeforeCursor(1, 0)
                 if (lastChar == null || lastChar.length == 0 || text[text.length - 1] != lastChar[0]) {
-                    Log.w(TAG, "did set " + text + ", but got " + ic!!.getTextBeforeCursor(text.length, 0) + " as last character")
+                    Log.w(TAG, "did set " + text + ", but got " + ic.getTextBeforeCursor(text.length, 0) + " as last character")
                     return false
                 }
             }
@@ -704,8 +691,9 @@ class RichInputConnection(private val parent: InputMethodService) : PrivateComma
             expectedSelStart = start
             expectedSelEnd = end
         }
-        if (isConnected()) {
-            val isIcValid = ic!!.setSelection(start, end)
+        val ic = ic
+        if (ic != null) {
+            val isIcValid = ic.setSelection(start, end)
             if (!isIcValid) {
                 return false
             }
@@ -721,14 +709,16 @@ class RichInputConnection(private val parent: InputMethodService) : PrivateComma
     }
 
     fun selectWord(spacingAndPunctuations: SpacingAndPunctuations, script: String) {
-        if (!isConnected()) return
+        val ic = ic ?: return
         if (expectedSelStart != expectedSelEnd) { // already something selected
-            ic!!.setSelection(expectedSelEnd, expectedSelEnd)
+            ic.setSelection(expectedSelEnd, expectedSelEnd)
             return
         }
         val range = getWordRangeAtCursor(spacingAndPunctuations, script)
         if (range == null) return
-        ic!!.setSelection(expectedSelStart - range.getNumberOfCharsInWordBeforeCursor(), expectedSelStart + range.getNumberOfCharsInWordAfterCursor())
+        // getWordRangeAtCursor refreshed the connection and returns null when there is none,
+        // so read the field again instead of using the one captured above
+        this.ic?.setSelection(expectedSelStart - range.getNumberOfCharsInWordBeforeCursor(), expectedSelStart + range.getNumberOfCharsInWordAfterCursor())
     }
 
     fun copyText(getSelection: Boolean) {
@@ -759,16 +749,14 @@ class RichInputConnection(private val parent: InputMethodService) : PrivateComma
         if (DEBUG_PREVIOUS_TEXT) checkConsistencyForDebug()
         // This has no effect on the text field and does not change its content. It only makes
         // TextView flash the text for a second based on indices contained in the argument.
-        if (isConnected()) {
-            ic!!.commitCorrection(correctionInfo)
-        }
+        ic?.commitCorrection(correctionInfo)
         if (DEBUG_PREVIOUS_TEXT) checkConsistencyForDebug()
     }
 
-    fun commitCompletion(completionInfo: CompletionInfo?) {
+    fun commitCompletion(completionInfo: CompletionInfo) {
         if (DEBUG_BATCH_NESTING) checkBatchEdit()
         if (DEBUG_PREVIOUS_TEXT) checkConsistencyForDebug()
-        var text = completionInfo!!.getText()
+        var text = completionInfo.getText()
         if (DebugFlags.DEBUG_ENABLED)
             Log.d(TAG, "committing completion of length "+text.length) // don't log actual text
         // text should never be null, but just in case, it's better to insert nothing than to crash
@@ -777,9 +765,7 @@ class RichInputConnection(private val parent: InputMethodService) : PrivateComma
         expectedSelStart += text.length - composingText.length
         expectedSelEnd = expectedSelStart
         composingText.setLength(0)
-        if (isConnected()) {
-            ic!!.commitCompletion(completionInfo)
-        }
+        ic?.commitCompletion(completionInfo)
         if (DEBUG_PREVIOUS_TEXT) checkConsistencyForDebug()
     }
 
@@ -855,10 +841,10 @@ class RichInputConnection(private val parent: InputMethodService) : PrivateComma
     fun isCursorFollowedByWordCharacter(
             spacingAndPunctuations: SpacingAndPunctuations): Boolean {
         val after = getTextAfterCursor(1, 0)
-        if (TextUtils.isEmpty(after)) {
+        if (after.isNullOrEmpty()) {
             return false
         }
-        val codePointAfterCursor = Character.codePointAt(after!!, 0)
+        val codePointAfterCursor = Character.codePointAt(after, 0)
         return !spacingAndPunctuations.isWordSeparator(codePointAfterCursor)
                 && !spacingAndPunctuations.isWordConnector(codePointAfterCursor)
     }
@@ -906,8 +892,8 @@ class RichInputConnection(private val parent: InputMethodService) : PrivateComma
         val textBeforeCursor = getTextBeforeCursor(2, 0)
         // NOTE: This does not work with surrogate pairs. Hopefully when the keyboard is able to
         // enter surrogate pairs this code will have been removed.
-        if (TextUtils.isEmpty(textBeforeCursor)
-                || (Constants.CODE_SPACE != textBeforeCursor!![1].code)) {
+        if (textBeforeCursor.isNullOrEmpty()
+                || (Constants.CODE_SPACE != textBeforeCursor[1].code)) {
             // We may only come here if the application is changing the text while we are typing.
             // This is quite a broken case, but not logically impossible, so we shouldn't crash,
             // but some debugging log may be in order.
@@ -991,8 +977,8 @@ class RichInputConnection(private val parent: InputMethodService) : PrivateComma
         val lastCodePoint = getCodePointBeforeCursor()
         if (StringUtils.mightBeEmoji(lastCodePoint) || Character.isSupplementaryCodePoint(lastCodePoint) || combiningRange.contains(lastCodePoint)) {
             val text = getTextBeforeCursor(NUM_CHARS_TO_GET_BEFORE_CURSOR, 0)
-            if (TextUtils.isEmpty(text)) return 1
-            return text!!.toString().lastGrapheme.length
+            if (text.isNullOrEmpty()) return 1
+            return text.toString().lastGrapheme.length
         }
         return 1
     }
@@ -1054,7 +1040,7 @@ class RichInputConnection(private val parent: InputMethodService) : PrivateComma
         ic = parent.getCurrentInputConnection()
         val textBeforeCursor = getTextBeforeCursor(
                 Constants.EDITOR_CONTENTS_CACHE_SIZE, 0)
-        val selectedText = if (isConnected()) ic!!.getSelectedText(0 /* flags */) else null
+        val selectedText = ic?.getSelectedText(0 /* flags */)
         if (null == textBeforeCursor ||
                 (!TextUtils.isEmpty(selectedText) && expectedSelEnd == expectedSelStart)) {
             // If textBeforeCursor is null, we have no idea what kind of text field we have or if
@@ -1096,10 +1082,8 @@ class RichInputConnection(private val parent: InputMethodService) : PrivateComma
 
     override fun performPrivateCommand(action: String?, data: Bundle?): Boolean {
         ic = parent.getCurrentInputConnection()
-        if (!isConnected()) {
-            return false
-        }
-        return ic!!.performPrivateCommand(action, data)
+        val ic = ic ?: return false
+        return ic.performPrivateCommand(action, data)
     }
 
     fun getExpectedSelectionStart(): Int {
@@ -1134,19 +1118,17 @@ class RichInputConnection(private val parent: InputMethodService) : PrivateComma
      */
     fun requestCursorUpdates(enableMonitor: Boolean, requestImmediateCallback: Boolean): Boolean {
         ic = parent.getCurrentInputConnection()
-        if (!isConnected()) {
-            return false
-        }
+        val ic = ic ?: return false
         val cursorUpdateMode = (if (enableMonitor) InputConnection.CURSOR_UPDATE_MONITOR else 0) or
             (if (requestImmediateCallback) InputConnection.CURSOR_UPDATE_IMMEDIATE else 0)
-        return ic!!.requestCursorUpdates(cursorUpdateMode)
+        return ic.requestCursorUpdates(cursorUpdateMode)
     }
 
     // doesn't work in many apps that support normal clipboard pasting, possibly just because they don't have mime types in editorInfo
     fun commitContent(contentInfo: InputContentInfoCompat, editorInfo: EditorInfo) {
         ic = parent.getCurrentInputConnection()
-        if (isConnected())
-            InputConnectionCompat.commitContent(ic!!, editorInfo, contentInfo, InputConnectionCompat.INPUT_CONTENT_GRANT_READ_URI_PERMISSION, null)
+        val ic = ic ?: return
+        InputConnectionCompat.commitContent(ic, editorInfo, contentInfo, InputConnectionCompat.INPUT_CONTENT_GRANT_READ_URI_PERMISSION, null)
     }
 
     companion object {
