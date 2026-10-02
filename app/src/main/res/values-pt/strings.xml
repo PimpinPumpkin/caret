@@ -581,4 +581,17 @@
     <string name="swipe_models_remove_message">Remover os modelos de escrita por gestos? A escrita por gestos deixa de funcionar até serem novamente transferidos ou importados.</string>
     <string name="swipe_engine_futo">Utilizar o FUTO Swipe</string>
     <string name="swipe_engine_futo_summary">Desativado, utiliza a biblioteca de escrita por gestos importada</string>
+    <string name="lm_next_word">Sugestões mais inteligentes da palavra seguinte</string>
+    <string name="lm_next_word_summary">Utiliza o modelo de linguagem dos modelos de escrita por gestos para prever a palavra seguinte a partir da frase escrita até ao momento. Apenas em inglês, requer os modelos de escrita por gestos.</string>
+    <string name="inline_dictation">Ditar dentro do teclado</string>
+    <string name="inline_dictation_summary">A tecla do microfone ouve aqui mesmo e escreve o que disser. Utiliza o serviço de voz do Alyo quando este está ativado no Alyo; caso contrário, o reconhecedor de voz do telemóvel. Sem nenhum dos dois, a tecla muda para o teclado de voz, como antes.</string>
+    <string name="inline_dictation_no_service">Nenhum serviço de reconhecimento de voz encontrado. No Alyo, ative a sua utilização como reconhecedor de voz do telemóvel.</string>
+    <string name="dictation_starting">A iniciar…</string>
+    <string name="dictation_error_permission">O serviço de voz não tem acesso ao microfone</string>
+    <string name="dictation_error">O reconhecimento de voz não está configurado</string>
+    <string name="dictation_listening">A ouvir… toque para parar</string>
+    <string name="mask_clipboard_secrets">Ocultar dados sensíveis copiados</string>
+    <string name="mask_clipboard_secrets_summary">Números de cartão, tokens de início de sessão, chaves privadas e frases de recuperação são mostrados como pontos na sugestão da área de transferência e no histórico da área de transferência. Ao colar, o texto real continua a ser inserido.</string>
+    <string name="remote_navigation">Navegação por comando</string>
+    <string name="remote_navigation_summary">Os botões de seta movem um realce entre as teclas e o botão do meio prime a tecla. Mantenha-o premido para abrir o pop-up da tecla. Ativada por predefinição numa TV.</string>
 </resources>

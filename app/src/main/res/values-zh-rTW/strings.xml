@@ -191,4 +191,17 @@
     <string name="swipe_models_remove_message">要移除滑行輸入模型嗎？在重新下載或匯入之前，滑行輸入將無法使用。</string>
     <string name="swipe_engine_futo">使用 FUTO Swipe</string>
     <string name="swipe_engine_futo_summary">關閉後會改用匯入的滑行輸入程式庫</string>
+    <string name="lm_next_word">更聰明的下一個字詞建議</string>
+    <string name="lm_next_word_summary">使用滑行輸入模型中的語言模型，根據目前已輸入的句子預測下一個字詞。僅支援英文，需要滑行輸入模型。</string>
+    <string name="inline_dictation">在鍵盤內聽寫</string>
+    <string name="inline_dictation_summary">麥克風鍵會直接在這裡聆聽並輸入你說的內容。如果已在 Alyo 中開啟，就使用 Alyo 的語音服務，否則使用手機的語音辨識器。兩者都沒有時，該鍵會像以前一樣切換到語音鍵盤。</string>
+    <string name="inline_dictation_no_service">找不到語音辨識服務。請在 Alyo 中開啟將其用作手機語音辨識器的選項。</string>
+    <string name="dictation_starting">正在啟動…</string>
+    <string name="dictation_error_permission">語音服務沒有麥克風權限</string>
+    <string name="dictation_error">尚未設定語音辨識</string>
+    <string name="dictation_listening">正在聆聽… 輕觸即可停止</string>
+    <string name="mask_clipboard_secrets">隱藏複製的機密資訊</string>
+    <string name="mask_clipboard_secrets_summary">卡號、登入權杖、私密金鑰和助記詞在剪貼簿建議和剪貼簿記錄中會顯示為圓點。貼上時仍會插入真正的文字。</string>
+    <string name="remote_navigation">遙控器導覽</string>
+    <string name="remote_navigation_summary">方向鍵會在按鍵之間移動醒目標示，中間鍵則按下該按鍵。長按中間鍵可顯示該按鍵的彈出鍵。在電視上預設為開啟。</string>
 </resources>

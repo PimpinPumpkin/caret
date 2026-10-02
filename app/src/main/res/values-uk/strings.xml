@@ -584,4 +584,17 @@
     <string name="swipe_models_remove_message">Видалити моделі введення жестами? Введення жестами не працюватиме, доки їх не буде знову завантажено або імпортовано.</string>
     <string name="swipe_engine_futo">Використовувати FUTO Swipe</string>
     <string name="swipe_engine_futo_summary">Якщо вимкнено, використовується завантажена бібліотека введення жестами</string>
+    <string name="lm_next_word">Розумніші пропозиції наступного слова</string>
+    <string name="lm_next_word_summary">Використовує мовну модель із моделей введення жестами, щоб вгадувати наступне слово за вже набраною частиною речення. Лише для англійської, потрібні моделі введення жестами.</string>
+    <string name="inline_dictation">Диктування просто в клавіатурі</string>
+    <string name="inline_dictation_summary">Клавіша мікрофона слухає просто тут і вводить те, що ви кажете. Використовує службу розпізнавання мовлення Alyo, якщо її ввімкнено в Alyo, інакше розпізнавач мовлення телефона. Якщо немає ні того, ні іншого, клавіша, як і раніше, перемикає на голосову клавіатуру.</string>
+    <string name="inline_dictation_no_service">Службу розпізнавання мовлення не знайдено. Увімкніть в Alyo його використання як розпізнавача мовлення телефона.</string>
+    <string name="dictation_starting">Запуск…</string>
+    <string name="dictation_error_permission">Служба розпізнавання мовлення не має доступу до мікрофона</string>
+    <string name="dictation_error">Розпізнавання мовлення не налаштовано</string>
+    <string name="dictation_listening">Слухаю… натисніть, щоб зупинити</string>
+    <string name="mask_clipboard_secrets">Приховувати скопійовані секрети</string>
+    <string name="mask_clipboard_secrets_summary">Номери карток, токени входу, приватні ключі та сид-фрази показуються крапками в пропозиції буфера обміну та в історії буфера обміну. Під час вставлення все одно вставляється справжній текст.</string>
+    <string name="remote_navigation">Навігація з пульта</string>
+    <string name="remote_navigation_summary">Кнопки зі стрілками переміщують виділення між клавішами, а центральна кнопка натискає клавішу. Утримуйте її, щоб відкрити спливне вікно клавіші. На телевізорі ввімкнено типово.</string>
 </resources>

@@ -581,4 +581,17 @@
     <string name="swipe_models_remove_message">Modelle für Gesten-Tippen entfernen? Gesten-Tippen funktioniert erst wieder, wenn sie erneut heruntergeladen oder importiert werden.</string>
     <string name="swipe_engine_futo">FUTO Swipe verwenden</string>
     <string name="swipe_engine_futo_summary">Wenn aus, wird stattdessen die importierte Gesten-Tippen-Bibliothek verwendet</string>
+    <string name="lm_next_word">Klügere Vorschläge für nächstes Wort</string>
+    <string name="lm_next_word_summary">Nutzt das Sprachmodell der Modelle für Gesten-Tippen, um das nächste Wort aus dem bisherigen Satz zu erraten. Nur Englisch, benötigt die Modelle für Gesten-Tippen.</string>
+    <string name="inline_dictation">In der Tastatur diktieren</string>
+    <string name="inline_dictation_summary">Die Mikrofontaste hört direkt hier zu und tippt, was du sagst. Nutzt den Sprachdienst von Alyo, wenn er in Alyo eingeschaltet ist, sonst die Spracherkennung des Telefons. Ohne beides wechselt die Taste wie bisher zur Sprachtastatur.</string>
+    <string name="inline_dictation_no_service">Kein Spracherkennungsdienst gefunden. Schalte in Alyo die Verwendung als Spracherkennung des Telefons ein.</string>
+    <string name="dictation_starting">Wird gestartet…</string>
+    <string name="dictation_error_permission">Sprachdienst hat keinen Mikrofonzugriff</string>
+    <string name="dictation_error">Spracherkennung ist nicht eingerichtet</string>
+    <string name="dictation_listening">Hört zu… zum Beenden tippen</string>
+    <string name="mask_clipboard_secrets">Kopierte Geheimnisse verbergen</string>
+    <string name="mask_clipboard_secrets_summary">Kartennummern, Anmelde-Tokens, private Schlüssel und Seed-Phrasen werden im Zwischenablage-Vorschlag und im Zwischenablage-Verlauf als Punkte angezeigt. Beim Einfügen wird weiterhin der echte Text eingefügt.</string>
+    <string name="remote_navigation">Navigation per Fernbedienung</string>
+    <string name="remote_navigation_summary">Die Pfeiltasten bewegen eine Markierung zwischen den Tasten, die mittlere Taste drückt die Taste. Halte sie für das Popup der Taste gedrückt. Auf einem Fernseher standardmäßig an.</string>
 </resources>

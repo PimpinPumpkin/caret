@@ -487,4 +487,17 @@
     <string name="swipe_models_remove_message">Hapus model pengetikan gestur? Pengetikan gestur tidak akan berfungsi sampai model diunduh atau diimpor lagi.</string>
     <string name="swipe_engine_futo">Gunakan FUTO Swipe</string>
     <string name="swipe_engine_futo_summary">Jika nonaktif, pustaka pengetikan gestur yang diimpor akan digunakan</string>
+    <string name="lm_next_word">Saran kata berikutnya yang lebih cerdas</string>
+    <string name="lm_next_word_summary">Memakai model bahasa dari model pengetikan gestur untuk menebak kata berikutnya dari kalimat sejauh ini. Hanya bahasa Inggris, memerlukan model pengetikan gestur.</string>
+    <string name="inline_dictation">Dikte di dalam papan ketik</string>
+    <string name="inline_dictation_summary">Tombol mikrofon mendengarkan langsung di sini dan mengetik apa yang Anda ucapkan. Memakai layanan ucapan Alyo jika diaktifkan di Alyo, jika tidak, pengenal ucapan ponsel. Tanpa keduanya, tombol beralih ke papan ketik suara seperti sebelumnya.</string>
+    <string name="inline_dictation_no_service">Layanan pengenalan ucapan tidak ditemukan. Di Alyo, aktifkan penggunaannya sebagai pengenal ucapan ponsel.</string>
+    <string name="dictation_starting">Memulai…</string>
+    <string name="dictation_error_permission">Layanan ucapan tidak memiliki akses mikrofon</string>
+    <string name="dictation_error">Pengenalan ucapan belum disiapkan</string>
+    <string name="dictation_listening">Mendengarkan… ketuk untuk berhenti</string>
+    <string name="mask_clipboard_secrets">Sembunyikan rahasia yang disalin</string>
+    <string name="mask_clipboard_secrets_summary">Nomor kartu, token login, kunci privat, dan frasa pemulihan ditampilkan sebagai titik di saran papan klip dan riwayat papan klip. Menempel tetap memasukkan teks aslinya.</string>
+    <string name="remote_navigation">Navigasi dengan remote control</string>
+    <string name="remote_navigation_summary">Tombol panah memindahkan sorotan di antara tombol dan tombol tengah menekan tombol tersebut. Tahan untuk memunculkan popup tombol. Aktif secara default di TV.</string>
 </resources>

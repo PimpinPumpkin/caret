@@ -305,4 +305,17 @@
     <string name="swipe_models_remove_message">Ta bort modellerna för svepskrivning? Svepskrivning slutar fungera tills de hämtas eller importeras igen.</string>
     <string name="swipe_engine_futo">Använd FUTO Swipe</string>
     <string name="swipe_engine_futo_summary">Av använder det inlästa svepskrivningsbiblioteket i stället</string>
+    <string name="lm_next_word">Smartare förslag på nästa ord</string>
+    <string name="lm_next_word_summary">Använder språkmodellen i modellerna för svepskrivning för att gissa nästa ord utifrån meningen hittills. Endast engelska, kräver modellerna för svepskrivning.</string>
+    <string name="inline_dictation">Diktera i tangentbordet</string>
+    <string name="inline_dictation_summary">Mikrofontangenten lyssnar direkt här och skriver det du säger. Använder Alyos taltjänst när den är påslagen i Alyo, annars telefonens taligenkänning. Utan någon av dem byter tangenten till rösttangentbordet som förut.</string>
+    <string name="inline_dictation_no_service">Ingen tjänst för taligenkänning hittades. Slå på användningen av Alyo som telefonens taligenkänning i Alyo.</string>
+    <string name="dictation_starting">Startar…</string>
+    <string name="dictation_error_permission">Taltjänsten har ingen åtkomst till mikrofonen</string>
+    <string name="dictation_error">Taligenkänning är inte konfigurerad</string>
+    <string name="dictation_listening">Lyssnar… tryck för att stoppa</string>
+    <string name="mask_clipboard_secrets">Dölj kopierade hemligheter</string>
+    <string name="mask_clipboard_secrets_summary">Kortnummer, inloggningstoken, privata nycklar och återställningsfraser visas som punkter i urklippsförslaget och urklippshistoriken. Vid inklistring infogas fortfarande den riktiga texten.</string>
+    <string name="remote_navigation">Navigering med fjärrkontroll</string>
+    <string name="remote_navigation_summary">Pilknapparna flyttar en markering mellan tangenterna och mittknappen trycker på tangenten. Håll in den för tangentens popup. På som standard på en TV.</string>
 </resources>

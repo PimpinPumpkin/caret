@@ -132,6 +132,11 @@ android {
     namespace = "app.caret.latin"
     lint {
         abortOnError = true
+        // Most languages are translated only in part and fall back to English, by design.
+        disable += "MissingTranslation"
+        // Flags getString on a context taken in a composable even when the call sits in a click
+        // handler, where a fresh lookup is exactly what is wanted. Real cases use stringResource.
+        warning += "LocalContextGetResourceValueCall"
     }
 }
 

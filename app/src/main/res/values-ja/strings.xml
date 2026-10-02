@@ -189,4 +189,17 @@
     <string name="swipe_models_remove_message">ジェスチャー入力モデルを削除しますか？もう一度ダウンロードまたはインポートするまで、ジェスチャー入力は使用できなくなります。</string>
     <string name="swipe_engine_futo">FUTO Swipe を使用する</string>
     <string name="swipe_engine_futo_summary">オフにすると、代わりにインポートしたジェスチャー入力ライブラリを使用します</string>
+    <string name="lm_next_word">より賢い次の入力候補</string>
+    <string name="lm_next_word_summary">ジェスチャー入力モデルの言語モデルを使用して、ここまでの文から次の単語を予測します。英語のみ対応で、ジェスチャー入力モデルが必要です。</string>
+    <string name="inline_dictation">キーボード内で音声入力</string>
+    <string name="inline_dictation_summary">マイクキーを押すとその場で聞き取り、話した内容を入力します。Alyo 側でオンになっている場合は Alyo の音声サービスを、そうでない場合はスマートフォンの音声認識を使用します。どちらもない場合は、これまでどおり音声キーボードに切り替わります。</string>
+    <string name="inline_dictation_no_service">音声認識サービスが見つかりません。Alyo で、スマートフォンの音声認識として使用する設定をオンにしてください。</string>
+    <string name="dictation_starting">開始中…</string>
+    <string name="dictation_error_permission">音声サービスにマイクへのアクセス権限がありません</string>
+    <string name="dictation_error">音声認識が設定されていません</string>
+    <string name="dictation_listening">聞き取り中… タップで停止</string>
+    <string name="mask_clipboard_secrets">コピーした機密情報を隠す</string>
+    <string name="mask_clipboard_secrets_summary">カード番号、ログイントークン、秘密鍵、シードフレーズは、クリップボードの入力候補とクリップボード履歴で点として表示されます。貼り付けると実際のテキストが挿入されます。</string>
+    <string name="remote_navigation">リモコン操作</string>
+    <string name="remote_navigation_summary">矢印ボタンでキー間のハイライトを移動し、中央のボタンでキーを押します。長押しするとキーのポップアップを表示します。テレビではデフォルトでオンです。</string>
 </resources>

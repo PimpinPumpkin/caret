@@ -590,4 +590,17 @@
     <string name="swipe_models_remove_message">Remover os modelos de digitação por gestos? A digitação por gestos deixará de funcionar até que eles sejam baixados ou importados novamente.</string>
     <string name="swipe_engine_futo">Usar o FUTO Swipe</string>
     <string name="swipe_engine_futo_summary">Desativado, usa a biblioteca de digitação por gestos importada</string>
+    <string name="lm_next_word">Sugestões mais inteligentes da próxima palavra</string>
+    <string name="lm_next_word_summary">Usa o modelo de linguagem dos modelos de digitação por gestos para prever a próxima palavra a partir da frase digitada até o momento. Somente em inglês, requer os modelos de digitação por gestos.</string>
+    <string name="inline_dictation">Ditar dentro do teclado</string>
+    <string name="inline_dictation_summary">A tecla do microfone ouve aqui mesmo e digita o que você diz. Usa o serviço de fala do Alyo quando ele está ativado no Alyo; caso contrário, o reconhecedor de fala do celular. Sem nenhum dos dois, a tecla muda para o teclado de voz, como antes.</string>
+    <string name="inline_dictation_no_service">Nenhum serviço de reconhecimento de fala encontrado. No Alyo, ative o uso dele como reconhecedor de fala do celular.</string>
+    <string name="dictation_starting">Iniciando…</string>
+    <string name="dictation_error_permission">O serviço de fala não tem acesso ao microfone</string>
+    <string name="dictation_error">O reconhecimento de fala não está configurado</string>
+    <string name="dictation_listening">Ouvindo… toque para parar</string>
+    <string name="mask_clipboard_secrets">Ocultar dados sigilosos copiados</string>
+    <string name="mask_clipboard_secrets_summary">Números de cartão, tokens de login, chaves privadas e frases de recuperação aparecem como pontos na sugestão da área de transferência e no histórico da área de transferência. Ao colar, o texto real ainda é inserido.</string>
+    <string name="remote_navigation">Navegação por controle remoto</string>
+    <string name="remote_navigation_summary">Os botões de seta movem um destaque entre as teclas e o botão do meio pressiona a tecla. Segure-o para abrir o pop-up da tecla. Ativado por padrão em TVs.</string>
 </resources>

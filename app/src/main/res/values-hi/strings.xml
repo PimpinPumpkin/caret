@@ -138,4 +138,17 @@
     <string name="swipe_models_remove_message">जेश्चर टाइपिंग के मॉडल निकालें? जब तक इन्हें दोबारा डाउनलोड या इंपोर्ट नहीं किया जाता, जेश्चर टाइपिंग काम नहीं करेगी.</string>
     <string name="swipe_engine_futo">FUTO Swipe का इस्तेमाल करें</string>
     <string name="swipe_engine_futo_summary">बंद होने पर इसकी जगह इंपोर्ट की गई जेश्चर टाइपिंग लाइब्रेरी इस्तेमाल होती है</string>
+    <string name="lm_next_word">अगले शब्द के बेहतर सुझाव</string>
+    <string name="lm_next_word_summary">अब तक लिखे वाक्य से अगले शब्द का अनुमान लगाने के लिए जेश्चर टाइपिंग के मॉडल के भाषा मॉडल का इस्तेमाल करता है. सिर्फ़ अंग्रेज़ी के लिए, जेश्चर टाइपिंग के मॉडल ज़रूरी हैं.</string>
+    <string name="inline_dictation">कीबोर्ड में ही बोलकर लिखें</string>
+    <string name="inline_dictation_summary">माइक्रोफ़ोन कुंजी यहीं सुनती है और आप जो बोलते हैं उसे टाइप करती है. Alyo में चालू होने पर Alyo की स्पीच सेवा का इस्तेमाल करती है, वरना फ़ोन के स्पीच रिकग्निशन का. दोनों न होने पर कुंजी पहले की तरह वॉइस कीबोर्ड पर स्विच करती है.</string>
+    <string name="inline_dictation_no_service">बोली पहचानने की कोई सेवा नहीं मिली. Alyo में, उसे फ़ोन के स्पीच रिकग्निशन के तौर पर इस्तेमाल करना चालू करें.</string>
+    <string name="dictation_starting">शुरू हो रहा है…</string>
+    <string name="dictation_error_permission">स्पीच सेवा को माइक्रोफ़ोन की अनुमति नहीं है</string>
+    <string name="dictation_error">स्पीच रिकग्निशन सेट अप नहीं है</string>
+    <string name="dictation_listening">सुन रहा है… रोकने के लिए टैप करें</string>
+    <string name="mask_clipboard_secrets">कॉपी की गई गोपनीय जानकारी छिपाएं</string>
+    <string name="mask_clipboard_secrets_summary">कार्ड नंबर, लॉगिन टोकन, निजी कुंजियां और सीड फ़्रेज़ क्लिपबोर्ड सुझाव और क्लिपबोर्ड इतिहास में बिंदुओं के रूप में दिखते हैं. चिपकाने पर असली टेक्स्ट ही डाला जाता है.</string>
+    <string name="remote_navigation">रिमोट कंट्रोल से नेविगेशन</string>
+    <string name="remote_navigation_summary">तीर वाले बटन कुंजियों के बीच हाइलाइट को घुमाते हैं और बीच वाला बटन कुंजी दबाता है. कुंजी के पॉपअप के लिए उसे दबाकर रखें. टीवी पर डिफ़ॉल्ट रूप से चालू.</string>
 </resources>

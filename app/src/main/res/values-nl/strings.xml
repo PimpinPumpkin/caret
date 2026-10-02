@@ -590,4 +590,17 @@
     <string name="swipe_models_remove_message">De modellen voor typen met gebaren verwijderen? Typen met gebaren werkt niet meer totdat ze opnieuw zijn gedownload of geïmporteerd.</string>
     <string name="swipe_engine_futo">FUTO Swipe gebruiken</string>
     <string name="swipe_engine_futo_summary">Uit: in plaats daarvan wordt de geïmporteerde bibliotheek voor typen met gebaren gebruikt</string>
+    <string name="lm_next_word">Slimmere suggesties voor volgend woord</string>
+    <string name="lm_next_word_summary">Gebruikt het taalmodel van de modellen voor typen met gebaren om het volgende woord te voorspellen op basis van de zin tot nu toe. Alleen Engels, de modellen voor typen met gebaren zijn nodig.</string>
+    <string name="inline_dictation">Dicteren in het toetsenbord</string>
+    <string name="inline_dictation_summary">De microfoontoets luistert hier ter plekke en typt wat je zegt. Gebruikt de spraakservice van Alyo als die in Alyo is ingeschakeld, anders de spraakherkenning van de telefoon. Zonder een van beide schakelt de toets net als voorheen over naar het spraaktoetsenbord.</string>
+    <string name="inline_dictation_no_service">Geen spraakherkenningsservice gevonden. Schakel in Alyo het gebruik als spraakherkenning van de telefoon in.</string>
+    <string name="dictation_starting">Starten…</string>
+    <string name="dictation_error_permission">Spraakservice heeft geen toegang tot de microfoon</string>
+    <string name="dictation_error">Spraakherkenning is niet ingesteld</string>
+    <string name="dictation_listening">Luisteren… tik om te stoppen</string>
+    <string name="mask_clipboard_secrets">Gekopieerde geheimen verbergen</string>
+    <string name="mask_clipboard_secrets_summary">Kaartnummers, inlogtokens, privésleutels en herstelzinnen worden als stippen weergegeven in de klembordsuggestie en de klembordgeschiedenis. Bij het plakken wordt nog steeds de echte tekst ingevoegd.</string>
+    <string name="remote_navigation">Navigatie met afstandsbediening</string>
+    <string name="remote_navigation_summary">De pijltoetsen verplaatsen een markering tussen de toetsen en de middelste knop drukt de toets in. Houd die ingedrukt voor de pop-up van de toets. Staat standaard aan op een tv.</string>
 </resources>

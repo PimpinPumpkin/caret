@@ -586,4 +586,17 @@ Nouveau dictionnaire:
     <string name="swipe_models_remove_message">Supprimer les modèles de saisie gestuelle ? La saisie gestuelle ne fonctionnera plus tant qu\'ils n\'auront pas été téléchargés ou importés à nouveau.</string>
     <string name="swipe_engine_futo">Utiliser FUTO Swipe</string>
     <string name="swipe_engine_futo_summary">Si désactivé, la bibliothèque de saisie gestuelle importée est utilisée à la place</string>
+    <string name="lm_next_word">Suggestions du mot suivant plus intelligentes</string>
+    <string name="lm_next_word_summary">Utilise le modèle de langue des modèles de saisie gestuelle pour deviner le mot suivant à partir du début de la phrase. Anglais uniquement, nécessite les modèles de saisie gestuelle.</string>
+    <string name="inline_dictation">Dicter dans le clavier</string>
+    <string name="inline_dictation_summary">La touche microphone écoute directement ici et saisit ce que vous dites. Utilise le service vocal d\'Alyo s\'il est activé dans Alyo, sinon la reconnaissance vocale du téléphone. Sans l\'un ni l\'autre, la touche bascule vers le clavier vocal comme avant.</string>
+    <string name="inline_dictation_no_service">Aucun service de reconnaissance vocale trouvé. Dans Alyo, activez son utilisation comme reconnaissance vocale du téléphone.</string>
+    <string name="dictation_starting">Démarrage…</string>
+    <string name="dictation_error_permission">Le service vocal n\'a pas accès au microphone</string>
+    <string name="dictation_error">La reconnaissance vocale n\'est pas configurée</string>
+    <string name="dictation_listening">Écoute… appuyez pour arrêter</string>
+    <string name="mask_clipboard_secrets">Masquer les secrets copiés</string>
+    <string name="mask_clipboard_secrets_summary">Les numéros de carte, jetons de connexion, clés privées et phrases de récupération sont affichés sous forme de points dans la suggestion du presse-papiers et dans l\'historique du presse-papiers. Le collage insère toujours le texte réel.</string>
+    <string name="remote_navigation">Navigation à la télécommande</string>
+    <string name="remote_navigation_summary">Les touches fléchées déplacent une surbrillance entre les touches et le bouton central appuie sur la touche. Maintenez-le pour afficher le pop-up de la touche. Activé par défaut sur un téléviseur.</string>
 </resources>

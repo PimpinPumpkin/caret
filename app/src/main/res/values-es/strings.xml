@@ -581,4 +581,17 @@
     <string name="swipe_models_remove_message">¿Quitar los modelos de escritura gestual? La escritura gestual dejará de funcionar hasta que se descarguen o importen de nuevo.</string>
     <string name="swipe_engine_futo">Usar FUTO Swipe</string>
     <string name="swipe_engine_futo_summary">Si se desactiva, se usa en su lugar la biblioteca de escritura gestual importada</string>
+    <string name="lm_next_word">Sugerencias más inteligentes de la siguiente palabra</string>
+    <string name="lm_next_word_summary">Utiliza el modelo de lenguaje de los modelos de escritura gestual para adivinar la siguiente palabra a partir de la frase escrita hasta el momento. Solo en inglés, requiere los modelos de escritura gestual.</string>
+    <string name="inline_dictation">Dictar dentro del teclado</string>
+    <string name="inline_dictation_summary">La tecla del micrófono escucha aquí mismo y escribe lo que dices. Usa el servicio de voz de Alyo cuando está activado en Alyo; si no, el reconocimiento de voz del teléfono. Sin ninguno de los dos, la tecla cambia al teclado de voz como antes.</string>
+    <string name="inline_dictation_no_service">No se ha encontrado ningún servicio de reconocimiento de voz. En Alyo, activa su uso como reconocimiento de voz del teléfono.</string>
+    <string name="dictation_starting">Iniciando…</string>
+    <string name="dictation_error_permission">El servicio de voz no tiene acceso al micrófono</string>
+    <string name="dictation_error">El reconocimiento de voz no está configurado</string>
+    <string name="dictation_listening">Escuchando… toca para detener</string>
+    <string name="mask_clipboard_secrets">Ocultar secretos copiados</string>
+    <string name="mask_clipboard_secrets_summary">Los números de tarjeta, tokens de inicio de sesión, claves privadas y frases semilla se muestran como puntos en la sugerencia del portapapeles y en el historial del portapapeles. Al pegar se sigue insertando el texto real.</string>
+    <string name="remote_navigation">Navegación con mando a distancia</string>
+    <string name="remote_navigation_summary">Los botones de flecha mueven un resaltado entre las teclas y el botón central pulsa la tecla. Mantenlo pulsado para ver la ventana emergente de la tecla. Activado por defecto en un televisor.</string>
 </resources>

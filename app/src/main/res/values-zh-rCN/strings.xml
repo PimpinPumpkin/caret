@@ -584,4 +584,17 @@
     <string name="swipe_models_remove_message">要移除滑行输入模型吗？在重新下载或导入之前，滑行输入将无法使用。</string>
     <string name="swipe_engine_futo">使用 FUTO Swipe</string>
     <string name="swipe_engine_futo_summary">关闭后将改用导入的滑行输入库</string>
+    <string name="lm_next_word">更智能的后续字词建议</string>
+    <string name="lm_next_word_summary">使用滑行输入模型中的语言模型，根据已输入的句子预测下一个字词。仅支持英语，需要滑行输入模型。</string>
+    <string name="inline_dictation">在键盘内听写</string>
+    <string name="inline_dictation_summary">麦克风键会直接在此聆听并输入您说的内容。如果已在 Alyo 中开启，则使用 Alyo 的语音服务，否则使用手机的语音识别器。两者都没有时，该键会像以前一样切换到语音键盘。</string>
+    <string name="inline_dictation_no_service">未找到语音识别服务。请在 Alyo 中开启将其用作手机语音识别器的选项。</string>
+    <string name="dictation_starting">正在启动…</string>
+    <string name="dictation_error_permission">语音服务没有麦克风权限</string>
+    <string name="dictation_error">尚未设置语音识别</string>
+    <string name="dictation_listening">正在聆听… 点按即可停止</string>
+    <string name="mask_clipboard_secrets">隐藏复制的机密信息</string>
+    <string name="mask_clipboard_secrets_summary">卡号、登录令牌、私钥和助记词在剪贴板建议和剪贴板历史中显示为圆点。粘贴时仍会插入真实文本。</string>
+    <string name="remote_navigation">遥控器导航</string>
+    <string name="remote_navigation_summary">方向键在按键之间移动高亮，中间键按下该按键。长按中间键可显示该按键的弹出键。在电视上默认开启。</string>
 </resources>

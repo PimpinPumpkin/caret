@@ -517,4 +517,17 @@
     <string name="swipe_models_remove_message">제스처 입력 모델을 삭제하시겠습니까? 다시 다운로드하거나 가져올 때까지 제스처 입력이 작동하지 않습니다.</string>
     <string name="swipe_engine_futo">FUTO Swipe 사용</string>
     <string name="swipe_engine_futo_summary">끄면 가져온 제스처 입력 라이브러리를 대신 사용</string>
+    <string name="lm_next_word">더 똑똑한 다음 단어 추천</string>
+    <string name="lm_next_word_summary">제스처 입력 모델의 언어 모델을 사용하여 지금까지의 문장에서 다음 단어를 예측합니다. 영어만 지원하며 제스처 입력 모델이 필요합니다.</string>
+    <string name="inline_dictation">키보드 안에서 음성 입력</string>
+    <string name="inline_dictation_summary">마이크 키가 바로 여기에서 듣고 말한 내용을 입력합니다. Alyo에서 켜져 있으면 Alyo의 음성 서비스를, 그렇지 않으면 휴대전화의 음성 인식기를 사용합니다. 둘 다 없으면 이전처럼 음성 키보드로 전환합니다.</string>
+    <string name="inline_dictation_no_service">음성 인식 서비스를 찾을 수 없습니다. Alyo에서 휴대전화의 음성 인식기로 사용하는 설정을 켜세요.</string>
+    <string name="dictation_starting">시작하는 중…</string>
+    <string name="dictation_error_permission">음성 서비스에 마이크 접근 권한이 없습니다</string>
+    <string name="dictation_error">음성 인식이 설정되지 않았습니다</string>
+    <string name="dictation_listening">듣는 중… 탭하여 중지</string>
+    <string name="mask_clipboard_secrets">복사한 비밀 정보 숨기기</string>
+    <string name="mask_clipboard_secrets_summary">카드 번호, 로그인 토큰, 개인 키, 시드 문구가 클립보드 제안과 클립보드 기록에서 점으로 표시됩니다. 붙여넣으면 실제 텍스트가 입력됩니다.</string>
+    <string name="remote_navigation">리모컨 탐색</string>
+    <string name="remote_navigation_summary">방향 버튼으로 키 사이에서 강조 표시를 옮기고 가운데 버튼으로 키를 누릅니다. 길게 누르면 키의 팝업이 표시됩니다. TV에서는 기본으로 켜져 있습니다.</string>
 </resources>

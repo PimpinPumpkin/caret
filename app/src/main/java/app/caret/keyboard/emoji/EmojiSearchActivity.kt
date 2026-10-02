@@ -240,7 +240,7 @@ class EmojiSearchActivity : ComponentActivity() {
                                     },
                                     singleLine = true,
                                     enabled = true,
-                                    interactionSource = MutableInteractionSource(),
+                                    interactionSource = remember { MutableInteractionSource() },
                                 )
                             }
                         }

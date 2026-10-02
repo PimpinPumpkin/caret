@@ -581,4 +581,17 @@
     <string name="swipe_models_remove_message">Удалить модели непрерывного ввода? Непрерывный ввод не будет работать, пока они не будут снова скачаны или импортированы.</string>
     <string name="swipe_engine_futo">Использовать FUTO Swipe</string>
     <string name="swipe_engine_futo_summary">Если выключено, используется загруженная библиотека ввода жестами</string>
+    <string name="lm_next_word">Более умные подсказки следующего слова</string>
+    <string name="lm_next_word_summary">Использует языковую модель из моделей непрерывного ввода, чтобы угадывать следующее слово по уже набранной части предложения. Только для английского, нужны модели непрерывного ввода.</string>
+    <string name="inline_dictation">Диктовка прямо в клавиатуре</string>
+    <string name="inline_dictation_summary">Клавиша микрофона слушает прямо здесь и вводит то, что вы говорите. Использует службу распознавания речи Alyo, если она включена в Alyo, иначе распознаватель речи телефона. Если нет ни того, ни другого, клавиша, как и раньше, переключает на голосовую клавиатуру.</string>
+    <string name="inline_dictation_no_service">Служба распознавания речи не найдена. Включите в Alyo его использование в качестве распознавателя речи телефона.</string>
+    <string name="dictation_starting">Запуск…</string>
+    <string name="dictation_error_permission">У службы распознавания речи нет доступа к микрофону</string>
+    <string name="dictation_error">Распознавание речи не настроено</string>
+    <string name="dictation_listening">Слушаю… нажмите, чтобы остановить</string>
+    <string name="mask_clipboard_secrets">Скрывать скопированные секреты</string>
+    <string name="mask_clipboard_secrets_summary">Номера карт, токены входа, закрытые ключи и сид-фразы показываются точками в подсказке буфера обмена и в журнале буфера обмена. При вставке по-прежнему вставляется настоящий текст.</string>
+    <string name="remote_navigation">Навигация с пульта</string>
+    <string name="remote_navigation_summary">Кнопки со стрелками перемещают выделение между клавишами, а центральная кнопка нажимает клавишу. Удерживайте её, чтобы открыть всплывающее окно клавиши. На телевизоре включено по умолчанию.</string>
 </resources>

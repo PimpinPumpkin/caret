@@ -589,4 +589,17 @@
     <string name="swipe_models_remove_message">Rimuovere i modelli per la digitazione gestuale? La digitazione gestuale non funzionerà finché non verranno scaricati o importati di nuovo.</string>
     <string name="swipe_engine_futo">Usa FUTO Swipe</string>
     <string name="swipe_engine_futo_summary">Se disattivato, viene usata la libreria per la digitazione gestuale importata</string>
+    <string name="lm_next_word">Suggerimenti parola seguente più intelligenti</string>
+    <string name="lm_next_word_summary">Usa il modello linguistico dei modelli per la digitazione gestuale per indovinare la parola seguente dalla frase scritta finora. Solo inglese, richiede i modelli per la digitazione gestuale.</string>
+    <string name="inline_dictation">Detta nella tastiera</string>
+    <string name="inline_dictation_summary">Il tasto del microfono ascolta direttamente qui e scrive ciò che dici. Usa il servizio vocale di Alyo quando è attivato in Alyo, altrimenti il riconoscimento vocale del telefono. Senza nessuno dei due, il tasto passa alla tastiera vocale come prima.</string>
+    <string name="inline_dictation_no_service">Nessun servizio di riconoscimento vocale trovato. In Alyo, attivane l\'uso come riconoscimento vocale del telefono.</string>
+    <string name="dictation_starting">Avvio…</string>
+    <string name="dictation_error_permission">Il servizio vocale non ha accesso al microfono</string>
+    <string name="dictation_error">Il riconoscimento vocale non è configurato</string>
+    <string name="dictation_listening">In ascolto… tocca per interrompere</string>
+    <string name="mask_clipboard_secrets">Nascondi i segreti copiati</string>
+    <string name="mask_clipboard_secrets_summary">Numeri di carta, token di accesso, chiavi private e seed phrase sono mostrati come puntini nel suggerimento degli appunti e nella cronologia appunti. Incollando viene comunque inserito il testo reale.</string>
+    <string name="remote_navigation">Navigazione con telecomando</string>
+    <string name="remote_navigation_summary">I tasti freccia spostano un\'evidenziazione tra i tasti e il tasto centrale preme il tasto. Tienilo premuto per il popup del tasto. Attiva per impostazione predefinita su una TV.</string>
 </resources>

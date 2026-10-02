@@ -590,4 +590,17 @@
     <string name="swipe_models_remove_message">Kaydırarak yazma modelleri kaldırılsın mı? Modeller yeniden indirilene veya içe aktarılana kadar kaydırarak yazma çalışmaz.</string>
     <string name="swipe_engine_futo">FUTO Swipe kullan</string>
     <string name="swipe_engine_futo_summary">Kapalıyken bunun yerine yüklenen hareketle yazma kitaplığı kullanılır</string>
+    <string name="lm_next_word">Daha akıllı sonraki kelime önerileri</string>
+    <string name="lm_next_word_summary">Cümlenin o ana kadarki kısmından sonraki kelimeyi tahmin etmek için kaydırarak yazma modellerinin dil modelini kullanır. Yalnızca İngilizce, kaydırarak yazma modelleri gerekir.</string>
+    <string name="inline_dictation">Klavyenin içinde dikte et</string>
+    <string name="inline_dictation_summary">Mikrofon tuşu doğrudan burada dinler ve söylediklerinizi yazar. Alyo\'da açıksa Alyo\'nun konuşma hizmetini, değilse telefonun konuşma tanıyıcısını kullanır. İkisi de yoksa tuş eskisi gibi sesli klavyeye geçer.</string>
+    <string name="inline_dictation_no_service">Konuşma tanıma hizmeti bulunamadı. Alyo\'da, telefonun konuşma tanıyıcısı olarak kullanılmasını açın.</string>
+    <string name="dictation_starting">Başlatılıyor…</string>
+    <string name="dictation_error_permission">Konuşma hizmetinin mikrofon erişimi yok</string>
+    <string name="dictation_error">Konuşma tanıma ayarlanmamış</string>
+    <string name="dictation_listening">Dinleniyor… durdurmak için dokunun</string>
+    <string name="mask_clipboard_secrets">Kopyalanan gizli bilgileri gizle</string>
+    <string name="mask_clipboard_secrets_summary">Kart numaraları, oturum açma belirteçleri, özel anahtarlar ve kurtarma ifadeleri pano önerisinde ve pano geçmişinde nokta olarak gösterilir. Yapıştırma yine de gerçek metni ekler.</string>
+    <string name="remote_navigation">Uzaktan kumandayla gezinme</string>
+    <string name="remote_navigation_summary">Ok düğmeleri vurguyu tuşlar arasında taşır, orta düğme ise tuşa basar. Tuşun açılır penceresi için basılı tutun. TV\'de varsayılan olarak açıktır.</string>
 </resources>

@@ -590,4 +590,17 @@
     <string name="swipe_models_remove_message">Usunąć modele pisania gestami? Pisanie gestami przestanie działać, dopóki nie zostaną ponownie pobrane lub zaimportowane.</string>
     <string name="swipe_engine_futo">Używaj FUTO Swipe</string>
     <string name="swipe_engine_futo_summary">Po wyłączeniu używana jest zaimportowana biblioteka pisania gestami</string>
+    <string name="lm_next_word">Lepsze podpowiedzi kolejnego słowa</string>
+    <string name="lm_next_word_summary">Używa modelu językowego z modeli pisania gestami, aby przewidzieć kolejne słowo na podstawie dotychczasowego zdania. Tylko język angielski, wymaga modeli pisania gestami.</string>
+    <string name="inline_dictation">Dyktuj w klawiaturze</string>
+    <string name="inline_dictation_summary">Klawisz mikrofonu słucha od razu tutaj i wpisuje to, co mówisz. Korzysta z usługi mowy Alyo, jeśli jest włączona w Alyo, a w przeciwnym razie z rozpoznawania mowy telefonu. Gdy brak obu, klawisz przełącza na klawiaturę głosową, tak jak wcześniej.</string>
+    <string name="inline_dictation_no_service">Nie znaleziono usługi rozpoznawania mowy. W Alyo włącz używanie go do rozpoznawania mowy w telefonie.</string>
+    <string name="dictation_starting">Uruchamianie…</string>
+    <string name="dictation_error_permission">Usługa mowy nie ma dostępu do mikrofonu</string>
+    <string name="dictation_error">Rozpoznawanie mowy nie jest skonfigurowane</string>
+    <string name="dictation_listening">Słucham… dotknij, aby zatrzymać</string>
+    <string name="mask_clipboard_secrets">Ukrywaj skopiowane poufne dane</string>
+    <string name="mask_clipboard_secrets_summary">Numery kart, tokeny logowania, klucze prywatne i frazy odzyskiwania są wyświetlane jako kropki w sugestii ze schowka i w historii schowka. Wklejanie nadal wstawia prawdziwy tekst.</string>
+    <string name="remote_navigation">Nawigacja pilotem</string>
+    <string name="remote_navigation_summary">Przyciski strzałek przesuwają podświetlenie między klawiszami, a środkowy przycisk naciska klawisz. Przytrzymaj go, aby otworzyć wyskakujące okienko klawisza. Domyślnie włączone na telewizorze.</string>
 </resources>

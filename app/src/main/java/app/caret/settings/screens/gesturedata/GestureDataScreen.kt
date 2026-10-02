@@ -629,7 +629,7 @@ private fun BottomBar(hasWords: Boolean, onDeleted: () -> Unit) {
             appendLine()
             appendLine()
 
-            append(LocalContext.current.getString(R.string.gesture_data_swipe_o_scope, Links.SWIPE_O_SCOPE).htmlToAnnotated())
+            append(stringResource(R.string.gesture_data_swipe_o_scope, Links.SWIPE_O_SCOPE).htmlToAnnotated())
         }
         InfoDialog(text) { showLinks = false }
     }

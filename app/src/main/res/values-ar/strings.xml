@@ -590,4 +590,17 @@
     <string name="swipe_models_remove_message">أتريد إزالة نماذج الكتابة بالإيماءة؟ ستتوقف الكتابة بالإيماءة عن العمل إلى أن تُنزَّل النماذج أو تُستورد من جديد.</string>
     <string name="swipe_engine_futo">استخدم FUTO Swipe</string>
     <string name="swipe_engine_futo_summary">عند الإيقاف تُستخدم مكتبة الكتابة بالإيماءة المستوردة بدلًا منه</string>
+    <string name="lm_next_word">اقتراحات أذكى للكلمة التالية</string>
+    <string name="lm_next_word_summary">يستخدم النموذج اللغوي ضمن نماذج الكتابة بالإيماءة لتخمين الكلمة التالية من الجملة المكتوبة حتى الآن. للإنجليزية فقط، ويحتاج إلى نماذج الكتابة بالإيماءة.</string>
+    <string name="inline_dictation">الإملاء داخل لوحة المفاتيح</string>
+    <string name="inline_dictation_summary">يستمع مفتاح الميكروفون هنا مباشرةً ويكتب ما تقوله. يستخدم خدمة الكلام في Alyo عند تفعيلها في Alyo، وإلا فيستخدم أداة التعرف على الكلام في الهاتف. وإن لم يتوفر أي منهما، ينتقل المفتاح إلى لوحة المفاتيح الصوتية كما في السابق.</string>
+    <string name="inline_dictation_no_service">لم يُعثر على خدمة للتعرف على الكلام. فعِّل في Alyo استخدامه كأداة التعرف على الكلام في الهاتف.</string>
+    <string name="dictation_starting">جارٍ البدء…</string>
+    <string name="dictation_error_permission">خدمة الكلام لا تملك إذن الوصول إلى الميكروفون</string>
+    <string name="dictation_error">لم يُعدّ التعرف على الكلام</string>
+    <string name="dictation_listening">جارٍ الاستماع… انقر للإيقاف</string>
+    <string name="mask_clipboard_secrets">أخفِ الأسرار المنسوخة</string>
+    <string name="mask_clipboard_secrets_summary">تظهر أرقام البطاقات ورموز تسجيل الدخول والمفاتيح الخاصة وعبارات الاسترداد على شكل نقاط في اقتراح الحافظة وسجل الحافظة. ويبقى اللصق يُدخل النص الحقيقي.</string>
+    <string name="remote_navigation">التنقل بجهاز التحكم عن بُعد</string>
+    <string name="remote_navigation_summary">تحرّك أزرار الأسهم تمييزًا بين المفاتيح، والزر الأوسط يضغط المفتاح. اضغط عليه مطولًا لإظهار النافذة المنبثقة للمفتاح. مفعّل افتراضيًا على التلفاز.</string>
 </resources>
