@@ -1199,20 +1199,13 @@ public final class InputLogic {
             // If we are in the middle of a recorrection, we need to commit the recorrection
             // first so that we can insert the separator at the current cursor position.
             // We also need to unlearn the original word that is now being corrected.
-            unlearnWord(mWordComposer.getTypedWord(), inputTransaction.getSettingsValues(), DictionaryFacilitator.UnlearnEvent.BACKSPACE);
+            unlearnWord(mWordComposer.getTypedWord(), settingsValues, DictionaryFacilitator.UnlearnEvent.BACKSPACE);
             resetEntireInputState(mConnection.getExpectedSelectionStart(),
                     mConnection.getExpectedSelectionEnd(), true /* clearSuggestionStrip */);
         }
         // isComposingWord() may have changed since we stored wasComposing
         if (mWordComposer.isComposingWord()) {
-            if (settingsValues.mAutoCorrectEnabled && ! isInlineEmojiSearchAction()) {
-                final String separator = shouldAvoidSendingCode ? LastComposedWord.NOT_A_SEPARATOR
-                        : StringUtils.newSingleCodePointString(codePoint);
-                commitCurrentAutoCorrection(settingsValues, separator, handler);
-                inputTransaction.setDidAutoCorrect();
-            } else {
-                commitTyped(settingsValues, StringUtils.newSingleCodePointString(codePoint));
-            }
+            commitComposingWordBeforeSeparator(codePoint, shouldAvoidSendingCode, inputTransaction, handler);
         }
 
         final boolean swapWeakSpace = tryStripSpaceAndReturnWhetherShouldSwapInstead(event, inputTransaction);
@@ -1220,22 +1213,7 @@ public final class InputLogic {
         final boolean isInsideDoubleQuoteOrAfterDigit = Constants.CODE_DOUBLE_QUOTE == codePoint
                 && mConnection.isInsideDoubleQuoteOrAfterDigit();
 
-        final boolean needsPrecedingSpace;
-        if (SpaceState.PHANTOM != inputTransaction.getSpaceState()) {
-            needsPrecedingSpace = false;
-        } else if (Constants.CODE_DOUBLE_QUOTE == codePoint) {
-            // Double quotes behave like they are usually preceded by space iff we are
-            // not inside a double quote or after a digit.
-            needsPrecedingSpace = !isInsideDoubleQuoteOrAfterDigit;
-        } else if (settingsValues.mSpacingAndPunctuations.isClusteringSymbol(codePoint)
-                && settingsValues.mSpacingAndPunctuations.isClusteringSymbol(
-                        mConnection.getCodePointBeforeCursor())) {
-            needsPrecedingSpace = false;
-        } else {
-            needsPrecedingSpace = settingsValues.isUsuallyPrecededBySpace(codePoint) || StringUtilsKt.isEmoji(codePoint);
-        }
-
-        if (needsPrecedingSpace) {
+        if (needsSpaceBeforeSeparator(codePoint, inputTransaction, isInsideDoubleQuoteOrAfterDigit)) {
             insertAutomaticSpaceIfOptionsAndTextAllow(settingsValues);
         }
 
@@ -1247,61 +1225,107 @@ public final class InputLogic {
             mSpaceState = SpaceState.SWAP_PUNCTUATION;
             mSuggestionStripViewAccessor.setNeutralSuggestionStrip();
         } else if (Constants.CODE_SPACE == codePoint) {
-            if (!mSuggestedWords.isPunctuationSuggestions()) {
-                mSpaceState = SpaceState.WEAK;
-            }
-
-            startDoubleSpacePeriodCountdown(inputTransaction);
-            if (wasComposingWord || mSuggestedWords.isEmpty()) {
-                inputTransaction.setRequiresUpdateSuggestions();
-            }
-
-            if (!shouldAvoidSendingCode) {
-                mConnection.commitCodePoint(codePoint);
-            }
+            commitSpace(inputTransaction, wasComposingWord, shouldAvoidSendingCode);
         } else {
-            if (SpaceState.PHANTOM == inputTransaction.getSpaceState()
-                    && (settingsValues.isUsuallyFollowedBySpace(codePoint) || isInsideDoubleQuoteOrAfterDigit)) {
-                // If we are in phantom space state, and the user presses a separator, we want to
-                // stay in phantom space state so that the next keypress has a chance to add the
-                // space. For example, if I type "Good dat", pick "day" from the suggestion strip
-                // then insert a comma and go on to typing the next word, I want the space to be
-                // inserted automatically before the next word, the same way it is when I don't
-                // input the comma. Also when closing a quote the phantom state should be preserved.
-                // The case is a little different if the separator is a space stripper. Such a
-                // separator does not normally need a space on the right (that's the difference
-                // between swappers and strippers), so we should not stay in phantom space state if
-                // the separator is a stripper. Hence the additional test above.
-                mSpaceState = SpaceState.PHANTOM;
-            } else {
-                // mSpaceState is still SpaceState.NONE, but some characters should typically
-                // be followed by space. Set phantom space state for such characters if the user
-                // enabled the setting and was not composing a word. The latter avoids setting
-                // phantom space state when typing decimal numbers, with the drawback of not
-                // setting phantom space state after ending a sentence with a non-word.
-                // A double quote behaves like it's usually followed by space if we're inside
-                // a double quote.
-                if (wasComposingWord
-                        && settingsValues.mAutospaceAfterPunctuation
-                        && (settingsValues.isUsuallyFollowedBySpace(codePoint) || isInsideDoubleQuoteOrAfterDigit)) {
-                    mSpaceState = SpaceState.PHANTOM;
-                }
-            }
-
-            enterInlineEmojiSearchIfNeeded(codePoint, settingsValues);
-
-            mConnection.commitCodePoint(codePoint);
-
-            if (isInlineEmojiSearchAction()) {
-                inputTransaction.setRequiresUpdateSuggestions();
-            } else {
-                // Set punctuation right away. onUpdateSelection will fire but tests whether it is
-                // already displayed or not, so it's okay.
-                mSuggestionStripViewAccessor.setNeutralSuggestionStrip();
-            }
+            commitSeparatorOtherThanSpace(codePoint, inputTransaction, wasComposingWord, isInsideDoubleQuoteOrAfterDigit);
         }
 
         inputTransaction.requireShiftUpdate(InputTransaction.SHIFT_UPDATE_NOW);
+    }
+
+    /** A separator ends the word being composed: commit it, autocorrected if that is on. */
+    private void commitComposingWordBeforeSeparator(final int codePoint, final boolean shouldAvoidSendingCode,
+            final InputTransaction inputTransaction, final LatinIME.UIHandler handler) {
+        final SettingsValues settingsValues = inputTransaction.getSettingsValues();
+        if (settingsValues.mAutoCorrectEnabled && ! isInlineEmojiSearchAction()) {
+            final String separator = shouldAvoidSendingCode ? LastComposedWord.NOT_A_SEPARATOR
+                    : StringUtils.newSingleCodePointString(codePoint);
+            commitCurrentAutoCorrection(settingsValues, separator, handler);
+            inputTransaction.setDidAutoCorrect();
+        } else {
+            commitTyped(settingsValues, StringUtils.newSingleCodePointString(codePoint));
+        }
+    }
+
+    /** Whether the space the keyboard still owes (phantom space) has to go in before this separator. */
+    private boolean needsSpaceBeforeSeparator(final int codePoint, final InputTransaction inputTransaction,
+            final boolean isInsideDoubleQuoteOrAfterDigit) {
+        final SettingsValues settingsValues = inputTransaction.getSettingsValues();
+        if (SpaceState.PHANTOM != inputTransaction.getSpaceState()) {
+            return false;
+        }
+        if (Constants.CODE_DOUBLE_QUOTE == codePoint) {
+            // Double quotes behave like they are usually preceded by space iff we are
+            // not inside a double quote or after a digit.
+            return !isInsideDoubleQuoteOrAfterDigit;
+        }
+        if (settingsValues.mSpacingAndPunctuations.isClusteringSymbol(codePoint)
+                && settingsValues.mSpacingAndPunctuations.isClusteringSymbol(mConnection.getCodePointBeforeCursor())) {
+            return false;
+        }
+        return settingsValues.isUsuallyPrecededBySpace(codePoint) || StringUtilsKt.isEmoji(codePoint);
+    }
+
+    /** A plain space: remember it may be swapped or doubled, and put it in. */
+    private void commitSpace(final InputTransaction inputTransaction, final boolean wasComposingWord,
+            final boolean shouldAvoidSendingCode) {
+        if (!mSuggestedWords.isPunctuationSuggestions()) {
+            mSpaceState = SpaceState.WEAK;
+        }
+
+        startDoubleSpacePeriodCountdown(inputTransaction);
+        if (wasComposingWord || mSuggestedWords.isEmpty()) {
+            inputTransaction.setRequiresUpdateSuggestions();
+        }
+
+        if (!shouldAvoidSendingCode) {
+            mConnection.commitCodePoint(Constants.CODE_SPACE);
+        }
+    }
+
+    /** Any separator but space: decide whether a space is owed after it, and put it in. */
+    private void commitSeparatorOtherThanSpace(final int codePoint, final InputTransaction inputTransaction,
+            final boolean wasComposingWord, final boolean isInsideDoubleQuoteOrAfterDigit) {
+        final SettingsValues settingsValues = inputTransaction.getSettingsValues();
+        if (SpaceState.PHANTOM == inputTransaction.getSpaceState()
+                && (settingsValues.isUsuallyFollowedBySpace(codePoint) || isInsideDoubleQuoteOrAfterDigit)) {
+            // If we are in phantom space state, and the user presses a separator, we want to
+            // stay in phantom space state so that the next keypress has a chance to add the
+            // space. For example, if I type "Good dat", pick "day" from the suggestion strip
+            // then insert a comma and go on to typing the next word, I want the space to be
+            // inserted automatically before the next word, the same way it is when I don't
+            // input the comma. Also when closing a quote the phantom state should be preserved.
+            // The case is a little different if the separator is a space stripper. Such a
+            // separator does not normally need a space on the right (that's the difference
+            // between swappers and strippers), so we should not stay in phantom space state if
+            // the separator is a stripper. Hence the additional test above.
+            mSpaceState = SpaceState.PHANTOM;
+        } else {
+            // mSpaceState is still SpaceState.NONE, but some characters should typically
+            // be followed by space. Set phantom space state for such characters if the user
+            // enabled the setting and was not composing a word. The latter avoids setting
+            // phantom space state when typing decimal numbers, with the drawback of not
+            // setting phantom space state after ending a sentence with a non-word.
+            // A double quote behaves like it's usually followed by space if we're inside
+            // a double quote.
+            if (wasComposingWord
+                    && settingsValues.mAutospaceAfterPunctuation
+                    && (settingsValues.isUsuallyFollowedBySpace(codePoint) || isInsideDoubleQuoteOrAfterDigit)) {
+                mSpaceState = SpaceState.PHANTOM;
+            }
+        }
+
+        enterInlineEmojiSearchIfNeeded(codePoint, settingsValues);
+
+        mConnection.commitCodePoint(codePoint);
+
+        if (isInlineEmojiSearchAction()) {
+            inputTransaction.setRequiresUpdateSuggestions();
+        } else {
+            // Set punctuation right away. onUpdateSelection will fire but tests whether it is
+            // already displayed or not, so it's okay.
+            mSuggestionStripViewAccessor.setNeutralSuggestionStrip();
+        }
     }
 
     /**

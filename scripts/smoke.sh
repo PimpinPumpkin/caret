@@ -40,6 +40,12 @@ check() { # name expected actual
     if [ "$2" = "$3" ]; then echo "ok   $1: $3"; else echo "FAIL $1: expected '$2', got '$3'"; fail=1; fi
 }
 
+# the emulator sometimes comes back from an older snapshot without the models
+if [ -d swipe/models ] && ! adb shell "run-as $PKG ls files/swipe_models/honorable_sturgeon/model_fp32.pte" >/dev/null 2>&1; then
+    scripts/swipe-models.sh install >/dev/null
+    adb shell ime set $IME >/dev/null
+fi
+
 show_keyboard
 sleep 6 # swipe models load in the background when the keyboard first shows
 
