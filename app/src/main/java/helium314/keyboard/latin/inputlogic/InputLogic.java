@@ -600,6 +600,19 @@ public final class InputLogic {
             BackgroundGatheringCache.INSTANCE.onEditWord(mWordComposer.getTypedWord());
 
         mConnection.beginBatchEdit();
+        finishTextBeforeSwipe(settingsValues, handler);
+        final int codePointBeforeCursor = mConnection.getCodePointBeforeCursor();
+        if (Character.isLetterOrDigit(codePointBeforeCursor)
+                || settingsValues.isUsuallyFollowedBySpace(codePointBeforeCursor)) {
+            oweSpaceBeforeSwipe(settingsValues, keyboardSwitcher);
+        }
+        mConnection.endBatchEdit();
+        mWordComposer.setCapitalizedModeAtStartComposingTime(
+                getActualCapsMode(settingsValues, keyboardSwitcher.getKeyboardCapsMode()));
+    }
+
+    /** A swipe starts a new word: what was being typed is committed, a selection will be replaced. */
+    private void finishTextBeforeSwipe(final SettingsValues settingsValues, final LatinIME.UIHandler handler) {
         if (mWordComposer.isComposingWord()) {
             if (mWordComposer.isCursorFrontOrMiddleOfComposingWord()) {
                 // If we are in the middle of a recorrection, we need to commit the recorrection
@@ -626,31 +639,31 @@ public final class InputLogic {
                 // set selected text as rejected to avoid glide typing resulting in exactly the selected word again
                 mWordComposer.setRejectedBatchModeSuggestion(selectedText.toString());
         }
-        final int codePointBeforeCursor = mConnection.getCodePointBeforeCursor();
-        if (Character.isLetterOrDigit(codePointBeforeCursor)
-                || settingsValues.isUsuallyFollowedBySpace(codePointBeforeCursor)) {
-            // autoShiftHasBeenOverridden is weird
-            // before switching CapsMode to enum, it was CapsMode != autoCapsState
-            // autoCapsState is 0 (off), 0x1000, 0x2000, 0x4000 or a combination
-            // old CapsMode was 0 (off), 1, 3, 5, 7
-            // meaning both were incompatible, and the check was just returning whether both were 0
-            // todo: maybe adjust this?
-            boolean autoShiftHasBeenOverridden =
-                (keyboardSwitcher.getKeyboardCapsMode() == CapsMode.OFF) != (getCurrentAutoCapsState(settingsValues) == 0);
-            if (settingsValues.mAutospaceBeforeGestureTyping)
-                mSpaceState = SpaceState.PHANTOM; // influences autoCapsState
-            if (!autoShiftHasBeenOverridden) {
-                // When we change the space state, we need to update the shift state of the
-                // keyboard unless it has been overridden manually. This is happening for example
-                // after typing some letters and a period, then gesturing; the keyboard is not in
-                // caps mode yet, but since a gesture is starting, it should go in caps mode,
-                // unless the user explicitly said it should not.
-                keyboardSwitcher.updateShiftState(getCurrentAutoCapsState(settingsValues), getCurrentRecapitalizeState());
-            }
+    }
+
+    /**
+     * The swiped word follows a letter, digit or punctuation: note that a space is owed before it,
+     * and let the shift state follow, since the owed space can mean a new sentence.
+     */
+    private void oweSpaceBeforeSwipe(final SettingsValues settingsValues, final KeyboardSwitcher keyboardSwitcher) {
+        // autoShiftHasBeenOverridden is weird
+        // before switching CapsMode to enum, it was CapsMode != autoCapsState
+        // autoCapsState is 0 (off), 0x1000, 0x2000, 0x4000 or a combination
+        // old CapsMode was 0 (off), 1, 3, 5, 7
+        // meaning both were incompatible, and the check was just returning whether both were 0
+        // todo: maybe adjust this?
+        boolean autoShiftHasBeenOverridden =
+            (keyboardSwitcher.getKeyboardCapsMode() == CapsMode.OFF) != (getCurrentAutoCapsState(settingsValues) == 0);
+        if (settingsValues.mAutospaceBeforeGestureTyping)
+            mSpaceState = SpaceState.PHANTOM; // influences autoCapsState
+        if (!autoShiftHasBeenOverridden) {
+            // When we change the space state, we need to update the shift state of the
+            // keyboard unless it has been overridden manually. This is happening for example
+            // after typing some letters and a period, then gesturing; the keyboard is not in
+            // caps mode yet, but since a gesture is starting, it should go in caps mode,
+            // unless the user explicitly said it should not.
+            keyboardSwitcher.updateShiftState(getCurrentAutoCapsState(settingsValues), getCurrentRecapitalizeState());
         }
-        mConnection.endBatchEdit();
-        mWordComposer.setCapitalizedModeAtStartComposingTime(
-                getActualCapsMode(settingsValues, keyboardSwitcher.getKeyboardCapsMode()));
     }
 
     /* The sequence number member is only used in onUpdateBatchInput. It is increased each time
