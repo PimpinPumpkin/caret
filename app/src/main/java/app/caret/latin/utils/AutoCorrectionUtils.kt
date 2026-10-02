@@ -25,11 +25,11 @@ object AutoCorrectionUtils {
             if (!suggestion.isAppropriateForAutoCorrection()) {
                 return false
             }
-            val autoCorrectionSuggestionScore = suggestion.mScore
+            val autoCorrectionSuggestionScore = suggestion.score
             // TODO: when the normalized score of the first suggestion is nearly equals to
             //       the normalized score of the second suggestion, behave less aggressive.
             val normalizedScore = BinaryDictionaryUtils.calcNormalizedScore(
-                    consideredWord, suggestion.mWord, autoCorrectionSuggestionScore)
+                    consideredWord, suggestion.word, autoCorrectionSuggestionScore)
             if (DebugFlags.DEBUG_ENABLED) {
                 Log.d(TAG, "Normalized " + consideredWord + "," + suggestion + ","
                         + autoCorrectionSuggestionScore + ", " + normalizedScore

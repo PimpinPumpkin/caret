@@ -23,20 +23,20 @@ import java.util.Locale
 class DictionaryCollection(dictType: String, locale: Locale?,
         dictionaries: Collection<Dictionary?>, weights: FloatArray) : Dictionary(dictType, locale) {
     private val TAG = DictionaryCollection::class.java.simpleName
-    private val mDictionaries: ArrayList<Dictionary>
-    private val mWeights: FloatArray
+    private val dictionaries: ArrayList<Dictionary>
+    private val weights: FloatArray
 
     init {
         val list = ArrayList<Dictionary?>(dictionaries)
         list.removeAll(Collections.singleton<Dictionary?>(null))
         // no null elements are left at this point
         @Suppress("UNCHECKED_CAST")
-        mDictionaries = list as ArrayList<Dictionary>
-        if (mDictionaries.size > weights.size) {
-            mWeights = FloatArray(mDictionaries.size)
-            Arrays.fill(mWeights, 1f)
-            Log.w(TAG, "got weights array of length " + weights.size + ", expected "+mDictionaries.size)
-        } else mWeights = weights
+        this.dictionaries = list as ArrayList<Dictionary>
+        if (this.dictionaries.size > weights.size) {
+            this.weights = FloatArray(this.dictionaries.size)
+            Arrays.fill(this.weights, 1f)
+            Log.w(TAG, "got weights array of length " + weights.size + ", expected "+this.dictionaries.size)
+        } else this.weights = weights
     }
 
     override fun getSuggestions(composedData: ComposedData?,
@@ -44,34 +44,33 @@ class DictionaryCollection(dictType: String, locale: Locale?,
             settingsValuesForSuggestion: SettingsValuesForSuggestion?,
             sessionId: Int, weightForLocale: Float,
             inOutWeightOfLangModelVsSpatialModel: FloatArray?): ArrayList<SuggestedWordInfo>? {
-        val dictionaries = mDictionaries
         if (dictionaries.isEmpty()) return null
         // To avoid creating unnecessary objects, we get the list out of the first
         // dictionary and add the rest to it if not null, hence the get(0)
         var suggestions = dictionaries[0].getSuggestions(composedData,
                 ngramContext, proximityInfoHandle, settingsValuesForSuggestion, sessionId,
-                weightForLocale * mWeights[0], inOutWeightOfLangModelVsSpatialModel)
+                weightForLocale * weights[0], inOutWeightOfLangModelVsSpatialModel)
         if (null == suggestions) suggestions = ArrayList()
         val length = dictionaries.size
         for (i in 1 until length) {
             val sugg = dictionaries[i].getSuggestions(
                     composedData, ngramContext, proximityInfoHandle, settingsValuesForSuggestion,
-                    sessionId, weightForLocale * mWeights[i], inOutWeightOfLangModelVsSpatialModel)
+                    sessionId, weightForLocale * weights[i], inOutWeightOfLangModelVsSpatialModel)
             if (null != sugg) suggestions.addAll(sugg)
         }
         return suggestions
     }
 
     override fun isInDictionary(word: String?): Boolean {
-        for (i in mDictionaries.size - 1 downTo 0)
-            if (mDictionaries[i].isInDictionary(word)) return true
+        for (i in dictionaries.size - 1 downTo 0)
+            if (dictionaries[i].isInDictionary(word)) return true
         return false
     }
 
     override fun getFrequency(word: String?): Int {
         var maxFreq = -1
-        for (i in mDictionaries.size - 1 downTo 0) {
-            val tempFreq = mDictionaries[i].getFrequency(word)
+        for (i in dictionaries.size - 1 downTo 0) {
+            val tempFreq = dictionaries[i].getFrequency(word)
             maxFreq = Math.max(tempFreq, maxFreq)
         }
         return maxFreq
@@ -79,19 +78,19 @@ class DictionaryCollection(dictType: String, locale: Locale?,
 
     override fun getMaxFrequencyOfExactMatches(word: String?): Int {
         var maxFreq = -1
-        for (i in mDictionaries.size - 1 downTo 0) {
-            val tempFreq = mDictionaries[i].getMaxFrequencyOfExactMatches(word)
+        for (i in dictionaries.size - 1 downTo 0) {
+            val tempFreq = dictionaries[i].getMaxFrequencyOfExactMatches(word)
             maxFreq = Math.max(tempFreq, maxFreq)
         }
         return maxFreq
     }
 
     override fun isInitialized(): Boolean {
-        return !mDictionaries.isEmpty()
+        return !dictionaries.isEmpty()
     }
 
     override fun close() {
-        for (dict in mDictionaries)
+        for (dict in dictionaries)
             dict.close()
     }
 }

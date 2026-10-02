@@ -26,21 +26,30 @@ import java.util.Collections
 class WordComposer {
     // Only the public constructor sets this: copies and test composers must not use the combiners.
     private lateinit var combinerChain: CombinerChain
-    private var combiningSpec: String? = null // Memory so that we don't uselessly recreate the combiner chain
+    /**
+     * The current combining spec, or null if none is set.
+     */
+    var combiningSpec: String? = null // Memory so that we don't uselessly recreate the combiner chain
+        private set
 
     // The list of events that served to compose this string.
     private val events: ArrayList<Event>
     private val inputPointers: InputPointers
     private var autoCorrection: SuggestedWordInfo? = null
-    private var resumed = false
-    private var batchMode = false
+    /**
+     * Whether we started composing this word by resuming suggestion on an existing string
+     */
+    var isResumed = false
+        private set
+    var isBatchMode = false
+        private set
     // A memory of the last rejected batch mode suggestion, if any. This goes like this: the user
     // gestures a word, is displeased with the results and hits backspace, then gestures again.
     // At the very least we should avoid re-suggesting the same thing, and to do that we memorize
     // the rejected suggestion in this variable.
     // TODO: this should be done in a comprehensive way by the User History feature instead of
     // as an ad-hockery here.
-    private var rejectedBatchModeSuggestion: String? = null
+    var rejectedBatchModeSuggestion: String? = null
 
     // Cache these values for performance
     private var typedWordCache: CharSequence = ""
@@ -64,8 +73,8 @@ class WordComposer {
         events = ArrayList()
         inputPointers = InputPointers(MAX_WORD_LENGTH)
         autoCorrection = null
-        resumed = false
-        batchMode = false
+        isResumed = false
+        isBatchMode = false
         cursorPositionWithinWord = 0
         rejectedBatchModeSuggestion = null
         refreshTypedWordCache()
@@ -81,8 +90,8 @@ class WordComposer {
         events = ArrayList() // unused in a copy
         inputPointers = other.inputPointers // ideally we would have an actual copy, but for current use it should be ok
         autoCorrection = other.autoCorrection
-        resumed = other.resumed
-        batchMode = other.batchMode
+        isResumed = other.isResumed
+        isBatchMode = other.isBatchMode
         rejectedBatchModeSuggestion = other.rejectedBatchModeSuggestion
         typedWordCache = other.typedWordCache
         capsCount = other.capsCount
@@ -94,7 +103,7 @@ class WordComposer {
     }
 
     fun getComposedDataSnapshot(): ComposedData {
-        return ComposedData(inputPointers, isBatchMode(), typedWordCache.toString())
+        return ComposedData(inputPointers, isBatchMode, typedWordCache.toString())
     }
 
     /**
@@ -119,8 +128,8 @@ class WordComposer {
         capsCount = 0
         digitsCount = 0
         isOnlyFirstCharCapitalized = false
-        resumed = false
-        batchMode = false
+        isResumed = false
+        isBatchMode = false
         rejectedBatchModeSuggestion = null
         refreshTypedWordCache()
         cursorPositionWithinWord = 0
@@ -144,13 +153,11 @@ class WordComposer {
         return codePointSize
     }
 
-    fun isSingleLetter(): Boolean {
-        return size() == 1
-    }
+    val isSingleLetter: Boolean
+        get() = size() == 1
 
-    fun isComposingWord(): Boolean {
-        return size() > 0
-    }
+    val isComposingWord: Boolean
+        get() = size() > 0
 
     fun getInputPointers(): InputPointers? {
         return inputPointers
@@ -202,7 +209,7 @@ class WordComposer {
                 // In the batch input mode, the {@code inputPointers} holds batch input points and
                 // shouldn't be overridden by the "typed key" coordinates
                 // (See {@link #setBatchInputWord}).
-                if (!batchMode) {
+                if (!isBatchMode) {
                     // TODO: Set correct pointer id and time
                     inputPointers.addPointerAt(newIndex, keyX, keyY, 0, 0)
                 }
@@ -232,9 +239,8 @@ class WordComposer {
         return cursorPositionWithinWord != codePointSize
     }
 
-    fun isCursorInFrontOfComposingWord(): Boolean {
-        return isComposingWord() && cursorPositionWithinWord == 0
-    }
+    val isCursorInFrontOfComposingWord: Boolean
+        get() = isComposingWord && cursorPositionWithinWord == 0
 
     /**
      * When the cursor is moved by the user, we need to update its position.
@@ -278,12 +284,12 @@ class WordComposer {
 
     fun setBatchInputPointers(batchPointers: InputPointers) {
         inputPointers.set(batchPointers)
-        batchMode = true
+        isBatchMode = true
     }
 
     fun setBatchInputWord(word: String) {
         reset()
-        batchMode = true
+        isBatchMode = true
         val length = word.length
         var i = 0
         while (i < length) {
@@ -313,16 +319,15 @@ class WordComposer {
                     )
             applyProcessedEvent(processedEvent)
         }
-        resumed = true
+        isResumed = true
     }
 
     /**
      * Returns the word as it was typed, without any correction applied.
      * @return the word that was typed so far. Never returns null.
      */
-    fun getTypedWord(): String {
-        return typedWordCache.toString()
-    }
+    val typedWord: String
+        get() = typedWordCache.toString()
 
     /**
      * Whether this composer is composing or about to compose a word in which only the first letter
@@ -334,9 +339,8 @@ class WordComposer {
      *
      * @return capitalization preference
      */
-    fun isOrWillBeOnlyFirstCharCapitalized(): Boolean {
-        return if (isComposingWord()) isOnlyFirstCharCapitalized else (capitalizedMode != CapsMode.OFF)
-    }
+    val isOrWillBeOnlyFirstCharCapitalized: Boolean
+        get() = if (isComposingWord) isOnlyFirstCharCapitalized else (capitalizedMode != CapsMode.OFF)
 
     /**
      * Whether or not all of the user typed chars are upper case
@@ -354,16 +358,15 @@ class WordComposer {
     }
 
     fun lastChar(): Char {
-        if (!isComposingWord()) return '\u0000'
+        if (!isComposingWord) return '\u0000'
         return typedWordCache[typedWordCache.length - 1]
     }
 
     /**
      * Returns true if more than one character is upper case, otherwise returns false.
      */
-    fun isMostlyCaps(): Boolean {
-        return capsCount > 1
-    }
+    val isMostlyCaps: Boolean
+        get() = capsCount > 1
 
     /**
      * Returns true if we have digits in the composing word.
@@ -396,7 +399,7 @@ class WordComposer {
      * @param mode the mode just before fetching suggestions
      */
     fun adviseCapitalizedModeBeforeFetchingSuggestions(mode: CapsMode) {
-        if (!isComposingWord()) {
+        if (!isComposingWord) {
             capitalizedMode = mode
         }
     }
@@ -419,16 +422,8 @@ class WordComposer {
     /**
      * @return the auto-correction for this word, or null if none.
      */
-    fun getAutoCorrectionOrNull(): SuggestedWordInfo? {
-        return autoCorrection
-    }
-
-    /**
-     * @return whether we started composing this word by resuming suggestion on an existing string
-     */
-    fun isResumed(): Boolean {
-        return resumed
-    }
+    val autoCorrectionOrNull: SuggestedWordInfo?
+        get() = autoCorrection
 
     // `type' should be one of the LastComposedWord.COMMIT_TYPE_* constants above.
     // committedWord should contain suggestion spans if applicable.
@@ -447,7 +442,7 @@ class WordComposer {
         }
         capsCount = 0
         digitsCount = 0
-        batchMode = false
+        isBatchMode = false
         combinerChain.reset()
         events.clear()
         codePointSize = 0
@@ -456,46 +451,26 @@ class WordComposer {
         refreshTypedWordCache()
         autoCorrection = null
         cursorPositionWithinWord = 0
-        resumed = false
+        isResumed = false
         rejectedBatchModeSuggestion = null
         return lastComposedWord
     }
 
     fun resumeSuggestionOnLastComposedWord(lastComposedWord: LastComposedWord) {
         events.clear()
-        Collections.copy(events, lastComposedWord.mEvents)
-        inputPointers.set(lastComposedWord.mInputPointers)
+        Collections.copy(events, lastComposedWord.events)
+        inputPointers.set(lastComposedWord.inputPointers)
         combinerChain.reset()
         refreshTypedWordCache()
-        capitalizedMode = lastComposedWord.mCapitalizedMode
+        capitalizedMode = lastComposedWord.capitalizedMode
         autoCorrection = null // This will be filled by the next call to updateSuggestion.
         cursorPositionWithinWord = codePointSize
         rejectedBatchModeSuggestion = null
-        resumed = true
-    }
-
-    fun isBatchMode(): Boolean {
-        return batchMode
+        isResumed = true
     }
 
     fun unsetBatchMode() {
-        batchMode = false
-    }
-
-    fun setRejectedBatchModeSuggestion(rejectedSuggestion: String?) {
-        rejectedBatchModeSuggestion = rejectedSuggestion
-    }
-
-    fun getRejectedBatchModeSuggestion(): String? {
-        return rejectedBatchModeSuggestion
-    }
-
-    /**
-     * Get the current combining spec.
-     * @return the combining spec string, or null if none is set.
-     */
-    fun getCombiningSpec(): String? {
-        return combiningSpec
+        isBatchMode = false
     }
 
     fun addInputPointerForTest(index: Int, keyX: Int, keyY: Int) {

@@ -425,9 +425,10 @@ object StringUtils {
 
     @JvmStatic
     fun isEmptyStringOrWhiteSpaces(s: String?): Boolean {
+        if (s == null) return true
         val N = codePointCount(s)
         for (i in 0 until N) {
-            if (!Character.isWhitespace(s!!.codePointAt(i))) {
+            if (!Character.isWhitespace(s.codePointAt(i))) {
                 return false
             }
         }
@@ -463,8 +464,8 @@ object StringUtils {
         }
         val label = newSingleCodePointString(code)
         val titleCaseLabel = toTitleCaseOfKeyLabel(label, locale)
-        return if (codePointCount(titleCaseLabel) == 1)
-            titleCaseLabel!!.codePointAt(0) else KeyCode.NOT_SPECIFIED
+        return if (titleCaseLabel != null && codePointCount(titleCaseLabel) == 1)
+            titleCaseLabel.codePointAt(0) else KeyCode.NOT_SPECIFIED
     }
 
     @JvmStatic

@@ -77,7 +77,7 @@ class CombinedFormatUtils {
                     builder.append(formatProbabilityInfo(ngramProperty.mTargetWord.mProbabilityInfo))
                     builder.append("\n")
                     var i = 0
-                    while (i < ngramProperty.mNgramContext.getPrevWordCount()) {
+                    while (i < ngramProperty.mNgramContext.prevWordCount) {
                         builder.append("  " + NGRAM_PREV_WORD_TAG + "[" + i + "]="
                                 + ngramProperty.mNgramContext.getNthPrevWord(i + 1))
                         if (ngramProperty.mNgramContext.isNthPrevWordBeginningOfSentence(i + 1)) {

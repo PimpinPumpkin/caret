@@ -80,7 +80,7 @@ class GestureStrokeRecognitionPoints(private val pointerId: Int,
 
     // TODO: Make this package private
     val length: Int
-        get() = eventTimes.getLength()
+        get() = eventTimes.length
 
     // TODO: Make this package private
     fun addDownEventPoint(x: Int, y: Int, elapsedTimeSinceFirstDown: Int,

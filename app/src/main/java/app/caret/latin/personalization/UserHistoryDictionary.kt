@@ -28,7 +28,7 @@ constructor(context: Context, locale: Locale?) : ExpandableBinaryDictionary(
         context, getUserHistoryDictName(NAME, locale, null), locale!!, Dictionary.TYPE_USER_HISTORY, null) {
 
     init {
-        if (mLocale != null && mLocale.toString().length > 1) {
+        if (this.locale != null && this.locale.toString().length > 1) {
             reloadDictionaryIfRequired()
         }
     }

@@ -96,7 +96,7 @@ class InputLogicHandler(latinIMEHandler: LatinIME.UIHandler, inputLogic: InputLo
         val suggestedWordsToShowSuggestions: SuggestedWords
         // We're now inside the callback. This always runs on the Non-UI thread,
         // no matter what thread updateBatchInput was originally called on.
-        if (suggestedWordsForBatchInput.isEmpty()) {
+        if (suggestedWordsForBatchInput.isEmpty) {
             // Use old suggestions if we don't have any new ones.
             // Previous suggestions are found in InputLogic#mSuggestedWords.
             // Since these are the most recent ones and we just recomputed

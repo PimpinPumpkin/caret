@@ -170,9 +170,9 @@ class SuggestionStripLayoutHelper(
         val word = suggestedWords.getLabel(indexInSuggestedWords)
         // TODO: don't use the index to decide whether this is the auto-correction/typed word, as
         // this is brittle
-        val isAutoCorrection = suggestedWords.mWillAutoCorrect
+        val isAutoCorrection = suggestedWords.willAutoCorrect
                 && indexInSuggestedWords == SuggestedWords.INDEX_OF_AUTO_CORRECTION
-        val isTypedWordValid = suggestedWords.mTypedWordValid
+        val isTypedWordValid = suggestedWords.typedWordValid
                 && indexInSuggestedWords == SuggestedWords.INDEX_OF_TYPED_WORD
         if (!isAutoCorrection && !isTypedWordValid) {
             return word
@@ -204,11 +204,11 @@ class SuggestionStripLayoutHelper(
     ): Int {
         val settingsValues = Settings.getValues()
         val shouldOmitTypedWord = shouldOmitTypedWord(
-            suggestedWords.mInputStyle,
+            suggestedWords.inputStyle,
             settingsValues.gestureFloatingPreviewTextEnabled, true
         )
         return getPositionInSuggestionStrip(
-            indexInSuggestedWords, suggestedWords.mWillAutoCorrect,
+            indexInSuggestedWords, suggestedWords.willAutoCorrect,
             shouldOmitTypedWord, mCenterPositionInStrip, typedWordPositionWhenAutocorrect
         )
     }
@@ -221,16 +221,16 @@ class SuggestionStripLayoutHelper(
         val isTypedWord = suggestedWords.getInfo(indexInSuggestedWords).isKindOf(SuggestedWordInfo.KIND_TYPED)
 
         val color: Int
-        if (indexInSuggestedWords == SuggestedWords.INDEX_OF_AUTO_CORRECTION && suggestedWords.mWillAutoCorrect) {
+        if (indexInSuggestedWords == SuggestedWords.INDEX_OF_AUTO_CORRECTION && suggestedWords.willAutoCorrect) {
             color = colorAutoCorrect
-        } else if (isTypedWord && suggestedWords.mTypedWordValid) {
+        } else if (isTypedWord && suggestedWords.typedWordValid) {
             color = colorValidTypedWord
         } else if (isTypedWord) {
             color = colorTypedWord
         } else {
             color = colorSuggested
         }
-        if (suggestedWords.mIsObsoleteSuggestions && !isTypedWord) {
+        if (suggestedWords.isObsoleteSuggestions && !isTypedWord) {
             return applyAlpha(color, alphaObsoleted)
         }
         return color

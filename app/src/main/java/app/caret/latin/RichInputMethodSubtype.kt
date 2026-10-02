@@ -101,18 +101,18 @@ class RichInputMethodSubtype private constructor(val rawSubtype: InputMethodSubt
                 .setSubtypeId(SUBTYPE_ID_OF_DUMMY_EMOJI_SUBTYPE)
                 .build()
         )
-        private var sNoLanguageSubtype: RichInputMethodSubtype? = null
+        private var cachedNoLanguageSubtype: RichInputMethodSubtype? = null
 
         val noLanguageSubtype: RichInputMethodSubtype get() {
-            sNoLanguageSubtype?.let { return it }
-            var noLanguageSubtype = sNoLanguageSubtype
+            cachedNoLanguageSubtype?.let { return it }
+            var noLanguageSubtype = cachedNoLanguageSubtype
             val rawNoLanguageSubtype = SubtypeSettings.getResourceSubtypesForLocale(SubtypeLocaleUtils.NO_LANGUAGE.constructLocale())
                 .firstOrNull { it.mainLayoutNameOrQwerty() == SubtypeLocaleUtils.QWERTY }
             if (rawNoLanguageSubtype != null) {
                 noLanguageSubtype = RichInputMethodSubtype(rawNoLanguageSubtype)
             }
             if (noLanguageSubtype != null) {
-                sNoLanguageSubtype = noLanguageSubtype
+                cachedNoLanguageSubtype = noLanguageSubtype
                 return noLanguageSubtype
             }
             Log.w(TAG, "Can't find any language with QWERTY subtype")

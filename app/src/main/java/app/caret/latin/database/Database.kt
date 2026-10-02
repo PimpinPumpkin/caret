@@ -34,11 +34,9 @@ class Database private constructor(context: Context, name: String = NAME) : SQLi
         const val OLD_NAME = "heliboard.db"
         private var instance: Database? = null
         fun getInstance(context: Context): Database {
-            if (instance == null) {
-                renameOldDatabase(context)
-                instance = Database(context)
-            }
-            return instance!!
+            instance?.let { return it }
+            renameOldDatabase(context)
+            return Database(context).also { instance = it }
         }
 
         private fun renameOldDatabase(context: Context) {

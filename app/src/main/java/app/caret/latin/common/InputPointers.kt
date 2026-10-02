@@ -7,23 +7,14 @@
 package app.caret.latin.common
 
 // TODO: This class is not thread-safe.
-class InputPointers(defaultCapacity: Int) {
-    private val mDefaultCapacity: Int
-    private val mXCoordinates: ResizableIntArray
-    private val mYCoordinates: ResizableIntArray
-    private val mPointerIds: ResizableIntArray
-    private val mTimes: ResizableIntArray
-
-    init {
-        mDefaultCapacity = defaultCapacity
-        mXCoordinates = ResizableIntArray(defaultCapacity)
-        mYCoordinates = ResizableIntArray(defaultCapacity)
-        mPointerIds = ResizableIntArray(defaultCapacity)
-        mTimes = ResizableIntArray(defaultCapacity)
-    }
+class InputPointers(private val defaultCapacity: Int) {
+    private val xArray = ResizableIntArray(defaultCapacity)
+    private val yArray = ResizableIntArray(defaultCapacity)
+    private val pointerIdArray = ResizableIntArray(defaultCapacity)
+    private val timeArray = ResizableIntArray(defaultCapacity)
 
     private fun fillWithLastTimeUntil(index: Int) {
-        val fromIndex = mTimes.getLength()
+        val fromIndex = timeArray.length
         // Fill the gap with the latest time.
         // See {@link #getTime(int)} and {@link #isValidTimeStamps()}.
         if (fromIndex <= 0) {
@@ -33,39 +24,39 @@ class InputPointers(defaultCapacity: Int) {
         if (fillLength <= 0) {
             return
         }
-        val lastTime = mTimes.get(fromIndex - 1)
-        mTimes.fill(lastTime, fromIndex, fillLength)
+        val lastTime = timeArray.get(fromIndex - 1)
+        timeArray.fill(lastTime, fromIndex, fillLength)
     }
 
     fun addPointerAt(index: Int, x: Int, y: Int, pointerId: Int, time: Int) {
-        mXCoordinates.addAt(index, x)
-        mYCoordinates.addAt(index, y)
-        mPointerIds.addAt(index, pointerId)
+        xArray.addAt(index, x)
+        yArray.addAt(index, y)
+        pointerIdArray.addAt(index, pointerId)
         if (DEBUG_TIME) {
             fillWithLastTimeUntil(index)
         }
-        mTimes.addAt(index, time)
+        timeArray.addAt(index, time)
     }
 
     fun addPointer(x: Int, y: Int, pointerId: Int, time: Int) {
-        mXCoordinates.add(x)
-        mYCoordinates.add(y)
-        mPointerIds.add(pointerId)
-        mTimes.add(time)
+        xArray.add(x)
+        yArray.add(y)
+        pointerIdArray.add(pointerId)
+        timeArray.add(time)
     }
 
     fun set(ip: InputPointers) {
-        mXCoordinates.set(ip.mXCoordinates)
-        mYCoordinates.set(ip.mYCoordinates)
-        mPointerIds.set(ip.mPointerIds)
-        mTimes.set(ip.mTimes)
+        xArray.set(ip.xArray)
+        yArray.set(ip.yArray)
+        pointerIdArray.set(ip.pointerIdArray)
+        timeArray.set(ip.timeArray)
     }
 
     fun copy(ip: InputPointers) {
-        mXCoordinates.copy(ip.mXCoordinates)
-        mYCoordinates.copy(ip.mYCoordinates)
-        mPointerIds.copy(ip.mPointerIds)
-        mTimes.copy(ip.mTimes)
+        xArray.copy(ip.xArray)
+        yArray.copy(ip.yArray)
+        pointerIdArray.copy(ip.pointerIdArray)
+        timeArray.copy(ip.timeArray)
     }
 
     /**
@@ -83,10 +74,10 @@ class InputPointers(defaultCapacity: Int) {
         if (length == 0) {
             return
         }
-        mXCoordinates.append(xCoordinates, startPos, length)
-        mYCoordinates.append(yCoordinates, startPos, length)
-        mPointerIds.fill(pointerId, mPointerIds.getLength(), length)
-        mTimes.append(times, startPos, length)
+        xArray.append(xCoordinates, startPos, length)
+        yArray.append(yCoordinates, startPos, length)
+        pointerIdArray.fill(pointerId, pointerIdArray.length, length)
+        timeArray.append(times, startPos, length)
     }
 
     /**
@@ -94,35 +85,30 @@ class InputPointers(defaultCapacity: Int) {
      * @param elementCount how many elements to shift.
      */
     fun shift(elementCount: Int) {
-        mXCoordinates.shift(elementCount)
-        mYCoordinates.shift(elementCount)
-        mPointerIds.shift(elementCount)
-        mTimes.shift(elementCount)
+        xArray.shift(elementCount)
+        yArray.shift(elementCount)
+        pointerIdArray.shift(elementCount)
+        timeArray.shift(elementCount)
     }
 
     fun reset() {
-        val defaultCapacity = mDefaultCapacity
-        mXCoordinates.reset(defaultCapacity)
-        mYCoordinates.reset(defaultCapacity)
-        mPointerIds.reset(defaultCapacity)
-        mTimes.reset(defaultCapacity)
+        xArray.reset(defaultCapacity)
+        yArray.reset(defaultCapacity)
+        pointerIdArray.reset(defaultCapacity)
+        timeArray.reset(defaultCapacity)
     }
 
-    fun getPointerSize(): Int {
-        return mXCoordinates.getLength()
-    }
+    val pointerSize: Int
+        get() = xArray.length
 
-    fun getXCoordinates(): IntArray {
-        return mXCoordinates.getPrimitiveArray()
-    }
+    val xCoordinates: IntArray
+        get() = xArray.primitiveArray
 
-    fun getYCoordinates(): IntArray {
-        return mYCoordinates.getPrimitiveArray()
-    }
+    val yCoordinates: IntArray
+        get() = yArray.primitiveArray
 
-    fun getPointerIds(): IntArray {
-        return mPointerIds.getPrimitiveArray()
-    }
+    val pointerIds: IntArray
+        get() = pointerIdArray.primitiveArray
 
     /**
      * Gets the time each point was registered, in milliseconds, relative to the first event in the
@@ -130,13 +116,12 @@ class InputPointers(defaultCapacity: Int) {
      * @return The time each point was registered, in milliseconds, relative to the first event in
      * the sequence.
      */
-    fun getTimes(): IntArray {
-        return mTimes.getPrimitiveArray()
-    }
+    val times: IntArray
+        get() = timeArray.primitiveArray
 
     override fun toString(): String {
-        return ("size=" + getPointerSize() + " id=" + mPointerIds + " time=" + mTimes
-                + " x=" + mXCoordinates + " y=" + mYCoordinates)
+        return ("size=" + pointerSize + " id=" + pointerIdArray + " time=" + timeArray
+                + " x=" + xArray + " y=" + yArray)
     }
 
     companion object {

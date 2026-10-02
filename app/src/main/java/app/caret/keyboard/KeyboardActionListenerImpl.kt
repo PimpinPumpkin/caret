@@ -374,7 +374,7 @@ class KeyboardActionListenerImpl(private val latinIME: LatinIME, private val inp
         //     https://github.com/HeliBorg/HeliBoard/issues/1139#issuecomment-2588169384
         //  * inputType is NOT of variant InputType.TYPE_TEXT_VARIATION_WEB_EDIT_TEXT (variant appears to always be 0)
         //     -> this is "fixed" now using AppWorkarounds.adjustInputType
-        val variation = InputType.TYPE_MASK_VARIATION and Settings.getValues().mInputAttributes.mInputType
+        val variation = InputType.TYPE_MASK_VARIATION and Settings.getValues().mInputAttributes.inputType
         if (variation != InputType.TYPE_TEXT_VARIATION_WEB_EDIT_TEXT
                 && inputLogic.moveCursorByAndReturnIfInsideComposingWord(moveSteps)) {
             // no need to finish input and restart suggestions if we're still in the word

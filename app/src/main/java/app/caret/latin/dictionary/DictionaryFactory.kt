@@ -38,7 +38,7 @@ object DictionaryFactory {
         }
         nonExtracted.forEach { filename ->
             val type = filename.substringBefore("_")
-            if (dictList.any { it.mDictType == type }) return@forEach
+            if (dictList.any { it.dictType == type }) return@forEach
             val extractedFile = DictionaryInfoUtils.extractAssetsDictionary(filename, locale, context) ?: return@forEach
             checkAndAddDictionaryToListIfNewType(extractedFile, dictList, locale)
         }
@@ -71,7 +71,7 @@ object DictionaryFactory {
      */
     private fun checkAndAddDictionaryToListIfNewType(file: File, dicts: MutableList<Dictionary>, locale: Locale) {
         val dictionary = getDictionary(file, locale) ?: return
-        if (dicts.any { it.mDictType == dictionary.mDictType }) {
+        if (dicts.any { it.dictType == dictionary.dictType }) {
             dictionary.close()
             return
         }
@@ -94,7 +94,7 @@ object DictionaryFactory {
             file.absolutePath, 0, file.length(), false, locale, dictType
         )
 
-        if (readOnlyBinaryDictionary.isValidDictionary()) {
+        if (readOnlyBinaryDictionary.isValidDictionary) {
             if (locale.language == "ko") {
                 // Use KoreanDictionary for Korean locale
                 return KoreanDictionary(readOnlyBinaryDictionary)

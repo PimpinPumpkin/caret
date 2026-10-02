@@ -87,7 +87,7 @@ class GestureFloatingTextDrawingPreview(mainKeyboardViewAttr: TypedArray) : Abst
     private val gesturePreviewRectangle = RectF()
     private var previewTextX = 0
     private var previewTextY = 0
-    private var suggestedWords: SuggestedWords = SuggestedWords.getEmptyInstance()
+    private var suggestedWords: SuggestedWords = SuggestedWords.emptyInstance
     private val lastPointerCoords = CoordinateUtils.newInstance()
 
     init {
@@ -99,7 +99,7 @@ class GestureFloatingTextDrawingPreview(mainKeyboardViewAttr: TypedArray) : Abst
     }
 
     fun dismissGestureFloatingPreviewText() {
-        setSuggestedWords(SuggestedWords.getEmptyInstance())
+        setSuggestedWords(SuggestedWords.emptyInstance)
     }
 
     fun setSuggestedWords(suggestedWords: SuggestedWords) {
@@ -123,7 +123,7 @@ class GestureFloatingTextDrawingPreview(mainKeyboardViewAttr: TypedArray) : Abst
      * @param canvas The canvas where preview text is drawn.
      */
     override fun drawPreview(canvas: Canvas) {
-        if (!isPreviewEnabled || suggestedWords.isEmpty()
+        if (!isPreviewEnabled || suggestedWords.isEmpty
                 || TextUtils.isEmpty(suggestedWords.getWord(0))) {
             return
         }
@@ -138,7 +138,7 @@ class GestureFloatingTextDrawingPreview(mainKeyboardViewAttr: TypedArray) : Abst
      * Updates gesture preview text position based on mLastPointerCoords.
      */
     protected fun updatePreviewPosition() {
-        if (suggestedWords.isEmpty() || TextUtils.isEmpty(suggestedWords.getWord(0))) {
+        if (suggestedWords.isEmpty || TextUtils.isEmpty(suggestedWords.getWord(0))) {
             invalidateDrawingView()
             return
         }

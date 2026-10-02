@@ -127,14 +127,14 @@ class BatchInputArbiter(pointerId: Int, params: GestureStrokeRecognitionParams) 
             listener: BatchInputArbiterListener) {
         synchronized(aggregatedPointers) {
             recognitionPoints.appendIncrementalBatchPoints(aggregatedPointers)
-            val size = aggregatedPointers.getPointerSize()
+            val size = aggregatedPointers.pointerSize
             if (size > lastRecognitionPointSize && recognitionPoints.hasRecognitionTimePast(
                     moveEventTime, lastRecognitionTime)) {
                 listener.onUpdateBatchInput(aggregatedPointers, moveEventTime)
                 listener.onStartUpdateBatchInputTimer()
                 // The listener may change the size of the pointers (when auto-committing
                 // for example), so we need to get the size from the pointers again.
-                lastRecognitionPointSize = aggregatedPointers.getPointerSize()
+                lastRecognitionPointSize = aggregatedPointers.pointerSize
                 lastRecognitionTime = moveEventTime
             }
         }

@@ -24,41 +24,40 @@ class NgramContext {
      */
     class WordInfo {
         // This is an empty char sequence when mIsBeginningOfSentence is true.
-        @JvmField val mWord: CharSequence?
+        @JvmField val word: CharSequence?
         // TODO: Have sentence separator.
         // Whether the current context is beginning of sentence or not. This is true when composing
         // at the beginning of an input field or composing a word after a sentence separator.
-        @JvmField val mIsBeginningOfSentence: Boolean
+        @JvmField val isBeginningOfSentence: Boolean
 
         // Beginning of sentence.
         private constructor() {
-            mWord = ""
-            mIsBeginningOfSentence = true
+            word = ""
+            isBeginningOfSentence = true
         }
 
         constructor(word: CharSequence?) {
-            mWord = word
-            mIsBeginningOfSentence = false
+            this.word = word
+            isBeginningOfSentence = false
         }
 
-        fun isValid(): Boolean {
-            return mWord != null
-        }
+        val isValid: Boolean
+            get() = word != null
 
         override fun hashCode(): Int {
-            return Arrays.hashCode(arrayOf<Any?>(mWord, mIsBeginningOfSentence))
+            return Arrays.hashCode(arrayOf<Any?>(word, isBeginningOfSentence))
         }
 
         override fun equals(o: Any?): Boolean {
             if (this === o) return true
             if (o !is WordInfo) return false
             val wordInfo: WordInfo = o
-            if (mWord == null || wordInfo.mWord == null) {
-                return mWord === wordInfo.mWord
-                        && mIsBeginningOfSentence == wordInfo.mIsBeginningOfSentence
+            if (word == null || wordInfo.word == null) {
+                return word === wordInfo.word
+                        && isBeginningOfSentence == wordInfo.isBeginningOfSentence
             }
-            return TextUtils.equals(mWord, wordInfo.mWord)
-                    && mIsBeginningOfSentence == wordInfo.mIsBeginningOfSentence
+            return TextUtils.equals(word, wordInfo.word)
+                    && isBeginningOfSentence == wordInfo.isBeginningOfSentence
         }
 
         companion object {
@@ -75,37 +74,37 @@ class NgramContext {
     // For simplicity of implementation, elements may also be EMPTY_WORD_INFO transiently after the
     // WordComposer was reset and before starting a new composing word, but we should never be
     // calling getSuggetions* in this situation.
-    private val mPrevWordsInfo: Array<WordInfo?>
+    private val prevWordsInfo: Array<WordInfo?>
     private val prevWordsCount: Int
 
-    private val mMaxPrevWordCount: Int
+    private val maxPrevWordCount: Int
 
     // Construct from the previous word information.
     // (assigns the fields itself instead of delegating: spreading the array into the other
     // constructor would copy it, and the passed array must be used as is)
     @Suppress("UNCHECKED_CAST")
     constructor(vararg prevWordsInfo: WordInfo?) {
-        mPrevWordsInfo = prevWordsInfo as Array<WordInfo?>
+        this.prevWordsInfo = prevWordsInfo as Array<WordInfo?>
         prevWordsCount = prevWordsInfo.size
-        mMaxPrevWordCount = DecoderSpecificConstants.MAX_PREV_WORD_COUNT_FOR_N_GRAM
+        maxPrevWordCount = DecoderSpecificConstants.MAX_PREV_WORD_COUNT_FOR_N_GRAM
     }
 
     @Suppress("UNCHECKED_CAST")
     constructor(maxPrevWordCount: Int, vararg prevWordsInfo: WordInfo?) {
-        mPrevWordsInfo = prevWordsInfo as Array<WordInfo?>
+        this.prevWordsInfo = prevWordsInfo as Array<WordInfo?>
         prevWordsCount = prevWordsInfo.size
-        mMaxPrevWordCount = maxPrevWordCount
+        this.maxPrevWordCount = maxPrevWordCount
     }
 
     fun changeWordIfAfterBeginningOfSentence(from: String?, to: String?): Boolean {
         var beginning = false
         for (i in prevWordsCount - 1 downTo 0) {
-            val info = mPrevWordsInfo[i]!!
-            if (beginning && TextUtils.equals(info.mWord, from)) {
-                mPrevWordsInfo[i] = WordInfo(to)
+            val info = prevWordsInfo[i]!!
+            if (beginning && TextUtils.equals(info.word, from)) {
+                prevWordsInfo[i] = WordInfo(to)
                 return true
             }
-            beginning = info.mIsBeginningOfSentence
+            beginning = info.isBeginningOfSentence
         }
         return false
     }
@@ -114,11 +113,11 @@ class NgramContext {
      * Create next prevWordsInfo using current prevWordsInfo.
      */
     fun getNextNgramContext(wordInfo: WordInfo?): NgramContext {
-        val nextPrevWordCount = Math.min(mMaxPrevWordCount, prevWordsCount + 1)
-        val prevWordsInfo = arrayOfNulls<WordInfo>(nextPrevWordCount)
-        prevWordsInfo[0] = wordInfo
-        System.arraycopy(mPrevWordsInfo, 0, prevWordsInfo, 1, nextPrevWordCount - 1)
-        return NgramContext(mMaxPrevWordCount, *prevWordsInfo)
+        val nextPrevWordCount = Math.min(maxPrevWordCount, prevWordsCount + 1)
+        val nextPrevWordsInfo = arrayOfNulls<WordInfo>(nextPrevWordCount)
+        nextPrevWordsInfo[0] = wordInfo
+        System.arraycopy(prevWordsInfo, 0, nextPrevWordsInfo, 1, nextPrevWordCount - 1)
+        return NgramContext(maxPrevWordCount, *nextPrevWordsInfo)
     }
 
 
@@ -129,13 +128,14 @@ class NgramContext {
      */
     fun extractPrevWordsContext(): String {
         val terms = ArrayList<String>()
-        for (i in mPrevWordsInfo.size - 1 downTo 0) {
-            if (mPrevWordsInfo[i] != null && mPrevWordsInfo[i]!!.isValid()) {
-                val wordInfo = mPrevWordsInfo[i]!!
-                if (wordInfo.mIsBeginningOfSentence) {
+        for (i in prevWordsInfo.size - 1 downTo 0) {
+            val wordInfo = prevWordsInfo[i]
+            val word = wordInfo?.word
+            if (wordInfo != null && word != null) {
+                if (wordInfo.isBeginningOfSentence) {
                     terms.add(BEGINNING_OF_SENTENCE_TAG)
                 } else {
-                    val term = wordInfo.mWord!!.toString()
+                    val term = word.toString()
                     if (!term.isEmpty()) {
                         terms.add(term)
                     }
@@ -152,13 +152,14 @@ class NgramContext {
      */
     fun extractPrevWordsContextArray(): Array<String> {
         val prevTermList = ArrayList<String>()
-        for (i in mPrevWordsInfo.size - 1 downTo 0) {
-            if (mPrevWordsInfo[i] != null && mPrevWordsInfo[i]!!.isValid()) {
-                val wordInfo = mPrevWordsInfo[i]!!
-                if (wordInfo.mIsBeginningOfSentence) {
+        for (i in prevWordsInfo.size - 1 downTo 0) {
+            val wordInfo = prevWordsInfo[i]
+            val word = wordInfo?.word
+            if (wordInfo != null && word != null) {
+                if (wordInfo.isBeginningOfSentence) {
                     prevTermList.add(BEGINNING_OF_SENTENCE_TAG)
                 } else {
-                    val term = wordInfo.mWord!!.toString()
+                    val term = word.toString()
                     if (!term.isEmpty()) {
                         prevTermList.add(term)
                     }
@@ -168,13 +169,11 @@ class NgramContext {
         return prevTermList.toTypedArray()
     }
 
-    fun isValid(): Boolean {
-        return prevWordsCount > 0 && mPrevWordsInfo[0]!!.isValid()
-    }
+    val isValid: Boolean
+        get() = prevWordsCount > 0 && prevWordsInfo[0]!!.isValid
 
-    fun isBeginningOfSentenceContext(): Boolean {
-        return prevWordsCount > 0 && mPrevWordsInfo[0]!!.mIsBeginningOfSentence
-    }
+    val isBeginningOfSentenceContext: Boolean
+        get() = prevWordsCount > 0 && prevWordsInfo[0]!!.isBeginningOfSentence
 
     // n is 1-indexed.
     // TODO: Remove
@@ -182,7 +181,7 @@ class NgramContext {
         if (n <= 0 || n > prevWordsCount) {
             return null
         }
-        return mPrevWordsInfo[n - 1]!!.mWord
+        return prevWordsInfo[n - 1]!!.word
     }
 
     // n is 1-indexed.
@@ -190,34 +189,34 @@ class NgramContext {
         if (n <= 0 || n > prevWordsCount) {
             return false
         }
-        return mPrevWordsInfo[n - 1]!!.mIsBeginningOfSentence
+        return prevWordsInfo[n - 1]!!.isBeginningOfSentence
     }
 
     fun outputToArray(codePointArrays: Array<IntArray?>,
             isBeginningOfSentenceArray: BooleanArray) {
         for (i in 0 until prevWordsCount) {
-            val wordInfo = mPrevWordsInfo[i]
-            if (wordInfo == null || !wordInfo.isValid()) {
+            val wordInfo = prevWordsInfo[i]
+            val word = wordInfo?.word
+            if (wordInfo == null || word == null) {
                 codePointArrays[i] = IntArray(0)
                 isBeginningOfSentenceArray[i] = false
                 continue
             }
-            codePointArrays[i] = StringUtils.toCodePointArray(wordInfo.mWord!!)
-            isBeginningOfSentenceArray[i] = wordInfo.mIsBeginningOfSentence
+            codePointArrays[i] = StringUtils.toCodePointArray(word)
+            isBeginningOfSentenceArray[i] = wordInfo.isBeginningOfSentence
         }
     }
 
-    fun getPrevWordCount(): Int {
-        return prevWordsCount
-    }
+    val prevWordCount: Int
+        get() = prevWordsCount
 
     override fun hashCode(): Int {
         var hashValue = 0
-        for (wordInfo in mPrevWordsInfo) {
-            if (WordInfo.EMPTY_WORD_INFO != wordInfo) {
+        for (wordInfo in prevWordsInfo) {
+            if (wordInfo == null || WordInfo.EMPTY_WORD_INFO != wordInfo) {
                 break
             }
-            hashValue = hashValue xor wordInfo!!.hashCode()
+            hashValue = hashValue xor wordInfo.hashCode()
         }
         return hashValue
     }
@@ -225,22 +224,22 @@ class NgramContext {
     override fun equals(o: Any?): Boolean {
         if (this === o) return true
         if (o !is NgramContext) return false
-        val prevWordsInfo: NgramContext = o
+        val other: NgramContext = o
 
-        val minLength = Math.min(prevWordsCount, prevWordsInfo.prevWordsCount)
+        val minLength = Math.min(prevWordsCount, other.prevWordsCount)
         for (i in 0 until minLength) {
-            if (mPrevWordsInfo[i]!! != prevWordsInfo.mPrevWordsInfo[i]) {
+            if (prevWordsInfo[i]!! != other.prevWordsInfo[i]) {
                 return false
             }
         }
         val longerWordsInfo: Array<WordInfo?>
         val longerWordsInfoCount: Int
-        if (prevWordsCount > prevWordsInfo.prevWordsCount) {
-            longerWordsInfo = mPrevWordsInfo
+        if (prevWordsCount > other.prevWordsCount) {
+            longerWordsInfo = prevWordsInfo
             longerWordsInfoCount = prevWordsCount
         } else {
-            longerWordsInfo = prevWordsInfo.mPrevWordsInfo
-            longerWordsInfoCount = prevWordsInfo.prevWordsCount
+            longerWordsInfo = other.prevWordsInfo
+            longerWordsInfoCount = other.prevWordsCount
         }
         for (i in minLength until longerWordsInfoCount) {
             if (longerWordsInfo[i] != null
@@ -254,7 +253,7 @@ class NgramContext {
     override fun toString(): String {
         val builder = StringBuilder()
         for (i in 0 until prevWordsCount) {
-            val wordInfo = mPrevWordsInfo[i]
+            val wordInfo = prevWordsInfo[i]
             builder.append("PrevWord[")
             builder.append(i)
             builder.append("]: ")
@@ -262,13 +261,13 @@ class NgramContext {
                 builder.append("null. ")
                 continue
             }
-            if (!wordInfo.isValid()) {
+            if (!wordInfo.isValid) {
                 builder.append("Empty. ")
                 continue
             }
-            builder.append(wordInfo.mWord)
+            builder.append(wordInfo.word)
             builder.append(", isBeginningOfSentence: ")
-            builder.append(wordInfo.mIsBeginningOfSentence)
+            builder.append(wordInfo.isBeginningOfSentence)
             builder.append(". ")
         }
         return builder.toString()

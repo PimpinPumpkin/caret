@@ -19,13 +19,13 @@ import java.util.ArrayList
  * committed already. This is used for resuming suggestion, and cancel auto-correction.
  */
 class LastComposedWord {
-    @JvmField val mEvents: ArrayList<Event>
-    @JvmField val mTypedWord: String
-    @JvmField val mCommittedWord: CharSequence
-    @JvmField val mSeparatorString: String
-    @JvmField val mNgramContext: NgramContext?
-    @JvmField val mCapitalizedMode: CapsMode?
-    @JvmField val mInputPointers =
+    @JvmField val events: ArrayList<Event>
+    @JvmField val typedWord: String
+    @JvmField val committedWord: CharSequence
+    @JvmField val separatorString: String
+    @JvmField val ngramContext: NgramContext?
+    @JvmField val capitalizedMode: CapsMode?
+    @JvmField val inputPointers =
             InputPointers(DecoderSpecificConstants.DICTIONARY_MAX_WORD_LENGTH)
 
     private var active: Boolean
@@ -35,15 +35,15 @@ class LastComposedWord {
     constructor(events: ArrayList<Event>, inputPointers: InputPointers?, typedWord: String,
             committedWord: CharSequence, separatorString: String, ngramContext: NgramContext?, capitalizedMode: CapsMode?) {
         if (inputPointers != null) {
-            mInputPointers.copy(inputPointers)
+            this.inputPointers.copy(inputPointers)
         }
-        mTypedWord = typedWord
-        mEvents = ArrayList(events)
-        mCommittedWord = committedWord
-        mSeparatorString = separatorString
+        this.typedWord = typedWord
+        this.events = ArrayList(events)
+        this.committedWord = committedWord
+        this.separatorString = separatorString
         active = true
-        mNgramContext = ngramContext
-        mCapitalizedMode = capitalizedMode
+        this.ngramContext = ngramContext
+        this.capitalizedMode = capitalizedMode
     }
 
     fun deactivate() {
@@ -51,11 +51,11 @@ class LastComposedWord {
     }
 
     fun canRevertCommit(): Boolean {
-        return active && !TextUtils.isEmpty(mCommittedWord) && !didCommitTypedWord()
+        return active && !TextUtils.isEmpty(committedWord) && !didCommitTypedWord()
     }
 
     private fun didCommitTypedWord(): Boolean {
-        return TextUtils.equals(mTypedWord, mCommittedWord)
+        return TextUtils.equals(typedWord, committedWord)
     }
 
     companion object {

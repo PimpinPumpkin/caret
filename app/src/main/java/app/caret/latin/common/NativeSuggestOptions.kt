@@ -7,11 +7,7 @@
 package app.caret.latin.common
 
 class NativeSuggestOptions {
-    private val mOptions: IntArray
-
-    init {
-        mOptions = IntArray(OPTIONS_SIZE)
-    }
+    val options = IntArray(OPTIONS_SIZE)
 
     fun setIsGesture(value: Boolean) {
         setBooleanOption(IS_GESTURE, value)
@@ -35,16 +31,12 @@ class NativeSuggestOptions {
         setIntegerOption(WEIGHT_FOR_LOCALE_IN_THOUSANDS, (value * 1000).toInt())
     }
 
-    fun getOptions(): IntArray {
-        return mOptions
-    }
-
     private fun setBooleanOption(key: Int, value: Boolean) {
-        mOptions[key] = if (value) 1 else 0
+        options[key] = if (value) 1 else 0
     }
 
     private fun setIntegerOption(key: Int, value: Int) {
-        mOptions[key] = value
+        options[key] = value
     }
 
     companion object {

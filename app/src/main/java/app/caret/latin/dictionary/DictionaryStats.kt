@@ -13,17 +13,17 @@ import java.util.Locale
 
 class DictionaryStats {
     @JvmField
-    val mLocale: Locale?
+    val locale: Locale?
     @JvmField
-    val mDictType: String
+    val dictType: String
     @JvmField
-    val mDictFileName: String?
+    val dictFileName: String?
     @JvmField
     val dictFileSize: Long
     @JvmField
-    val mContentVersion: Int
+    val contentVersion: Int
     @JvmField
-    val mWordCount: Int
+    val wordCount: Int
 
     constructor(
             locale: Locale?,
@@ -31,24 +31,24 @@ class DictionaryStats {
             dictFileName: String?,
             dictFile: File?,
             contentVersion: Int) {
-        mLocale = locale
-        mDictType = dictType
+        this.locale = locale
+        this.dictType = dictType
         dictFileSize = if (dictFile == null || !dictFile.exists()) 0L else dictFile.length()
-        mDictFileName = dictFileName
-        mContentVersion = contentVersion
-        mWordCount = -1
+        this.dictFileName = dictFileName
+        this.contentVersion = contentVersion
+        this.wordCount = -1
     }
 
     constructor(
             locale: Locale?,
             dictType: String,
             wordCount: Int) {
-        mLocale = locale
-        mDictType = dictType
+        this.locale = locale
+        this.dictType = dictType
         dictFileSize = wordCount.toLong()
-        mDictFileName = null
-        mContentVersion = 0
-        mWordCount = wordCount
+        this.dictFileName = null
+        this.contentVersion = 0
+        this.wordCount = wordCount
     }
 
     fun getFileSizeString(): String {
@@ -65,18 +65,18 @@ class DictionaryStats {
     }
 
     override fun toString(): String {
-        val builder = StringBuilder(mDictType)
-        if (mDictType == Dictionary.TYPE_MAIN) {
+        val builder = StringBuilder(dictType)
+        if (dictType == Dictionary.TYPE_MAIN) {
             builder.append(" (")
-            builder.append(mContentVersion)
+            builder.append(contentVersion)
             builder.append(")")
         }
         builder.append(": ")
-        if (mWordCount > -1) {
-            builder.append(mWordCount)
+        if (wordCount > -1) {
+            builder.append(wordCount)
             builder.append(" words")
         } else {
-            builder.append(mDictFileName)
+            builder.append(dictFileName)
             builder.append(" / ")
             builder.append(getFileSizeString())
         }

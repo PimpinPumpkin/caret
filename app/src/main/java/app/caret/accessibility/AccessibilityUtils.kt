@@ -97,10 +97,10 @@ class AccessibilityUtils private constructor() {
      * @param suggestedWords the list of suggested auto-correction words
      */
     fun setAutoCorrection(suggestedWords: SuggestedWords) {
-        if (suggestedWords.mWillAutoCorrect) {
+        if (suggestedWords.willAutoCorrect) {
             autoCorrectionWord = suggestedWords.getWord(SuggestedWords.INDEX_OF_AUTO_CORRECTION)
-            val typedWordInfo = suggestedWords.mTypedWordInfo
-            typedWord = typedWordInfo?.mWord
+            val typedWordInfo = suggestedWords.typedWordInfo
+            typedWord = typedWordInfo?.word
         } else {
             autoCorrectionWord = null
             typedWord = null

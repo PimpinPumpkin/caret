@@ -347,9 +347,10 @@ class DynamicColors(context: Context, override val themeStyle: String, override 
                     setColor(view.background, POPUP_KEYS_BACKGROUND)
                 else view.background.colorFilter = adjustedBackgroundFilter
             MAIN_BACKGROUND -> {
-                if (keyboardBackground != null) {
+                val backgroundDrawable = keyboardBackground
+                if (backgroundDrawable != null) {
                     if (!backgroundSetupDone) {
-                        keyboardBackground = keyboardBackground!!.toBitmap(view.width, view.height).toDrawable(view.context.resources)
+                        keyboardBackground = backgroundDrawable.toBitmap(view.width, view.height).toDrawable(view.context.resources)
                         backgroundSetupDone = true
                     }
                     view.background = keyboardBackground
@@ -532,9 +533,10 @@ class DefaultColors (
             ONE_HANDED_MODE_BUTTON -> setColor(view.background, if (keyboardBackground == null) MAIN_BACKGROUND else STRIP_BACKGROUND)
             MORE_SUGGESTIONS_BACKGROUND -> view.background.colorFilter = backgroundFilter
             MAIN_BACKGROUND -> {
-                if (keyboardBackground != null) {
+                val backgroundDrawable = keyboardBackground
+                if (backgroundDrawable != null) {
                     if (!backgroundSetupDone) {
-                        keyboardBackground = keyboardBackground!!.toBitmap(view.width, view.height).toDrawable(view.context.resources)
+                        keyboardBackground = backgroundDrawable.toBitmap(view.width, view.height).toDrawable(view.context.resources)
                         backgroundSetupDone = true
                     }
                     view.background = keyboardBackground
@@ -583,9 +585,10 @@ class AllColors(private val colorMap: EnumMap<ColorType, Int>, override val them
         when (color) {
             ONE_HANDED_MODE_BUTTON -> setColor(view.background, MAIN_BACKGROUND) // button has no separate background color
             MAIN_BACKGROUND -> {
-                if (keyboardBackground != null) {
+                val backgroundDrawable = keyboardBackground
+                if (backgroundDrawable != null) {
                     if (!backgroundSetupDone) {
-                        keyboardBackground = keyboardBackground!!.toBitmap(view.width, view.height).toDrawable(view.context.resources)
+                        keyboardBackground = backgroundDrawable.toBitmap(view.width, view.height).toDrawable(view.context.resources)
                         backgroundSetupDone = true
                     }
                     view.background = keyboardBackground

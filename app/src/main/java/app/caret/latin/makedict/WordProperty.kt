@@ -118,7 +118,7 @@ class WordProperty : Comparable<WordProperty> {
         }
         val bigrams = ArrayList<WeightedString>()
         for (ngram in mNgrams) {
-            if (ngram.mNgramContext.getPrevWordCount() == 1) {
+            if (ngram.mNgramContext.prevWordCount == 1) {
                 bigrams.add(ngram.mTargetWord)
             }
         }

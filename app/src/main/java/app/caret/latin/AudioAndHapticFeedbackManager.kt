@@ -24,20 +24,20 @@ import app.caret.latin.settings.SettingsValues
  * complexity of settings and the like.
  */
 class AudioAndHapticFeedbackManager private constructor() {
-    private var mAudioManager: AudioManager? = null
-    private var mVibrator: Vibrator? = null
+    private var audioManager: AudioManager? = null
+    private var vibrator: Vibrator? = null
 
-    private var mSettingsValues: SettingsValues? = null
+    private var settingsValues: SettingsValues? = null
     private var soundOn = false
-    private var mDoNotDisturb = false
+    private var doNotDisturb = false
 
     init {
         // Intentional empty constructor for singleton.
     }
 
     private fun initInternal(context: Context) {
-        mAudioManager = context.getSystemService(Context.AUDIO_SERVICE) as AudioManager?
-        mVibrator = context.getSystemService(Context.VIBRATOR_SERVICE) as Vibrator?
+        audioManager = context.getSystemService(Context.AUDIO_SERVICE) as AudioManager?
+        vibrator = context.getSystemService(Context.VIBRATOR_SERVICE) as Vibrator?
     }
 
     fun performHapticAndAudioFeedback(
@@ -50,31 +50,31 @@ class AudioAndHapticFeedbackManager private constructor() {
     }
 
     fun hasVibrator(): Boolean {
-        val vibrator = mVibrator
-        return vibrator != null && vibrator.hasVibrator()
+        val vib = vibrator
+        return vib != null && vib.hasVibrator()
     }
 
     fun vibrate(milliseconds: Long) {
-        val vibrator = mVibrator
-        if (vibrator == null || milliseconds <= 0) {
+        val vib = vibrator
+        if (vib == null || milliseconds <= 0) {
             return
         }
-        vibrator.vibrate(milliseconds)
+        vib.vibrate(milliseconds)
     }
 
     private fun reevaluateIfSoundIsOn(): Boolean {
-        val settingsValues = mSettingsValues
-        val audioManager = mAudioManager
-        if (settingsValues == null || !settingsValues.soundOn || audioManager == null || mDoNotDisturb) {
+        val values = settingsValues
+        val audio = audioManager
+        if (values == null || !values.soundOn || audio == null || doNotDisturb) {
             return false
         }
-        return audioManager.ringerMode == AudioManager.RINGER_MODE_NORMAL
+        return audio.ringerMode == AudioManager.RINGER_MODE_NORMAL
     }
 
     fun performAudioFeedback(code: Int, hapticEvent: HapticEvent) {
         // if mAudioManager is null, we can't play a sound anyway, so return
-        val audioManager = mAudioManager
-        if (audioManager == null) {
+        val audio = audioManager
+        if (audio == null) {
             return
         }
         if (!soundOn) {
@@ -89,20 +89,20 @@ class AudioAndHapticFeedbackManager private constructor() {
             Constants.CODE_SPACE -> AudioManager.FX_KEYPRESS_SPACEBAR
             else -> AudioManager.FX_KEYPRESS_STANDARD
         }
-        audioManager.playSoundEffect(sound, mSettingsValues!!.keypressSoundVolume)
+        audio.playSoundEffect(sound, settingsValues!!.keypressSoundVolume)
     }
 
     fun performHapticFeedback(viewToPerformHapticFeedbackOn: View?, hapticEvent: HapticEvent) {
-        val settingsValues = mSettingsValues!!
-        if (!settingsValues.vibrateOn || (mDoNotDisturb && !settingsValues.vibrateInDndMode)) {
+        val values = settingsValues!!
+        if (!values.vibrateOn || (doNotDisturb && !values.vibrateInDndMode)) {
             return
         }
         if (hapticEvent == HapticEvent.NO_HAPTICS) {
             // Avoid surprises with the handling of HapticFeedbackConstants.NO_HAPTICS
             return
         }
-        if (hapticEvent.allowCustomDuration && settingsValues.keypressVibrationDuration >= 0) {
-            vibrate(settingsValues.keypressVibrationDuration.toLong())
+        if (hapticEvent.allowCustomDuration && values.keypressVibrationDuration >= 0) {
+            vibrate(values.keypressVibrationDuration.toLong())
             return
         }
         // Go ahead with the system default
@@ -114,26 +114,26 @@ class AudioAndHapticFeedbackManager private constructor() {
     }
 
     fun onSettingsChanged(settingsValues: SettingsValues?) {
-        mSettingsValues = settingsValues
+        this.settingsValues = settingsValues
         soundOn = reevaluateIfSoundIsOn()
     }
 
     fun onRingerModeChanged(doNotDisturb: Boolean) {
-        mDoNotDisturb = doNotDisturb
+        this.doNotDisturb = doNotDisturb
         soundOn = reevaluateIfSoundIsOn()
     }
 
     companion object {
-        private val sInstance = AudioAndHapticFeedbackManager()
+        private val instance = AudioAndHapticFeedbackManager()
 
         @JvmStatic
         fun getInstance(): AudioAndHapticFeedbackManager {
-            return sInstance
+            return instance
         }
 
         @JvmStatic
         fun init(context: Context) {
-            sInstance.initInternal(context)
+            instance.initInternal(context)
         }
     }
 }

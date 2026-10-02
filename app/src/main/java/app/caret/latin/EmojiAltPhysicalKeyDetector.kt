@@ -22,34 +22,34 @@ class EmojiAltPhysicalKeyDetector(resources: Resources) {
     private class HotKeySet : HashSet<Pair<Int, Int>>()
 
     private abstract class EmojiHotKeys(name: String, keySet: HotKeySet) {
-        private val mName: String
-        private val mKeySet: HotKeySet
+        private val name: String
+        private val keySet: HotKeySet
 
         var canFire: Boolean
-        var mMetaState: Int = 0
+        var metaState: Int = 0
 
         init {
-            mName = name
-            mKeySet = keySet
+            this.name = name
+            this.keySet = keySet
             canFire = false
         }
 
         fun onKeyDown(keyEvent: KeyEvent) {
             if (DEBUG) {
-                Log.d(TAG, "EmojiHotKeys.onKeyDown() - " + mName + " - considering " + keyEvent)
+                Log.d(TAG, "EmojiHotKeys.onKeyDown() - " + name + " - considering " + keyEvent)
             }
 
             val key: Pair<Int, Int> =
                     Pair.create(keyEvent.keyCode, keyEvent.metaState)
-            if (mKeySet.contains(key)) {
+            if (keySet.contains(key)) {
                 if (DEBUG) {
-                   Log.d(TAG, "EmojiHotKeys.onKeyDown() - " + mName + " - enabling action")
+                   Log.d(TAG, "EmojiHotKeys.onKeyDown() - " + name + " - enabling action")
                 }
                 canFire = true
-                mMetaState = keyEvent.metaState
+                metaState = keyEvent.metaState
             } else if (canFire) {
                 if (DEBUG) {
-                   Log.d(TAG, "EmojiHotKeys.onKeyDown() - " + mName + " - disabling action")
+                   Log.d(TAG, "EmojiHotKeys.onKeyDown() - " + name + " - disabling action")
                 }
                 canFire = false
             }
@@ -57,31 +57,31 @@ class EmojiAltPhysicalKeyDetector(resources: Resources) {
 
         fun onKeyUp(keyEvent: KeyEvent) {
             if (DEBUG) {
-                Log.d(TAG, "EmojiHotKeys.onKeyUp() - " + mName + " - considering " + keyEvent)
+                Log.d(TAG, "EmojiHotKeys.onKeyUp() - " + name + " - considering " + keyEvent)
             }
 
             val keyCode = keyEvent.keyCode
-            var metaState = keyEvent.metaState
+            var keyMetaState = keyEvent.metaState
             if (KeyEvent.isModifierKey(keyCode)) {
                  // Try restoring meta stat in case the released key was a modifier.
                  // I am sure one can come up with scenarios to break this, but it
                  // seems to work well in practice.
-                 metaState = metaState or mMetaState
+                 keyMetaState = keyMetaState or metaState
             }
 
-            val key: Pair<Int, Int> = Pair.create(keyCode, metaState)
-            if (mKeySet.contains(key)) {
+            val key: Pair<Int, Int> = Pair.create(keyCode, keyMetaState)
+            if (keySet.contains(key)) {
                 if (canFire) {
                     if (!keyEvent.isCanceled) {
                         if (DEBUG) {
-                            Log.d(TAG, "EmojiHotKeys.onKeyUp() - " + mName + " - firing action")
+                            Log.d(TAG, "EmojiHotKeys.onKeyUp() - " + name + " - firing action")
                         }
                         action()
                     } else {
                         // This key up event was a part of key combinations and
                         // should be ignored.
                         if (DEBUG) {
-                            Log.d(TAG, "EmojiHotKeys.onKeyUp() - " + mName + " - canceled, ignoring action")
+                            Log.d(TAG, "EmojiHotKeys.onKeyUp() - " + name + " - canceled, ignoring action")
                         }
                     }
                     canFire = false
@@ -90,7 +90,7 @@ class EmojiAltPhysicalKeyDetector(resources: Resources) {
 
             if (canFire) {
                 if (DEBUG) {
-                    Log.d(TAG, "EmojiHotKeys.onKeyUp() - " + mName + " - disabling action")
+                    Log.d(TAG, "EmojiHotKeys.onKeyUp() - " + name + " - disabling action")
                 }
                 canFire = false
             }

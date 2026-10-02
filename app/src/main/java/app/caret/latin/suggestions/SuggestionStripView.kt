@@ -195,7 +195,7 @@ class SuggestionStripView(context: Context, attrs: AttributeSet?, defStyle: Int)
     }
 
     private lateinit var listener: Listener
-    private var suggestedWords = SuggestedWords.getEmptyInstance()
+    private var suggestedWords = SuggestedWords.emptyInstance
     private var startIndexOfMoreSuggestions = 0
     private var isExternalSuggestionVisible = false // Required to disable the more suggestions if other suggestions are visible
     private val layoutHelper = SuggestionStripLayoutHelper(context, attrs, defStyle, wordViews, dividerViews, debugInfoViews)
@@ -404,7 +404,7 @@ class SuggestionStripView(context: Context, attrs: AttributeSet?, defStyle: Int)
         var showIcon = true
         if (wordView.tag is Int) {
             val index = wordView.tag as Int
-            val type = suggestedWords.getInfo(index).mSourceDict
+            val type = suggestedWords.getInfo(index).sourceDict
             if (type == Dictionary.DICTIONARY_USER_TYPED || type == Dictionary.DICTIONARY_HARDCODED)
                 showIcon = false
         }
@@ -462,9 +462,9 @@ class SuggestionStripView(context: Context, attrs: AttributeSet?, defStyle: Int)
         val index = wordView.tag as? Int ?: return
         if (index >= suggestedWords.size()) return
         val info = suggestedWords.getInfo(index)
-        if (info.getWord() != word) return
+        if (info.word != word) return
 
-        val text = info.mSourceDict!!.mDictType + ":" + info.mSourceDict!!.mLocale
+        val text = info.sourceDict!!.dictType + ":" + info.sourceDict!!.locale
         if (isShowingMoreSuggestionPanel) {
             moreSuggestionsView.dismissPopupKeysPanel()
         }
@@ -479,19 +479,19 @@ class SuggestionStripView(context: Context, attrs: AttributeSet?, defStyle: Int)
         val suggestedWordInfos = ArrayList<SuggestedWordInfo>()
         for (i in 0..<suggestedWords.size()) {
             val info = suggestedWords.getInfo(i)
-            if (info.getWord() != word) suggestedWordInfos.add(info)
+            if (info.word != word) suggestedWordInfos.add(info)
         }
-        suggestedWords.mRawSuggestions?.removeFirst { it.getWord() == word }
+        suggestedWords.rawSuggestions?.removeFirst { it.word == word }
 
         val newSuggestedWords = SuggestedWords(
-            suggestedWordInfos, suggestedWords.mRawSuggestions, suggestedWords.getTypedWordInfo(), suggestedWords.mTypedWordValid,
-            suggestedWords.mWillAutoCorrect, suggestedWords.mIsObsoleteSuggestions, suggestedWords.mInputStyle, suggestedWords.mSequenceNumber
+            suggestedWordInfos, suggestedWords.rawSuggestions, suggestedWords.typedWordInfo, suggestedWords.typedWordValid,
+            suggestedWords.willAutoCorrect, suggestedWords.isObsoleteSuggestions, suggestedWords.inputStyle, suggestedWords.sequenceNumber
         )
         setSuggestions(newSuggestedWords, direction != 1)
         suggestionsStrip.isVisible = true
 
         // Show the toolbar if no suggestions are left and the "Auto show toolbar" setting is enabled
-        if (this.suggestedWords.isEmpty() && Settings.getValues().autoShowToolbar) {
+        if (this.suggestedWords.isEmpty && Settings.getValues().autoShowToolbar) {
             setToolbarVisibility(true)
         }
     }

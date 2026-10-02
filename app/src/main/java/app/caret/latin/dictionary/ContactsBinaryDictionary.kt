@@ -67,7 +67,7 @@ class ContactsBinaryDictionary protected constructor(context: Context, locale: L
      */
     private fun loadDictionaryForUriLocked(uri: Uri) {
         if (!PermissionsUtil.checkAllPermissionsGranted(
-                mContext, Manifest.permission.READ_CONTACTS)) {
+                this.context, Manifest.permission.READ_CONTACTS)) {
             Log.i(TAG, "No permission to read contacts. Not loading the Dictionary.")
         }
 
@@ -112,7 +112,7 @@ class ContactsBinaryDictionary protected constructor(context: Context, locale: L
                             null /* shortcut */, 0 /* shortcutFreq */, false /* isNotAWord */,
                             false /* isPossiblyOffensive */,
                             BinaryDictionary.NOT_A_VALID_TIMESTAMP)
-                    if (ngramContext.isValid() && useFirstLastBigrams) {
+                    if (ngramContext.isValid && useFirstLastBigrams) {
                         runGCIfRequiredLocked(true /* mindsBlockByGC */)
                         addNgramEntryLocked(ngramContext,
                                 word,

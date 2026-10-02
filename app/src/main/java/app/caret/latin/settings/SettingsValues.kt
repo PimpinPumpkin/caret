@@ -224,7 +224,7 @@ class SettingsValues(context: Context, prefs: SharedPreferences, res: Resources,
         autoCorrectionEnabledPerUserSettings = prefs.getBoolean(Settings.PREF_AUTO_CORRECTION, Defaults.PREF_AUTO_CORRECTION)
         autoCorrectEnabled = autoCorrectionEnabledPerUserSettings
                 && (mInputAttributes.inputTypeShouldAutoCorrect || prefs.getBoolean(Settings.PREF_MORE_AUTO_CORRECTION, Defaults.PREF_MORE_AUTO_CORRECTION))
-                && (urlDetectionEnabled || !InputTypeUtils.isUriOrEmailType(mInputAttributes.mInputType))
+                && (urlDetectionEnabled || !InputTypeUtils.isUriOrEmailType(mInputAttributes.inputType))
         centerSuggestionTextToEnter = prefs.getBoolean(Settings.PREF_CENTER_SUGGESTION_TEXT_TO_ENTER, Defaults.PREF_CENTER_SUGGESTION_TEXT_TO_ENTER)
         val autoCorrectConfidence = prefs.getFloat(Settings.PREF_AUTO_CORRECT_CONFIDENCE, Defaults.PREF_AUTO_CORRECT_CONFIDENCE)
         // confidence -> threshold and score limit are just some formulas that give something similar to the old values, so that confidence can be in a nice 0-1 range
@@ -265,10 +265,10 @@ class SettingsValues(context: Context, prefs: SharedPreferences, res: Resources,
         suggestionStripHiddenPerUserSettings = toolbarMode == ToolbarMode.HIDDEN || toolbarMode == ToolbarMode.TOOLBAR_KEYS
         overrideShowingSuggestions = mInputAttributes.mayOverrideShowingSuggestions
                 && prefs.getBoolean(Settings.PREF_ALWAYS_SHOW_SUGGESTIONS, Defaults.PREF_ALWAYS_SHOW_SUGGESTIONS)
-                && ((inputAttributes.mInputType and InputType.TYPE_MASK_VARIATION) != InputType.TYPE_TEXT_VARIATION_WEB_EDIT_TEXT
+                && ((inputAttributes.inputType and InputType.TYPE_MASK_VARIATION) != InputType.TYPE_TEXT_VARIATION_WEB_EDIT_TEXT
                   || !prefs.getBoolean(Settings.PREF_ALWAYS_SHOW_SUGGESTIONS_EXCEPT_WEB_TEXT, Defaults.PREF_ALWAYS_SHOW_SUGGESTIONS_EXCEPT_WEB_TEXT))
         suggestionsEnabled = prefs.getBoolean(Settings.PREF_SHOW_SUGGESTIONS, Defaults.PREF_SHOW_SUGGESTIONS)
-            && (mInputAttributes.mShouldShowSuggestions || overrideShowingSuggestions) && !suggestionStripHiddenPerUserSettings
+            && (mInputAttributes.shouldShowSuggestions || overrideShowingSuggestions) && !suggestionStripHiddenPerUserSettings
         incognitoModeEnabled = prefs.getBoolean(Settings.PREF_ALWAYS_INCOGNITO_MODE, Defaults.PREF_ALWAYS_INCOGNITO_MODE) || mInputAttributes.noLearning
                 || mInputAttributes.isPasswordField
         bottomRowScale = Settings.readBottomRowScale(prefs, isLandscape, isFolded)
@@ -344,7 +344,7 @@ class SettingsValues(context: Context, prefs: SharedPreferences, res: Resources,
     }
 
     fun needsToLookupSuggestions(): Boolean {
-        return (mInputAttributes.mShouldShowSuggestions || overrideShowingSuggestions)
+        return (mInputAttributes.shouldShowSuggestions || overrideShowingSuggestions)
                 && (autoCorrectEnabled || suggestionsEnabled)
     }
 

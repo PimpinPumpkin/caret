@@ -11,7 +11,6 @@ import android.database.Cursor
 import android.database.sqlite.SQLiteException
 import android.net.Uri
 import android.provider.ContactsContract.Contacts
-import android.text.TextUtils
 import app.caret.latin.utils.Log
 
 import app.caret.latin.common.Constants
@@ -28,32 +27,29 @@ import java.util.concurrent.atomic.AtomicInteger
  * The manager provides an API for listening to meaning full updates by keeping a
  * measure of the current state of the content provider.
  */
-class ContactsManager(context: Context) {
+class ContactsManager(private val context: Context) {
     protected class RankedContact(cursor: Cursor) {
         @JvmField
-        val mName: String
+        val name: String
         @JvmField
         val lastContactedTime: Long
         @JvmField
-        val mTimesContacted: Int
+        val timesContacted: Int
         @JvmField
         val inVisibleGroup: Boolean
 
-        private var mAffinity = 0.0f
+        var affinity = 0.0f
+            private set
 
         init {
-            mName = cursor.getString(
+            name = cursor.getString(
                     ContactsDictionaryConstants.NAME_INDEX)
-            mTimesContacted = cursor.getInt(
+            timesContacted = cursor.getInt(
                     ContactsDictionaryConstants.TIMES_CONTACTED_INDEX)
             lastContactedTime = cursor.getLong(
                     ContactsDictionaryConstants.LAST_TIME_CONTACTED_INDEX)
             inVisibleGroup = cursor.getInt(
                     ContactsDictionaryConstants.IN_VISIBLE_GROUP_INDEX) == 1
-        }
-
-        fun getAffinity(): Float {
-            return mAffinity
         }
 
         /**
@@ -67,20 +63,20 @@ class ContactsManager(context: Context) {
          * contact may still have 0 affinity.
          */
         fun computeAffinity(maxTimesContacted: Int, currentTime: Long) {
-            val timesWeight = (mTimesContacted.toFloat() + 1) / (maxTimesContacted + 1)
+            val timesWeight = (timesContacted.toFloat() + 1) / (maxTimesContacted + 1)
             val timeSinceLastContact = Math.min(
                     Math.max(0L, currentTime - lastContactedTime),
                     TimeUnit.MILLISECONDS.convert(180, TimeUnit.DAYS))
             val lastTimeWeight = Math.pow(0.5,
                     (timeSinceLastContact / (TimeUnit.MILLISECONDS.convert(10, TimeUnit.DAYS))).toDouble()).toFloat()
             val visibleWeight = if (inVisibleGroup) 1.0f else 0.0f
-            mAffinity = (timesWeight + lastTimeWeight + visibleWeight) / 3
+            affinity = (timesWeight + lastTimeWeight + visibleWeight) / 3
         }
     }
 
     private class AffinityComparator : Comparator<RankedContact> {
         override fun compare(contact1: RankedContact, contact2: RankedContact): Int {
-            return java.lang.Float.compare(contact2.getAffinity(), contact1.getAffinity())
+            return java.lang.Float.compare(contact2.affinity, contact1.affinity)
         }
     }
 
@@ -96,19 +92,17 @@ class ContactsManager(context: Context) {
      * The number of contacts observed in the most recent instance of
      * contacts content provider.
      */
-    private val mContactCountAtLastRebuild = AtomicInteger(0)
+    private val lastRebuildContactCount = AtomicInteger(0)
 
     /**
      * The hash code of list of valid contacts names in the most recent dictionary
      * rebuild.
      */
-    private val mHashCodeAtLastRebuild = AtomicInteger(0)
+    private val lastRebuildHashCode = AtomicInteger(0)
 
-    private val mContext: Context
     private val observer: ContactsContentObserver
 
     init {
-        mContext = context
         observer = ContactsContentObserver(this /* ContactsManager */, context)
     }
 
@@ -117,13 +111,11 @@ class ContactsManager(context: Context) {
         observer.registerObserver(listener)
     }
 
-    fun getContactCountAtLastRebuild(): Int {
-        return mContactCountAtLastRebuild.get()
-    }
+    val contactCountAtLastRebuild: Int
+        get() = lastRebuildContactCount.get()
 
-    fun getHashCodeAtLastRebuild(): Int {
-        return mHashCodeAtLastRebuild.get()
-    }
+    val hashCodeAtLastRebuild: Int
+        get() = lastRebuildHashCode.get()
 
     /**
      * Returns all the valid names in the Contacts DB. Callers should also
@@ -137,7 +129,7 @@ class ContactsManager(context: Context) {
         // Check all contacts since it's not possible to find out which names have changed.
         // This is needed because it's possible to receive extraneous onChange events even when no
         // name has changed.
-        val cursor = mContext.getContentResolver().query(uri,
+        val cursor = context.getContentResolver().query(uri,
                 ContactsDictionaryConstants.PROJECTION, null, null, null)
         val contacts = ArrayList<RankedContact>()
         var maxTimesContacted = 0
@@ -170,7 +162,7 @@ class ContactsManager(context: Context) {
         val names = HashSet<String>()
         var i = 0
         while (i < contacts.size && names.size < MAX_CONTACT_NAMES) {
-            names.add(contacts.get(i).mName)
+            names.add(contacts.get(i).name)
             ++i
         }
         return ArrayList(names)
@@ -182,7 +174,7 @@ class ContactsManager(context: Context) {
     fun getContactCount(): Int {
         // TODO: consider switching to a rawQuery("select count(*)...") on the database if performance is a bottleneck.
         try {
-            mContext.getContentResolver().query(Contacts.CONTENT_URI,
+            context.getContentResolver().query(Contacts.CONTENT_URI,
                     ContactsDictionaryConstants.PROJECTION_ID_ONLY, null, null, null
             ).use { cursor ->
                 if (null == cursor)
@@ -200,8 +192,8 @@ class ContactsManager(context: Context) {
      * are done with all the updates of the content provider successfully.
      */
     fun updateLocalState(names: ArrayList<String>) {
-        mContactCountAtLastRebuild.set(getContactCount())
-        mHashCodeAtLastRebuild.set(names.hashCode())
+        lastRebuildContactCount.set(getContactCount())
+        lastRebuildHashCode.set(names.hashCode())
     }
 
     /**
@@ -220,7 +212,7 @@ class ContactsManager(context: Context) {
         const val MAX_CONTACT_NAMES = 200
 
         private fun isValidName(name: String?): Boolean {
-            if (TextUtils.isEmpty(name) || name!!.indexOf(Constants.CODE_COMMERCIAL_AT.toChar()) != -1) {
+            if (name.isNullOrEmpty() || name.indexOf(Constants.CODE_COMMERCIAL_AT.toChar()) != -1) {
                 return false
             }
             val hasSpace = name.indexOf(Constants.CODE_SPACE.toChar()) != -1

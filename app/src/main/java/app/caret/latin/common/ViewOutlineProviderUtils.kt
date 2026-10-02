@@ -16,16 +16,16 @@ fun setInsetsOutlineProvider(view: View): InsetsOutlineProvider {
     return provider
 }
 
-class InsetsOutlineProvider(private val mView: View) : ViewOutlineProvider() {
+class InsetsOutlineProvider(private val view: View) : ViewOutlineProvider() {
     private var lastVisibleTopInsets = NO_DATA
     init {
-        mView.outlineProvider = this
+        view.outlineProvider = this
     }
     fun setInsets(insets: InputMethodService.Insets) {
         val visibleTopInsets = insets.visibleTopInsets
         if (lastVisibleTopInsets != visibleTopInsets) {
             lastVisibleTopInsets = visibleTopInsets
-            mView.invalidateOutline()
+            view.invalidateOutline()
         }
     }
 

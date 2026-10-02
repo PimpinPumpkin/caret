@@ -26,7 +26,7 @@ import app.caret.latin.utils.FloatingKeyboardUtils
 
 class InputView(context: Context, attrs: AttributeSet?) : FrameLayout(context, attrs, 0) {
     private val inputViewRect = Rect()
-    private lateinit var mMainKeyboardView: MainKeyboardView
+    private lateinit var mainKeyboardView: MainKeyboardView
     private lateinit var keyboardTopPaddingForwarder: KeyboardTopPaddingForwarder
     private lateinit var moreSuggestionsViewCanceler: MoreSuggestionsViewCanceler
     private var activeForwarder: MotionEventForwarder<*, *>? = null
@@ -35,11 +35,11 @@ class InputView(context: Context, attrs: AttributeSet?) : FrameLayout(context, a
         super.onFinishInflate()
         val suggestionStripView: SuggestionStripView =
                 findViewById(R.id.suggestion_strip_view)
-        mMainKeyboardView = findViewById(R.id.keyboard_view)
+        mainKeyboardView = findViewById(R.id.keyboard_view)
         keyboardTopPaddingForwarder = KeyboardTopPaddingForwarder(
-                mMainKeyboardView, suggestionStripView)
+                mainKeyboardView, suggestionStripView)
         moreSuggestionsViewCanceler = MoreSuggestionsViewCanceler(
-                mMainKeyboardView, suggestionStripView)
+                mainKeyboardView, suggestionStripView)
         doOnNextLayout(this::onNextLayout)
     }
 
@@ -49,7 +49,7 @@ class InputView(context: Context, attrs: AttributeSet?) : FrameLayout(context, a
 
     override fun dispatchHoverEvent(event: MotionEvent?): Boolean {
         if (AccessibilityUtils.instance.isTouchExplorationEnabled
-                && mMainKeyboardView.isShowingPopupKeysPanel) {
+                && mainKeyboardView.isShowingPopupKeysPanel) {
             // With accessibility mode on, discard hover events while a popup keys keyboard is shown.
             // The {@link PopupKeysKeyboard} receives hover events directly from the platform.
             return true
@@ -115,8 +115,8 @@ class InputView(context: Context, attrs: AttributeSet?) : FrameLayout(context, a
      */
     private abstract class MotionEventForwarder<SenderView : View, ReceiverView : View>(
             senderView: SenderView, receiverView: ReceiverView) {
-        protected val mSenderView: SenderView = senderView
-        protected val mReceiverView: ReceiverView = receiverView
+        protected val senderView: SenderView = senderView
+        protected val receiverView: ReceiverView = receiverView
 
         protected val eventSendingRect = Rect()
         protected val eventReceivingRect = Rect()
@@ -145,11 +145,11 @@ class InputView(context: Context, attrs: AttributeSet?) : FrameLayout(context, a
         fun onInterceptTouchEvent(x: Int, y: Int, me: MotionEvent): Boolean {
             // Forwards a {link MotionEvent} only if both <code>SenderView</code> and
             // <code>ReceiverView</code> are visible.
-            if (mSenderView.visibility != View.VISIBLE ||
-                    mReceiverView.visibility != View.VISIBLE) {
+            if (senderView.visibility != View.VISIBLE ||
+                    receiverView.visibility != View.VISIBLE) {
                 return false
             }
-            mSenderView.getGlobalVisibleRect(eventSendingRect)
+            senderView.getGlobalVisibleRect(eventSendingRect)
             if (!eventSendingRect.contains(x, y)) {
                 return false
             }
@@ -166,10 +166,10 @@ class InputView(context: Context, attrs: AttributeSet?) : FrameLayout(context, a
         // Returns true if a {@link MotionEvent} is forwarded to <code>ReceiverView</code>.
         // Otherwise returns false.
         fun onTouchEvent(x: Int, y: Int, me: MotionEvent): Boolean {
-            mReceiverView.getGlobalVisibleRect(eventReceivingRect)
+            receiverView.getGlobalVisibleRect(eventReceivingRect)
             // Translate global coordinates to <code>ReceiverView</code> local coordinates.
             me.setLocation(translateX(x).toFloat(), translateY(y).toFloat())
-            mReceiverView.dispatchTouchEvent(me)
+            receiverView.dispatchTouchEvent(me)
             onForwardingEvent(me)
             return true
         }
@@ -182,14 +182,14 @@ class InputView(context: Context, attrs: AttributeSet?) : FrameLayout(context, a
     private class KeyboardTopPaddingForwarder(mainKeyboardView: MainKeyboardView,
             suggestionStripView: SuggestionStripView)
             : MotionEventForwarder<MainKeyboardView, SuggestionStripView>(mainKeyboardView, suggestionStripView) {
-        private var mKeyboardTopPadding = 0
+        private var keyboardTopPadding = 0
 
         fun setKeyboardTopPadding(keyboardTopPadding: Int) {
-            mKeyboardTopPadding = keyboardTopPadding
+            this.keyboardTopPadding = keyboardTopPadding
         }
 
         private fun isInKeyboardTopPadding(y: Int): Boolean {
-            return y < eventSendingRect.top + mKeyboardTopPadding
+            return y < eventSendingRect.top + keyboardTopPadding
         }
 
         override fun needsToForward(x: Int, y: Int): Boolean {
@@ -197,7 +197,7 @@ class InputView(context: Context, attrs: AttributeSet?) : FrameLayout(context, a
             // Because the visibility of {@link MainKeyboardView} is controlled by its parent
             // view in {@link KeyboardSwitcher#setMainKeyboardFrame()}, we should check the
             // visibility of the parent view.
-            val mainKeyboardFrame = mSenderView.parent as View
+            val mainKeyboardFrame = senderView.parent as View
             return mainKeyboardFrame.visibility == View.VISIBLE && isInKeyboardTopPadding(y)
         }
 
@@ -222,12 +222,12 @@ class InputView(context: Context, attrs: AttributeSet?) : FrameLayout(context, a
             : MotionEventForwarder<View, SuggestionStripView>(mainKeyboardView.rootView, suggestionStripView) {
 
         override fun needsToForward(x: Int, y: Int): Boolean {
-            return mReceiverView.isShowingMoreSuggestionPanel && eventSendingRect.contains(x, y)
+            return receiverView.isShowingMoreSuggestionPanel && eventSendingRect.contains(x, y)
         }
 
         override fun onForwardingEvent(me: MotionEvent) {
             if (me.actionMasked == MotionEvent.ACTION_DOWN) {
-                mReceiverView.dismissMoreSuggestionsPanel()
+                receiverView.dismissMoreSuggestionsPanel()
             }
         }
     }

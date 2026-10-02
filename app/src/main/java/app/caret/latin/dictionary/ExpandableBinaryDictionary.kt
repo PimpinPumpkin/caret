@@ -46,30 +46,31 @@ abstract class ExpandableBinaryDictionary : Dictionary {
 
     /** The application context. */
     @JvmField
-    val mContext: Context
+    val context: Context
 
     /**
      * The binary dictionary generated dynamically from the fusion dictionary. This is used to
      * answer unigram and bigram queries.
      */
-    private var mBinaryDictionary: BinaryDictionary?
+    var binaryDictionary: BinaryDictionary?
+        private set
 
     /**
      * The name of this dictionary, used as a part of the filename for storing the binary
      * dictionary.
      */
-    private val mDictName: String
+    private val dictName: String
 
     /** Dictionary file */
-    private val mDictFile: File
+    private val dictFile: File
 
     /** Indicates whether a task for reloading the dictionary has been scheduled. */
-    private val mIsReloading: AtomicBoolean
+    private val isReloading: AtomicBoolean
 
     /** Indicates whether the current dictionary needs to be recreated. */
-    private var mNeedsToRecreate: Boolean
+    private var needsToRecreate: Boolean
 
-    private val mLock: ReentrantReadWriteLock
+    private val lock: ReentrantReadWriteLock
 
     /**
      * Abstract method for loading initial contents of a given dictionary.
@@ -77,7 +78,7 @@ abstract class ExpandableBinaryDictionary : Dictionary {
     protected abstract fun loadInitialContentsLocked()
 
     fun isValidDictionaryLocked(): Boolean {
-        return mBinaryDictionary!!.isValidDictionary()
+        return binaryDictionary!!.isValidDictionary()
     }
 
     /**
@@ -93,38 +94,34 @@ abstract class ExpandableBinaryDictionary : Dictionary {
      */
     constructor(context: Context, dictName: String,
             locale: Locale, dictType: String, dictFile: File?) : super(dictType, locale) {
-        mDictName = dictName
-        mContext = context
-        mDictFile = getDictFile(context, dictName, dictFile)
-        mBinaryDictionary = null
-        mIsReloading = AtomicBoolean()
-        mNeedsToRecreate = false
-        mLock = ReentrantReadWriteLock()
+        this.dictName = dictName
+        this.context = context
+        this.dictFile = getDictFile(context, dictName, dictFile)
+        binaryDictionary = null
+        isReloading = AtomicBoolean()
+        needsToRecreate = false
+        lock = ReentrantReadWriteLock()
     }
 
     private fun asyncExecuteTaskWithWriteLock(task: Runnable) {
-        asyncExecuteTaskWithLock(mLock.writeLock(), task)
-    }
-
-    fun getBinaryDictionary(): BinaryDictionary? {
-        return mBinaryDictionary
+        asyncExecuteTaskWithLock(lock.writeLock(), task)
     }
 
     override fun getFrequency(word: String?): Int {
-        if (mLock.readLock().tryLock()) {
+        if (lock.readLock().tryLock()) {
             try {
-                return mBinaryDictionary!!.getFrequency(word)
+                return binaryDictionary!!.getFrequency(word)
             } finally {
-                mLock.readLock().unlock()
+                lock.readLock().unlock()
             }
         }
         return Dictionary.NOT_A_PROBABILITY
     }
 
     fun closeBinaryDictionary() {
-        if (mBinaryDictionary != null) {
-            mBinaryDictionary!!.close()
-            mBinaryDictionary = null
+        binaryDictionary?.let {
+            it.close()
+            binaryDictionary = null
         }
     }
 
@@ -137,8 +134,8 @@ abstract class ExpandableBinaryDictionary : Dictionary {
 
     protected open fun getHeaderAttributeMap(): MutableMap<String, String> {
         val attributeMap = HashMap<String, String>()
-        attributeMap.put(DictionaryHeader.DICTIONARY_ID_KEY, mDictName)
-        attributeMap.put(DictionaryHeader.DICTIONARY_LOCALE_KEY, mLocale.toString())
+        attributeMap.put(DictionaryHeader.DICTIONARY_ID_KEY, dictName)
+        attributeMap.put(DictionaryHeader.DICTIONARY_LOCALE_KEY, this.locale.toString())
         attributeMap.put(DictionaryHeader.DICTIONARY_VERSION_KEY,
                 TimeUnit.MILLISECONDS.toSeconds(System.currentTimeMillis()).toString())
         return attributeMap
@@ -150,20 +147,20 @@ abstract class ExpandableBinaryDictionary : Dictionary {
 
     fun removeBinaryDictionaryLocked() {
         closeBinaryDictionary()
-        if (mDictFile.exists() && !FileUtils.deleteRecursively(mDictFile)) {
-            Log.e(TAG, "Can't remove a file: " + mDictFile.getName())
+        if (dictFile.exists() && !FileUtils.deleteRecursively(dictFile)) {
+            Log.e(TAG, "Can't remove a file: " + dictFile.getName())
         }
     }
 
     private fun openBinaryDictionaryLocked() {
-        mBinaryDictionary = BinaryDictionary(
-                mDictFile.getAbsolutePath(), 0 /* offset */, mDictFile.length(),
-                true /* useFullEditDistance */, mLocale, mDictType, true /* isUpdatable */)
+        binaryDictionary = BinaryDictionary(
+                dictFile.getAbsolutePath(), 0 /* offset */, dictFile.length(),
+                true /* useFullEditDistance */, this.locale, this.dictType, true /* isUpdatable */)
     }
 
     fun createOnMemoryBinaryDictionaryLocked() {
-        mBinaryDictionary = BinaryDictionary(
-                mDictFile.getAbsolutePath(), true /* useFullEditDistance */, mLocale, mDictType,
+        binaryDictionary = BinaryDictionary(
+                dictFile.getAbsolutePath(), true /* useFullEditDistance */, this.locale, this.dictType,
                 DICTIONARY_FORMAT_VERSION.toLong(), getHeaderAttributeMap())
     }
 
@@ -179,7 +176,7 @@ abstract class ExpandableBinaryDictionary : Dictionary {
      */
     fun runGCIfRequired(mindsBlockByGC: Boolean) {
         asyncExecuteTaskWithWriteLock(Runnable {
-            if (getBinaryDictionary() == null) {
+            if (binaryDictionary == null) {
                 return@Runnable
             }
             runGCIfRequiredLocked(mindsBlockByGC)
@@ -187,15 +184,16 @@ abstract class ExpandableBinaryDictionary : Dictionary {
     }
 
     protected fun runGCIfRequiredLocked(mindsBlockByGC: Boolean) {
-        if (mBinaryDictionary!!.needsToRunGC(mindsBlockByGC)) {
-            mBinaryDictionary!!.flushWithGC()
+        val dict = binaryDictionary!!
+        if (dict.needsToRunGC(mindsBlockByGC)) {
+            dict.flushWithGC()
         }
     }
 
     private fun updateDictionaryWithWriteLock(updateTask: Runnable) {
         reloadDictionaryIfRequired()
         asyncExecuteTaskWithWriteLock(Runnable {
-            if (getBinaryDictionary() == null) {
+            if (binaryDictionary == null) {
                 return@Runnable
             }
             runGCIfRequiredLocked(true /* mindsBlockByGC */)
@@ -216,7 +214,7 @@ abstract class ExpandableBinaryDictionary : Dictionary {
     protected fun addUnigramLocked(word: String, frequency: Int,
             shortcutTarget: String?, shortcutFreq: Int, isNotAWord: Boolean,
             isPossiblyOffensive: Boolean, timestamp: Int) {
-        if (!mBinaryDictionary!!.addUnigramEntry(word, frequency, shortcutTarget, shortcutFreq,
+        if (!binaryDictionary!!.addUnigramEntry(word, frequency, shortcutTarget, shortcutFreq,
                 false /* isBeginningOfSentence */, isNotAWord, isPossiblyOffensive, timestamp)) {
             Log.e(TAG, "Cannot add unigram entry. word: " + word)
         }
@@ -228,7 +226,7 @@ abstract class ExpandableBinaryDictionary : Dictionary {
     fun removeUnigramEntryDynamically(word: String) {
         reloadDictionaryIfRequired()
         asyncExecuteTaskWithWriteLock(Runnable {
-            val binaryDictionary = getBinaryDictionary()
+            val binaryDictionary = this.binaryDictionary
             if (binaryDictionary == null) {
                 return@Runnable
             }
@@ -248,7 +246,7 @@ abstract class ExpandableBinaryDictionary : Dictionary {
             frequency: Int, timestamp: Int) {
         reloadDictionaryIfRequired()
         asyncExecuteTaskWithWriteLock(Runnable {
-            if (getBinaryDictionary() == null) {
+            if (binaryDictionary == null) {
                 return@Runnable
             }
             runGCIfRequiredLocked(true /* mindsBlockByGC */)
@@ -258,7 +256,7 @@ abstract class ExpandableBinaryDictionary : Dictionary {
 
     protected fun addNgramEntryLocked(ngramContext: NgramContext, word: String,
             frequency: Int, timestamp: Int) {
-        if (!mBinaryDictionary!!.addNgramEntry(ngramContext, word, frequency, timestamp)) {
+        if (!binaryDictionary!!.addNgramEntry(ngramContext, word, frequency, timestamp)) {
             if (DEBUG) {
                 Log.i(TAG, "Cannot add n-gram entry.")
                 Log.i(TAG, "  NgramContext: " + ngramContext + ", word: " + word)
@@ -272,7 +270,7 @@ abstract class ExpandableBinaryDictionary : Dictionary {
     fun updateEntriesForWord(ngramContext: NgramContext,
             word: String, isValidWord: Boolean, count: Int, timestamp: Int) {
         updateDictionaryWithWriteLock(Runnable {
-            val binaryDictionary = getBinaryDictionary()
+            val binaryDictionary = this.binaryDictionary
             if (binaryDictionary == null) {
                 return@Runnable
             }
@@ -293,18 +291,16 @@ abstract class ExpandableBinaryDictionary : Dictionary {
         reloadDictionaryIfRequired()
         var lockAcquired = false
         try {
-            lockAcquired = mLock.readLock().tryLock(
+            lockAcquired = lock.readLock().tryLock(
                     TIMEOUT_FOR_READ_OPS_IN_MILLISECONDS.toLong(), TimeUnit.MILLISECONDS)
             if (lockAcquired) {
-                if (mBinaryDictionary == null) {
-                    return null
-                }
+                val dict = binaryDictionary ?: return null
                 val suggestions: ArrayList<SuggestedWordInfo>? =
-                        mBinaryDictionary!!.getSuggestions(composedData, ngramContext,
+                        dict.getSuggestions(composedData, ngramContext,
                                 proximityInfoHandle, settingsValuesForSuggestion, sessionId,
                                 weightForLocale, inOutWeightOfLangModelVsSpatialModel)
-                if (mBinaryDictionary!!.isCorrupted()) {
-                    Log.i(TAG, "Dictionary (" + mDictName + ") is corrupted. "
+                if (dict.isCorrupted()) {
+                    Log.i(TAG, "Dictionary (" + dictName + ") is corrupted. "
                             + "Remove and regenerate it.")
                     removeBinaryDictionary()
                 }
@@ -314,7 +310,7 @@ abstract class ExpandableBinaryDictionary : Dictionary {
             Log.e(TAG, "Interrupted tryLock() in getSuggestionsWithSessionId().", e)
         } finally {
             if (lockAcquired) {
-                mLock.readLock().unlock()
+                lock.readLock().unlock()
             }
         }
         return null
@@ -324,10 +320,10 @@ abstract class ExpandableBinaryDictionary : Dictionary {
         reloadDictionaryIfRequired()
         var lockAcquired = false
         try {
-            lockAcquired = mLock.readLock().tryLock(
+            lockAcquired = lock.readLock().tryLock(
                     TIMEOUT_FOR_READ_OPS_IN_MILLISECONDS.toLong(), TimeUnit.MILLISECONDS)
             if (lockAcquired) {
-                if (mBinaryDictionary == null) {
+                if (binaryDictionary == null) {
                     return false
                 }
                 return isInDictionaryLocked(word!!)
@@ -336,34 +332,32 @@ abstract class ExpandableBinaryDictionary : Dictionary {
             Log.e(TAG, "Interrupted tryLock() in isInDictionary().", e)
         } finally {
             if (lockAcquired) {
-                mLock.readLock().unlock()
+                lock.readLock().unlock()
             }
         }
         return false
     }
 
     protected fun isInDictionaryLocked(word: String): Boolean {
-        if (mBinaryDictionary == null) return false
-        return mBinaryDictionary!!.isInDictionary(word)
+        val dict = binaryDictionary ?: return false
+        return dict.isInDictionary(word)
     }
 
     override fun getMaxFrequencyOfExactMatches(word: String?): Int {
         reloadDictionaryIfRequired()
         var lockAcquired = false
         try {
-            lockAcquired = mLock.readLock().tryLock(
+            lockAcquired = lock.readLock().tryLock(
                     TIMEOUT_FOR_READ_OPS_IN_MILLISECONDS.toLong(), TimeUnit.MILLISECONDS)
             if (lockAcquired) {
-                if (mBinaryDictionary == null) {
-                    return Dictionary.NOT_A_PROBABILITY
-                }
-                return mBinaryDictionary!!.getMaxFrequencyOfExactMatches(word)
+                val dict = binaryDictionary ?: return Dictionary.NOT_A_PROBABILITY
+                return dict.getMaxFrequencyOfExactMatches(word)
             }
         } catch (e: InterruptedException) {
             Log.e(TAG, "Interrupted tryLock() in getMaxFrequencyOfExactMatches().", e)
         } finally {
             if (lockAcquired) {
-                mLock.readLock().unlock()
+                lock.readLock().unlock()
             }
         }
         return Dictionary.NOT_A_PROBABILITY
@@ -379,22 +373,23 @@ abstract class ExpandableBinaryDictionary : Dictionary {
             // Test if this class does not cause problems when it takes long time to load binary
             // dictionary.
             try {
-                Log.w(TAG, "Start stress in loading: " + mDictName)
+                Log.w(TAG, "Start stress in loading: " + dictName)
                 Thread.sleep(15000)
                 Log.w(TAG, "End stress in loading")
             } catch (e: InterruptedException) {
-                Log.w(TAG, "Interrupted while loading: " + mDictName, e)
+                Log.w(TAG, "Interrupted while loading: " + dictName, e)
             }
         }
-        val oldBinaryDictionary = mBinaryDictionary
+        val oldBinaryDictionary = binaryDictionary
         openBinaryDictionaryLocked()
         if (oldBinaryDictionary != null) {
             oldBinaryDictionary.close()
         }
-        if (mBinaryDictionary!!.isValidDictionary()
-                && needsToMigrateDictionary(mBinaryDictionary!!.getFormatVersion())) {
-            if (!mBinaryDictionary!!.migrateTo(DICTIONARY_FORMAT_VERSION)) {
-                Log.e(TAG, "Dictionary migration failed: " + mDictName)
+        val dict = binaryDictionary!!
+        if (dict.isValidDictionary()
+                && needsToMigrateDictionary(dict.getFormatVersion())) {
+            if (!dict.migrateTo(DICTIONARY_FORMAT_VERSION)) {
+                Log.e(TAG, "Dictionary migration failed: " + dictName)
                 removeBinaryDictionaryLocked()
             }
         }
@@ -408,7 +403,7 @@ abstract class ExpandableBinaryDictionary : Dictionary {
         createOnMemoryBinaryDictionaryLocked()
         loadInitialContentsLocked()
         // Run GC and flush to file when initial contents have been loaded.
-        mBinaryDictionary!!.flushWithGCIfHasUpdated()
+        binaryDictionary!!.flushWithGCIfHasUpdated()
     }
 
     /**
@@ -416,16 +411,15 @@ abstract class ExpandableBinaryDictionary : Dictionary {
      *
      */
     protected fun setNeedsToRecreate() {
-        mNeedsToRecreate = true
+        needsToRecreate = true
     }
 
     fun clearNeedsToRecreate() {
-        mNeedsToRecreate = false
+        needsToRecreate = false
     }
 
-    fun isNeededToRecreate(): Boolean {
-        return mNeedsToRecreate
-    }
+    val isNeededToRecreate: Boolean
+        get() = needsToRecreate
 
     /**
      * Load the current binary dictionary from internal storage. If the dictionary file doesn't
@@ -442,28 +436,26 @@ abstract class ExpandableBinaryDictionary : Dictionary {
      * Returns whether a dictionary reload is required.
      */
     private fun isReloadRequired(): Boolean {
-        return mBinaryDictionary == null || mNeedsToRecreate
+        return binaryDictionary == null || needsToRecreate
     }
 
     /**
      * Reloads the dictionary. Access is controlled on a per dictionary file basis.
      */
     private fun asyncReloadDictionary() {
-        val isReloading = mIsReloading
         if (!isReloading.compareAndSet(false, true)) {
             return
         }
-        val dictFile = mDictFile
         asyncExecuteTaskWithWriteLock(Runnable {
             try {
-                if (!dictFile.exists() || isNeededToRecreate()) {
+                if (!dictFile.exists() || isNeededToRecreate) {
                     // If the dictionary file does not exist or contents have been updated,
                     // generate a new one.
                     createNewDictionaryLocked()
-                } else if (getBinaryDictionary() == null) {
+                } else if (binaryDictionary == null) {
                     // Otherwise, load the existing dictionary.
                     loadBinaryDictionaryLocked()
-                    val binaryDictionary = getBinaryDictionary()
+                    val binaryDictionary = this.binaryDictionary
                     if (binaryDictionary != null && !(isValidDictionaryLocked()
                             // TODO: remove the check below
                             && matchesExpectedBinaryDictFormatVersionForThisType(binaryDictionary.getFormatVersion()))) {
@@ -485,7 +477,7 @@ abstract class ExpandableBinaryDictionary : Dictionary {
      */
     override fun onFinishInput() {
         asyncExecuteTaskWithWriteLock(Runnable {
-            val binaryDictionary = getBinaryDictionary()
+            val binaryDictionary = this.binaryDictionary
             if (binaryDictionary == null) {
                 return@Runnable
             }
@@ -499,13 +491,11 @@ abstract class ExpandableBinaryDictionary : Dictionary {
 
     fun getDictionaryStats(): DictionaryStats? {
         reloadDictionaryIfRequired()
-        val dictName = mDictName
-        val dictFile = mDictFile
         val result =
                 AsyncResultHolder<DictionaryStats?>("DictionaryStats")
-        asyncExecuteTaskWithLock(mLock.readLock(), object : Runnable {
+        asyncExecuteTaskWithLock(lock.readLock(), object : Runnable {
             override fun run() {
-                result.set(DictionaryStats(mLocale!!, dictName, dictName, dictFile, 0))
+                result.set(DictionaryStats(this@ExpandableBinaryDictionary.locale!!, dictName, dictName, dictFile, 0))
             }
         })
         return result.get(null /* defaultValue */, TIMEOUT_FOR_READ_OPS_IN_MILLISECONDS.toLong())
@@ -514,10 +504,9 @@ abstract class ExpandableBinaryDictionary : Dictionary {
     fun dumpAllWordsForDebug() {
         reloadDictionaryIfRequired()
         val tag = TAG
-        val dictName = mDictName
-        asyncExecuteTaskWithLock(mLock.readLock(), Runnable {
-            Log.d(tag, "Dump dictionary: " + dictName + " for " + mLocale)
-            val binaryDictionary = getBinaryDictionary()
+        asyncExecuteTaskWithLock(lock.readLock(), Runnable {
+            Log.d(tag, "Dump dictionary: " + dictName + " for " + this.locale)
+            val binaryDictionary = this.binaryDictionary
             if (binaryDictionary == null) {
                 return@Runnable
             }
@@ -550,9 +539,9 @@ abstract class ExpandableBinaryDictionary : Dictionary {
         reloadDictionaryIfRequired()
         val result =
                 AsyncResultHolder<Array<WordProperty>>("WordPropertiesForSync")
-        asyncExecuteTaskWithLock(mLock.readLock(), Runnable {
+        asyncExecuteTaskWithLock(lock.readLock(), Runnable {
             val wordPropertyList = ArrayList<WordProperty>()
-            val binaryDictionary = getBinaryDictionary()
+            val binaryDictionary = this.binaryDictionary
             if (binaryDictionary == null) {
                 return@Runnable
             }

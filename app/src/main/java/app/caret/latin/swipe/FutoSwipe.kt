@@ -143,15 +143,15 @@ object FutoSwipe {
         val context = appContext ?: return null
         if (!isActive(context)) return null
         val pointers = composedData.inputPointers
-        val size = pointers.getPointerSize()
+        val size = pointers.pointerSize
         if (size < 2) return emptyList()
         val swipeLayout = prepare(context, keyboard, locale) ?: return emptyList()
         val engine = decoder ?: return emptyList()
         refreshUserWords(context, engine, swipeLayout, locale, userWords, isMainWord)
 
-        val xs = pointers.getXCoordinates()
-        val ys = pointers.getYCoordinates()
-        val times = pointers.getTimes()
+        val xs = pointers.xCoordinates
+        val ys = pointers.yCoordinates
+        val times = pointers.times
         val x = FloatArray(size) { swipeLayout.normalizeX(xs[it]) }
         val y = FloatArray(size) { swipeLayout.normalizeY(ys[it]) }
         val t = FloatArray(size) { (times[it] - times[0]).toFloat() }
@@ -219,7 +219,7 @@ object FutoSwipe {
 
     private fun contextWords(ngramContext: NgramContext): List<String> {
         val words = ArrayList<String>()
-        for (n in minOf(ngramContext.getPrevWordCount(), MAX_CONTEXT_WORDS) downTo 1) {
+        for (n in minOf(ngramContext.prevWordCount, MAX_CONTEXT_WORDS) downTo 1) {
             val word = ngramContext.getNthPrevWord(n)?.toString() ?: continue
             if (word.isNotEmpty() && word != NgramContext.BEGINNING_OF_SENTENCE_TAG) words.add(word)
         }

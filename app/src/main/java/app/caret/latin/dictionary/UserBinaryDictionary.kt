@@ -28,15 +28,14 @@ import java.util.Locale
  * dictionary file to use it from native code.
  */
 class UserBinaryDictionary protected constructor(context: Context, locale: Locale?,
-                               alsoUseMoreRestrictiveLocales: Boolean,
+                               private val alsoUseMoreRestrictiveLocales: Boolean,
                                dictFile: File?, name: String) : ExpandableBinaryDictionary(
-        context, ExpandableBinaryDictionary.getDictName(name, locale!!, dictFile), locale!!,
+        context, ExpandableBinaryDictionary.getDictName(name, locale!!, dictFile), locale,
         Dictionary.TYPE_USER, dictFile) {
 
     private var observer: ContentObserver?
     // this really needs to be the locale string, as it interacts with system
     private val localeString: String
-    private val mAlsoUseMoreRestrictiveLocales: Boolean
 
     init {
         if (null == locale) throw NullPointerException() // Catch the error earlier
@@ -47,21 +46,21 @@ class UserBinaryDictionary protected constructor(context: Context, locale: Local
         } else {
             localeString = localeStr
         }
-        mAlsoUseMoreRestrictiveLocales = alsoUseMoreRestrictiveLocales
 
-        observer = object : ContentObserver(null) {
+        val contentObserver = object : ContentObserver(null) {
             override fun onChange(self: Boolean, uri: Uri?) {
                 setNeedsToRecreate()
             }
         }
-        context.contentResolver.registerContentObserver(Words.CONTENT_URI, true, observer!!)
+        observer = contentObserver
+        context.contentResolver.registerContentObserver(Words.CONTENT_URI, true, contentObserver)
         reloadDictionaryIfRequired()
     }
 
     @Synchronized
     override fun close() {
-        if (observer != null) {
-            mContext.contentResolver.unregisterContentObserver(observer!!)
+        observer?.let {
+            context.contentResolver.unregisterContentObserver(it)
             observer = null
         }
         super.close()
@@ -98,7 +97,7 @@ class UserBinaryDictionary protected constructor(context: Context, locale: Local
 
         val requestArguments: Array<String>
         // If length == 3, we already have all the arguments we need (common prefix is meaningless inside variants)
-        if (mAlsoUseMoreRestrictiveLocales && length < 3) {
+        if (alsoUseMoreRestrictiveLocales && length < 3) {
             request.append(" or (locale like ?)")
             // The following creates an array with one more (null) position
             val localeElementsWithMoreRestrictiveLocalesIncluded: Array<String> =
@@ -128,7 +127,7 @@ class UserBinaryDictionary protected constructor(context: Context, locale: Local
     private fun addWordsFromProjectionLocked(query: Array<String>, request: String, requestArguments: Array<String>) {
         var cursor: Cursor? = null
         try {
-            cursor = mContext.contentResolver.query(
+            cursor = context.contentResolver.query(
                     Words.CONTENT_URI, query, request, requestArguments, null)
             addWordsLocked(cursor)
         } catch (e: SQLiteException) {

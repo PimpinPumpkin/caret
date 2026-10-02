@@ -38,9 +38,8 @@ class ReadOnlyBinaryDictionary(filename: String, offset: Long, length: Long,
                 locale, dictType, false /* isUpdatable */)
     }
 
-    fun isValidDictionary(): Boolean {
-        return binaryDictionary.isValidDictionary()
-    }
+    val isValidDictionary: Boolean
+        get() = binaryDictionary.isValidDictionary()
 
     override fun getSuggestions(composedData: ComposedData?,
             ngramContext: NgramContext?, proximityInfoHandle: Long,
@@ -123,7 +122,6 @@ class ReadOnlyBinaryDictionary(filename: String, offset: Long, length: Long,
         }
     }
 
-    fun getHash(): String? {
-        return binaryDictionary.getHash()
-    }
+    val hash: String?
+        get() = binaryDictionary.getHash()
 }

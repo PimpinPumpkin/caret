@@ -123,7 +123,7 @@ class ClipboardHistoryManager(
                 Log.i(TAG, "could not go back to old primary clip", e)
                 // happens wen the clip was a file
                 // try to find it in out clipboard entries
-                val clip = clipboardDao?.getAll()?.firstOrNull { it.timeStamp == ClipboardManagerCompat.getClipTimestamp(primaryClip) }
+                val clip = clipboardDao?.all?.firstOrNull { it.timeStamp == ClipboardManagerCompat.getClipTimestamp(primaryClip) }
                 if (clip?.filename != null)
                     clipboardManager.setPrimaryClip(ClipData(
                         ClipDescription(clip.text, clip.mimeTypes?.toTypedArray()),

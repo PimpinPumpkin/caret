@@ -76,7 +76,7 @@ class AppsBinaryDictionary protected constructor(ctx: Context, locale: Locale,
                         null /* shortcut */, 0 /* shortcutFreq */, false /* isNotAWord */,
                         false /* isPossiblyOffensive */,
                         BinaryDictionary.NOT_A_VALID_TIMESTAMP)
-                if (ngramContext.isValid()) {
+                if (ngramContext.isValid) {
                     runGCIfRequiredLocked(true /* mindsBlockByGC */)
                     addNgramEntryLocked(ngramContext,
                             word,

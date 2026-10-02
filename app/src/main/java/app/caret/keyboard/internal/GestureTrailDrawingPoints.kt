@@ -42,12 +42,12 @@ class GestureTrailDrawingPoints {
     }
 
     private fun addStrokeLocked(stroke: GestureStrokeDrawingPoints, downTime: Long) {
-        val trailSize = eventTimes.getLength()
+        val trailSize = eventTimes.length
         stroke.appendPreviewStroke(eventTimes, xCoordinates, yCoordinates, pointTypes)
-        if (eventTimes.getLength() == trailSize) {
+        if (eventTimes.length == trailSize) {
             return
         }
-        val times = eventTimes.getPrimitiveArray()
+        val times = eventTimes.primitiveArray
         val strokeId = stroke.gestureStrokeId
         // Because interpolation algorithm in {@link GestureStrokeDrawingPoints} can't determine
         // the interpolated points in the last segment of gesture stroke, it may need recalculation
@@ -67,7 +67,7 @@ class GestureTrailDrawingPoints {
                 // Decay the previous strokes' event times.
                 times[i] -= elapsedTime
             }
-            val xCoords = xCoordinates.getPrimitiveArray()
+            val xCoords = xCoordinates.primitiveArray
             xCoords[trailSize] = markAsDownEvent(xCoords[trailSize])
             currentTimeBase = downTime - times[trailSize]
             currentStrokeId = strokeId
@@ -96,15 +96,15 @@ class GestureTrailDrawingPoints {
             outBoundsRect: Rect, params: GestureTrailDrawingParams): Boolean {
         // Initialize bounds rectangle.
         outBoundsRect.setEmpty()
-        val trailSize = eventTimes.getLength()
+        val trailSize = eventTimes.length
         if (trailSize == 0) {
             return false
         }
 
-        val times = eventTimes.getPrimitiveArray()
-        val xCoords = xCoordinates.getPrimitiveArray()
-        val yCoords = yCoordinates.getPrimitiveArray()
-        val types = pointTypes.getPrimitiveArray()
+        val times = eventTimes.primitiveArray
+        val xCoords = xCoordinates.primitiveArray
+        val yCoords = yCoordinates.primitiveArray
+        val types = pointTypes.primitiveArray
         val sinceDown = (SystemClock.uptimeMillis() - currentTimeBase).toInt()
         var startIndex = trailStartIndex
         while (startIndex < trailSize) {
@@ -186,9 +186,9 @@ class GestureTrailDrawingPoints {
 
     private fun debugDrawPoints(canvas: Canvas, startIndex: Int, endIndex: Int,
             paint: Paint) {
-        val xCoords = xCoordinates.getPrimitiveArray()
-        val yCoords = yCoordinates.getPrimitiveArray()
-        val types = pointTypes.getPrimitiveArray()
+        val xCoords = xCoordinates.primitiveArray
+        val yCoords = yCoordinates.primitiveArray
+        val types = pointTypes.primitiveArray
         // {@link Paint} that is zero width stroke and anti alias off draws exactly 1 pixel.
         paint.setAntiAlias(false)
         paint.setStrokeWidth(0f)

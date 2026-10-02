@@ -1279,8 +1279,9 @@ class LatinIME : InputMethodService(),
             val noFullscreen = (ei.imeOptions and EditorInfo.IME_FLAG_NO_FULLSCREEN) != 0
             if (noExtractUi || noFullscreen) return false
             val stripView = suggestionStripView
-            if (keyboardSwitcher.getVisibleKeyboardView() == null || stripView == null) return false
-            val usedHeight = keyboardSwitcher.getVisibleKeyboardView()!!.getHeight() + stripView.getHeight()
+            val visibleKeyboardView = keyboardSwitcher.getVisibleKeyboardView()
+            if (visibleKeyboardView == null || stripView == null) return false
+            val usedHeight = visibleKeyboardView.getHeight() + stripView.getHeight()
             val availableHeight = getResources().getDisplayMetrics().heightPixels
             return usedHeight > availableHeight * 0.6 // if we have less than 40% available, use fullscreen mode
         }
@@ -1350,7 +1351,7 @@ class LatinIME : InputMethodService(),
     }
 
     fun showInputPickerDialog(): Boolean {
-        if (isShowingOptionDialog()) return false
+        if (isShowingOptionDialog) return false
         if (richImm.hasMultipleEnabledIMEsOrSubtypes(true)) {
             val dialog = createInputMethodPickerDialog(this, richImm, keyboardSwitcher.getMainKeyboardView()!!.getWindowToken())
             optionsDialog = dialog
@@ -1360,9 +1361,8 @@ class LatinIME : InputMethodService(),
         return false
     }
 
-    private fun isShowingOptionDialog(): Boolean {
-        return optionsDialog?.isShowing() == true
-    }
+    private val isShowingOptionDialog: Boolean
+        get() = optionsDialog?.isShowing() == true
 
     // called when language switch key is pressed (either the keyboard key, or long-press comma)
     fun switchToNextSubtype() {
@@ -1483,8 +1483,8 @@ class LatinIME : InputMethodService(),
 
         val isEmptyApplicationSpecifiedCompletions =
                 currentSettingsValues.mInputAttributes.applicationSpecifiedCompletionOn
-                        && suggestedWords.isEmpty()
-        val noSuggestionsFromDictionaries = suggestedWords.isEmpty()
+                        && suggestedWords.isEmpty
+        val noSuggestionsFromDictionaries = suggestedWords.isEmpty
                 || suggestedWords.isPunctuationSuggestions()
                 || isEmptyApplicationSpecifiedCompletions
 
@@ -1502,11 +1502,11 @@ class LatinIME : InputMethodService(),
     }
 
     override fun setSuggestions(suggestedWords: SuggestedWords) {
-        if (suggestedWords.isEmpty()) {
+        if (suggestedWords.isEmpty) {
             // avoids showing clipboard suggestion when starting gesture typing
             // should be fine, as there will be another suggestion in a few ms
             // (but not a great style to avoid this visual glitch, maybe revert this commit and replace with sth better)
-            if (suggestedWords.mInputStyle != SuggestedWords.INPUT_STYLE_UPDATE_BATCH)
+            if (suggestedWords.inputStyle != SuggestedWords.INPUT_STYLE_UPDATE_BATCH)
                 setNeutralSuggestionStrip()
         } else {
             setSuggestedWords(suggestedWords)
@@ -1560,7 +1560,7 @@ class LatinIME : InputMethodService(),
         }
         val neutralSuggestions: SuggestedWords = if (currentSettings.suggestPunctuation)
                 currentSettings.punctuationSuggestions
-                else SuggestedWords.getEmptyInstance()
+                else SuggestedWords.emptyInstance
         setSuggestedWords(neutralSuggestions)
         val stripView = suggestionStripView
         if (stripView != null && currentSettings.autoShowToolbar) {

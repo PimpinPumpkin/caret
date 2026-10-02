@@ -11,13 +11,7 @@ import android.content.Context
 import android.content.Intent
 import app.caret.latin.utils.Log
 
-class DictionaryDumpBroadcastReceiver(latinIme: LatinIME) : BroadcastReceiver() {
-    @JvmField
-    val mLatinIme: LatinIME
-
-    init {
-        mLatinIme = latinIme
-    }
+class DictionaryDumpBroadcastReceiver(@JvmField val latinIme: LatinIME) : BroadcastReceiver() {
 
     override fun onReceive(context: Context?, intent: Intent?) {
         val action = intent!!.getAction()
@@ -28,7 +22,7 @@ class DictionaryDumpBroadcastReceiver(latinIme: LatinIME) : BroadcastReceiver() 
                       "but the dictionary name is not set.")
                 return
             }
-            mLatinIme.dumpDictionaryForDebug(dictName)
+            latinIme.dumpDictionaryForDebug(dictName)
         }
     }
 

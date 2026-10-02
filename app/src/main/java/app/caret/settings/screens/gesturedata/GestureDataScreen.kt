@@ -230,8 +230,8 @@ fun GestureDataScreen(
                     if (!composedData.isBatchMode || inputStyle != SuggestedWords.INPUT_STYLE_TAIL_BATCH) return
                     val target = wordFromDict ?: return
                     val newData = WordData(target, suggestions, composedData, ngramContext, keyboard, inputStyle, true)
-                    if (suggestions.any { it.mWord == target && it.mScore >= 0 } // just not negative should be fine
-                            || suggestions.first().mWord == target) { // or the target word first (but negative), which can happen in some cases
+                    if (suggestions.any { it.word == target && it.score >= 0 } // just not negative should be fine
+                            || suggestions.first().word == target) { // or the target word first (but negative), which can happen in some cases
                         scope.launch {
                             ++sessionWordCount
                             newData.save(ctx)
@@ -469,7 +469,7 @@ fun GestureDataScreen(
         ExtendedFloatingActionButton(
             onClick = { nextWord(true) },
             // doesn't look good with the long text
-            text = { Text(stringResource(R.string.gesture_data_next_save, lastData?.suggestions?.firstOrNull()?.getWord().toString())) },
+            text = { Text(stringResource(R.string.gesture_data_next_save, lastData?.suggestions?.firstOrNull()?.word.toString())) },
             icon = { NextScreenIcon() },
             modifier = Modifier
                 .wrapContentSize(Alignment.BottomEnd)
@@ -692,7 +692,7 @@ private class AssetsDictWithInfo(private val name: String, context: Context): Di
 
 private fun BinaryDictionary.addWords(words: MutableList<WeightedWord>) {
     var token = 0
-    val hasCases = mLocale?.let { ScriptUtils.scriptSupportsUppercase(it) } ?: true
+    val hasCases = this.locale?.let { ScriptUtils.scriptSupportsUppercase(it) } ?: true
     var cumulativeWeight = 0.0 //words.lastOrNull()?.second ?: 0.0
     var added = false
     do {

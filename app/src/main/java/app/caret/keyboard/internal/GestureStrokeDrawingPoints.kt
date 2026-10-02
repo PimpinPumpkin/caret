@@ -46,7 +46,7 @@ class GestureStrokeDrawingPoints(private val drawingParams: GestureStrokeDrawing
         distanceFromLastSample += Math.hypot((x - lastX).toDouble(), (y - lastY).toDouble())
         lastX = x
         lastY = y
-        val isDownEvent = (previewEventTimes.getLength() == 0)
+        val isDownEvent = (previewEventTimes.length == 0)
         if (distanceFromLastSample >= drawingParams.minSamplingDistance || isDownEvent) {
             distanceFromLastSample = 0.0
             return true
@@ -74,7 +74,7 @@ class GestureStrokeDrawingPoints(private val drawingParams: GestureStrokeDrawing
     fun appendPreviewStroke(eventTimes: ResizableIntArray,
             xCoords: ResizableIntArray, yCoords: ResizableIntArray,
             types: ResizableIntArray) {
-        val length = previewEventTimes.getLength() - lastPreviewSize
+        val length = previewEventTimes.length - lastPreviewSize
         if (length <= 0) {
             return
         }
@@ -82,9 +82,9 @@ class GestureStrokeDrawingPoints(private val drawingParams: GestureStrokeDrawing
         xCoords.append(previewXCoordinates, lastPreviewSize, length)
         yCoords.append(previewYCoordinates, lastPreviewSize, length)
         if (GestureTrailDrawingPoints.DEBUG_SHOW_POINTS) {
-            types.fill(GestureTrailDrawingPoints.POINT_TYPE_SAMPLED, types.getLength(), length)
+            types.fill(GestureTrailDrawingPoints.POINT_TYPE_SAMPLED, types.length, length)
         }
-        lastPreviewSize = previewEventTimes.getLength()
+        lastPreviewSize = previewEventTimes.length
     }
 
     /**
@@ -105,10 +105,10 @@ class GestureStrokeDrawingPoints(private val drawingParams: GestureStrokeDrawing
     fun interpolateStrokeAndReturnStartIndexOfLastSegment(lastInterpolatedIndex: Int,
             eventTimes: ResizableIntArray, xCoords: ResizableIntArray,
             yCoords: ResizableIntArray, types: ResizableIntArray): Int {
-        val size = previewEventTimes.getLength()
-        val pt = previewEventTimes.getPrimitiveArray()
-        val px = previewXCoordinates.getPrimitiveArray()
-        val py = previewYCoordinates.getPrimitiveArray()
+        val size = previewEventTimes.length
+        val pt = previewEventTimes.primitiveArray
+        val px = previewXCoordinates.primitiveArray
+        val py = previewYCoordinates.primitiveArray
         interpolator.reset(px, py, 0, size)
         // The last segment of gesture stroke needs to be interpolated again because the slope of
         // the tangent at the last point isn't determined.

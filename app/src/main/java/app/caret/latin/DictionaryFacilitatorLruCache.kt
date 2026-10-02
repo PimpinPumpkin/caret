@@ -16,69 +16,69 @@ import java.util.concurrent.TimeUnit
  * This class automatically creates and releases up to 3 facilitator instances using LRU policy.
  */
 class DictionaryFacilitatorLruCache(context: Context, dictionaryNamePrefix: String) {
-    private val mContext: Context
-    private val mDictionaryNamePrefix: String
+    private val context: Context
+    private val dictionaryNamePrefix: String
     private val lock = Any()
-    private val mDictionaryFacilitator: DictionaryFacilitator
-    private var mUseContactsDictionary = false
-    private var mUseAppsDictionary = false
-    private var mLocale: Locale? = null
+    private val dictionaryFacilitator: DictionaryFacilitator
+    private var useContactsDictionary = false
+    private var useAppsDictionary = false
+    private var locale: Locale? = null
 
     init {
-        mContext = context
-        mDictionaryNamePrefix = dictionaryNamePrefix
-        mDictionaryFacilitator = DictionaryFacilitatorProvider.getDictionaryFacilitator(
+        this.context = context
+        this.dictionaryNamePrefix = dictionaryNamePrefix
+        dictionaryFacilitator = DictionaryFacilitatorProvider.getDictionaryFacilitator(
                 true /* isNeededForSpellChecking */)
     }
 
     private fun resetDictionariesForLocaleLocked() {
         // Nothing to do if the locale is null.  This would be the case before any get() calls.
-        val locale = mLocale
+        val locale = this.locale
         if (locale != null) {
           // Note: Given that personalized dictionaries are not used here; we can pass null account.
-          mDictionaryFacilitator.resetDictionaries(mContext, locale, mUseContactsDictionary,
-                  mUseAppsDictionary, false, false, mDictionaryNamePrefix, null)
+          dictionaryFacilitator.resetDictionaries(context, locale, useContactsDictionary,
+                  useAppsDictionary, false, false, dictionaryNamePrefix, null)
         }
     }
 
     fun setUseContactsDictionary(useContactsDictionary: Boolean) {
         synchronized(lock) {
-            if (mUseContactsDictionary == useContactsDictionary) {
+            if (this.useContactsDictionary == useContactsDictionary) {
                 // The value has not been changed.
                 return
             }
-            mUseContactsDictionary = useContactsDictionary
+            this.useContactsDictionary = useContactsDictionary
             resetDictionariesForLocaleLocked()
-            waitForLoadingMainDictionary(mDictionaryFacilitator)
+            waitForLoadingMainDictionary(dictionaryFacilitator)
         }
     }
 
     fun setUseAppsDictionary(useAppsDictionary: Boolean) {
         synchronized(lock) {
-            if (mUseAppsDictionary == useAppsDictionary) {
+            if (this.useAppsDictionary == useAppsDictionary) {
                 // The value has not been changed.
                 return
             }
-            mUseAppsDictionary = useAppsDictionary
+            this.useAppsDictionary = useAppsDictionary
             resetDictionariesForLocaleLocked()
-            waitForLoadingMainDictionary(mDictionaryFacilitator)
+            waitForLoadingMainDictionary(dictionaryFacilitator)
         }
     }
 
     fun get(locale: Locale): DictionaryFacilitator {
         synchronized(lock) {
-            if (!mDictionaryFacilitator.isForLocale(locale)) {
-                mLocale = locale
+            if (!dictionaryFacilitator.isForLocale(locale)) {
+                this.locale = locale
                 resetDictionariesForLocaleLocked()
             }
-            waitForLoadingMainDictionary(mDictionaryFacilitator)
-            return mDictionaryFacilitator
+            waitForLoadingMainDictionary(dictionaryFacilitator)
+            return dictionaryFacilitator
         }
     }
 
     fun closeDictionaries() {
         synchronized(lock) {
-            mDictionaryFacilitator.closeDictionaries()
+            dictionaryFacilitator.closeDictionaries()
         }
     }
 

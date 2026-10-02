@@ -98,7 +98,8 @@ class FileUtils {
         fun copyStreamToOtherStream(inputStream: InputStream?, out: OutputStream) {
             val buf = ByteArray(1024)
             var len: Int
-            while (inputStream!!.read(buf).also { len = it } > 0) {
+            val input = inputStream!!
+            while (input.read(buf).also { len = it } > 0) {
                 out.write(buf, 0, len)
             }
             out.flush()

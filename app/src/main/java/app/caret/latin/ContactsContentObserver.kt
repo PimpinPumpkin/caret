@@ -23,22 +23,15 @@ import java.util.concurrent.atomic.AtomicBoolean
 /**
  * A content observer that listens to updates to content provider {@link Contacts#CONTENT_URI}.
  */
-class ContactsContentObserver(manager: ContactsManager, context: Context) : Runnable {
-    private val mContext: Context
-    private val mManager: ContactsManager
-    private val mRunning = AtomicBoolean(false)
+class ContactsContentObserver(private val manager: ContactsManager, private val context: Context) : Runnable {
+    private val running = AtomicBoolean(false)
 
-    private var mContentObserver: ContentObserver? = null
+    private var contentObserver: ContentObserver? = null
     private var contactsChangedListener: ContactsChangedListener? = null
-
-    init {
-        mManager = manager
-        mContext = context
-    }
 
     fun registerObserver(listener: ContactsChangedListener?) {
         if (!PermissionsUtil.checkAllPermissionsGranted(
-                mContext, Manifest.permission.READ_CONTACTS)) {
+                context, Manifest.permission.READ_CONTACTS)) {
             Log.i(TAG, "No permission to read contacts. Not registering the observer.")
             // do nothing if we do not have the permission to read contacts.
             return
@@ -48,26 +41,26 @@ class ContactsContentObserver(manager: ContactsManager, context: Context) : Runn
             Log.d(TAG, "registerObserver()")
         }
         contactsChangedListener = listener
-        val contentObserver = object : ContentObserver(null /* handler */) {
+        val observer = object : ContentObserver(null /* handler */) {
             override fun onChange(self: Boolean) {
                 ExecutorUtils.getBackgroundExecutor(ExecutorUtils.KEYBOARD)
                         .execute(this@ContactsContentObserver)
             }
         }
-        mContentObserver = contentObserver
-        val contentResolver = mContext.getContentResolver()
-        contentResolver.registerContentObserver(Contacts.CONTENT_URI, true, contentObserver)
+        contentObserver = observer
+        val contentResolver = context.getContentResolver()
+        contentResolver.registerContentObserver(Contacts.CONTENT_URI, true, observer)
     }
 
     override fun run() {
         if (!PermissionsUtil.checkAllPermissionsGranted(
-                mContext, Manifest.permission.READ_CONTACTS)) {
+                context, Manifest.permission.READ_CONTACTS)) {
             Log.i(TAG, "No permission to read contacts. Not updating the contacts.")
             unregister()
             return
         }
 
-        if (!mRunning.compareAndSet(false /* expect */, true /* update */)) {
+        if (!running.compareAndSet(false /* expect */, true /* update */)) {
             if (DebugFlags.DEBUG_ENABLED) {
                 Log.d(TAG, "run() : Already running. Don't waste time checking again.")
             }
@@ -79,33 +72,33 @@ class ContactsContentObserver(manager: ContactsManager, context: Context) : Runn
             }
             contactsChangedListener!!.onContactsChange()
         }
-        mRunning.set(false)
+        running.set(false)
     }
 
     fun haveContentsChanged(): Boolean {
         if (!PermissionsUtil.checkAllPermissionsGranted(
-                mContext, Manifest.permission.READ_CONTACTS)) {
+                context, Manifest.permission.READ_CONTACTS)) {
             Log.i(TAG, "No permission to read contacts. Marking contacts as not changed.")
             return false
         }
 
         val startTime = SystemClock.uptimeMillis()
-        val contactCount = mManager.getContactCount()
+        val contactCount = manager.getContactCount()
         if (contactCount > ContactsDictionaryConstants.MAX_CONTACTS_PROVIDER_QUERY_LIMIT) {
             // If there are too many contacts then return false. In this rare case it is impossible
             // to include all of them anyways and the cost of rebuilding the dictionary is too high.
             // TODO: Sort and check only the most recent contacts?
             return false
         }
-        if (contactCount != mManager.getContactCountAtLastRebuild()) {
+        if (contactCount != manager.contactCountAtLastRebuild) {
             if (DebugFlags.DEBUG_ENABLED) {
                 Log.d(TAG, "haveContentsChanged() : Count changed from "
-                        + mManager.getContactCountAtLastRebuild() + " to " + contactCount)
+                        + manager.contactCountAtLastRebuild + " to " + contactCount)
             }
             return true
         }
-        val names = mManager.getValidNames(Contacts.CONTENT_URI)
-        if (names.hashCode() != mManager.getHashCodeAtLastRebuild()) {
+        val names = manager.getValidNames(Contacts.CONTENT_URI)
+        if (names.hashCode() != manager.hashCodeAtLastRebuild) {
             return true
         }
         if (DebugFlags.DEBUG_ENABLED) {
@@ -116,7 +109,7 @@ class ContactsContentObserver(manager: ContactsManager, context: Context) : Runn
     }
 
     fun unregister() {
-        mContext.getContentResolver().unregisterContentObserver(mContentObserver!!)
+        context.getContentResolver().unregisterContentObserver(contentObserver!!)
     }
 
     companion object {

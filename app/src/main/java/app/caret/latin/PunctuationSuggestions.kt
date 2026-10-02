@@ -74,7 +74,7 @@ class PunctuationSuggestions private constructor(punctuationsList: ArrayList<Sug
 
     override fun toString(): String {
         return ("PunctuationSuggestions: "
-                + " words=" + Arrays.toString(mSuggestedWordInfoList.toTypedArray()))
+                + " words=" + Arrays.toString(this.suggestedWordInfoList.toTypedArray()))
     }
 
     companion object {

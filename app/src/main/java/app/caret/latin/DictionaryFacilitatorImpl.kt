@@ -76,17 +76,17 @@ class DictionaryFacilitatorImpl : DictionaryFacilitator {
     // todo: write cache never set, and never read (only written)
     //  tried to use read cache for a while, but small performance improvements are not worth the work,
     //  see https://github.com/HeliBorg/HeliBoard/issues/307
-    private var mValidSpellingWordReadCache: LruCache<String, Boolean>? = null
-    private var mValidSpellingWordWriteCache: LruCache<String, Boolean>? = null
+    private var validSpellingWordReadCache: LruCache<String, Boolean>? = null
+    private var validSpellingWordWriteCache: LruCache<String, Boolean>? = null
 
     private val scope = CoroutineScope(Dispatchers.Default)
 
     override fun setValidSpellingWordReadCache(cache: LruCache<String, Boolean>) {
-        mValidSpellingWordReadCache = cache
+        validSpellingWordReadCache = cache
     }
 
     override fun setValidSpellingWordWriteCache(cache: LruCache<String, Boolean>) {
-        mValidSpellingWordWriteCache = cache
+        validSpellingWordWriteCache = cache
     }
 
     // judging by usage before adding multilingual typing, this should check primary group locale only
@@ -171,8 +171,8 @@ class DictionaryFacilitatorImpl : DictionaryFacilitator {
             }
         }
 
-        mValidSpellingWordWriteCache?.evictAll()
-        mValidSpellingWordReadCache?.evictAll()
+        validSpellingWordWriteCache?.evictAll()
+        validSpellingWordReadCache?.evictAll()
     }
 
     /** creates dictionaryGroups for [newLocales] with given [newSubDictTypes], trying to re-use existing dictionaries.
@@ -349,7 +349,7 @@ class DictionaryFacilitatorImpl : DictionaryFacilitator {
         val wordToUse: String
         // Check for isBeginningOfSentenceContext too, because not all text fields auto-capitalize in this case.
         // Even if the user capitalizes manually, they most likely don't want the capitalized form suggested.
-        if (wasAutoCapitalized || ngramContext.isBeginningOfSentenceContext()) {
+        if (wasAutoCapitalized || ngramContext.isBeginningOfSentenceContext) {
             val decapitalizedWord = word.decapitalize(dictionaryGroup.locale) // try undoing auto-capitalization
             if (isValidWord(word, DictionaryFacilitator.ALL_DICTIONARY_TYPES, dictionaryGroup)
                 && !isValidWord(decapitalizedWord, DictionaryFacilitator.ALL_DICTIONARY_TYPES, dictionaryGroup)
@@ -411,18 +411,18 @@ class DictionaryFacilitatorImpl : DictionaryFacilitator {
                 // adding can throw IllegalArgumentException: Unknown URL content://user_dictionary/words
                 // https://stackoverflow.com/q/41474623 https://github.com/AnySoftKeyboard/AnySoftKeyboard/issues/490
                 // apparently some devices don't have a dictionary? or it's just sporadic hiccups?
-                runCatching { UserDictionary.Words.addWord(userDict.mContext, word, 250, null, dictionaryGroup.locale) }
+                runCatching { UserDictionary.Words.addWord(userDict.context, word, 250, null, dictionaryGroup.locale) }
             }
         }
     }
 
     private fun putWordIntoValidSpellingWordCache(caller: String, originalWord: String) {
-        if (mValidSpellingWordWriteCache == null)
+        if (validSpellingWordWriteCache == null)
             return
 
         val lowerCaseWord = originalWord.lowercase(getCurrentLocale())
         val lowerCaseValid = isValidSpellingWord(lowerCaseWord)
-        mValidSpellingWordWriteCache?.put(lowerCaseWord, lowerCaseValid)
+        validSpellingWordWriteCache?.put(lowerCaseWord, lowerCaseValid)
 
         val capitalWord = StringUtils.capitalizeFirstAndDowncaseRest(originalWord, getCurrentLocale())
         val capitalValid = if (lowerCaseValid) {
@@ -430,7 +430,7 @@ class DictionaryFacilitatorImpl : DictionaryFacilitator {
         } else {
             isValidSpellingWord(capitalWord)
         }
-        mValidSpellingWordWriteCache?.put(capitalWord, capitalValid)
+        validSpellingWordWriteCache?.put(capitalWord, capitalValid)
     }
 
     override fun adjustConfidences(word: String, wasAutoCapitalized: Boolean) {
@@ -491,7 +491,7 @@ class DictionaryFacilitatorImpl : DictionaryFacilitator {
             getFutoSwipeResults(composedData, ngramContext, keyboard)?.let { return it }
             // the native code crashes on swipe input when no gesture typing library is loaded
             if (!FutoSwipe.hasOtherLibrary)
-                return SuggestionResults(SuggestedWords.MAX_SUGGESTIONS, ngramContext.isBeginningOfSentenceContext(), false)
+                return SuggestionResults(SuggestedWords.MAX_SUGGESTIONS, ngramContext.isBeginningOfSentenceContext, false)
         }
         val proximityInfoHandle = keyboard.proximityInfo.nativeProximityInfo
         val weightOfLangModelVsSpatialModel = floatArrayOf(Dictionary.NOT_A_WEIGHT_OF_LANG_MODEL_VS_SPATIAL_MODEL)
@@ -508,7 +508,7 @@ class DictionaryFacilitatorImpl : DictionaryFacilitator {
         suggestionsArray[0] = getSuggestions(composedData, ngramContext, settingsValuesForSuggestion, sessionId,
             proximityInfoHandle, weightOfLangModelVsSpatialModel, dictionaryGroups[0])
         val suggestionResults = SuggestionResults(
-            SuggestedWords.MAX_SUGGESTIONS, ngramContext.isBeginningOfSentenceContext(), false
+            SuggestedWords.MAX_SUGGESTIONS, ngramContext.isBeginningOfSentenceContext, false
         )
         waitForOtherDicts?.await()
 
@@ -538,9 +538,9 @@ class DictionaryFacilitatorImpl : DictionaryFacilitator {
         val mainDict = group.getDict(Dictionary.TYPE_MAIN)
         val suggestions = FutoSwipe.getSuggestions(userWords, { mainDict?.isInDictionary(it) == true }, composedData, ngramContext, keyboard, group.locale, sourceDict)
             ?: return null
-        val results = SuggestionResults(SuggestedWords.MAX_SUGGESTIONS, ngramContext.isBeginningOfSentenceContext(), false)
+        val results = SuggestionResults(SuggestedWords.MAX_SUGGESTIONS, ngramContext.isBeginningOfSentenceContext, false)
         suggestions.forEach {
-            if (isBlacklisted(it.getWord())) return@forEach
+            if (isBlacklisted(it.word)) return@forEach
             results.add(it)
             results.rawSuggestions?.add(it)
         }
@@ -568,20 +568,20 @@ class DictionaryFacilitatorImpl : DictionaryFacilitator {
             val checkForGarbage = composedData.isBatchMode && (dictType == Dictionary.TYPE_USER_HISTORY || dictType == Dictionary.TYPE_MAIN)
 
             for (info in dictionarySuggestions) {
-                val word = info.getWord()
+                val word = info.word
                 if (isBlacklisted(word) || SupportedEmojis.isUnsupported(word)) // don't add blacklisted words and unsupported emojis
                     continue
                 if (checkForGarbage
                     // consider the user might use custom main dictionary containing shortcuts
                     //  assume this is unlikely to happen, and take care about common shortcuts that are not actual words (emoji, symbols)
                     && word.length > 2 // should exclude most symbol shortcuts
-                    && info.mSourceDict!!.mDictType == dictType // dictType is always main, but info.mSourceDict.mDictType contains the actual dict (main dict is a dictionary group)
+                    && info.sourceDict!!.dictType == dictType // dictType is always main, but info.mSourceDict.mDictType contains the actual dict (main dict is a dictionary group)
                     && !mightBeEmoji(word) // simplified check for performance reasons
                     && !dictionary.isInDictionary(word)
                 )
                     continue
 
-                if (word.length == 1 && info.mSourceDict!!.mDictType == Dictionary.TYPE_EMOJI && !StringUtils.mightBeEmoji(word[0].code))
+                if (word.length == 1 && info.sourceDict!!.dictType == Dictionary.TYPE_EMOJI && !StringUtils.mightBeEmoji(word[0].code))
                     continue
 
                 suggestions.add(info)
@@ -594,9 +594,9 @@ class DictionaryFacilitatorImpl : DictionaryFacilitator {
     // meaning that it always has default mConfidence. So we cannot choose to only check preferred
     // locale, and instead simply return true if word is in any of the available dictionaries
     override fun isValidSpellingWord(word: String): Boolean {
-        mValidSpellingWordReadCache?.get(word)?.let { return it }
+        validSpellingWordReadCache?.get(word)?.let { return it }
         val result = dictionaryGroups.any { isValidWord(word, DictionaryFacilitator.ALL_DICTIONARY_TYPES, it) }
-        mValidSpellingWordReadCache?.put(word, result)
+        validSpellingWordReadCache?.put(word, result)
         return result
     }
 
@@ -715,18 +715,18 @@ class DictionaryFacilitatorImpl : DictionaryFacilitator {
             for (i in 0 until 2 - nonEmojiNonTypedWordCount) {
                 val firstNonEmojiNonTypedWord = allResults.firstOrNull {
                     !suggestionResults.contains(it) && !isEmojiOrTypedWord(it, typedWord)
-                        && addedWord?.compareTo(it.getWord(), true) != 0
+                        && addedWord?.compareTo(it.word, true) != 0
                 } ?: continue
                 // The conditions above guarantee that there are at least two EmojiOrTypedWord items
                 val lastEmojiOrTypedWord = suggestionResults.last { isEmojiOrTypedWord(it, typedWord) }
                 suggestionResults.remove(lastEmojiOrTypedWord)
                 suggestionResults.add(firstNonEmojiNonTypedWord)
-                addedWord = firstNonEmojiNonTypedWord.getWord()
+                addedWord = firstNonEmojiNonTypedWord.word
             }
         }
 
         private fun isEmojiOrTypedWord(info: SuggestedWordInfo, typedWord: String): Boolean =
-            info.isEmoji() || info.getWord().compareTo(typedWord, true) == 0
+            info.isEmoji() || info.word.compareTo(typedWord, true) == 0
     }
 }
 
@@ -768,7 +768,7 @@ private class DictionaryGroup(
         }
 
         val lowercase = word.lowercase(locale)
-        if (getDict(Dictionary.TYPE_MAIN)!!.isValidWord(lowercase)) {
+        if (mainDict.isValidWord(lowercase)) {
             addToBlacklist(lowercase)
         }
     }

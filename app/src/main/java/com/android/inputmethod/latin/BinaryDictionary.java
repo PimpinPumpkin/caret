@@ -91,7 +91,7 @@ public final class BinaryDictionary extends Dictionary {
         synchronized(mDicTraverseSessions) {
             DicTraverseSession traverseSession = mDicTraverseSessions.get(traverseSessionId);
             if (traverseSession == null) {
-                traverseSession = new DicTraverseSession(mLocale, mNativeDict, mDictSize);
+                traverseSession = new DicTraverseSession(locale, mNativeDict, mDictSize);
                 mDicTraverseSessions.put(traverseSessionId, traverseSession);
             }
             return traverseSession;
@@ -221,7 +221,7 @@ public final class BinaryDictionary extends Dictionary {
         }
         // TODO: Record the corruption.
         Log.e(TAG, "BinaryDictionary (" + mDictFilePath + ") is corrupted.");
-        Log.e(TAG, "locale: " + mLocale);
+        Log.e(TAG, "locale: " + locale);
         Log.e(TAG, "dict size: " + mDictSize);
         Log.e(TAG, "updatable: " + mIsUpdatable);
         return true;
@@ -621,7 +621,7 @@ public final class BinaryDictionary extends Dictionary {
 
     @Override
     public boolean shouldAutoCommit(final SuggestedWordInfo candidate) {
-        return candidate.mAutoCommitFirstWordConfidence > CONFIDENCE_TO_AUTO_COMMIT;
+        return candidate.autoCommitFirstWordConfidence > CONFIDENCE_TO_AUTO_COMMIT;
     }
 
     @Override

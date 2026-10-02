@@ -416,7 +416,7 @@ class PointerTracker private constructor(id: Int) : PointerTrackerQueue.Element,
     override fun onUpdateBatchInput(aggregatedPointers: InputPointers, eventTime: Long) {
         if (DEBUG_LISTENER) {
             Log.d(TAG, String.format(Locale.US, "[%d] onUpdateBatchInput: batchPoints=%d", pointerId,
-                    aggregatedPointers.getPointerSize()))
+                    aggregatedPointers.pointerSize))
         }
         listener.onUpdateBatchInput(aggregatedPointers)
     }
@@ -435,7 +435,7 @@ class PointerTracker private constructor(id: Int) : PointerTrackerQueue.Element,
         }
         if (DEBUG_LISTENER) {
             Log.d(TAG, String.format(Locale.US, "[%d] onEndBatchInput   : batchPoints=%d",
-                    pointerId, aggregatedPointers.getPointerSize()))
+                    pointerId, aggregatedPointers.pointerSize))
         }
         listener.onEndBatchInput(aggregatedPointers)
     }

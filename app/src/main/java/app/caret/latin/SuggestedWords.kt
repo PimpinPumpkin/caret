@@ -26,45 +26,48 @@ open class SuggestedWords(
         isObsoleteSuggestions: Boolean,
         inputStyle: Int,
         sequenceNumber: Int) {
+    /**
+     * Get {@link SuggestedWordInfo} object for the typed word.
+     * @return The {@link SuggestedWordInfo} object for the typed word.
+     */
     @JvmField
-    val mTypedWordInfo: SuggestedWordInfo?
+    val typedWordInfo: SuggestedWordInfo?
     @JvmField
-    val mTypedWordValid: Boolean
+    val typedWordValid: Boolean
     // Note: this INCLUDES cases where the word will auto-correct to itself. A good definition
     // of what this flag means would be "the top suggestion is strong enough to auto-correct",
     // whether this exactly matches the user entry or not.
     @JvmField
-    val mWillAutoCorrect: Boolean
+    val willAutoCorrect: Boolean
     @JvmField
-    val mIsObsoleteSuggestions: Boolean
+    val isObsoleteSuggestions: Boolean
     // How the input for these suggested words was done by the user. Must be one of the
     // INPUT_STYLE_* constants above.
     @JvmField
-    val mInputStyle: Int
+    val inputStyle: Int
     @JvmField
-    val mSequenceNumber: Int // Sequence number for auto-commit.
+    val sequenceNumber: Int // Sequence number for auto-commit.
     @JvmField
-    val mSuggestedWordInfoList: ArrayList<SuggestedWordInfo>
+    val suggestedWordInfoList: ArrayList<SuggestedWordInfo>
     @JvmField
-    val mRawSuggestions: ArrayList<SuggestedWordInfo>?
+    val rawSuggestions: ArrayList<SuggestedWordInfo>?
 
     init {
-        mSuggestedWordInfoList = suggestedWordInfoList
-        mRawSuggestions = rawSuggestions
-        mTypedWordValid = typedWordValid
-        mWillAutoCorrect = willAutoCorrect
-        mIsObsoleteSuggestions = isObsoleteSuggestions
-        mInputStyle = inputStyle
-        mSequenceNumber = sequenceNumber
-        mTypedWordInfo = typedWordInfo
+        this.suggestedWordInfoList = suggestedWordInfoList
+        this.rawSuggestions = rawSuggestions
+        this.typedWordValid = typedWordValid
+        this.willAutoCorrect = willAutoCorrect
+        this.isObsoleteSuggestions = isObsoleteSuggestions
+        this.inputStyle = inputStyle
+        this.sequenceNumber = sequenceNumber
+        this.typedWordInfo = typedWordInfo
     }
 
-    fun isEmpty(): Boolean {
-        return mSuggestedWordInfoList.isEmpty()
-    }
+    val isEmpty: Boolean
+        get() = suggestedWordInfoList.isEmpty()
 
     fun size(): Int {
-        return mSuggestedWordInfoList.size
+        return suggestedWordInfoList.size
     }
 
     /**
@@ -73,18 +76,10 @@ open class SuggestedWords(
      * @return the count of suggested word to show as suggestions to UI.
      */
     fun getWordCountToShow(): Int {
-        if (isPrediction()) {
+        if (isPrediction) {
             return size()
         }
         return size() - /* typed word */ 1
-    }
-
-    /**
-     * Get {@link SuggestedWordInfo} object for the typed word.
-     * @return The {@link SuggestedWordInfo} object for the typed word.
-     */
-    fun getTypedWordInfo(): SuggestedWordInfo? {
-        return mTypedWordInfo
     }
 
     /**
@@ -93,7 +88,7 @@ open class SuggestedWords(
      * @return The suggested word.
      */
     open fun getWord(index: Int): String {
-        return mSuggestedWordInfoList.get(index).mWord
+        return suggestedWordInfoList.get(index).word
     }
 
     /**
@@ -105,7 +100,7 @@ open class SuggestedWords(
      * @return The text to be displayed.
      */
     open fun getLabel(index: Int): String {
-        return mSuggestedWordInfoList.get(index).mWord
+        return suggestedWordInfoList.get(index).word
     }
 
     /**
@@ -114,7 +109,7 @@ open class SuggestedWords(
      * @return The {@link SuggestedWordInfo} object.
      */
     open fun getInfo(index: Int): SuggestedWordInfo {
-        return mSuggestedWordInfoList.get(index)
+        return suggestedWordInfoList.get(index)
     }
 
     /**
@@ -123,7 +118,7 @@ open class SuggestedWords(
      * @return The position of the suggestion in the suggestion list.
      */
     fun indexOf(suggestedWordInfo: SuggestedWordInfo?): Int {
-        return mSuggestedWordInfoList.indexOf(suggestedWordInfo)
+        return suggestedWordInfoList.indexOf(suggestedWordInfo)
     }
 
     @Suppress("SENSELESS_COMPARISON")
@@ -135,7 +130,7 @@ open class SuggestedWords(
         if (wordInfo == null) {
             return null
         }
-        val debugString = wordInfo.getDebugString()
+        val debugString = wordInfo.debugString
         if (TextUtils.isEmpty(debugString)) {
             return null
         }
@@ -153,49 +148,49 @@ open class SuggestedWords(
     override fun toString(): String {
         // Pretty-print method to help debug
         return ("SuggestedWords:"
-                + " mTypedWordValid=" + mTypedWordValid
-                + " mWillAutoCorrect=" + mWillAutoCorrect
-                + " mInputStyle=" + mInputStyle
-                + " words=" + Arrays.toString(mSuggestedWordInfoList.toTypedArray()))
+                + " mTypedWordValid=" + typedWordValid
+                + " mWillAutoCorrect=" + willAutoCorrect
+                + " mInputStyle=" + inputStyle
+                + " words=" + Arrays.toString(suggestedWordInfoList.toTypedArray()))
     }
 
     fun getAutoCommitCandidate(): SuggestedWordInfo? {
-        if (mSuggestedWordInfoList.size <= 0) return null
-        val candidate = mSuggestedWordInfoList.get(0)
-        return if (candidate.isEligibleForAutoCommit()) candidate else null
+        if (suggestedWordInfoList.size <= 0) return null
+        val candidate = suggestedWordInfoList.get(0)
+        return if (candidate.isEligibleForAutoCommit) candidate else null
     }
 
     // non-final for testability.
     class SuggestedWordInfo {
         @JvmField
-        val mWord: String
+        val word: String
         @JvmField
-        val mPrevWordsContext: String
+        val prevWordsContext: String
         // The completion info from the application. Null for suggestions that don't come from
         // the application (including keyboard-computed ones, so this is almost always null)
         @JvmField
         val applicationSpecifiedCompletionInfo: CompletionInfo?
         @JvmField
-        val mScore: Int
+        val score: Int
         @JvmField
         var originalScore: Int = 0 // relevant only for background data gathering, todo: remove when gathering period is over
         @JvmField
-        val mKindAndFlags: Int
+        val kindAndFlags: Int
         @JvmField
         val codePointCount: Int
         @JvmField
-        val mSourceDict: Dictionary?
+        val sourceDict: Dictionary?
         // For auto-commit. This keeps track of the index inside the touch coordinates array
         // passed to native code to get suggestions for a gesture that corresponds to the first
         // letter of the second word.
         @JvmField
-        val mIndexOfTouchPointOfSecondWord: Int
+        val indexOfTouchPointOfSecondWord: Int
         // For auto-commit. This is a measure of how confident we are that we can commit the
         // first word of this suggestion.
         @JvmField
-        val mAutoCommitFirstWordConfidence: Int
-        private var mDebugString: String = ""
-        private var mIsEmoji: Boolean? = null
+        val autoCommitFirstWordConfidence: Int
+        private var debugInfo: String = ""
+        private var isEmojiCache: Boolean? = null
 
         /**
          * Create a new suggested word info.
@@ -205,22 +200,22 @@ open class SuggestedWords(
          * @param kindAndFlags The kind of suggestion, as one of the above KIND_* constants with
          * flags.
          * @param sourceDict What instance of Dictionary produced this suggestion.
-         * @param indexOfTouchPointOfSecondWord See mIndexOfTouchPointOfSecondWord.
-         * @param autoCommitFirstWordConfidence See mAutoCommitFirstWordConfidence.
+         * @param indexOfTouchPointOfSecondWord See indexOfTouchPointOfSecondWord.
+         * @param autoCommitFirstWordConfidence See autoCommitFirstWordConfidence.
          */
         constructor(word: String, prevWordsContext: String,
                 score: Int, kindAndFlags: Int,
                 sourceDict: Dictionary?, indexOfTouchPointOfSecondWord: Int,
                 autoCommitFirstWordConfidence: Int) {
-            mWord = word
-            mPrevWordsContext = prevWordsContext
+            this.word = word
+            this.prevWordsContext = prevWordsContext
             applicationSpecifiedCompletionInfo = null
-            mScore = score
-            mKindAndFlags = kindAndFlags
-            mSourceDict = sourceDict
-            codePointCount = StringUtils.codePointCount(mWord)
-            mIndexOfTouchPointOfSecondWord = indexOfTouchPointOfSecondWord
-            mAutoCommitFirstWordConfidence = autoCommitFirstWordConfidence
+            this.score = score
+            this.kindAndFlags = kindAndFlags
+            this.sourceDict = sourceDict
+            codePointCount = StringUtils.codePointCount(word)
+            this.indexOfTouchPointOfSecondWord = indexOfTouchPointOfSecondWord
+            this.autoCommitFirstWordConfidence = autoCommitFirstWordConfidence
         }
 
         /**
@@ -229,80 +224,66 @@ open class SuggestedWords(
          * @param applicationSpecifiedCompletion The application-specified completion info.
          */
         constructor(applicationSpecifiedCompletion: CompletionInfo?) {
-            mWord = applicationSpecifiedCompletion!!.text!!.toString()
-            mPrevWordsContext = ""
+            word = applicationSpecifiedCompletion!!.text!!.toString()
+            prevWordsContext = ""
             applicationSpecifiedCompletionInfo = applicationSpecifiedCompletion
-            mScore = MAX_SCORE
-            mKindAndFlags = KIND_APP_DEFINED
-            mSourceDict = Dictionary.DICTIONARY_APPLICATION_DEFINED
-            codePointCount = StringUtils.codePointCount(mWord)
-            mIndexOfTouchPointOfSecondWord = NOT_AN_INDEX
-            mAutoCommitFirstWordConfidence = NOT_A_CONFIDENCE
+            score = MAX_SCORE
+            kindAndFlags = KIND_APP_DEFINED
+            sourceDict = Dictionary.DICTIONARY_APPLICATION_DEFINED
+            codePointCount = StringUtils.codePointCount(word)
+            indexOfTouchPointOfSecondWord = NOT_AN_INDEX
+            autoCommitFirstWordConfidence = NOT_A_CONFIDENCE
         }
 
-        fun isEligibleForAutoCommit(): Boolean {
-            return (isKindOf(KIND_CORRECTION) && NOT_AN_INDEX != mIndexOfTouchPointOfSecondWord)
-        }
+        val isEligibleForAutoCommit: Boolean
+            get() = (isKindOf(KIND_CORRECTION) && NOT_AN_INDEX != indexOfTouchPointOfSecondWord)
 
-        fun getKind(): Int {
-            return (mKindAndFlags and KIND_MASK_KIND)
-        }
+        val kind: Int
+            get() = (kindAndFlags and KIND_MASK_KIND)
 
         fun isKindOf(kind: Int): Boolean {
-            return getKind() == kind
+            return this.kind == kind
         }
 
-        fun isPossiblyOffensive(): Boolean {
-            return (mKindAndFlags and KIND_FLAG_POSSIBLY_OFFENSIVE) != 0
-        }
+        val isPossiblyOffensive: Boolean
+            get() = (kindAndFlags and KIND_FLAG_POSSIBLY_OFFENSIVE) != 0
 
-        fun isExactMatch(): Boolean {
-            return (mKindAndFlags and KIND_FLAG_EXACT_MATCH) != 0
-        }
+        val isExactMatch: Boolean
+            get() = (kindAndFlags and KIND_FLAG_EXACT_MATCH) != 0
 
-        fun isExactMatchWithIntentionalOmission(): Boolean {
-            return (mKindAndFlags and KIND_FLAG_EXACT_MATCH_WITH_INTENTIONAL_OMISSION) != 0
-        }
+        val isExactMatchWithIntentionalOmission: Boolean
+            get() = (kindAndFlags and KIND_FLAG_EXACT_MATCH_WITH_INTENTIONAL_OMISSION) != 0
 
         fun isAppropriateForAutoCorrection(): Boolean {
-            return (mKindAndFlags and KIND_FLAG_APPROPRIATE_FOR_AUTO_CORRECTION) != 0
+            return (kindAndFlags and KIND_FLAG_APPROPRIATE_FOR_AUTO_CORRECTION) != 0
                     || (isKindOf(KIND_SHORTCUT) && Settings.getValues().autoCorrectShortcuts)
         }
 
         fun setDebugString(str: String?) {
             if (null == str) throw NullPointerException("Debug info is null")
-            mDebugString = str
+            debugInfo = str
         }
 
-        fun getDebugString(): String {
-            return mDebugString
-        }
-
-        fun getWord(): String {
-            return mWord
-        }
+        val debugString: String
+            get() = debugInfo
 
         fun isEmoji(): Boolean {
-            if (mIsEmoji == null) {
-                mIsEmoji = isEmoji(mWord)
-            }
-            return mIsEmoji!!
+            return isEmojiCache ?: isEmoji(word).also { isEmojiCache = it }
         }
 
         @Deprecated("")
-        fun getSourceDictionary(): Dictionary? {
-            return mSourceDict
-        }
+        val sourceDictionary: Dictionary?
+            get() = sourceDict
 
         fun codePointAt(i: Int): Int {
-            return mWord.codePointAt(i)
+            return word.codePointAt(i)
         }
 
         override fun toString(): String {
-            if (TextUtils.isEmpty(mDebugString)) {
-                return mWord
+            if (TextUtils.isEmpty(debugInfo)) {
+                return word
             }
-            return mWord + " (" + mDebugString + ")"
+            return word + " (" + debugInfo + ")"
         }
 
         companion object {
@@ -351,7 +332,7 @@ open class SuggestedWords(
                 var i = 0
                 while (i < candidates.size) {
                     removeSuggestedWordInfoFromList(
-                            candidates.get(i).mWord, candidates, i /* startIndexExclusive */)
+                            candidates.get(i).word, candidates, i /* startIndexExclusive */)
                     ++i
                 }
                 return firstOccurrenceOfWord
@@ -365,7 +346,7 @@ open class SuggestedWords(
                 var i = startIndexExclusive + 1
                 while (i < candidates.size) {
                     val previous = candidates.get(i)
-                    if (word == previous.mWord) {
+                    if (word == previous.word) {
                         if (firstOccurrenceOfWord == -1) {
                             firstOccurrenceOfWord = i
                         }
@@ -379,9 +360,8 @@ open class SuggestedWords(
         }
     }
 
-    fun isPrediction(): Boolean {
-        return isPrediction(mInputStyle)
-    }
+    val isPrediction: Boolean
+        get() = isPrediction(inputStyle)
 
     /**
      * @return the {@link SuggestedWordInfo} which corresponds to the word that is originally
@@ -393,7 +373,7 @@ open class SuggestedWords(
             return null
         }
         val info = getInfo(INDEX_OF_TYPED_WORD)
-        return if (info.getKind() == SuggestedWordInfo.KIND_TYPED) info else null
+        return if (info.kind == SuggestedWordInfo.KIND_TYPED) info else null
     }
 
     companion object {
@@ -436,14 +416,12 @@ open class SuggestedWords(
         }
 
         @JvmStatic
-        fun getEmptyInstance(): SuggestedWords {
-            return EMPTY
-        }
+        val emptyInstance: SuggestedWords
+            get() = EMPTY
 
         @JvmStatic
-        fun getEmptyBatchInstance(): SuggestedWords {
-            return EMPTY_BATCH
-        }
+        val emptyBatchInstance: SuggestedWords
+            get() = EMPTY_BATCH
 
         // Should get rid of the first one (what the user typed previously) from suggestions
         // and replace it with what the user currently typed.
@@ -454,11 +432,11 @@ open class SuggestedWords(
             val suggestionsList = ArrayList<SuggestedWordInfo>()
             val alreadySeen = HashSet<String>()
             suggestionsList.add(typedWordInfo)
-            alreadySeen.add(typedWordInfo.mWord)
+            alreadySeen.add(typedWordInfo.word)
             val previousSize = previousSuggestions.size()
             for (index in 1 until previousSize) {
                 val prevWordInfo = previousSuggestions.getInfo(index)
-                val prevWord = prevWordInfo.mWord
+                val prevWord = prevWordInfo.word
                 // Filter out duplicate suggestions.
                 if (!alreadySeen.contains(prevWord)) {
                     suggestionsList.add(prevWordInfo)

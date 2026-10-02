@@ -1366,7 +1366,7 @@ class InputLogicTest {
 
         if (!latinIME.prefs().getString(Settings.PREF_SELECTED_SUBTYPE, "")!!.contains("CombiningRules") // check fails if combiner merges symbols
             && !(codePoint == Constants.CODE_SPACE && oldBefore.lastOrNull() == ' ') // check fails when 2 spaces are converted into a period
-            && !latinIME.inputLogic.suggestedWords.mWillAutoCorrect // autocorrect obviously creates inconsistencies
+            && !latinIME.inputLogic.suggestedWords.willAutoCorrect // autocorrect obviously creates inconsistencies
             ) {
             if (phantomSpaceToInsert.isEmpty())
                 assertEquals(oldBefore + insert, textBeforeCursor)
@@ -1375,7 +1375,7 @@ class InputLogicTest {
         }
         assertEquals(oldAfter, textAfterCursor)
         assertEquals(textBeforeCursor + textAfterCursor, getTextFromConnection())
-        if (composer.isComposingWord()) // if we're not composing any more cursor is always at the end
+        if (composer.isComposingWord) // if we're not composing any more cursor is always at the end
             assertEquals(oldIsAtEnd, !composer.isCursorFrontOrMiddleOfComposingWord())
         checkConnectionConsistency()
     }

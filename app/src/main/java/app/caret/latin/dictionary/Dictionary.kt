@@ -21,14 +21,14 @@ import app.caret.latin.settings.SettingsValuesForSuggestion
  */
 abstract class Dictionary(dictType: String, locale: Locale?) {
     @JvmField
-    val mDictType: String
+    val dictType: String
     // The locale for this dictionary. May be null if unknown (phony dictionary for example).
     @JvmField
-    val mLocale: Locale?
+    val locale: Locale?
 
     init {
-        mDictType = dictType
-        mLocale = locale
+        this.dictType = dictType
+        this.locale = locale
     }
 
     /**
@@ -138,7 +138,7 @@ abstract class Dictionary(dictType: String, locale: Locale?) {
      * @return Whether this dictionary is specific to the user.
      */
     open fun isUserSpecific(): Boolean {
-        return when (mDictType) {
+        return when (dictType) {
             TYPE_USER_TYPED,
             TYPE_USER,
             TYPE_CONTACTS,

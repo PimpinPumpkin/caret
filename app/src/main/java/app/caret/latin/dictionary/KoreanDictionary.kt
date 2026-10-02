@@ -16,9 +16,7 @@ import java.util.ArrayList
  * For Korean dictionary, there are too many cases of characters to store on dictionary, which makes it slow.
  * To solve that, Unicode normalization is used to decompose Hangul syllables into Hangul jamos.
  */
-class KoreanDictionary(dictionary: Dictionary) : Dictionary(dictionary.mDictType, dictionary.mLocale) {
-
-    private val mDictionary: Dictionary = dictionary
+class KoreanDictionary(private val dictionary: Dictionary) : Dictionary(dictionary.dictType, dictionary.locale) {
 
     private fun processInput(input: String): String {
         val normalized = Normalizer.normalize(input, Normalizer.Form.NFD)
@@ -38,34 +36,34 @@ class KoreanDictionary(dictionary: Dictionary) : Dictionary(dictionary.mDictType
     override fun getSuggestions(composedData: ComposedData?,
                   ngramContext: NgramContext?, proximityInfoHandle: Long, settingsValuesForSuggestion: SettingsValuesForSuggestion?,
                   sessionId: Int, weightForLocale: Float, inOutWeightOfLangModelVsSpatialModel: FloatArray?): ArrayList<SuggestedWords.SuggestedWordInfo> {
-        @Suppress("NAME_SHADOWING")
-        val composedData = ComposedData(composedData!!.inputPointers,
-                composedData!!.isBatchMode, processInput(composedData!!.typedWord))
-        val suggestions: ArrayList<SuggestedWords.SuggestedWordInfo>? = mDictionary.getSuggestions(composedData,
+        val original = composedData!!
+        val decomposed = ComposedData(original.inputPointers,
+                original.isBatchMode, processInput(original.typedWord))
+        val suggestions: ArrayList<SuggestedWords.SuggestedWordInfo>? = dictionary.getSuggestions(decomposed,
                 ngramContext, proximityInfoHandle, settingsValuesForSuggestion, sessionId,
                 weightForLocale, inOutWeightOfLangModelVsSpatialModel)
         val result = ArrayList<SuggestedWords.SuggestedWordInfo>()
         for (info in suggestions!!) {
-            result.add(SuggestedWords.SuggestedWordInfo(processOutput(info.mWord), info.mPrevWordsContext,
-                    info.mScore, info.mKindAndFlags, info.mSourceDict, info.mIndexOfTouchPointOfSecondWord, info.mAutoCommitFirstWordConfidence))
+            result.add(SuggestedWords.SuggestedWordInfo(processOutput(info.word), info.prevWordsContext,
+                    info.score, info.kindAndFlags, info.sourceDict, info.indexOfTouchPointOfSecondWord, info.autoCommitFirstWordConfidence))
         }
         return result
     }
 
     override fun isInDictionary(word: String?): Boolean {
-        return mDictionary.isInDictionary(processInput(word!!))
+        return dictionary.isInDictionary(processInput(word!!))
     }
 
     override fun getFrequency(word: String?): Int {
-        return mDictionary.getFrequency(processInput(word!!))
+        return dictionary.getFrequency(processInput(word!!))
     }
 
     override fun getMaxFrequencyOfExactMatches(word: String?): Int {
-        return mDictionary.getMaxFrequencyOfExactMatches(processInput(word!!))
+        return dictionary.getMaxFrequencyOfExactMatches(processInput(word!!))
     }
 
     override fun getWordProperty(word: String?, isBeginningOfSentence: Boolean): WordProperty? {
-        return mDictionary.getWordProperty(processInput(word!!), isBeginningOfSentence)
+        return dictionary.getWordProperty(processInput(word!!), isBeginningOfSentence)
     }
 
     public override fun same(word: CharArray?, length: Int, typedWord: String?): Boolean {
@@ -73,27 +71,27 @@ class KoreanDictionary(dictionary: Dictionary) : Dictionary(dictionary.mDictType
         val word = processInput(String(word!!)).toCharArray()
         @Suppress("NAME_SHADOWING")
         val typedWord = processInput(typedWord!!)
-        return mDictionary.same(word, length, typedWord)
+        return dictionary.same(word, length, typedWord)
     }
 
     override fun close() {
-        mDictionary.close()
+        dictionary.close()
     }
 
     override fun onFinishInput() {
-        mDictionary.onFinishInput()
+        dictionary.onFinishInput()
     }
 
     override fun isInitialized(): Boolean {
-        return mDictionary.isInitialized()
+        return dictionary.isInitialized()
     }
 
     override fun shouldAutoCommit(candidate: SuggestedWords.SuggestedWordInfo?): Boolean {
-        return mDictionary.shouldAutoCommit(candidate)
+        return dictionary.shouldAutoCommit(candidate)
     }
 
     override fun isUserSpecific(): Boolean {
-        return mDictionary.isUserSpecific()
+        return dictionary.isUserSpecific()
     }
 
     companion object {

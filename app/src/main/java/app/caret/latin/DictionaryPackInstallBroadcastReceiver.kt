@@ -28,7 +28,7 @@ import app.caret.latin.utils.Log
  * but Latin IME never got a chance to register itself.
  */
 class DictionaryPackInstallBroadcastReceiver : BroadcastReceiver {
-    val mService: LatinIME?
+    val service: LatinIME?
 
     constructor() {
         // This empty constructor is necessary for the system to instantiate this receiver.
@@ -36,11 +36,11 @@ class DictionaryPackInstallBroadcastReceiver : BroadcastReceiver {
         // which happens when the dictionary pack settings are called before the keyboard
         // was ever started once.
         Log.i(TAG, "Latin IME dictionary broadcast receiver instantiated from the framework.")
-        mService = null
+        service = null
     }
 
     constructor(service: LatinIME?) {
-        mService = service
+        this.service = service
     }
 
     override fun onReceive(context: Context?, intent: Intent?) {
@@ -49,7 +49,7 @@ class DictionaryPackInstallBroadcastReceiver : BroadcastReceiver {
 
         // We need to reread the dictionary if a new dictionary package is installed.
         if (Intent.ACTION_PACKAGE_ADDED == action) {
-            if (null == mService) {
+            if (null == service) {
                 Log.e(TAG, "Called with intent " + action + " but we don't know the service: this "
                         + "should never happen")
                 return
@@ -70,7 +70,7 @@ class DictionaryPackInstallBroadcastReceiver : BroadcastReceiver {
             // Search for some dictionary pack in the just-installed package. If found, reread.
             for (info in providers) {
                 if (DictionaryPackConstants.AUTHORITY == info.authority) {
-                    mService.resetSuggestMainDict()
+                    service.resetSuggestMainDict()
                     return
                 }
             }
@@ -78,7 +78,7 @@ class DictionaryPackInstallBroadcastReceiver : BroadcastReceiver {
             // We can exit safely.
         } else if (Intent.ACTION_PACKAGE_REMOVED == action
                 && !intent.getBooleanExtra(Intent.EXTRA_REPLACING, false)) {
-            if (null == mService) {
+            if (null == service) {
                 Log.e(TAG, "Called with intent " + action + " but we don't know the service: this "
                         + "should never happen")
                 return
@@ -89,14 +89,14 @@ class DictionaryPackInstallBroadcastReceiver : BroadcastReceiver {
             // If we are replacing the package, we will receive ADDED right away so no need to
             // remove the dictionary at the moment, since we will do it when we receive the
             // ADDED broadcast.
-            mService.resetSuggestMainDict()
+            service.resetSuggestMainDict()
         } else if (DictionaryPackConstants.NEW_DICTIONARY_INTENT_ACTION == action) {
-            if (null == mService) {
+            if (null == service) {
                 Log.e(TAG, "Called with intent " + action + " but we don't know the service: this "
                         + "should never happen")
                 return
             }
-            mService.resetSuggestMainDict()
+            service.resetSuggestMainDict()
         }
     }
 

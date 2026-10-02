@@ -253,7 +253,7 @@ class MoreSuggestions(params: MoreSuggestionsParam, suggestedWords: SuggestedWor
         @JvmStatic
         fun isIndexSubjectToAutoCorrection(suggestedWords: SuggestedWords,
                 index: Int): Boolean {
-            return suggestedWords.mWillAutoCorrect && index == SuggestedWords.INDEX_OF_AUTO_CORRECTION
+            return suggestedWords.willAutoCorrect && index == SuggestedWords.INDEX_OF_AUTO_CORRECTION
         }
     }
 }

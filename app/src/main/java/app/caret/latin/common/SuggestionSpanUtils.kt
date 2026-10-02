@@ -23,8 +23,8 @@ fun getTextWithAutoCorrectionIndicatorUnderline(context: Context?, text: String,
 }
 
 fun getTextWithSuggestionSpan(context: Context, pickedWord: String, suggestedWords: SuggestedWords, locale: Locale): CharSequence {
-    if (pickedWord.isEmpty() || suggestedWords.isEmpty()
-        || suggestedWords.isPrediction() || suggestedWords.isPunctuationSuggestions()
+    if (pickedWord.isEmpty() || suggestedWords.isEmpty
+        || suggestedWords.isPrediction || suggestedWords.isPunctuationSuggestions()
     ) {
         return pickedWord
     }
@@ -37,8 +37,8 @@ fun getTextWithSuggestionSpan(context: Context, pickedWord: String, suggestedWor
         if (info.isKindOf(SuggestedWords.SuggestedWordInfo.KIND_PREDICTION)) {
             continue
         }
-        if (pickedWord != info.mWord) {
-            suggestionsList.add(info.mWord)
+        if (pickedWord != info.word) {
+            suggestionsList.add(info.word)
         }
     }
     val suggestionSpan = SuggestionSpan(context, locale, suggestionsList.toTypedArray(), 0, null)

@@ -28,15 +28,15 @@ class SingleDictionaryFacilitator(private val dict: Dictionary) : DictionaryFaci
      */
     fun getSuggestions(words: List<String>): SuggestionResults {
         val suggestionResults = SuggestionResults(SuggestedWords.MAX_SUGGESTIONS, false, false)
-        words.flatMap { word -> getSuggestions(word).distinctBy { it.getWord() } } // Filter out duplicate results per word
-            .groupBy { it.getWord() }
+        words.flatMap { word -> getSuggestions(word).distinctBy { it.word } } // Filter out duplicate results per word
+            .groupBy { it.word }
             .forEach { (_, results) ->
-                val info = results.maxBy { it.mScore }
-                val score = (results.sumOf { it.mScore.toLong() - Int.MIN_VALUE } / words.size + Int.MIN_VALUE).toInt()
+                val info = results.maxBy { it.score }
+                val score = (results.sumOf { it.score.toLong() - Int.MIN_VALUE } / words.size + Int.MIN_VALUE).toInt()
                 suggestionResults.add(
                     SuggestedWords.SuggestedWordInfo(
-                        info.getWord(), info.mPrevWordsContext, score, info.mKindAndFlags,
-                        info.mSourceDict, info.mIndexOfTouchPointOfSecondWord, info.mAutoCommitFirstWordConfidence
+                        info.word, info.prevWordsContext, score, info.kindAndFlags,
+                        info.sourceDict, info.indexOfTouchPointOfSecondWord, info.autoCommitFirstWordConfidence
                     )
                 )
             }
@@ -60,14 +60,14 @@ class SingleDictionaryFacilitator(private val dict: Dictionary) : DictionaryFaci
         settingsValuesForSuggestion: SettingsValuesForSuggestion, sessionId: Int, inputStyle: Int
     ): SuggestionResults {
         val suggestionResults = SuggestionResults(
-            SuggestedWords.MAX_SUGGESTIONS, ngramContext.isBeginningOfSentenceContext(),
+            SuggestedWords.MAX_SUGGESTIONS, ngramContext.isBeginningOfSentenceContext,
             false
         )
         suggestionResults.addAll(
             dict.getSuggestions(composedData, ngramContext, keyboard.proximityInfo.nativeProximityInfo,
                 settingsValuesForSuggestion, sessionId, 1f,
                 floatArrayOf(Dictionary.NOT_A_WEIGHT_OF_LANG_MODEL_VS_SPATIAL_MODEL)
-            )?.filter { !SupportedEmojis.isUnsupported(it.getWord()) }
+            )?.filter { !SupportedEmojis.isUnsupported(it.word) }
         )
         suggestionLogger?.onNewSuggestions(suggestionResults, composedData, ngramContext, keyboard, inputStyle)
 
@@ -82,7 +82,7 @@ class SingleDictionaryFacilitator(private val dict: Dictionary) : DictionaryFaci
 
     override fun setValidSpellingWordWriteCache(cache: LruCache<String, Boolean>) {}
 
-    override fun isForLocale(locale: Locale?): Boolean = locale == dict.mLocale
+    override fun isForLocale(locale: Locale?): Boolean = locale == dict.locale
 
     override fun onStartInput() {}
 
@@ -96,7 +96,7 @@ class SingleDictionaryFacilitator(private val dict: Dictionary) : DictionaryFaci
 
     override fun isActive(): Boolean = true
 
-    override fun getMainLocale(): Locale = dict.mLocale!!
+    override fun getMainLocale(): Locale = dict.locale!!
 
     override fun getCurrentLocale(): Locale = getMainLocale()
 

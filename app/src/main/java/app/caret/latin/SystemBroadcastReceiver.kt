@@ -48,12 +48,13 @@ import app.caret.settings.SettingsActivity
 class SystemBroadcastReceiver : BroadcastReceiver() {
     override fun onReceive(context: Context?, intent: Intent?) {
         val intentAction = intent!!.action
+        val ctx = context!!
         if (Intent.ACTION_MY_PACKAGE_REPLACED == intentAction) {
-            Log.i(TAG, "Package has been replaced: " + context!!.packageName)
-            toggleAppIcon(context)
+            Log.i(TAG, "Package has been replaced: " + ctx.packageName)
+            toggleAppIcon(ctx)
         } else if (Intent.ACTION_BOOT_COMPLETED == intentAction) {
             Log.i(TAG, "Boot has been completed")
-            toggleAppIcon(context!!)
+            toggleAppIcon(ctx)
         } else if (Intent.ACTION_LOCALE_CHANGED == intentAction) {
             Log.i(TAG, "System locale changed")
             KeyboardLayoutSet.onSystemLocaleChanged()
@@ -64,12 +65,12 @@ class SystemBroadcastReceiver : BroadcastReceiver() {
         // 2) the device has just booted,
         // 3) a new user has been created.
         // There is no good reason to keep the process alive if this IME isn't a current IME.
-        val imm = context!!.getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
+        val imm = ctx.getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
         // Called to check whether this IME has been triggered by the current user or not
         val isInputMethodManagerValidForUserOfThisProcess =
                 !imm.inputMethodList.isEmpty()
         val isCurrentImeOfCurrentUser = isInputMethodManagerValidForUserOfThisProcess
-                && UncachedInputMethodManagerUtils.isThisImeCurrent(context, imm)
+                && UncachedInputMethodManagerUtils.isThisImeCurrent(ctx, imm)
         if (!isCurrentImeOfCurrentUser) {
             val myPid = Process.myPid()
             Log.i(TAG, "Killing my process: pid=$myPid")

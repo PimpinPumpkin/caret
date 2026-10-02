@@ -151,7 +151,7 @@ class ClipboardDao private constructor(private val db: Database) {
 
     fun get(id: Long) = cache.first { it.id == id }
 
-    fun getAll(): List<ClipboardHistoryEntry> = cache
+    val all: List<ClipboardHistoryEntry> get() = cache
 
     fun count() = cache.size
 
@@ -227,12 +227,12 @@ class ClipboardDao private constructor(private val db: Database) {
         }
 
         val files = clipFilesDir.listFiles()?.toMutableList() ?: return
-        val fnames = files.mapTo(HashSet()) { it.name }
+        val fnames = files.mapTo(HashSet<String?>()) { it.name }
         val entries = cache.filter { it.filename != null }
         val enames = entries.mapTo(HashSet()) { it.filename }
 
         val filesToRemove = files.filter { it.name !in enames }
-        val entriesToRemove = entries.filter { it.filename!! !in fnames }
+        val entriesToRemove = entries.filter { it.filename !in fnames }
         if (filesToRemove.isEmpty() && entriesToRemove.isEmpty()) {
             deleteIfSizeExceeded(prefs)
             return

@@ -65,11 +65,11 @@ class SuggestionResults : TreeSet<SuggestedWordInfo> {
         // This comparator ranks the word info with the higher frequency first. That's because
         // that's the order we want our elements in.
         override fun compare(o1: SuggestedWordInfo, o2: SuggestedWordInfo): Int {
-            if (o1.mScore > o2.mScore) return -1
-            if (o1.mScore < o2.mScore) return 1
+            if (o1.score > o2.score) return -1
+            if (o1.score < o2.score) return 1
             if (o1.codePointCount < o2.codePointCount) return -1
             if (o1.codePointCount > o2.codePointCount) return 1
-            return o1.mWord.compareTo(o2.mWord)
+            return o1.word.compareTo(o2.word)
         }
     }
 

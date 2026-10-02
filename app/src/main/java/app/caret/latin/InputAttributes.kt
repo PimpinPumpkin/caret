@@ -27,7 +27,7 @@ class InputAttributes {
     @JvmField val targetApplicationPackageName: String?
     @JvmField val inputTypeShouldAutoCorrect: Boolean
     @JvmField val isPasswordField: Boolean
-    @JvmField val mShouldShowSuggestions: Boolean
+    @JvmField val shouldShowSuggestions: Boolean
     @JvmField val mayOverrideShowingSuggestions: Boolean
     @JvmField val applicationSpecifiedCompletionOn: Boolean
     @JvmField val shouldInsertSpacesAutomatically: Boolean
@@ -40,19 +40,19 @@ class InputAttributes {
      */
     @JvmField val disableGestureFloatingPreviewText: Boolean
     @JvmField val isGeneralTextInput: Boolean
-    @JvmField val mInputType: Int
-    private val mEditorInfo: EditorInfo?
-    private val mPackageNameForPrivateImeOptions: String?
+    @JvmField val inputType: Int
+    private val editorInfo: EditorInfo?
+    private val packageNameForPrivateImeOptions: String?
 
     constructor(editorInfo: EditorInfo?, isFullscreenMode: Boolean,
             packageNameForPrivateImeOptions: String?) {
-        mEditorInfo = editorInfo
-        mPackageNameForPrivateImeOptions = packageNameForPrivateImeOptions
+        this.editorInfo = editorInfo
+        this.packageNameForPrivateImeOptions = packageNameForPrivateImeOptions
         targetApplicationPackageName = if (null != editorInfo) editorInfo.packageName else null
-        mInputType = AppWorkarounds.adjustInputType(if (null != editorInfo) editorInfo.inputType else 0, targetApplicationPackageName)
-        val inputClass = mInputType and InputType.TYPE_MASK_CLASS
-        isPasswordField = InputTypeUtils.isPasswordInputType(mInputType)
-                || InputTypeUtils.isVisiblePasswordInputType(mInputType)
+        inputType = AppWorkarounds.adjustInputType(if (null != editorInfo) editorInfo.inputType else 0, targetApplicationPackageName)
+        val inputClass = inputType and InputType.TYPE_MASK_CLASS
+        isPasswordField = InputTypeUtils.isPasswordInputType(inputType)
+                || InputTypeUtils.isVisiblePasswordInputType(inputType)
         if (inputClass != InputType.TYPE_CLASS_TEXT) {
             // If we are not looking at a TYPE_CLASS_TEXT field, the following strange
             // cases may arise, so we do a couple sanity checks for them. If it's a
@@ -60,15 +60,15 @@ class InputAttributes {
             // of the flags.
             if (null == editorInfo) {
                 Log.w(TAG, "No editor info for this field. Bug?")
-            } else if (InputType.TYPE_NULL == mInputType) {
+            } else if (InputType.TYPE_NULL == inputType) {
                 // TODO: We should honor TYPE_NULL specification.
                 Log.i(TAG, "InputType.TYPE_NULL is specified")
             } else if (inputClass == 0) {
                 // TODO: is this check still necessary?
                 Log.w(TAG, String.format("Unexpected input class: inputType=0x%08x"
-                        + " imeOptions=0x%08x", mInputType, editorInfo.imeOptions))
+                        + " imeOptions=0x%08x", inputType, editorInfo.imeOptions))
             }
-            mShouldShowSuggestions = false
+            shouldShowSuggestions = false
             mayOverrideShowingSuggestions = false
             inputTypeShouldAutoCorrect = false
             applicationSpecifiedCompletionOn = false
@@ -80,18 +80,18 @@ class InputAttributes {
             return
         }
 
-        val variation = mInputType and InputType.TYPE_MASK_VARIATION
-        val flagNoSuggestions = 0 != (mInputType and InputType.TYPE_TEXT_FLAG_NO_SUGGESTIONS)
-        val flagMultiLine = 0 != (mInputType and InputType.TYPE_TEXT_FLAG_MULTI_LINE)
-        val flagAutoCorrect = 0 != (mInputType and InputType.TYPE_TEXT_FLAG_AUTO_CORRECT)
-        val flagAutoComplete = 0 != (mInputType and InputType.TYPE_TEXT_FLAG_AUTO_COMPLETE)
+        val variation = inputType and InputType.TYPE_MASK_VARIATION
+        val flagNoSuggestions = 0 != (inputType and InputType.TYPE_TEXT_FLAG_NO_SUGGESTIONS)
+        val flagMultiLine = 0 != (inputType and InputType.TYPE_TEXT_FLAG_MULTI_LINE)
+        val flagAutoCorrect = 0 != (inputType and InputType.TYPE_TEXT_FLAG_AUTO_CORRECT)
+        val flagAutoComplete = 0 != (inputType and InputType.TYPE_TEXT_FLAG_AUTO_COMPLETE)
 
         // TODO: Have a helper method in InputTypeUtils
         // Make sure that passwords are not displayed in {@link SuggestionStripView}.
-        mShouldShowSuggestions = !isPasswordField && !flagNoSuggestions
+        shouldShowSuggestions = !isPasswordField && !flagNoSuggestions
         mayOverrideShowingSuggestions = !isPasswordField
 
-        shouldInsertSpacesAutomatically = InputTypeUtils.isAutoSpaceFriendlyType(mInputType)
+        shouldInsertSpacesAutomatically = InputTypeUtils.isAutoSpaceFriendlyType(inputType)
 
         val noMicrophone = isPasswordField
                 || InputTypeUtils.isEmailVariation(variation)
@@ -101,7 +101,7 @@ class InputAttributes {
         shouldShowVoiceInputKey = !noMicrophone
 
         disableGestureFloatingPreviewText = InputAttributes.inPrivateImeOptions(
-                mPackageNameForPrivateImeOptions, NO_FLOATING_GESTURE_PREVIEW, editorInfo)
+                packageNameForPrivateImeOptions, NO_FLOATING_GESTURE_PREVIEW, editorInfo)
 
         // autocorrect if explicitly wanted, but also for most multi-line input types (like AOSP keyboard)
         // originally, URI and email were always excluded from autocorrect (in Suggest.java), but this is
@@ -132,26 +132,25 @@ class InputAttributes {
             noLearning = false
     }
 
-    fun isTypeNull(): Boolean {
-        return InputType.TYPE_NULL == mInputType
-    }
+    val isTypeNull: Boolean
+        get() = InputType.TYPE_NULL == inputType
 
     fun isSameInputType(editorInfo: EditorInfo?): Boolean {
-        return editorInfo!!.inputType == mInputType && mEditorInfo != null
-                && (mEditorInfo.imeOptions and EditorInfo.IME_FLAG_FORCE_ASCII) == (editorInfo.imeOptions and EditorInfo.IME_FLAG_FORCE_ASCII)
+        return editorInfo!!.inputType == inputType && this.editorInfo != null
+                && (this.editorInfo.imeOptions and EditorInfo.IME_FLAG_FORCE_ASCII) == (editorInfo.imeOptions and EditorInfo.IME_FLAG_FORCE_ASCII)
     }
 
     private fun hasNoMicrophoneKeyOption(): Boolean {
-        return InputAttributes.inPrivateImeOptions(mPackageNameForPrivateImeOptions, NO_MICROPHONE, mEditorInfo)
+        return InputAttributes.inPrivateImeOptions(packageNameForPrivateImeOptions, NO_MICROPHONE, editorInfo)
     }
 
     @Suppress("unused")
-    private fun dumpFlags(inputType: Int) {
-        val inputClass = inputType and InputType.TYPE_MASK_CLASS
+    private fun dumpFlags(inputTypeToDump: Int) {
+        val inputClass = inputTypeToDump and InputType.TYPE_MASK_CLASS
         val inputClassString = toInputClassString(inputClass)
         val variationString = toVariationString(
-                inputClass, inputType and InputType.TYPE_TEXT_VARIATION_EMAIL_ADDRESS)
-        val flagsString = toFlagsString(inputType and InputType.TYPE_MASK_FLAGS)
+                inputClass, inputTypeToDump and InputType.TYPE_TEXT_VARIATION_EMAIL_ADDRESS)
+        val flagsString = toFlagsString(inputTypeToDump and InputType.TYPE_MASK_FLAGS)
         Log.i(TAG, "Input class: " + inputClassString)
         Log.i(TAG, "Variation: " + variationString)
         Log.i(TAG, "Flags: " + flagsString)
@@ -161,10 +160,10 @@ class InputAttributes {
     override fun toString(): String {
         return String.format(
                 "%s: inputType=0x%08x%s%s%s%s%s targetApp=%s\n", javaClass.simpleName,
-                mInputType,
+                inputType,
                 (if (inputTypeShouldAutoCorrect) " shouldAutoCorrect" else ""),
                 (if (isPasswordField) " password" else ""),
-                (if (mShouldShowSuggestions) " shouldShowSuggestions" else ""),
+                (if (shouldShowSuggestions) " shouldShowSuggestions" else ""),
                 (if (applicationSpecifiedCompletionOn) " appSpecified" else ""),
                 (if (shouldInsertSpacesAutomatically) " insertSpaces" else ""),
                 targetApplicationPackageName)
