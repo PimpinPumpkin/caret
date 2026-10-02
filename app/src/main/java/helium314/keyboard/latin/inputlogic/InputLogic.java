@@ -785,22 +785,9 @@ public final class InputLogic {
                 // Backspace is a functional key, but it affects the contents of the editor.
                 inputTransaction.setDidAffectContents();
                 break;
-            case KeyCode.SHIFT: {
-                var keyboard = KeyboardSwitcher.getInstance().getKeyboard();
-                if (keyboard != null) {
-                    KeyboardElement element = keyboard.mId.getElement();
-                    if (!element.isAlphabet() && element != KeyboardElement.DPAD) {
-                        // recapitalization and follow-up code should only trigger for alphabet/d-pad shift, see #1256
-                        break;
-                    }
-                }
-                performRecapitalization(sv);
-                inputTransaction.requireShiftUpdate(InputTransaction.SHIFT_UPDATE_NOW);
-                inputTransaction.setRequiresUpdateSuggestions();
-                if (mSpaceState == SpaceState.PHANTOM && sv.mShiftRemovesAutospace)
-                    mSpaceState = SpaceState.NONE;
+            case KeyCode.SHIFT:
+                handleShiftKey(inputTransaction);
                 break;
-            }
             case KeyCode.CAPS_LOCK: {
                 var keyboard = KeyboardSwitcher.getInstance().getKeyboard();
                 if (keyboard == null || keyboard.mId.getElement().isAlphabet())
@@ -861,14 +848,7 @@ public final class InputLogic {
                 mLatinIME.getClipboardHistoryManager().clearHistory();
                 break;
             case KeyCode.CLIPBOARD_CUT:
-                if (mConnection.hasSelection()) {
-                    mConnection.copyText(true);
-                    // fake delete keypress to remove the text
-                    final Event backspaceEvent = Event.createSoftwareKeypressEvent(KeyCode.DELETE, 0,
-                            event.getX(), event.getY(), event.isKeyRepeat());
-                    handleBackspaceEvent(backspaceEvent, inputTransaction, currentKeyboardScript);
-                    inputTransaction.setDidAffectContents();
-                }
+                cutSelection(event, inputTransaction, currentKeyboardScript);
                 break;
             case KeyCode.WORD_LEFT:
                 sendDownUpKeyEventWithMetaState(
@@ -881,35 +861,10 @@ public final class InputLogic {
                     KeyEvent.META_CTRL_ON | event.getMetaState());
                 break;
             case KeyCode.MOVE_START_OF_PAGE:
-                final int selectionEnd1 = mConnection.getExpectedSelectionEnd();
-                final int selectionStart1 = mConnection.getExpectedSelectionStart();
-                sendDownUpKeyEventWithMetaState(KeyEvent.KEYCODE_MOVE_HOME, KeyEvent.META_CTRL_ON | event.getMetaState());
-                if (mConnection.getExpectedSelectionStart() == selectionStart1 && mConnection.getExpectedSelectionEnd() == selectionEnd1) {
-                    // unchanged -> try a different method (necessary for compose fields)
-                    final int newEnd = (event.getMetaState() & KeyEvent.META_SHIFT_MASK) != 0 ? selectionEnd1 : 0;
-                    // Caret: let go of the word being composed first, or the next letter is
-                    // added to that word at its old place instead of at the cursor
-                    finishInput();
-                    mConnection.setSelection(0, newEnd);
-                }
+                moveToStartOfPage(event);
                 break;
             case KeyCode.MOVE_END_OF_PAGE:
-                final int selectionStart2 = mConnection.getExpectedSelectionStart();
-                final int selectionEnd2 = mConnection.getExpectedSelectionEnd();
-                sendDownUpKeyEventWithMetaState(KeyEvent.KEYCODE_MOVE_END, KeyEvent.META_CTRL_ON | event.getMetaState());
-                if (mConnection.getExpectedSelectionStart() == selectionStart2 && mConnection.getExpectedSelectionEnd() == selectionEnd2) {
-                    // unchanged, try fallback e.g. for compose fields that don't care about ctrl + end
-                    // we just move to a very large index, and hope the field is prepared to deal with this
-                    // getting the actual length of the text for setting the correct position can be tricky for some apps...
-                    try {
-                        final int newStart = (event.getMetaState() & KeyEvent.META_SHIFT_MASK) != 0 ? selectionStart2 : Integer.MAX_VALUE;
-                        finishInput(); // Caret: as for the start of the page
-                        mConnection.setSelection(newStart, Integer.MAX_VALUE);
-                    } catch (Exception e) {
-                        // better catch potential errors and just do nothing in this case
-                        Log.i(TAG, "error when trying to move cursor to last position: " + e);
-                    }
-                }
+                moveToEndOfPage(event);
                 break;
             case KeyCode.UNDO:
                 if (GestureDataGatheringKt.useBackgroundGathering)
@@ -931,6 +886,7 @@ public final class InputLogic {
                 break;
             case KeyCode.SEND_INTENT_ONE, KeyCode.SEND_INTENT_TWO, KeyCode.SEND_INTENT_THREE:
                 IntentUtils.handleSendIntentKey(mLatinIME, event.getKeyCode());
+                // no break: the keyboard hides after sending an intent, it has been so since the keys exist
             case KeyCode.IME_HIDE_UI:
                 mLatinIME.requestHideSelf(0);
                 break;
@@ -950,30 +906,99 @@ public final class InputLogic {
                  KeyCode.KEY_REPEAT: // can be configured on main layout using !code/-11000, and we shouldn't crash on this in debug mode
                 break;
             default:
-                if (KeyCode.INSTANCE.isModifier(keyCode))
-                    return; // continuation of previous switch case above, but modifiers are held in a separate place
-                final int keyEventCode = keyCode > 0
-                    ? keyCode
-                    : event.getCodePoint() >= 0
-                        ? KeyCode.codePointToKeyEventCode(event.getCodePoint())
-                        : KeyCode.keyCodeToKeyEventCode(keyCode);
-                if (keyEventCode != KeyEvent.KEYCODE_UNKNOWN) {
-                    sendDownUpKeyEventWithMetaState(keyEventCode, event.getMetaState());
-                    return;
-                }
-                if (event.getMetaState() != 0 && event.getCodePoint() >= 32) {
-                    // Try handling it as normal key event, this essentially just ignore the meta state.
-                    // The conversion is good, as this way we are able to use e.g. ctrl + V. But if we don't have a codePointToKeyEventCode
-                    // for that key, we will just input the normal key now, e.g. ctrl + @ will (probably) do nothing, but ctrl + _ will input _
-                    // Maybe we should just return instead?
-                    handleNonFunctionalEvent(event, inputTransaction, handler);
-                    return;
-                }
-                // unknown event
-                Log.e(TAG, "unknown event, key code: "+keyCode+", codepoint "+event.getCodePoint()+", meta: "+event.getMetaState());
-                if (DebugFlags.DEBUG_ENABLED)
-                    throw new RuntimeException("Unknown event");
+                handleOtherFunctionalKey(event, inputTransaction, handler);
         }
+    }
+
+    /** Shift on the letters or the d-pad: change the capitalization of the word or selection at the cursor. */
+    private void handleShiftKey(final InputTransaction inputTransaction) {
+        final SettingsValues sv = inputTransaction.getSettingsValues();
+        var keyboard = KeyboardSwitcher.getInstance().getKeyboard();
+        if (keyboard != null) {
+            KeyboardElement element = keyboard.mId.getElement();
+            if (!element.isAlphabet() && element != KeyboardElement.DPAD) {
+                // recapitalization and follow-up code should only trigger for alphabet/d-pad shift, see #1256
+                return;
+            }
+        }
+        performRecapitalization(sv);
+        inputTransaction.requireShiftUpdate(InputTransaction.SHIFT_UPDATE_NOW);
+        inputTransaction.setRequiresUpdateSuggestions();
+        if (mSpaceState == SpaceState.PHANTOM && sv.mShiftRemovesAutospace)
+            mSpaceState = SpaceState.NONE;
+    }
+
+    /** Cut: copy the selection, then remove it the way backspace would. */
+    private void cutSelection(final Event event, final InputTransaction inputTransaction, final String currentKeyboardScript) {
+        if (!mConnection.hasSelection()) return;
+        mConnection.copyText(true);
+        // fake delete keypress to remove the text
+        final Event backspaceEvent = Event.createSoftwareKeypressEvent(KeyCode.DELETE, 0,
+                event.getX(), event.getY(), event.isKeyRepeat());
+        handleBackspaceEvent(backspaceEvent, inputTransaction, currentKeyboardScript);
+        inputTransaction.setDidAffectContents();
+    }
+
+    private void moveToStartOfPage(final Event event) {
+        final int selectionEnd = mConnection.getExpectedSelectionEnd();
+        final int selectionStart = mConnection.getExpectedSelectionStart();
+        sendDownUpKeyEventWithMetaState(KeyEvent.KEYCODE_MOVE_HOME, KeyEvent.META_CTRL_ON | event.getMetaState());
+        if (mConnection.getExpectedSelectionStart() == selectionStart && mConnection.getExpectedSelectionEnd() == selectionEnd) {
+            // unchanged -> try a different method (necessary for compose fields)
+            final int newEnd = (event.getMetaState() & KeyEvent.META_SHIFT_MASK) != 0 ? selectionEnd : 0;
+            // Caret: let go of the word being composed first, or the next letter is
+            // added to that word at its old place instead of at the cursor
+            finishInput();
+            mConnection.setSelection(0, newEnd);
+        }
+    }
+
+    private void moveToEndOfPage(final Event event) {
+        final int selectionStart = mConnection.getExpectedSelectionStart();
+        final int selectionEnd = mConnection.getExpectedSelectionEnd();
+        sendDownUpKeyEventWithMetaState(KeyEvent.KEYCODE_MOVE_END, KeyEvent.META_CTRL_ON | event.getMetaState());
+        if (mConnection.getExpectedSelectionStart() == selectionStart && mConnection.getExpectedSelectionEnd() == selectionEnd) {
+            // unchanged, try fallback e.g. for compose fields that don't care about ctrl + end
+            // we just move to a very large index, and hope the field is prepared to deal with this
+            // getting the actual length of the text for setting the correct position can be tricky for some apps...
+            try {
+                final int newStart = (event.getMetaState() & KeyEvent.META_SHIFT_MASK) != 0 ? selectionStart : Integer.MAX_VALUE;
+                finishInput(); // Caret: as for the start of the page
+                mConnection.setSelection(newStart, Integer.MAX_VALUE);
+            } catch (Exception e) {
+                // better catch potential errors and just do nothing in this case
+                Log.i(TAG, "error when trying to move cursor to last position: " + e);
+            }
+        }
+    }
+
+    /** A function key with no case of its own: send it as a key event if there is one for it. */
+    private void handleOtherFunctionalKey(final Event event, final InputTransaction inputTransaction,
+            final LatinIME.UIHandler handler) {
+        final int keyCode = event.getKeyCode();
+        if (KeyCode.INSTANCE.isModifier(keyCode))
+            return; // modifiers are held in a separate place
+        final int keyEventCode = keyCode > 0
+            ? keyCode
+            : event.getCodePoint() >= 0
+                ? KeyCode.codePointToKeyEventCode(event.getCodePoint())
+                : KeyCode.keyCodeToKeyEventCode(keyCode);
+        if (keyEventCode != KeyEvent.KEYCODE_UNKNOWN) {
+            sendDownUpKeyEventWithMetaState(keyEventCode, event.getMetaState());
+            return;
+        }
+        if (event.getMetaState() != 0 && event.getCodePoint() >= 32) {
+            // Try handling it as normal key event, this essentially just ignore the meta state.
+            // The conversion is good, as this way we are able to use e.g. ctrl + V. But if we don't have a codePointToKeyEventCode
+            // for that key, we will just input the normal key now, e.g. ctrl + @ will (probably) do nothing, but ctrl + _ will input _
+            // Maybe we should just return instead?
+            handleNonFunctionalEvent(event, inputTransaction, handler);
+            return;
+        }
+        // unknown event
+        Log.e(TAG, "unknown event, key code: "+keyCode+", codepoint "+event.getCodePoint()+", meta: "+event.getMetaState());
+        if (DebugFlags.DEBUG_ENABLED)
+            throw new RuntimeException("Unknown event");
     }
 
     /**
