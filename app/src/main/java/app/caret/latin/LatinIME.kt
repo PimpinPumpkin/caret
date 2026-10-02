@@ -179,7 +179,7 @@ class LatinIME : InputMethodService(),
 
     private var gestureConsumer: GestureConsumer = GestureConsumer.NULL_GESTURE_CONSUMER
 
-    private val clipboardHistoryManager: ClipboardHistoryManager = ClipboardHistoryManager(this)
+    val clipboardHistoryManager: ClipboardHistoryManager = ClipboardHistoryManager(this)
 
     // (declared at Java line 1727, after onKeyUp; moved here because part 1 declares all fields)
     // receive ringer mode change.
@@ -1676,9 +1676,6 @@ class LatinIME : InputMethodService(),
     // boolean onKeyMultiple(final int keyCode, final int count, final KeyEvent event);
 
 
-    fun getClipboardHistoryManager(): ClipboardHistoryManager {
-        return clipboardHistoryManager
-    }
 
     fun launchSettings() {
         inputLogic.commitTyped(settings.getCurrent(), LastComposedWord.NOT_A_SEPARATOR)

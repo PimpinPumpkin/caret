@@ -70,12 +70,14 @@ class RichInputConnection(private val parent: InputMethodService) : PrivateComma
      * It's not really the selection start position: the selection start may not be there yet, and
      * in some cases, it may never arrive there.
      */
-    private var expectedSelStart = INVALID_CURSOR_POSITION // in chars, not code points
+    var expectedSelectionStart = INVALID_CURSOR_POSITION // in chars, not code points
+        private set
     /**
-     * The expected selection end.  Only differs from expectedSelStart if a non-empty selection is
-     * expected.  The same caveats as expectedSelStart apply.
+     * The expected selection end.  Only differs from expectedSelectionStart if a non-empty selection is
+     * expected.  The same caveats as expectedSelectionStart apply.
      */
-    private var expectedSelEnd = INVALID_CURSOR_POSITION // in chars, not code points
+    var expectedSelectionEnd = INVALID_CURSOR_POSITION // in chars, not code points
+        private set
     /**
      * This contains the committed text immediately preceding the cursor and the composing
      * text, if any. It is refreshed when the cursor moves by calling upon the TextView.
@@ -100,9 +102,8 @@ class RichInputConnection(private val parent: InputMethodService) : PrivateComma
      */
     private var lastSlowInputConnectionTime = -SLOW_INPUTCONNECTION_PERSIST_MS
 
-    fun isConnected(): Boolean {
-        return ic != null
-    }
+    private val isConnected: Boolean
+        get() = ic != null
 
     /**
      * Returns whether or not the underlying InputConnection is slow. When true, we want to avoid
@@ -136,16 +137,16 @@ class RichInputConnection(private val parent: InputMethodService) : PrivateComma
         val reference = if (beforeCursor.length <= actualLength) beforeCursor.toString()
                 else beforeCursor.subSequence(beforeCursor.length - actualLength,
                         beforeCursor.length).toString()
-        if (et.selectionStart != expectedSelStart
+        if (et.selectionStart != expectedSelectionStart
                 || !(reference == `internal`.toString())) {
-            val context = "Expected selection start = " + expectedSelStart +
+            val context = "Expected selection start = " + expectedSelectionStart +
                     "\nActual selection start = " + et.selectionStart +
                     "\nExpected text = " + `internal`.length + " " + `internal` +
                     "\nActual text = " + reference.length + " " + reference
             (parent as LatinIME).debugDumpStateAndCrashWithException(context)
         } else {
             Log.e(TAG, DebugLogUtils.getStackTrace(2))
-            Log.e(TAG, "Exp <> Actual : " + expectedSelStart + " <> " + et.selectionStart)
+            Log.e(TAG, "Exp <> Actual : " + expectedSelectionStart + " <> " + et.selectionStart)
         }
     }
 
@@ -196,12 +197,12 @@ class RichInputConnection(private val parent: InputMethodService) : PrivateComma
             // selection is set to INVALID_CURSOR_POSITION if reloadTextCache return false
             return false
         }
-        if (expectedSelStart != newSelStart || expectedSelEnd != newSelEnd) {
-            expectedSelStart = newSelStart
-            expectedSelEnd = newSelEnd
+        if (expectedSelectionStart != newSelStart || expectedSelectionEnd != newSelEnd) {
+            expectedSelectionStart = newSelStart
+            expectedSelectionEnd = newSelEnd
             reloadTextCache()
-            if (expectedSelStart != newSelStart || expectedSelEnd != newSelEnd) {
-                Log.i(TAG, "resetCachesUponCursorMove: tried to set "+newSelStart+"/"+newSelEnd+", but input field has "+expectedSelStart+"/"+expectedSelEnd)
+            if (expectedSelectionStart != newSelStart || expectedSelectionEnd != newSelEnd) {
+                Log.i(TAG, "resetCachesUponCursorMove: tried to set "+newSelStart+"/"+newSelEnd+", but input field has "+expectedSelectionStart+"/"+expectedSelectionEnd)
             }
         }
         if (shouldFinishComposition) {
@@ -232,8 +233,8 @@ class RichInputConnection(private val parent: InputMethodService) : PrivateComma
         if (null == textBeforeCursor) {
             // For some reason the app thinks we are not connected to it. This looks like a
             // framework bug... Fall back to ground state and return false.
-            expectedSelStart = INVALID_CURSOR_POSITION
-            expectedSelEnd = INVALID_CURSOR_POSITION
+            expectedSelectionStart = INVALID_CURSOR_POSITION
+            expectedSelectionEnd = INVALID_CURSOR_POSITION
             Log.e(TAG, "Unable to connect to the editor to retrieve text.")
             return false
         }
@@ -245,8 +246,8 @@ class RichInputConnection(private val parent: InputMethodService) : PrivateComma
         val ic = ic ?: return
         val et = ic.getExtractedText(ExtractedTextRequest(), 0)
         if (et == null) return
-        expectedSelStart = et.selectionStart + et.startOffset
-        expectedSelEnd = et.selectionEnd + et.startOffset
+        expectedSelectionStart = et.selectionStart + et.startOffset
+        expectedSelectionEnd = et.selectionEnd + et.startOffset
     }
 
     private fun checkBatchEdit() {
@@ -288,8 +289,8 @@ class RichInputConnection(private val parent: InputMethodService) : PrivateComma
         // TODO: the following is exceedingly error-prone. Right now when the cursor is in the
         //  middle of the composing word composingText only holds the part of the composing text
         //  that is before the cursor, so this actually works, but it's terribly confusing. Fix this.
-        expectedSelStart += text.length - composingText.length
-        expectedSelEnd = expectedSelStart
+        expectedSelectionStart += text.length - composingText.length
+        expectedSelectionEnd = expectedSelectionStart
         composingText.setLength(0)
         val ic = ic
         if (ic != null) {
@@ -323,7 +324,7 @@ class RichInputConnection(private val parent: InputMethodService) : PrivateComma
     }
 
     fun canDeleteCharacters(): Boolean {
-        return expectedSelStart > 0
+        return expectedSelectionStart > 0
     }
 
     fun hasTextAfterCursor(): Boolean {
@@ -349,7 +350,7 @@ class RichInputConnection(private val parent: InputMethodService) : PrivateComma
     fun getCursorCapsMode(inputType: Int,
             spacingAndPunctuations: SpacingAndPunctuations?, hasSpaceBefore: Boolean): Int {
         ic = parent.getCurrentInputConnection()
-        if (!isConnected()) {
+        if (!isConnected) {
             return Constants.TextUtils.CAP_MODE_OFF
         }
         if (!TextUtils.isEmpty(composingText)) {
@@ -366,7 +367,7 @@ class RichInputConnection(private val parent: InputMethodService) : PrivateComma
         //  heavy pressing of delete, for example DEFAULT_TEXT_CACHE_SIZE - 5 times or so.
         //  getCapsMode should be updated to be able to return a "not enough info" result so that
         //  we can get more context only when needed.
-        if (TextUtils.isEmpty(committedTextBeforeComposingText) && 0 != expectedSelStart) {
+        if (TextUtils.isEmpty(committedTextBeforeComposingText) && 0 != expectedSelectionStart) {
             if (!reloadTextCache()) {
                 Log.w(TAG, "Unable to connect to the editor. "
                         + "Setting caps mode without knowing text.")
@@ -405,8 +406,8 @@ class RichInputConnection(private val parent: InputMethodService) : PrivateComma
         // However, if we don't have an expected cursor position, then we should always
         // go fetch the cache again (as it happens, INVALID_CURSOR_POSITION < 0, so we need to
         // test for this explicitly)
-        if (INVALID_CURSOR_POSITION != expectedSelStart
-                && (cachedLength >= n || cachedLength >= expectedSelStart)) {
+        if (INVALID_CURSOR_POSITION != expectedSelectionStart
+                && (cachedLength >= n || cachedLength >= expectedSelectionStart)) {
             val s = StringBuilder(committedTextBeforeComposingText.toString())
             // We call #toString() here to create a temporary object.
             // In some situations, this method is called on a worker thread, and it's possible
@@ -534,14 +535,14 @@ class RichInputConnection(private val parent: InputMethodService) : PrivateComma
                     + remainingChars, 0)
             committedTextBeforeComposingText.setLength(len)
         }
-        if (expectedSelStart > beforeLength) {
-            expectedSelStart -= beforeLength
-            expectedSelEnd -= beforeLength
+        if (expectedSelectionStart > beforeLength) {
+            expectedSelectionStart -= beforeLength
+            expectedSelectionEnd -= beforeLength
         } else {
             // There are fewer characters before the cursor in the buffer than we are being asked to
             // delete. Only delete what is there, and update the end with the amount deleted.
-            expectedSelEnd -= expectedSelStart
-            expectedSelStart = 0
+            expectedSelectionEnd -= expectedSelectionStart
+            expectedSelectionStart = 0
         }
         ic?.deleteSurroundingText(beforeLength, 0)
         if (DEBUG_PREVIOUS_TEXT) checkConsistencyForDebug()
@@ -568,8 +569,8 @@ class RichInputConnection(private val parent: InputMethodService) : PrivateComma
             when (keyEvent.getKeyCode()) {
                 KeyEvent.KEYCODE_ENTER -> {
                     committedTextBeforeComposingText.append("\n")
-                    expectedSelStart += 1
-                    expectedSelEnd = expectedSelStart
+                    expectedSelectionStart += 1
+                    expectedSelectionEnd = expectedSelectionStart
                 }
                 KeyEvent.KEYCODE_DEL -> {
                     if (0 == composingText.length) {
@@ -581,17 +582,17 @@ class RichInputConnection(private val parent: InputMethodService) : PrivateComma
                     } else {
                         composingText.delete(composingText.length - 1, composingText.length)
                     }
-                    if (expectedSelStart > 0 && expectedSelStart == expectedSelEnd) {
+                    if (expectedSelectionStart > 0 && expectedSelectionStart == expectedSelectionEnd) {
                         // TODO: Handle surrogate pairs.
-                        expectedSelStart -= 1
+                        expectedSelectionStart -= 1
                     }
-                    expectedSelEnd = expectedSelStart
+                    expectedSelectionEnd = expectedSelectionStart
                 }
                 KeyEvent.KEYCODE_UNKNOWN -> {
                     if (null != keyEvent.getCharacters()) {
                         committedTextBeforeComposingText.append(keyEvent.getCharacters())
-                        expectedSelStart += keyEvent.getCharacters().length
-                        expectedSelEnd = expectedSelStart
+                        expectedSelectionStart += keyEvent.getCharacters().length
+                        expectedSelectionEnd = expectedSelectionStart
                     }
                 }
                 else -> {
@@ -599,8 +600,8 @@ class RichInputConnection(private val parent: InputMethodService) : PrivateComma
                     if (!Character.isISOControl(codePoint)) { // don't append text if there is no actual text
                         val text = StringUtils.newSingleCodePointString(codePoint)
                         committedTextBeforeComposingText.append(text)
-                        expectedSelStart += text.length
-                        expectedSelEnd = expectedSelStart
+                        expectedSelectionStart += text.length
+                        expectedSelectionEnd = expectedSelectionStart
                     }
                 }
             }
@@ -611,7 +612,7 @@ class RichInputConnection(private val parent: InputMethodService) : PrivateComma
     fun setComposingRegion(start: Int, end: Int) {
         if (DEBUG_BATCH_NESTING) checkBatchEdit()
         if (DEBUG_PREVIOUS_TEXT) checkConsistencyForDebug()
-        val moveBy = expectedSelStart - start // determine now, as expectedSelStart may change in getTextBeforeCursor
+        val moveBy = expectedSelectionStart - start // determine now, as expectedSelectionStart may change in getTextBeforeCursor
         val textBeforeCursor =
                 getTextBeforeCursor(Constants.EDITOR_CONTENTS_CACHE_SIZE + (end - start), 0)
         committedTextBeforeComposingText.setLength(0)
@@ -620,9 +621,9 @@ class RichInputConnection(private val parent: InputMethodService) : PrivateComma
         composingText.setLength(0)
         if (!textBeforeCursor.isNullOrEmpty()) {
             // The cursor is not necessarily at the end of the composing text, but we have its
-            // position in expectedSelStart and expectedSelEnd. In this case we want the start
-            // of the text, so we should use expectedSelStart. In other words, the composing
-            // text starts (expectedSelStart - start) characters before the end of textBeforeCursor
+            // position in expectedSelectionStart and expectedSelectionEnd. In this case we want the start
+            // of the text, so we should use expectedSelectionStart. In other words, the composing
+            // text starts (expectedSelectionStart - start) characters before the end of textBeforeCursor
             val indexOfStartOfComposingText = Math.max(textBeforeCursor.length - moveBy, 0)
             composingText.append(textBeforeCursor.subSequence(indexOfStartOfComposingText,
                     textBeforeCursor.length))
@@ -637,8 +638,8 @@ class RichInputConnection(private val parent: InputMethodService) : PrivateComma
     fun setComposingText(text: CharSequence, newCursorPosition: Int): Boolean {
         if (DEBUG_BATCH_NESTING) checkBatchEdit()
         if (DEBUG_PREVIOUS_TEXT) checkConsistencyForDebug()
-        expectedSelStart += text.length - composingText.length
-        expectedSelEnd = expectedSelStart
+        expectedSelectionStart += text.length - composingText.length
+        expectedSelectionEnd = expectedSelectionStart
         composingText.setLength(0)
         composingText.append(text)
         // TODO: support values of newCursorPosition != 1. At this time, this is never called with
@@ -685,11 +686,11 @@ class RichInputConnection(private val parent: InputMethodService) : PrivateComma
             return false
         }
         if (start > end) {
-            expectedSelStart = end
-            expectedSelEnd = start
+            expectedSelectionStart = end
+            expectedSelectionEnd = start
         } else {
-            expectedSelStart = start
-            expectedSelEnd = end
+            expectedSelectionStart = start
+            expectedSelectionEnd = end
         }
         val ic = ic
         if (ic != null) {
@@ -702,23 +703,23 @@ class RichInputConnection(private val parent: InputMethodService) : PrivateComma
     }
 
     fun selectAll() {
-        if (!isConnected()) return
-        if (expectedSelStart != expectedSelEnd && expectedSelStart == 0 && !hasTextAfterCursor()) { // all text already selected
-            ic!!.setSelection(expectedSelEnd, expectedSelEnd)
+        if (!isConnected) return
+        if (expectedSelectionStart != expectedSelectionEnd && expectedSelectionStart == 0 && !hasTextAfterCursor()) { // all text already selected
+            ic!!.setSelection(expectedSelectionEnd, expectedSelectionEnd)
         } else ic!!.performContextMenuAction(android.R.id.selectAll)
     }
 
     fun selectWord(spacingAndPunctuations: SpacingAndPunctuations, script: String) {
         val ic = ic ?: return
-        if (expectedSelStart != expectedSelEnd) { // already something selected
-            ic.setSelection(expectedSelEnd, expectedSelEnd)
+        if (expectedSelectionStart != expectedSelectionEnd) { // already something selected
+            ic.setSelection(expectedSelectionEnd, expectedSelectionEnd)
             return
         }
         val range = getWordRangeAtCursor(spacingAndPunctuations, script)
         if (range == null) return
         // getWordRangeAtCursor refreshed the connection and returns null when there is none,
         // so read the field again instead of using the one captured above
-        this.ic?.setSelection(expectedSelStart - range.getNumberOfCharsInWordBeforeCursor(), expectedSelStart + range.getNumberOfCharsInWordAfterCursor())
+        this.ic?.setSelection(expectedSelectionStart - range.getNumberOfCharsInWordBeforeCursor(), expectedSelectionStart + range.getNumberOfCharsInWordAfterCursor())
     }
 
     fun copyText(getSelection: Boolean) {
@@ -762,8 +763,8 @@ class RichInputConnection(private val parent: InputMethodService) : PrivateComma
         // text should never be null, but just in case, it's better to insert nothing than to crash
         if (null == text) text = ""
         committedTextBeforeComposingText.append(text)
-        expectedSelStart += text.length - composingText.length
-        expectedSelEnd = expectedSelStart
+        expectedSelectionStart += text.length - composingText.length
+        expectedSelectionEnd = expectedSelectionStart
         composingText.setLength(0)
         ic?.commitCompletion(completionInfo)
         if (DEBUG_PREVIOUS_TEXT) checkConsistencyForDebug()
@@ -772,7 +773,7 @@ class RichInputConnection(private val parent: InputMethodService) : PrivateComma
     fun getNgramContextFromNthPreviousWord(
             spacingAndPunctuations: SpacingAndPunctuations, n: Int): NgramContext {
         ic = parent.getCurrentInputConnection()
-        if (!isConnected()) {
+        if (!isConnected) {
             return NgramContext.EMPTY_PREV_WORDS_INFO
         }
         val prev = getTextBeforeCursor(NUM_CHARS_TO_GET_BEFORE_CURSOR, 0)
@@ -806,7 +807,7 @@ class RichInputConnection(private val parent: InputMethodService) : PrivateComma
     fun getWordRangeAtCursor(spacingAndPunctuations: SpacingAndPunctuations,
             script: String): TextRange? {
         ic = parent.getCurrentInputConnection()
-        if (!isConnected()) {
+        if (!isConnected) {
             return null
         }
         val before = getTextBeforeCursorAndDetectLaggyConnection(
@@ -929,9 +930,9 @@ class RichInputConnection(private val parent: InputMethodService) : PrivateComma
      */
     fun isBelatedExpectedUpdate(oldSelStart: Int, newSelStart: Int,
             oldSelEnd: Int, newSelEnd: Int, composingSpanStart: Int, composingSpanEnd: Int): Boolean {
-        // This update is "belated" if we are expecting it. That is, expectedSelStart and
-        // expectedSelEnd match the new values that the TextView is updating TO.
-        if (expectedSelStart == newSelStart && expectedSelEnd == newSelEnd) {
+        // This update is "belated" if we are expecting it. That is, expectedSelectionStart and
+        // expectedSelectionEnd match the new values that the TextView is updating TO.
+        if (expectedSelectionStart == newSelStart && expectedSelectionEnd == newSelEnd) {
             if (composingSpanEnd - composingSpanStart < composingText.length) {
                 // composing span is smaller than expected, maybe changed by the app (see #1141)
                 // larger composing span is ok, because composingText only contains the word up to the cursor
@@ -939,19 +940,19 @@ class RichInputConnection(private val parent: InputMethodService) : PrivateComma
             }
             return true
         }
-        // This update is not belated if expectedSelStart and expectedSelEnd match the old
+        // This update is not belated if expectedSelectionStart and expectedSelectionEnd match the old
         // values, and one of newSelStart or newSelEnd is updated to a different value. In this
         // case, it is likely that something other than the IME has moved the selection endpoint
         // to the new value.
-        if (expectedSelStart == oldSelStart && expectedSelEnd == oldSelEnd
+        if (expectedSelectionStart == oldSelStart && expectedSelectionEnd == oldSelEnd
                 && (oldSelStart != newSelStart || oldSelEnd != newSelEnd)) return false
         // If neither of the above two cases hold, then the system may be having trouble keeping up
         // with updates. If 1) the selection is a cursor, 2) newSelStart is between oldSelStart
-        // and expectedSelStart, and 3) newSelEnd is between oldSelEnd and expectedSelEnd, then
+        // and expectedSelectionStart, and 3) newSelEnd is between oldSelEnd and expectedSelectionEnd, then
         // assume a belated update.
         return (newSelStart == newSelEnd)
-                && (newSelStart - oldSelStart) * (expectedSelStart - newSelStart) >= 0
-                && (newSelEnd - oldSelEnd) * (expectedSelEnd - newSelEnd) >= 0
+                && (newSelStart - oldSelStart) * (expectedSelectionStart - newSelStart) >= 0
+                && (newSelEnd - oldSelEnd) * (expectedSelectionEnd - newSelEnd) >= 0
     }
 
     /**
@@ -1042,7 +1043,7 @@ class RichInputConnection(private val parent: InputMethodService) : PrivateComma
                 Constants.EDITOR_CONTENTS_CACHE_SIZE, 0)
         val selectedText = ic?.getSelectedText(0 /* flags */)
         if (null == textBeforeCursor ||
-                (!TextUtils.isEmpty(selectedText) && expectedSelEnd == expectedSelStart)) {
+                (!TextUtils.isEmpty(selectedText) && expectedSelectionEnd == expectedSelectionStart)) {
             // If textBeforeCursor is null, we have no idea what kind of text field we have or if
             // thinking about the "cursor position" actually makes any sense. In this case we
             // remember a meaningless cursor position. Contrast this with an empty string, which is
@@ -1054,24 +1055,24 @@ class RichInputConnection(private val parent: InputMethodService) : PrivateComma
             // result in degraded behavior from the next input.
             // Interestingly, in either case, chances are any action the user takes next will result
             // in a call to onUpdateSelection, which should set things right.
-            expectedSelEnd = Constants.NOT_A_CURSOR_POSITION
-            expectedSelStart = expectedSelEnd
+            expectedSelectionEnd = Constants.NOT_A_CURSOR_POSITION
+            expectedSelectionStart = expectedSelectionEnd
         } else {
             val textLength = textBeforeCursor.length
             if (textLength < Constants.EDITOR_CONTENTS_CACHE_SIZE
-                    && (textLength > expectedSelStart
-                            ||  expectedSelStart < Constants.EDITOR_CONTENTS_CACHE_SIZE)) {
+                    && (textLength > expectedSelectionStart
+                            ||  expectedSelectionStart < Constants.EDITOR_CONTENTS_CACHE_SIZE)) {
                 // It should not be possible to have only one of those variables be
                 // NOT_A_CURSOR_POSITION, so if they are equal, either the selection is zero-sized
                 // (simple cursor, no selection) or there is no cursor/we don't know its pos
-                val wasEqual = expectedSelStart == expectedSelEnd
-                expectedSelStart = textLength
+                val wasEqual = expectedSelectionStart == expectedSelectionEnd
+                expectedSelectionStart = textLength
                 // We can't figure out the value of mLastSelectionEnd :(
                 // But at least if it's smaller than mLastSelectionStart something is wrong,
                 // and if they used to be equal we also don't want to make it look like there is a
                 // selection.
-                if (wasEqual || expectedSelStart > expectedSelEnd) {
-                    expectedSelEnd = expectedSelStart
+                if (wasEqual || expectedSelectionStart > expectedSelectionEnd) {
+                    expectedSelectionEnd = expectedSelectionStart
                 }
             } else {
                 // better re-read the correct position instead of guessing from incomplete data
@@ -1086,23 +1087,17 @@ class RichInputConnection(private val parent: InputMethodService) : PrivateComma
         return ic.performPrivateCommand(action, data)
     }
 
-    fun getExpectedSelectionStart(): Int {
-        return expectedSelStart
-    }
 
-    fun getExpectedSelectionEnd(): Int {
-        return expectedSelEnd
-    }
 
     /**
      * @return whether there is a selection currently active.
      */
     fun hasSelection(): Boolean {
-        return expectedSelEnd != expectedSelStart
+        return expectedSelectionEnd != expectedSelectionStart
     }
 
     fun isCursorPositionKnown(): Boolean {
-        return INVALID_CURSOR_POSITION != expectedSelStart
+        return INVALID_CURSOR_POSITION != expectedSelectionStart
     }
 
     /**

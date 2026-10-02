@@ -190,7 +190,11 @@ method but the function-key switch is longer than about 75 lines.
   now `app.caret.latin.LatinIME`, so an install from before the rename has to enable and select
   the keyboard once more after updating.
 
+- Cleanup pass over the four converted files: `m` and `s` prefixes are gone, `!!` went from 119
+  to 31 (the rest guard cases where Java threw and null can really occur, or sit once at the top
+  of an SDK or interface override), and getters that only returned a field are properties.
+
 Next:
-1. A cleanup pass over the converted files (`InputLogic.kt`, `RichInputConnection.kt`,
-   `PointerTracker.kt`, `LatinIME.kt`): drop the `m` prefixes, turn Java-style getters into
-   properties, remove the `!!`.
+1. `OnGetSuggestedWordsCallback` in `Suggest.kt` could take a non-null parameter (removes four
+   `!!` in `InputLogic.kt`).
+2. The remaining Java in the core path: `KeyboardSwitcher`, `MainKeyboardView`, `WordComposer`.

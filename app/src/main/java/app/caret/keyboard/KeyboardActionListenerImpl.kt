@@ -161,7 +161,7 @@ class KeyboardActionListenerImpl(private val latinIME: LatinIME, private val inp
         if (editorMimeTypes.any { content.description.hasMimeType(it) }) {
             connection.commitContent(content, editorInfo)
         } else if (editorMimeTypes.isEmpty()) { // make the fallback optional?
-            latinIME.getClipboardHistoryManager().pasteWithoutChangingClips(content)
+            latinIME.clipboardHistoryManager.pasteWithoutChangingClips(content)
         }
     }
 
@@ -255,9 +255,9 @@ class KeyboardActionListenerImpl(private val latinIME: LatinIME, private val inp
 
     override fun onMoveDeletePointer(steps: Int) {
         inputLogic.finishInput()
-        val end = connection.getExpectedSelectionEnd()
+        val end = connection.expectedSelectionEnd
         val actualSteps = if (Settings.getValues().mSwipeDeleteByWord) wordSteps(steps) else actualSteps(steps)
-        val start = connection.getExpectedSelectionStart() + actualSteps
+        val start = connection.expectedSelectionStart + actualSteps
         if (start > end) return
         gestureMoveBackHaptics()
         connection.setSelection(start, end)
@@ -379,13 +379,13 @@ class KeyboardActionListenerImpl(private val latinIME: LatinIME, private val inp
                 && inputLogic.moveCursorByAndReturnIfInsideComposingWord(moveSteps)) {
             // no need to finish input and restart suggestions if we're still in the word
             // this is a noticeable performance improvement when moving through long words
-            val newPosition = connection.getExpectedSelectionStart() + moveSteps
+            val newPosition = connection.expectedSelectionStart + moveSteps
             connection.setSelection(newPosition, newPosition)
             return true
         }
 
         inputLogic.finishInput()
-        val newPosition = connection.getExpectedSelectionStart() + moveSteps
+        val newPosition = connection.expectedSelectionStart + moveSteps
         connection.setSelection(newPosition, newPosition)
         inputLogic.restartSuggestionsOnWordTouchedByCursor(settings.current, keyboardSwitcher.currentKeyboardScript)
         return true

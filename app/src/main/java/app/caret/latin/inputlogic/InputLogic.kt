@@ -368,7 +368,7 @@ class InputLogic(
     private fun extendComposingRegionOverLeadingPart(settingsValues: SettingsValues, suggestion: String) {
         if (!wordComposer.isComposingWord() || wordComposer.isBatchMode()) return
         val typedWord = wordComposer.getTypedWord()
-        val cursor = connection.getExpectedSelectionStart()
+        val cursor = connection.expectedSelectionStart
         val before = connection.getTextBeforeCursor(Constants.EDITOR_CONTENTS_CACHE_SIZE, 0)
         if (before == null || cursor < 0 || before.length < typedWord.length) return
         // Non-separator characters committed right before the composing word still belong
@@ -607,7 +607,7 @@ class InputLogic(
                 // first so that we can insert the batch input at the current cursor position.
                 // We also need to unlearn the original word that is now being corrected.
                 unlearnWord(wordComposer.getTypedWord(), settingsValues, DictionaryFacilitator.UnlearnEvent.BACKSPACE)
-                resetEntireInputState(connection.getExpectedSelectionStart(), connection.getExpectedSelectionEnd(), true)
+                resetEntireInputState(connection.expectedSelectionStart, connection.expectedSelectionEnd, true)
             } else if (wordComposer.isSingleLetter() && !isInlineEmojiSearchAction()) {
                 // We auto-correct the previous (typed, not gestured) string iff it's one character
                 // long. The reason for this is, even in the middle of gesture typing, you'll still
@@ -820,7 +820,7 @@ class InputLogic(
             KeyCode.CLIPBOARD_COPY_ALL ->
                 connection.copyText(false)
             KeyCode.CLIPBOARD_CLEAR_HISTORY ->
-                latinIME.getClipboardHistoryManager().clearHistory()
+                latinIME.clipboardHistoryManager.clearHistory()
             KeyCode.CLIPBOARD_CUT ->
                 cutSelection(event, inputTransaction, currentKeyboardScript)
             KeyCode.WORD_LEFT ->
@@ -907,10 +907,10 @@ class InputLogic(
     }
 
     private fun moveToStartOfPage(event: Event) {
-        val selectionEnd = connection.getExpectedSelectionEnd()
-        val selectionStart = connection.getExpectedSelectionStart()
+        val selectionEnd = connection.expectedSelectionEnd
+        val selectionStart = connection.expectedSelectionStart
         sendDownUpKeyEventWithMetaState(KeyEvent.KEYCODE_MOVE_HOME, KeyEvent.META_CTRL_ON or event.metaState)
-        if (connection.getExpectedSelectionStart() == selectionStart && connection.getExpectedSelectionEnd() == selectionEnd) {
+        if (connection.expectedSelectionStart == selectionStart && connection.expectedSelectionEnd == selectionEnd) {
             // unchanged -> try a different method (necessary for compose fields)
             val newEnd = if ((event.metaState and KeyEvent.META_SHIFT_MASK) != 0) selectionEnd else 0
             // Caret: let go of the word being composed first, or the next letter is
@@ -921,10 +921,10 @@ class InputLogic(
     }
 
     private fun moveToEndOfPage(event: Event) {
-        val selectionStart = connection.getExpectedSelectionStart()
-        val selectionEnd = connection.getExpectedSelectionEnd()
+        val selectionStart = connection.expectedSelectionStart
+        val selectionEnd = connection.expectedSelectionEnd
         sendDownUpKeyEventWithMetaState(KeyEvent.KEYCODE_MOVE_END, KeyEvent.META_CTRL_ON or event.metaState)
-        if (connection.getExpectedSelectionStart() == selectionStart && connection.getExpectedSelectionEnd() == selectionEnd) {
+        if (connection.expectedSelectionStart == selectionStart && connection.expectedSelectionEnd == selectionEnd) {
             // unchanged, try fallback e.g. for compose fields that don't care about ctrl + end
             // we just move to a very large index, and hope the field is prepared to deal with this
             // getting the actual length of the text for setting the correct position can be tricky for some apps...
@@ -1046,8 +1046,8 @@ class InputLogic(
                     // first so that we can insert the character at the current cursor position.
                     // We also need to unlearn the original word that is now being corrected.
                     unlearnWord(wordComposer.getTypedWord(), sv, DictionaryFacilitator.UnlearnEvent.BACKSPACE)
-                    resetEntireInputState(connection.getExpectedSelectionStart(),
-                            connection.getExpectedSelectionEnd(), true /* clearSuggestionStrip */)
+                    resetEntireInputState(connection.expectedSelectionStart,
+                            connection.expectedSelectionEnd, true /* clearSuggestionStrip */)
                 } else {
                     commitTyped(sv, LastComposedWord.NOT_A_SEPARATOR)
                 }
@@ -1110,14 +1110,14 @@ class InputLogic(
             // we add something in front of the composing word, this is likely for adding something
             // and not for a correction
             // keep composing and don't unlearn word in this case
-            resetEntireInputState(connection.getExpectedSelectionStart(), connection.getExpectedSelectionEnd(), false)
+            resetEntireInputState(connection.expectedSelectionStart, connection.expectedSelectionEnd, false)
             isComposingWord = false
         } else if (wordComposer.isCursorFrontOrMiddleOfComposingWord()) {
             // If we are in the middle of a recorrection, we need to commit the recorrection
             // first so that we can insert the character at the current cursor position.
             // We also need to unlearn the original word that is now being corrected.
             unlearnWord(wordComposer.getTypedWord(), inputTransaction.settingsValues, DictionaryFacilitator.UnlearnEvent.BACKSPACE)
-            resetEntireInputState(connection.getExpectedSelectionStart(), connection.getExpectedSelectionEnd(), true)
+            resetEntireInputState(connection.expectedSelectionStart, connection.expectedSelectionEnd, true)
             isComposingWord = false
         }
         // We only start composing if we're not already composing.
@@ -1236,8 +1236,8 @@ class InputLogic(
             // first so that we can insert the separator at the current cursor position.
             // We also need to unlearn the original word that is now being corrected.
             unlearnWord(wordComposer.getTypedWord(), settingsValues, DictionaryFacilitator.UnlearnEvent.BACKSPACE)
-            resetEntireInputState(connection.getExpectedSelectionStart(),
-                    connection.getExpectedSelectionEnd(), true /* clearSuggestionStrip */)
+            resetEntireInputState(connection.expectedSelectionStart,
+                    connection.expectedSelectionEnd, true /* clearSuggestionStrip */)
         }
         // isComposingWord() may have changed since we stored wasComposing
         if (wordComposer.isComposingWord()) {
@@ -1391,7 +1391,7 @@ class InputLogic(
         // shift state should be updated, so if this is a key repeat, we update after a small delay.
         // Then again, even in the case of a key repeat, if the cursor is at start of text, it
         // can't go any further back, so we can update right away even if it's a key repeat.
-        val shiftUpdateKind = if (event.isKeyRepeat && connection.getExpectedSelectionStart() > 0)
+        val shiftUpdateKind = if (event.isKeyRepeat && connection.expectedSelectionStart > 0)
                 InputTransaction.SHIFT_UPDATE_LATER
                 else InputTransaction.SHIFT_UPDATE_NOW
         inputTransaction.requireShiftUpdate(shiftUpdateKind)
@@ -1402,8 +1402,8 @@ class InputLogic(
             // first so that we can remove the character at the current cursor position.
             // We also need to unlearn the original word that is now being corrected.
             unlearnWord(wordComposer.getTypedWord(), settingsValues, DictionaryFacilitator.UnlearnEvent.BACKSPACE)
-            resetEntireInputState(connection.getExpectedSelectionStart(),
-                    connection.getExpectedSelectionEnd(), true /* clearSuggestionStrip */)
+            resetEntireInputState(connection.expectedSelectionStart,
+                    connection.expectedSelectionEnd, true /* clearSuggestionStrip */)
             // When we exit this if-clause, wordComposer.isComposingWord() will return false.
         }
         if (wordComposer.isComposingWord()) {
@@ -1418,7 +1418,7 @@ class InputLogic(
         if (connection.hasSelection()) {
             result = backspaceSelection(settingsValues)
         } else if (settingsValues.mInputAttributes.isTypeNull()
-                || Constants.NOT_A_CURSOR_POSITION == connection.getExpectedSelectionEnd()) {
+                || Constants.NOT_A_CURSOR_POSITION == connection.expectedSelectionEnd) {
             result = backspaceWithKeyEvents(settingsValues, currentKeyboardScript)
         } else {
             result = backspaceBeforeCursor(event, settingsValues, currentKeyboardScript)
@@ -1528,10 +1528,10 @@ class InputLogic(
             unlearnWord(selection.toString(), settingsValues, DictionaryFacilitator.UnlearnEvent.BACKSPACE)
             result = BackspaceResult.DELETED_AND_UNLEARNED
         }
-        val numCharsDeleted = connection.getExpectedSelectionEnd() -
-                connection.getExpectedSelectionStart()
-        connection.setSelection(connection.getExpectedSelectionEnd(),
-                connection.getExpectedSelectionEnd())
+        val numCharsDeleted = connection.expectedSelectionEnd -
+                connection.expectedSelectionStart
+        connection.setSelection(connection.expectedSelectionEnd,
+                connection.expectedSelectionEnd)
         connection.deleteTextBeforeCursor(numCharsDeleted)
         StatsUtils.onBackspaceSelectedText(numCharsDeleted)
         return result
@@ -1803,8 +1803,8 @@ class InputLogic(
         if (!connection.hasSelection() || !recapitalizeStatus.isEnabled()) {
             return // No selection or recapitalize is disabled for now
         }
-        val selectionStart = connection.getExpectedSelectionStart()
-        val selectionEnd = connection.getExpectedSelectionEnd()
+        val selectionStart = connection.expectedSelectionStart
+        val selectionEnd = connection.expectedSelectionEnd
         val numCharsSelected = selectionEnd - selectionStart
         if (numCharsSelected > Constants.MAX_CHARACTERS_FOR_RECAPITALIZATION
                 || numCharsSelected < -Constants.MAX_CHARACTERS_FOR_RECAPITALIZATION) {
@@ -1962,7 +1962,7 @@ class InputLogic(
                 // If the cursor is not touching a word, or if there is a selection, return right away.
                 || connection.hasSelection()
                 // If we don't know the cursor location, return.
-                || connection.getExpectedSelectionStart() < 0) {
+                || connection.expectedSelectionStart < 0) {
             suggestionStripViewAccessor.setNeutralSuggestionStrip()
             return
         }
@@ -2012,7 +2012,7 @@ class InputLogic(
 
     private fun restartSuggestions(range: TextRange) {
         val numberOfCharsInWordBeforeCursor = range.getNumberOfCharsInWordBeforeCursor()
-        val expectedCursorPosition = connection.getExpectedSelectionStart()
+        val expectedCursorPosition = connection.expectedSelectionStart
         if (numberOfCharsInWordBeforeCursor > expectedCursorPosition) return
         val suggestions = ArrayList<SuggestedWordInfo>()
         val typedWordString = range.mWord.toString()
@@ -2222,8 +2222,8 @@ class InputLogic(
 
     fun getCurrentRecapitalizeState(): RecapitalizeMode? {
         if (!recapitalizeStatus.isStarted()
-                || !recapitalizeStatus.isSetAt(connection.getExpectedSelectionStart(),
-                        connection.getExpectedSelectionEnd())) {
+                || !recapitalizeStatus.isSetAt(connection.expectedSelectionStart,
+                        connection.expectedSelectionEnd)) {
             // Not recapitalizing at the moment
             return null
         }
@@ -2545,7 +2545,7 @@ class InputLogic(
                 // of the auto-correction flash. At this moment, the "typedWord" argument is
                 // ignored by TextView.
                 connection.commitCorrection(CorrectionInfo(
-                        connection.getExpectedSelectionEnd() - stringToCommit.length,
+                        connection.expectedSelectionEnd - stringToCommit.length,
                         typedWord, stringToCommit))
                 val prevWordsContext = if (autoCorrectionOrNull != null)
                         autoCorrectionOrNull.mPrevWordsContext
@@ -2602,7 +2602,7 @@ class InputLogic(
             // maybe we want to revert it
             val afterCursor = connection.getTextAfterCursor(1, 0)!!
             if (afterCursor.length > 0 && afterCursor[0].code == end) {
-                connection.setSelection(connection.getExpectedSelectionStart() - 1, connection.getExpectedSelectionEnd() + 1)
+                connection.setSelection(connection.expectedSelectionStart - 1, connection.expectedSelectionEnd + 1)
                 connection.commitText(selected, 1)
                 return
             }
@@ -2626,7 +2626,7 @@ class InputLogic(
         val shouldFinishComposition = connection.hasSelection()
                 || !connection.isCursorPositionKnown()
         if (!connection.resetCachesUponCursorMoveAndReturnSuccess(
-                connection.getExpectedSelectionStart(), connection.getExpectedSelectionEnd(),
+                connection.expectedSelectionStart, connection.expectedSelectionEnd,
                 shouldFinishComposition)) {
             if (0 < remainingTries) {
                 handler.postResetCaches(tryResumeSuggestions, remainingTries - 1)
@@ -2755,7 +2755,7 @@ class InputLogic(
         if (!connection.isCursorPositionKnown() || connection.hasSelection()) {
             return -1
         }
-        return connection.getExpectedSelectionStart() - wordComposer.size()
+        return connection.expectedSelectionStart - wordComposer.size()
     }
 
     /**
@@ -2774,7 +2774,7 @@ class InputLogic(
         // some apps ignore KeyEvent.KEYCODE_PASTE, other apps ignore CRTL+V
         // we try to deal with this by committing the text if the clipboard content is simply text,
         // and use KeyEvent.KEYCODE_PASTE otherwise except for apps that are known to ignore it
-        val primaryClip = latinIME.getClipboardHistoryManager().getPrimaryClipIfText()
+        val primaryClip = latinIME.clipboardHistoryManager.getPrimaryClipIfText()
         if (primaryClip != null) {
             connection.commitText(primaryClip, 1)
             return

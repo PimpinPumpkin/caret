@@ -79,7 +79,8 @@ class PointerTracker private constructor(id: Int) : PointerTrackerQueue.Element,
     private var isDetectingGesture = false // per PointerTracker.
 
     // The position and time at which first down event occurred.
-    private var downTime: Long = 0
+    var downTime: Long = 0
+        private set
     private val downCoordinates: IntArray = CoordinateUtils.newInstance()
     private var upTime: Long = 0
 
@@ -125,7 +126,7 @@ class PointerTracker private constructor(id: Int) : PointerTrackerQueue.Element,
     private val touchpadHandler = TouchpadHandler()
 
     private val batchInputArbiter: BatchInputArbiter
-    private val gestureStrokeDrawingPoints: GestureStrokeDrawingPoints
+    val gestureStrokeDrawingPoints: GestureStrokeDrawingPoints
 
     init {
         pointerId = id
@@ -267,9 +268,8 @@ class PointerTracker private constructor(id: Int) : PointerTrackerQueue.Element,
         return inDraggingFinger
     }
 
-    fun getKey(): Key? {
-        return currentKey
-    }
+    val key: Key?
+        get() = currentKey
 
     override fun isModifier(): Boolean {
         val key = currentKey
@@ -351,17 +351,11 @@ class PointerTracker private constructor(id: Int) : PointerTrackerQueue.Element,
     }
 
 
-    fun getGestureStrokeDrawingPoints(): GestureStrokeDrawingPoints {
-        return gestureStrokeDrawingPoints
-    }
 
     fun getLastCoordinates(outCoords: IntArray) {
         CoordinateUtils.set(outCoords, lastX, lastY)
     }
 
-    fun getDownTime(): Long {
-        return downTime
-    }
 
     fun getDownCoordinates(outCoords: IntArray) {
         CoordinateUtils.copy(outCoords, downCoordinates)
@@ -1009,7 +1003,7 @@ class PointerTracker private constructor(id: Int) : PointerTrackerQueue.Element,
         if (isShowingPopupKeysPanel()) {
             return
         }
-        val key = getKey()
+        val key = currentKey
         if (key == null) {
             return
         }
@@ -1188,7 +1182,7 @@ class PointerTracker private constructor(id: Int) : PointerTrackerQueue.Element,
     }
 
     fun onKeyRepeat(code: Int, repeatCount: Int) {
-        val key = getKey()
+        val key = currentKey
         if (key == null || key.getCode() != code) {
             currentRepeatingKeyCode = Constants.NOT_A_CODE
             return
@@ -1366,7 +1360,7 @@ class PointerTracker private constructor(id: Int) : PointerTrackerQueue.Element,
             val trackersSize = trackers.size
             for (i in 0 until trackersSize) {
                 val tracker = trackers.get(i)
-                tracker.setReleasedKeyGraphics(tracker.getKey(), true)
+                tracker.setReleasedKeyGraphics(tracker.key, true)
             }
         }
 
