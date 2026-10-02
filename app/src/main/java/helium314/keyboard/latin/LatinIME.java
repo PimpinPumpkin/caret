@@ -940,63 +940,12 @@ public class LatinIME extends InputMethodService implements
         // In some cases the input connection has not been reset yet and we can't access it. In
         // this case we will need to call loadKeyboard() later, when it's accessible, so that we
         // can go into the correct mode, so we need to do some housekeeping here.
-        final boolean needToCallLoadKeyboardLater;
-        final Suggest suggest = mInputLogic.mSuggest;
-        if (!isImeSuppressedByHardwareKeyboard()) {
-            // The app calling setText() has the effect of clearing the composing
-            // span, so we should reset our state unconditionally, even if restarting is true.
-            // We also tell the input logic about the combining rules for the current subtype, so
-            // it can adjust its combiners if needed.
-            mInputLogic.startInput(mRichImm.getCombiningRulesExtraValueOfCurrentSubtype(), currentSettingsValues);
+        // If we have a hardware keyboard we don't need to call loadKeyboard later anyway.
+        final boolean needToCallLoadKeyboardLater = !isImeSuppressedByHardwareKeyboard()
+                && !connectInputLogicToField(editorInfo, currentSettingsValues, isDifferentTextField);
 
-            resetDictionaryFacilitatorIfNecessary();
+        showKeyboardForField(mainKeyboardView, currentSettingsValues, isDifferentTextField, restarting, needToCallLoadKeyboardLater);
 
-            // TODO[IL]: Can the following be moved to InputLogic#startInput?
-            if (!mInputLogic.mConnection.resetCachesUponCursorMoveAndReturnSuccess(
-                    editorInfo.initialSelStart, editorInfo.initialSelEnd,
-                    false /* shouldFinishComposition */)) {
-                // Sometimes, while rotating, for some reason the framework tells the app we are not
-                // connected to it and that means we can't refresh the cache. In this case, schedule
-                // a refresh later.
-                // We try resetting the caches up to 5 times before giving up.
-                mHandler.postResetCaches(isDifferentTextField, 5 /* remainingTries */);
-                // mLastSelection{Start,End} are reset later in this method, no need to do it here
-                needToCallLoadKeyboardLater = true;
-            } else {
-                // When rotating, and when input is starting again in a field from where the focus
-                // didn't move (the keyboard having been closed with the back key),
-                // initialSelStart and initialSelEnd sometimes are lying. Make a best effort to
-                // work around this bug.
-                mInputLogic.mConnection.tryFixIncorrectCursorPosition();
-                if (mInputLogic.mConnection.isCursorTouchingWord(currentSettingsValues.mSpacingAndPunctuations, true)) {
-                    mHandler.postResumeSuggestions(true /* shouldDelay */);
-                }
-                needToCallLoadKeyboardLater = false;
-            }
-        } else {
-            // If we have a hardware keyboard we don't need to call loadKeyboard later anyway.
-            needToCallLoadKeyboardLater = false;
-        }
-
-        if (isDifferentTextField) {
-            mainKeyboardView.closing();
-            suggest.setAutoCorrectionThreshold(currentSettingsValues.mAutoCorrectionThreshold);
-            switcher.reloadMainKeyboard();
-            if (needToCallLoadKeyboardLater) {
-                // If we need to call loadKeyboard again later, we need to save its state now. The
-                // later call will be done in #retryResetCaches.
-                switcher.saveKeyboardState();
-            }
-        } else if (restarting) {
-            // TODO: Come up with a more comprehensive way to reset the keyboard layout when
-            // a keyboard layout set doesn't get reloaded in this method.
-            switcher.resetKeyboardStateToAlphabet();
-            // In apps like Talk, we come here when the text is sent and the field gets emptied and
-            // we need to re-evaluate the shift state, but not the whole layout which would be
-            // disruptive.
-            // Space state must be updated before calling updateShiftState
-            switcher.updateShiftState(getCurrentAutoCapsState(), getCurrentRecapitalizeState());
-        }
         // Set neutral suggestions and show the toolbar if the "Auto show toolbar" setting is enabled.
         if (!mHandler.hasPendingResumeSuggestions()) {
             mHandler.cancelUpdateSuggestionStrip();
@@ -1015,6 +964,68 @@ public class LatinIME extends InputMethodService implements
                 currentSettingsValues.mGestureFloatingPreviewTextEnabled);
 
         if (TRACE) Debug.startMethodTracing("/data/trace/latinime");
+    }
+
+    /**
+     * Resets the input logic for this field and reads the text around the cursor.
+     * @return false when the text field could not be read yet. A retry is then scheduled, and the
+     *  keyboard has to be loaded again once it succeeds.
+     */
+    private boolean connectInputLogicToField(final EditorInfo editorInfo, final SettingsValues currentSettingsValues,
+            final boolean isDifferentTextField) {
+        // The app calling setText() has the effect of clearing the composing
+        // span, so we should reset our state unconditionally, even if restarting is true.
+        // We also tell the input logic about the combining rules for the current subtype, so
+        // it can adjust its combiners if needed.
+        mInputLogic.startInput(mRichImm.getCombiningRulesExtraValueOfCurrentSubtype(), currentSettingsValues);
+
+        resetDictionaryFacilitatorIfNecessary();
+
+        // TODO[IL]: Can the following be moved to InputLogic#startInput?
+        if (!mInputLogic.mConnection.resetCachesUponCursorMoveAndReturnSuccess(
+                editorInfo.initialSelStart, editorInfo.initialSelEnd,
+                false /* shouldFinishComposition */)) {
+            // Sometimes, while rotating, for some reason the framework tells the app we are not
+            // connected to it and that means we can't refresh the cache. In this case, schedule
+            // a refresh later.
+            // We try resetting the caches up to 5 times before giving up.
+            mHandler.postResetCaches(isDifferentTextField, 5 /* remainingTries */);
+            return false;
+        }
+        // When rotating, and when input is starting again in a field from where the focus
+        // didn't move (the keyboard having been closed with the back key),
+        // initialSelStart and initialSelEnd sometimes are lying. Make a best effort to
+        // work around this bug.
+        mInputLogic.mConnection.tryFixIncorrectCursorPosition();
+        if (mInputLogic.mConnection.isCursorTouchingWord(currentSettingsValues.mSpacingAndPunctuations, true)) {
+            mHandler.postResumeSuggestions(true /* shouldDelay */);
+        }
+        return true;
+    }
+
+    /** Loads the keyboard for a new field, or only resets layout and shift state when input restarts in the same one. */
+    private void showKeyboardForField(final MainKeyboardView mainKeyboardView, final SettingsValues currentSettingsValues,
+            final boolean isDifferentTextField, final boolean restarting, final boolean needToCallLoadKeyboardLater) {
+        final KeyboardSwitcher switcher = mKeyboardSwitcher;
+        if (isDifferentTextField) {
+            mainKeyboardView.closing();
+            mInputLogic.mSuggest.setAutoCorrectionThreshold(currentSettingsValues.mAutoCorrectionThreshold);
+            switcher.reloadMainKeyboard();
+            if (needToCallLoadKeyboardLater) {
+                // If we need to call loadKeyboard again later, we need to save its state now. The
+                // later call will be done in #retryResetCaches.
+                switcher.saveKeyboardState();
+            }
+        } else if (restarting) {
+            // TODO: Come up with a more comprehensive way to reset the keyboard layout when
+            // a keyboard layout set doesn't get reloaded in this method.
+            switcher.resetKeyboardStateToAlphabet();
+            // In apps like Talk, we come here when the text is sent and the field gets emptied and
+            // we need to re-evaluate the shift state, but not the whole layout which would be
+            // disruptive.
+            // Space state must be updated before calling updateShiftState
+            switcher.updateShiftState(getCurrentAutoCapsState(), getCurrentRecapitalizeState());
+        }
     }
 
     @Override
