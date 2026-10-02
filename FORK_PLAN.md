@@ -153,10 +153,12 @@ Done:
 - Backspace (`handleBackspaceEvent`): six new tests, then split into `backspaceInComposingWord`,
   `revertOnBackspace`, `backspaceSelection`, `backspaceWithKeyEvents`, `backspaceBeforeCursor`.
 
+- Picking a suggestion (`onPickSuggestionManually`, `commitChosenWord`): eight new tests, two
+  steps pulled out, timing logs removed.
+- Separators (`handleSeparatorEvent`): five new tests, split into four steps.
+
 Next, in this order:
-1. Picking a suggestion and committing a word (`onPickSuggestionManually`, `commitChosenWord`).
-2. Space and separators (`handleSeparatorEvent`), including autospace and double-space period.
-3. Plain character input (`handleNonSeparatorEvent`).
-4. Swipe input (`onStartBatchInput` to `onEndBatchInput`).
-5. `RichInputConnection`: the cached picture of the text field.
-6. `LatinIME` and `PointerTracker`.
+1. Plain character input (`handleNonSeparatorEvent`).
+2. Swipe input (`onStartBatchInput` to `onEndBatchInput`).
+3. `RichInputConnection`: the cached picture of the text field.
+4. `LatinIME` and `PointerTracker`.
