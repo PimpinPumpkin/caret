@@ -76,3 +76,28 @@ class SwipeLayoutTest {
         assertEquals(expected.second, actual.second, 0.002f)
     }
 }
+
+class SwipeFormTest {
+    private val qwertz = "qwertzuiopasdfghjklyxcvbnm"
+    private val spanish = "qwertyuiopasdfghjklñzxcvbnm"
+
+    @org.junit.Test fun `accented letters without a key become their base letter`() {
+        kotlin.test.assertEquals("uber", swipeForm("Über", qwertz))
+        kotlin.test.assertEquals("eleve", swipeForm("élève", qwertz))
+        kotlin.test.assertEquals("francais", swipeForm("français", qwertz))
+        kotlin.test.assertEquals("strasse", swipeForm("Straße", qwertz))
+        kotlin.test.assertEquals("coeur", swipeForm("cœur", qwertz))
+    }
+
+    @org.junit.Test fun `a letter that has its own key stays`() {
+        kotlin.test.assertEquals("mañana", swipeForm("mañana", spanish))
+        kotlin.test.assertEquals("tambien", swipeForm("también", spanish))
+        kotlin.test.assertEquals("manana", swipeForm("mañana", qwertz))
+    }
+
+    @org.junit.Test fun `what is not a letter is left out`() {
+        kotlin.test.assertEquals("dont", swipeForm("don't", qwertz))
+        kotlin.test.assertEquals("i", swipeForm("I", qwertz))
+        kotlin.test.assertEquals("", swipeForm("123", qwertz))
+    }
+}

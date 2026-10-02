@@ -233,3 +233,27 @@ Still open in the converted code:
   feedback are unverified), split mode in portrait, foldables, and anything on a real phone.
 - Useful for emulator tests: `uiautomator dump --windows` includes the keyboard window, so keys
   and toolbar buttons can be found and tapped by label instead of by coordinates.
+
+## Since the conversion (2026-10-02)
+
+- Release builds are signed with Caret's own key and carry Caret's version (0.1.x, code 5000+n).
+  The release package is `app.caret`; dev builds stay `app.caret.debug`.
+- Next-word suggestions: the context language model of the swipe models ranks the next word
+  after at least one word of a sentence, behind up to two predictions from the user's own
+  dictionaries. English only (the model is English), switch under Text correction. The model
+  is small; "thank you very" gives "much", but it is no match for a large phone keyboard's model.
+- Swipe in other languages: words are put into the swipe trie spelled with the keys of the
+  layout, so "über" is swiped as "uber" on QWERTZ and comes out as "über". Other words on the
+  same keys ("schon"/"schön", "its"/"it's") follow as the next suggestions. Checked with
+  scripted swipes in German, French (AZERTY) and Spanish. There is no recorded swipe data for
+  these languages, so no accuracy number like the English benchmark; the paired decoder model and
+  the language model are English only, so other languages run on the encoder and dictionary alone.
+- Caret's own strings are machine translated into 20 languages, not reviewed by native speakers.
+- "Teh" as a fast first word: autocorrect works; the earlier miss was in a search field, which
+  asks keyboards not to correct.
+
+Open:
+- In-keyboard dictation through Alyo's speech service (needs a decision on the microphone
+  permission), clipboard masking, TV remote support.
+- TalkBack on a real device.
+

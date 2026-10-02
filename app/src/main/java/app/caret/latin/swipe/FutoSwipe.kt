@@ -49,6 +49,7 @@ object FutoSwipe {
     private var userTrieTime = 0L
     private var userSurfaceForms: Map<String, String> = emptyMap()
     private var surfaceForms: Map<String, String> = emptyMap()
+    private var alternateForms: Map<String, List<String>> = emptyMap()
 
     private var appContext: Context? = null
 
@@ -167,15 +168,21 @@ object FutoSwipe {
         // context when it is within 7% of the best score, so a clearly worse candidate must also
         // be clearly lower here, or one bad swipe keeps coming back.
         val best = results.firstOrNull()?.score ?: 0f
-        return results.mapIndexed { index, result ->
+        val suggestions = ArrayList<SuggestedWordInfo>()
+        results.forEachIndexed { index, result ->
             val gap = ((best - result.score) * SCORE_PER_UNIT).toInt().coerceIn(0, TOP_SCORE - 1000)
-            SuggestedWordInfo(
-                surfaceForms[result.word] ?: userSurfaceForms[result.word] ?: result.word, "",
-                TOP_SCORE - gap - index,
-                SuggestedWordInfo.KIND_CORRECTION, sourceDict,
-                SuggestedWordInfo.NOT_AN_INDEX, SuggestedWordInfo.NOT_A_CONFIDENCE
-            )
+            val score = TOP_SCORE - gap - index * 10
+            val word = surfaceForms[result.word] ?: userSurfaceForms[result.word] ?: result.word
+            suggestions.add(SuggestedWordInfo(word, "", score, SuggestedWordInfo.KIND_CORRECTION, sourceDict,
+                SuggestedWordInfo.NOT_AN_INDEX, SuggestedWordInfo.NOT_A_CONFIDENCE))
+            // other words that are swiped over the same keys ("schon" and "schön"), right behind it
+            alternateForms[result.word]?.forEachIndexed { n, other ->
+                if (other != word)
+                    suggestions.add(SuggestedWordInfo(other, "", score - 1 - n, SuggestedWordInfo.KIND_CORRECTION, sourceDict,
+                        SuggestedWordInfo.NOT_AN_INDEX, SuggestedWordInfo.NOT_A_CONFIDENCE))
+            }
         }
+        return suggestions
     }
 
     /**
@@ -219,7 +226,10 @@ object FutoSwipe {
             file.bufferedWriter().use { writer ->
                 writer.write("dictionary=user:${locale.toLanguageTag()}\n")
                 // personal words should win over rare main dictionary words
-                words.forEach { (word, frequency) -> writer.write(" word=$word,f=${frequency.coerceIn(USER_WORD_MIN_FREQUENCY, 255)}\n") }
+                words.forEach { (word, frequency) ->
+                    val keys = swipeForm(word, swipeLayout.letters)
+                    if (keys.isNotEmpty()) writer.write(" word=$keys,f=${frequency.coerceIn(USER_WORD_MIN_FREQUENCY, 255)}\n")
+                }
             }
             val newTrie = if (words.isEmpty()) 0L else SwipeDecoder.nativeLoadTrie(file.path, swipeLayout.letters)
             val tries = if (newTrie == 0L) longArrayOf(SwipeDecoder.nativeTrieInterface(trie))
@@ -230,7 +240,7 @@ object FutoSwipe {
             Log.i(TAG, "personal words for swipe: ${words.size}")
             userSurfaceForms = HashMap<String, String>().apply {
                 words.forEach { (word, _) ->
-                    val alpha = buildString { word.lowercase().forEach { if (it in swipeLayout.letters) append(it) } }
+                    val alpha = swipeForm(word, swipeLayout.letters)
                     // "Something" in the history must not turn every swiped "something" into a capital:
                     // only spell a result the personal way when the plain letters are not a word themselves
                     if (alpha != word && alpha.isNotEmpty() && !isMainWord(alpha)) put(alpha, word)
@@ -290,9 +300,11 @@ object FutoSwipe {
                 userTrie = 0L
             }
             userTrieTime = 0L
-            trie = SwipeDecoder.nativeLoadTrie(wordList.file.path, swipeLayout.letters)
+            trie = SwipeDecoder.nativeLoadTrie(wordList.keysFile(swipeLayout.letters).path, swipeLayout.letters)
             if (trie == 0L) return null
-            surfaceForms = wordList.surfaceForms(swipeLayout.letters)
+            val forms = wordList.surfaceForms(swipeLayout.letters)
+            surfaceForms = forms.first
+            alternateForms = forms.second
         }
 
         val ok = engine.setMode(
@@ -358,33 +370,88 @@ class SwipeLayout(val letters: String, val cx: FloatArray, val cy: FloatArray,
     }
 }
 
+/**
+ * A word as it is swiped on a keyboard with these [letters]: lower case, a letter with an accent
+ * that has no key of its own becomes its base letter, and anything else that is not a key is left
+ * out. "Über" is "uber" on QWERTZ, "mañana" stays "mañana" on a Spanish layout, "don't" is "dont".
+ */
+fun swipeForm(word: String, letters: String): String {
+    val out = StringBuilder(word.length)
+    for (c in word.lowercase()) {
+        if (c in letters) { out.append(c); continue }
+        val replacement = when (c) {
+            'ß' -> "ss"
+            'æ' -> "ae"
+            'œ' -> "oe"
+            'ø' -> "o"
+            'ł' -> "l"
+            'đ' -> "d"
+            else -> if (c.code < 0x80) "" else java.text.Normalizer.normalize(c.toString(), java.text.Normalizer.Form.NFD).take(1)
+        }
+        replacement.forEach { if (it in letters) out.append(it) }
+    }
+    return out.toString()
+}
+
 /** Position and code of one key, all that [SwipeLayout] needs from a keyboard. */
 data class KeyBox(val code: Int, val x: Int, val y: Int, val width: Int, val height: Int)
 
 /** The main dictionary of a locale as a .combined word list, which is what the library's trie reads. */
 class WordList private constructor(val file: File) {
     /**
-     * The library matches on letters only and returns "dont" or "i". This maps such a form back to
-     * the most frequent real word, "don't" or "I".
+     * The same words spelled with the keys of a layout (see [swipeForm]), which is what the
+     * library's trie gets: it can only match letters that are keys, so "über" has to go in as
+     * "uber" on a keyboard without an ü key. Written once per set of letters.
      */
-    fun surfaceForms(letters: String): Map<String, String> {
-        val best = HashMap<String, Pair<String, Int>>()
+    fun keysFile(letters: String): File {
+        val out = File(file.parentFile, "${file.name}.${Integer.toHexString(letters.hashCode())}.keys")
+        if (out.isFile && out.length() > 0) return out
+        val frequencies = LinkedHashMap<String, Int>()
+        forEachWord { word, frequency ->
+            val keys = swipeForm(word, letters)
+            if (keys.isNotEmpty() && frequency > (frequencies[keys] ?: -1)) frequencies[keys] = frequency
+        }
+        val tmp = File(out.path + ".tmp")
+        tmp.bufferedWriter().use { writer ->
+            writer.write("dictionary=main:keys\n")
+            frequencies.forEach { (keys, frequency) -> writer.write(" word=$keys,f=$frequency\n") }
+        }
+        if (!tmp.renameTo(out)) tmp.delete()
+        return if (out.isFile) out else file
+    }
+
+    /**
+     * The library returns the keys form, "dont", "i" or "uber". The first map gives the real word
+     * for it, "don't", "I" or "über": the most frequent one, and only when the keys form is not
+     * a word itself ("its" stays "its"). The second map lists up to two other real words with the
+     * same keys that differ by more than capitals, such as "it's" for "its" or "schön" for "schon".
+     */
+    fun surfaceForms(letters: String): Pair<Map<String, String>, Map<String, List<String>>> {
+        val spellings = HashMap<String, ArrayList<Pair<String, Int>>>()
+        val plain = HashSet<String>()
+        forEachWord { word, frequency ->
+            val keys = swipeForm(word, letters)
+            if (keys.isEmpty()) return@forEachWord
+            if (keys == word) plain.add(word)
+            else spellings.getOrPut(keys) { ArrayList(1) }.add(word to frequency)
+        }
+        val primary = HashMap<String, String>()
+        val alternates = HashMap<String, List<String>>()
+        spellings.forEach { (keys, words) ->
+            words.sortByDescending { it.second }
+            val first = if (keys in plain) keys else words[0].first.also { primary[keys] = it }
+            val others = words.map { it.first }.filter { it != first && it.lowercase() != keys }.take(2)
+            if (others.isNotEmpty()) alternates[keys] = others
+        }
+        return primary to alternates
+    }
+
+    private inline fun forEachWord(crossinline action: (String, Int) -> Unit) {
         file.forEachLine { line ->
             if (!line.startsWith(" word=")) return@forEachLine
-            val word = line.substring(6, line.lastIndexOf(",f="))
-            val alpha = buildString { word.lowercase().forEach { if (it in letters) append(it) } }
-            if (alpha == word || alpha.isEmpty()) return@forEachLine
-            val frequency = line.substring(line.lastIndexOf(",f=") + 3).toIntOrNull() ?: 0
-            // an all lowercase spelling of the same letters wins when it is as frequent
-            val current = best[alpha]
-            if (current == null || frequency > current.second) best[alpha] = word to frequency
+            val end = line.lastIndexOf(",f=")
+            action(line.substring(6, end), line.substring(end + 3).toIntOrNull() ?: 0)
         }
-        // "its" must stay "its" even though "it's" exists: only map forms that are not words themselves
-        val plain = HashSet<String>()
-        file.forEachLine { line ->
-            if (line.startsWith(" word=")) plain.add(line.substring(6, line.lastIndexOf(",f=")))
-        }
-        return best.filterKeys { it !in plain }.mapValues { it.value.first }
     }
 
     companion object {
