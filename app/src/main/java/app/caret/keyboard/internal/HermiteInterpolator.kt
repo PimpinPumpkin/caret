@@ -4,32 +4,37 @@
  * SPDX-License-Identifier: Apache-2.0 AND GPL-3.0-only
  */
 
-package app.caret.keyboard.internal;
+package app.caret.keyboard.internal
 
 /**
  * Interpolates XY-coordinates using Cubic Hermite Curve.
  */
-public final class HermiteInterpolator {
-    private int[] mXCoords;
-    private int[] mYCoords;
-    private int mMinPos;
-    private int mMaxPos;
+class HermiteInterpolator {
+    private lateinit var mXCoords: IntArray
+    private lateinit var mYCoords: IntArray
+    private var mMinPos = 0
+    private var mMaxPos = 0
 
     // Working variable to calculate interpolated value.
     /** The coordinates of the start point of the interval. */
-    public int mP1X, mP1Y;
+    @JvmField var mP1X = 0
+    @JvmField var mP1Y = 0
     /** The coordinates of the end point of the interval. */
-    public int mP2X, mP2Y;
+    @JvmField var mP2X = 0
+    @JvmField var mP2Y = 0
     /** The slope of the tangent at the start point. */
-    public float mSlope1X, mSlope1Y;
+    @JvmField var mSlope1X = 0f
+    @JvmField var mSlope1Y = 0f
     /** The slope of the tangent at the end point. */
-    public float mSlope2X, mSlope2Y;
+    @JvmField var mSlope2X = 0f
+    @JvmField var mSlope2Y = 0f
     /** The interpolated coordinates.
      * The return variables of {@link #interpolate(float)} to avoid instantiations.
      */
-    public float mInterpolatedX, mInterpolatedY;
+    @JvmField var mInterpolatedX = 0f
+    @JvmField var mInterpolatedY = 0f
 
-    public HermiteInterpolator() {
+    constructor() {
         // Nothing to do with here.
     }
 
@@ -42,12 +47,12 @@ public final class HermiteInterpolator {
      * @param minPos the minimum index of left-open interval of valid data.
      * @param maxPos the maximum index of left-open interval of valid data.
      */
-    public void reset(final int[] xCoords, final int[] yCoords, final int minPos,
-            final int maxPos) {
-        mXCoords = xCoords;
-        mYCoords = yCoords;
-        mMinPos = minPos;
-        mMaxPos = maxPos;
+    fun reset(xCoords: IntArray, yCoords: IntArray, minPos: Int,
+            maxPos: Int) {
+        mXCoords = xCoords
+        mYCoords = yCoords
+        mMinPos = minPos
+        mMaxPos = maxPos
     }
 
     /**
@@ -66,61 +71,61 @@ public final class HermiteInterpolator {
      *           valid points, <code>p3</code> must be equal or greater than <code>maxPos</code> of
      *           {@link #reset(int[],int[],int,int)}.
      */
-    public void setInterval(final int p0, final int p1, final int p2, final int p3) {
-        mP1X = mXCoords[p1];
-        mP1Y = mYCoords[p1];
-        mP2X = mXCoords[p2];
-        mP2Y = mYCoords[p2];
+    fun setInterval(p0: Int, p1: Int, p2: Int, p3: Int) {
+        mP1X = mXCoords[p1]
+        mP1Y = mYCoords[p1]
+        mP2X = mXCoords[p2]
+        mP2Y = mYCoords[p2]
         // A(ax,ay) is the vector p1->p2.
-        final int ax = mP2X - mP1X;
-        final int ay = mP2Y - mP1Y;
+        val ax = mP2X - mP1X
+        val ay = mP2Y - mP1Y
 
         // Calculate the slope of the tangent at p1.
         if (p0 >= mMinPos) {
             // p1 has previous valid point p0.
             // The slope of the tangent is half of the vector p0->p2.
-            mSlope1X = (mP2X - mXCoords[p0]) / 2.0f;
-            mSlope1Y = (mP2Y - mYCoords[p0]) / 2.0f;
+            mSlope1X = (mP2X - mXCoords[p0]) / 2.0f
+            mSlope1Y = (mP2Y - mYCoords[p0]) / 2.0f
         } else if (p3 < mMaxPos) {
             // p1 has no previous valid point, but p2 has next valid point p3.
             // B(bx,by) is the slope vector of the tangent at p2.
-            final float bx = (mXCoords[p3] - mP1X) / 2.0f;
-            final float by = (mYCoords[p3] - mP1Y) / 2.0f;
-            final float crossProdAB = ax * by - ay * bx;
-            final float dotProdAB = ax * bx + ay * by;
-            final float normASquare = ax * ax + ay * ay;
-            final float invHalfNormASquare = 1.0f / normASquare / 2.0f;
+            val bx = (mXCoords[p3] - mP1X) / 2.0f
+            val by = (mYCoords[p3] - mP1Y) / 2.0f
+            val crossProdAB = ax * by - ay * bx
+            val dotProdAB = ax * bx + ay * by
+            val normASquare = (ax * ax + ay * ay).toFloat()
+            val invHalfNormASquare = 1.0f / normASquare / 2.0f
             // The slope of the tangent is the mirror image of vector B to vector A.
-            mSlope1X = invHalfNormASquare * (dotProdAB * ax + crossProdAB * ay);
-            mSlope1Y = invHalfNormASquare * (dotProdAB * ay - crossProdAB * ax);
+            mSlope1X = invHalfNormASquare * (dotProdAB * ax + crossProdAB * ay)
+            mSlope1Y = invHalfNormASquare * (dotProdAB * ay - crossProdAB * ax)
         } else {
             // p1 and p2 have no previous valid point. (Interval has only point p1 and p2)
-            mSlope1X = ax;
-            mSlope1Y = ay;
+            mSlope1X = ax.toFloat()
+            mSlope1Y = ay.toFloat()
         }
 
         // Calculate the slope of the tangent at p2.
         if (p3 < mMaxPos) {
             // p2 has next valid point p3.
             // The slope of the tangent is half of the vector p1->p3.
-            mSlope2X = (mXCoords[p3] - mP1X) / 2.0f;
-            mSlope2Y = (mYCoords[p3] - mP1Y) / 2.0f;
+            mSlope2X = (mXCoords[p3] - mP1X) / 2.0f
+            mSlope2Y = (mYCoords[p3] - mP1Y) / 2.0f
         } else if (p0 >= mMinPos) {
             // p2 has no next valid point, but p1 has previous valid point p0.
             // B(bx,by) is the slope vector of the tangent at p1.
-            final float bx = (mP2X - mXCoords[p0]) / 2.0f;
-            final float by = (mP2Y - mYCoords[p0]) / 2.0f;
-            final float crossProdAB = ax * by - ay * bx;
-            final float dotProdAB = ax * bx + ay * by;
-            final float normASquare = ax * ax + ay * ay;
-            final float invHalfNormASquare = 1.0f / normASquare / 2.0f;
+            val bx = (mP2X - mXCoords[p0]) / 2.0f
+            val by = (mP2Y - mYCoords[p0]) / 2.0f
+            val crossProdAB = ax * by - ay * bx
+            val dotProdAB = ax * bx + ay * by
+            val normASquare = (ax * ax + ay * ay).toFloat()
+            val invHalfNormASquare = 1.0f / normASquare / 2.0f
             // The slope of the tangent is the mirror image of vector B to vector A.
-            mSlope2X = invHalfNormASquare * (dotProdAB * ax + crossProdAB * ay);
-            mSlope2Y = invHalfNormASquare * (dotProdAB * ay - crossProdAB * ax);
+            mSlope2X = invHalfNormASquare * (dotProdAB * ax + crossProdAB * ay)
+            mSlope2Y = invHalfNormASquare * (dotProdAB * ay - crossProdAB * ax)
         } else {
             // p1 and p2 has no previous valid point. (Interval has only point p1 and p2)
-            mSlope2X = ax;
-            mSlope2Y = ay;
+            mSlope2X = ax.toFloat()
+            mSlope2Y = ay.toFloat()
         }
     }
 
@@ -138,14 +143,14 @@ public final class HermiteInterpolator {
      *
      * @param t the interpolation parameter. The value must be in close interval <code>[0,1]</code>.
      */
-    public void interpolate(final float t) {
-        final float omt = 1.0f - t;
-        final float tm2 = 2.0f * t;
-        final float k1 = 1.0f + tm2;
-        final float k2 = 3.0f - tm2;
-        final float omt2 = omt * omt;
-        final float t2 = t * t;
-        mInterpolatedX = (k1 * mP1X + t * mSlope1X) * omt2 + (k2 * mP2X - omt * mSlope2X) * t2;
-        mInterpolatedY = (k1 * mP1Y + t * mSlope1Y) * omt2 + (k2 * mP2Y - omt * mSlope2Y) * t2;
+    fun interpolate(t: Float) {
+        val omt = 1.0f - t
+        val tm2 = 2.0f * t
+        val k1 = 1.0f + tm2
+        val k2 = 3.0f - tm2
+        val omt2 = omt * omt
+        val t2 = t * t
+        mInterpolatedX = (k1 * mP1X + t * mSlope1X) * omt2 + (k2 * mP2X - omt * mSlope2X) * t2
+        mInterpolatedY = (k1 * mP1Y + t * mSlope1Y) * omt2 + (k2 * mP2Y - omt * mSlope2Y) * t2
     }
 }
