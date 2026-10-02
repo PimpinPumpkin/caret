@@ -104,7 +104,8 @@ open class KeyboardAccessibilityDelegate<KV : KeyboardView>(
             // Instantiate the provide only when requested. Since the system
             // will call this method multiple times it is a good practice to
             // cache the provider instance.
-            return cachedNodeProvider ?: KeyboardAccessibilityNodeProvider(keyboardView, this)
+            return cachedNodeProvider
+                ?: KeyboardAccessibilityNodeProvider(keyboardView, this).also { cachedNodeProvider = it }
         }
 
     /**
