@@ -4,39 +4,38 @@
  * SPDX-License-Identifier: Apache-2.0 AND GPL-3.0-only
  */
 
-package app.caret.latin.inputlogic;
+package app.caret.latin.inputlogic
 
-import android.os.Handler;
-import android.os.HandlerThread;
-import android.os.Message;
+import android.os.Handler
+import android.os.HandlerThread
+import android.os.Message
 
-import app.caret.latin.LatinIME;
-import app.caret.latin.SuggestedWords;
-import app.caret.latin.common.InputPointers;
+import app.caret.latin.LatinIME
+import app.caret.latin.Suggest.OnGetSuggestedWordsCallback
+import app.caret.latin.SuggestedWords
+import app.caret.latin.common.InputPointers
 
 /**
  * A helper to manage deferred tasks for the input logic.
  */
-class InputLogicHandler implements Handler.Callback {
-    final Handler mNonUIThreadHandler;
-    final LatinIME.UIHandler mLatinIMEHandler;
-    final InputLogic mInputLogic;
-    private final Object mLock = new Object();
-    private boolean mInBatchInput; // synchronized using {@link #mLock}.
+class InputLogicHandler(latinIMEHandler: LatinIME.UIHandler, inputLogic: InputLogic) : Handler.Callback {
+    val mNonUIThreadHandler: Handler
+    val mLatinIMEHandler: LatinIME.UIHandler
+    val mInputLogic: InputLogic
+    private val lock = Any()
+    private var inBatchInput = false // synchronized using {@link #mLock}.
 
-    private static final int MSG_GET_SUGGESTED_WORDS = 1;
-
-    public InputLogicHandler(final LatinIME.UIHandler latinIMEHandler, final InputLogic inputLogic) {
-        final HandlerThread handlerThread = new HandlerThread(
-                InputLogicHandler.class.getSimpleName());
-        handlerThread.start();
-        mNonUIThreadHandler = new Handler(handlerThread.getLooper(), this);
-        mLatinIMEHandler = latinIMEHandler;
-        mInputLogic = inputLogic;
+    init {
+        val handlerThread = HandlerThread(
+                InputLogicHandler::class.java.simpleName)
+        handlerThread.start()
+        mNonUIThreadHandler = Handler(handlerThread.looper, this)
+        mLatinIMEHandler = latinIMEHandler
+        mInputLogic = inputLogic
     }
 
-    public void reset() {
-        mNonUIThreadHandler.removeCallbacksAndMessages(null);
+    fun reset() {
+        mNonUIThreadHandler.removeCallbacksAndMessages(null)
     }
 
     /**
@@ -44,22 +43,21 @@ class InputLogicHandler implements Handler.Callback {
      * @see android.os.Handler.Callback#handleMessage(android.os.Message)
      */
     // Called on the Non-UI handler thread by the Handler code.
-    @Override
-    public boolean handleMessage(final Message msg) {
+    override fun handleMessage(msg: Message): Boolean {
         if (msg.what == MSG_GET_SUGGESTED_WORDS)
-            ((Runnable)msg.obj).run();
-        return true;
+            (msg.obj as Runnable).run()
+        return true
     }
 
     // Called on the UI thread by InputLogic.
-    public void onStartBatchInput() {
-        synchronized (mLock) {
-            mInBatchInput = true;
+    fun onStartBatchInput() {
+        synchronized(lock) {
+            inBatchInput = true
         }
     }
 
-    public boolean isInBatchInput() {
-        return mInBatchInput;
+    fun isInBatchInput(): Boolean {
+        return inBatchInput
     }
 
     /**
@@ -74,24 +72,28 @@ class InputLogicHandler implements Handler.Callback {
     // handler thread. If this is the end of a batch input, the callback will then proceed to
     // send a message to the UI handler in LatinIME so that showing suggestions can be done on
     // the UI thread.
-    private void updateBatchInput(final InputPointers batchPointers,
-            final int sequenceNumber, final boolean isTailBatchInput) {
-        synchronized (mLock) {
-            if (!mInBatchInput) {
+    private fun updateBatchInput(batchPointers: InputPointers,
+            sequenceNumber: Int, isTailBatchInput: Boolean) {
+        synchronized(lock) {
+            if (!inBatchInput) {
                 // Batch input has ended or canceled while the message was being delivered.
-                return;
+                return
             }
-            mInputLogic.wordComposer.setBatchInputPointers(batchPointers);
-            getSuggestedWords(() -> mInputLogic.getSuggestedWords(
-                isTailBatchInput ? SuggestedWords.INPUT_STYLE_TAIL_BATCH : SuggestedWords.INPUT_STYLE_UPDATE_BATCH, sequenceNumber,
-                suggestedWords -> showGestureSuggestionsWithPreviewVisuals(suggestedWords, isTailBatchInput))
-            );
+            mInputLogic.wordComposer.setBatchInputPointers(batchPointers)
+            getSuggestedWords(Runnable { mInputLogic.getSuggestedWords(
+                if (isTailBatchInput) SuggestedWords.INPUT_STYLE_TAIL_BATCH else SuggestedWords.INPUT_STYLE_UPDATE_BATCH, sequenceNumber,
+                object : OnGetSuggestedWordsCallback {
+                    override fun onGetSuggestedWords(suggestedWords: SuggestedWords) {
+                        showGestureSuggestionsWithPreviewVisuals(suggestedWords, isTailBatchInput)
+                    }
+                })
+            })
         }
     }
 
-    private void showGestureSuggestionsWithPreviewVisuals(final SuggestedWords suggestedWordsForBatchInput,
-            final boolean isTailBatchInput) {
-        final SuggestedWords suggestedWordsToShowSuggestions;
+    private fun showGestureSuggestionsWithPreviewVisuals(suggestedWordsForBatchInput: SuggestedWords,
+            isTailBatchInput: Boolean) {
+        val suggestedWordsToShowSuggestions: SuggestedWords
         // We're now inside the callback. This always runs on the Non-UI thread,
         // no matter what thread updateBatchInput was originally called on.
         if (suggestedWordsForBatchInput.isEmpty()) {
@@ -99,16 +101,16 @@ class InputLogicHandler implements Handler.Callback {
             // Previous suggestions are found in InputLogic#mSuggestedWords.
             // Since these are the most recent ones and we just recomputed
             // new ones to update them, then the previous ones are there.
-            suggestedWordsToShowSuggestions = mInputLogic.suggestedWords;
+            suggestedWordsToShowSuggestions = mInputLogic.suggestedWords
         } else {
-            suggestedWordsToShowSuggestions = suggestedWordsForBatchInput;
+            suggestedWordsToShowSuggestions = suggestedWordsForBatchInput
         }
-        mLatinIMEHandler.showGesturePreviewAndSetSuggestions(suggestedWordsToShowSuggestions, isTailBatchInput);
+        mLatinIMEHandler.showGesturePreviewAndSetSuggestions(suggestedWordsToShowSuggestions, isTailBatchInput)
         if (isTailBatchInput) {
-            mInBatchInput = false;
+            inBatchInput = false
             // The following call schedules onEndBatchInputInternal
             // to be called on the UI thread.
-            mLatinIMEHandler.showTailBatchInputResult(suggestedWordsToShowSuggestions);
+            mLatinIMEHandler.showTailBatchInputResult(suggestedWordsToShowSuggestions)
         }
     }
 
@@ -121,9 +123,9 @@ class InputLogicHandler implements Handler.Callback {
      * @param sequenceNumber the sequence number associated with this batch input.
      */
     // Called on the UI thread by InputLogic.
-    public void onUpdateBatchInput(final InputPointers batchPointers,
-            final int sequenceNumber) {
-        updateBatchInput(batchPointers, sequenceNumber, false);
+    fun onUpdateBatchInput(batchPointers: InputPointers,
+            sequenceNumber: Int) {
+        updateBatchInput(batchPointers, sequenceNumber, false)
     }
 
     /**
@@ -134,9 +136,9 @@ class InputLogicHandler implements Handler.Callback {
      * canceling a batch input does not necessitate the long operation of pulling suggestions.
      */
     // Called on the UI thread by InputLogic.
-    public void onCancelBatchInput() {
-        synchronized (mLock) {
-            mInBatchInput = false;
+    fun onCancelBatchInput() {
+        synchronized(lock) {
+            inBatchInput = false
         }
     }
 
@@ -152,12 +154,16 @@ class InputLogicHandler implements Handler.Callback {
      * @param sequenceNumber the sequence number associated with this batch input.
      */
     // Called on the UI thread by InputLogic.
-    public void updateTailBatchInput(final InputPointers batchPointers,
-            final int sequenceNumber) {
-        updateBatchInput(batchPointers, sequenceNumber, true);
+    fun updateTailBatchInput(batchPointers: InputPointers,
+            sequenceNumber: Int) {
+        updateBatchInput(batchPointers, sequenceNumber, true)
     }
 
-    public void getSuggestedWords(final Runnable callback) {
-        mNonUIThreadHandler.obtainMessage(MSG_GET_SUGGESTED_WORDS, callback).sendToTarget();
+    fun getSuggestedWords(callback: Runnable) {
+        mNonUIThreadHandler.obtainMessage(MSG_GET_SUGGESTED_WORDS, callback).sendToTarget()
+    }
+
+    companion object {
+        private const val MSG_GET_SUGGESTED_WORDS = 1
     }
 }

@@ -4,19 +4,17 @@
  * SPDX-License-Identifier: Apache-2.0 AND GPL-3.0-only
  */
 
-package app.caret.latin.makedict;
+package app.caret.latin.makedict
 
-import androidx.annotation.NonNull;
+import app.caret.latin.define.DecoderSpecificConstants
 
-import app.caret.latin.define.DecoderSpecificConstants;
-
-import java.util.Date;
-import java.util.HashMap;
+import java.util.Date
+import java.util.HashMap
 
 /**
  * Dictionary File Format Specification.
  */
-public final class FormatSpec {
+object FormatSpec {
 
     /*
      * File header layout is as follows:
@@ -150,8 +148,8 @@ public final class FormatSpec {
      * if (FLAG_BIGRAM_SHORTCUT_ATTR_HAS_NEXT goto flags
      */
 
-    public static final int MAGIC_NUMBER = 0x9BC13AFE;
-    static final int NOT_A_VERSION_NUMBER = -1;
+    const val MAGIC_NUMBER = 0x9BC13AFE.toInt()
+    const val NOT_A_VERSION_NUMBER = -1
 
     // These MUST have the same values as the relevant constants in format_utils.h.
     // From version 2.01 on, we use version * 100 + revision as a version number. That allows
@@ -160,123 +158,120 @@ public final class FormatSpec {
     // When we bump up the dictionary format version, we should update
     // ExpandableDictionary.needsToMigrateDictionary() and
     // ExpandableDictionary.matchesExpectedBinaryDictFormatVersionForThisType().
-    public static final int VERSION2 = 2;
-    public static final int VERSION201 = 201;
-    public static final int VERSION202 = 202;
+    const val VERSION2 = 2
+    const val VERSION201 = 201
+    const val VERSION202 = 202
     // format version for Fava Dictionaries.
-    public static final int VERSION_DELIGHT3 = 86736212;
-    public static final int MINIMUM_SUPPORTED_VERSION_OF_CODE_POINT_TABLE = VERSION201;
+    const val VERSION_DELIGHT3 = 86736212
+    const val MINIMUM_SUPPORTED_VERSION_OF_CODE_POINT_TABLE = VERSION201
     // Dictionary version used for testing.
-    public static final int VERSION4_ONLY_FOR_TESTING = 399;
-    public static final int VERSION402 = 402;
-    public static final int VERSION403 = 403;
-    public static final int VERSION4 = VERSION403;
-    public static final int MINIMUM_SUPPORTED_STATIC_VERSION = VERSION202;
-    public static final int MAXIMUM_SUPPORTED_STATIC_VERSION = VERSION_DELIGHT3;
-    static final int MINIMUM_SUPPORTED_DYNAMIC_VERSION = VERSION4;
-    static final int MAXIMUM_SUPPORTED_DYNAMIC_VERSION = VERSION403;
+    const val VERSION4_ONLY_FOR_TESTING = 399
+    const val VERSION402 = 402
+    const val VERSION403 = 403
+    const val VERSION4 = VERSION403
+    const val MINIMUM_SUPPORTED_STATIC_VERSION = VERSION202
+    const val MAXIMUM_SUPPORTED_STATIC_VERSION = VERSION_DELIGHT3
+    const val MINIMUM_SUPPORTED_DYNAMIC_VERSION = VERSION4
+    const val MAXIMUM_SUPPORTED_DYNAMIC_VERSION = VERSION403
 
     // TODO: Make this value adaptative to content data, store it in the header, and
     // use it in the reading code.
-    static final int MAX_WORD_LENGTH = DecoderSpecificConstants.DICTIONARY_MAX_WORD_LENGTH;
+    const val MAX_WORD_LENGTH = DecoderSpecificConstants.DICTIONARY_MAX_WORD_LENGTH
 
     // These flags are used only in the static dictionary.
-    static final int MASK_CHILDREN_ADDRESS_TYPE = 0xC0;
-    static final int FLAG_CHILDREN_ADDRESS_TYPE_NOADDRESS = 0x00;
-    static final int FLAG_CHILDREN_ADDRESS_TYPE_ONEBYTE = 0x40;
-    static final int FLAG_CHILDREN_ADDRESS_TYPE_TWOBYTES = 0x80;
-    static final int FLAG_CHILDREN_ADDRESS_TYPE_THREEBYTES = 0xC0;
+    const val MASK_CHILDREN_ADDRESS_TYPE = 0xC0
+    const val FLAG_CHILDREN_ADDRESS_TYPE_NOADDRESS = 0x00
+    const val FLAG_CHILDREN_ADDRESS_TYPE_ONEBYTE = 0x40
+    const val FLAG_CHILDREN_ADDRESS_TYPE_TWOBYTES = 0x80
+    const val FLAG_CHILDREN_ADDRESS_TYPE_THREEBYTES = 0xC0
 
-    static final int FLAG_HAS_MULTIPLE_CHARS = 0x20;
+    const val FLAG_HAS_MULTIPLE_CHARS = 0x20
 
-    static final int FLAG_IS_TERMINAL = 0x10;
-    static final int FLAG_HAS_SHORTCUT_TARGETS = 0x08;
-    static final int FLAG_HAS_BIGRAMS = 0x04;
-    static final int FLAG_IS_NOT_A_WORD = 0x02;
-    static final int FLAG_IS_POSSIBLY_OFFENSIVE = 0x01;
+    const val FLAG_IS_TERMINAL = 0x10
+    const val FLAG_HAS_SHORTCUT_TARGETS = 0x08
+    const val FLAG_HAS_BIGRAMS = 0x04
+    const val FLAG_IS_NOT_A_WORD = 0x02
+    const val FLAG_IS_POSSIBLY_OFFENSIVE = 0x01
 
-    static final int FLAG_BIGRAM_SHORTCUT_ATTR_HAS_NEXT = 0x80;
-    static final int FLAG_BIGRAM_ATTR_OFFSET_NEGATIVE = 0x40;
-    static final int MASK_BIGRAM_ATTR_ADDRESS_TYPE = 0x30;
-    static final int FLAG_BIGRAM_ATTR_ADDRESS_TYPE_ONEBYTE = 0x10;
-    static final int FLAG_BIGRAM_ATTR_ADDRESS_TYPE_TWOBYTES = 0x20;
-    static final int FLAG_BIGRAM_ATTR_ADDRESS_TYPE_THREEBYTES = 0x30;
-    static final int FLAG_BIGRAM_SHORTCUT_ATTR_FREQUENCY = 0x0F;
+    const val FLAG_BIGRAM_SHORTCUT_ATTR_HAS_NEXT = 0x80
+    const val FLAG_BIGRAM_ATTR_OFFSET_NEGATIVE = 0x40
+    const val MASK_BIGRAM_ATTR_ADDRESS_TYPE = 0x30
+    const val FLAG_BIGRAM_ATTR_ADDRESS_TYPE_ONEBYTE = 0x10
+    const val FLAG_BIGRAM_ATTR_ADDRESS_TYPE_TWOBYTES = 0x20
+    const val FLAG_BIGRAM_ATTR_ADDRESS_TYPE_THREEBYTES = 0x30
+    const val FLAG_BIGRAM_SHORTCUT_ATTR_FREQUENCY = 0x0F
 
-    static final int PTNODE_CHARACTERS_TERMINATOR = 0x1F;
+    const val PTNODE_CHARACTERS_TERMINATOR = 0x1F
 
-    static final int PTNODE_TERMINATOR_SIZE = 1;
-    static final int PTNODE_FLAGS_SIZE = 1;
-    static final int PTNODE_FREQUENCY_SIZE = 1;
-    static final int PTNODE_MAX_ADDRESS_SIZE = 3;
-    static final int PTNODE_ATTRIBUTE_FLAGS_SIZE = 1;
-    static final int PTNODE_ATTRIBUTE_MAX_ADDRESS_SIZE = 3;
-    static final int PTNODE_SHORTCUT_LIST_SIZE_SIZE = 2;
+    const val PTNODE_TERMINATOR_SIZE = 1
+    const val PTNODE_FLAGS_SIZE = 1
+    const val PTNODE_FREQUENCY_SIZE = 1
+    const val PTNODE_MAX_ADDRESS_SIZE = 3
+    const val PTNODE_ATTRIBUTE_FLAGS_SIZE = 1
+    const val PTNODE_ATTRIBUTE_MAX_ADDRESS_SIZE = 3
+    const val PTNODE_SHORTCUT_LIST_SIZE_SIZE = 2
 
-    static final int NO_CHILDREN_ADDRESS = Integer.MIN_VALUE;
-    static final int INVALID_CHARACTER = -1;
+    const val NO_CHILDREN_ADDRESS = Int.MIN_VALUE
+    const val INVALID_CHARACTER = -1
 
-    static final int MAX_PTNODES_FOR_ONE_BYTE_PTNODE_COUNT = 0x7F; // 127
+    const val MAX_PTNODES_FOR_ONE_BYTE_PTNODE_COUNT = 0x7F // 127
     // Large PtNode array size field size is 2 bytes.
-    static final int LARGE_PTNODE_ARRAY_SIZE_FIELD_SIZE_FLAG = 0x8000;
-    static final int MAX_PTNODES_IN_A_PT_NODE_ARRAY = 0x7FFF; // 32767
-    static final int MAX_BIGRAMS_IN_A_PTNODE = 10000;
-    static final int MAX_SHORTCUT_LIST_SIZE_IN_A_PTNODE = 0xFFFF;
+    const val LARGE_PTNODE_ARRAY_SIZE_FIELD_SIZE_FLAG = 0x8000
+    const val MAX_PTNODES_IN_A_PT_NODE_ARRAY = 0x7FFF // 32767
+    const val MAX_BIGRAMS_IN_A_PTNODE = 10000
+    const val MAX_SHORTCUT_LIST_SIZE_IN_A_PTNODE = 0xFFFF
 
-    static final int MAX_TERMINAL_FREQUENCY = 255;
-    static final int MAX_BIGRAM_FREQUENCY = 15;
+    const val MAX_TERMINAL_FREQUENCY = 255
+    const val MAX_BIGRAM_FREQUENCY = 15
 
-    public static final int SHORTCUT_WHITELIST_FREQUENCY = 15;
+    const val SHORTCUT_WHITELIST_FREQUENCY = 15
 
     // This option needs to be the same numeric value as the one in binary_format.h.
-    static final int NOT_VALID_WORD = -99;
+    const val NOT_VALID_WORD = -99
 
-    static final int UINT8_MAX = 0xFF;
-    static final int UINT16_MAX = 0xFFFF;
-    static final int UINT24_MAX = 0xFFFFFF;
-    static final int MSB8 = 0x80;
-    static final int MINIMAL_ONE_BYTE_CHARACTER_VALUE = 0x20;
-    static final int MAXIMAL_ONE_BYTE_CHARACTER_VALUE = 0xFF;
+    const val UINT8_MAX = 0xFF
+    const val UINT16_MAX = 0xFFFF
+    const val UINT24_MAX = 0xFFFFFF
+    const val MSB8 = 0x80
+    const val MINIMAL_ONE_BYTE_CHARACTER_VALUE = 0x20
+    const val MAXIMAL_ONE_BYTE_CHARACTER_VALUE = 0xFF
 
     /**
      * Options global to the dictionary.
      */
-    public static final class DictionaryOptions {
-        public final HashMap<String, String> mAttributes;
-        public DictionaryOptions(final HashMap<String, String> attributes) {
-            mAttributes = attributes;
+    class DictionaryOptions(attributes: HashMap<String, String>) {
+        @JvmField val mAttributes: HashMap<String, String>
+        init {
+            mAttributes = attributes
         }
-        @Override
-        @NonNull public String toString() { // Convenience method
-            return toString(0, false);
+        override fun toString(): String { // Convenience method
+            return toString(0, false)
         }
-        public String toString(final int indentCount, final boolean plumbing) {
-            final StringBuilder indent = new StringBuilder();
+        fun toString(indentCount: Int, plumbing: Boolean): String {
+            val indent = StringBuilder()
             if (plumbing) {
-                indent.append("H:");
+                indent.append("H:")
             } else {
-                for (int i = 0; i < indentCount; ++i) {
-                    indent.append(" ");
+                for (i in 0 until indentCount) {
+                    indent.append(" ")
                 }
             }
-            final StringBuilder s = new StringBuilder();
-            for (final String optionKey : mAttributes.keySet()) {
-                s.append(indent);
-                s.append(optionKey);
-                s.append(" = ");
-                if ("date".equals(optionKey) && !plumbing) {
+            val s = StringBuilder()
+            for (optionKey in mAttributes.keys) {
+                s.append(indent)
+                s.append(optionKey)
+                s.append(" = ")
+                if ("date" == optionKey && !plumbing) {
                     // Date needs a number of milliseconds, but the dictionary contains seconds
-                    s.append(new Date(1000 * Long.parseLong(mAttributes.get(optionKey))));
+                    s.append(Date(1000 * java.lang.Long.parseLong(mAttributes[optionKey])))
                 } else {
-                    s.append(mAttributes.get(optionKey));
+                    s.append(mAttributes[optionKey])
                 }
-                s.append("\n");
+                s.append("\n")
             }
-            return s.toString();
+            return s.toString()
         }
     }
 
-    private FormatSpec() {
-        // This utility class is not publicly instantiable.
-    }
+    // This utility class is not publicly instantiable.
 }
