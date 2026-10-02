@@ -261,7 +261,19 @@ Still open in the converted code:
   and, on the emulator, up to the service answering that it is not set up; not yet with real
   speech.
 
+- Copied secrets (0.1.3): card numbers (with a valid check digit), login tokens, long hex
+  strings, private keys and wallet seed phrases are shown as dots, keeping the first and last
+  two characters, in the clipboard suggestion and the clipboard history. The rule looks at the
+  whole copied text. One-time codes and text that merely mentions a password stay readable.
+  Setting under Preferences, on by default.
+- Remote control (0.1.3): arrow keys move a ringed highlight between keys, the middle button
+  presses the key, a held press opens its popup, Back leaves the emoji and clipboard panels.
+  On by default on a TV, setting under Advanced. The emoji and clipboard panels themselves and
+  the toolbar cannot be steered with arrows yet.
+- Backup from the dev build restores into the release build (checked on the emulator).
+
 Open:
-- Dictation with real speech on a phone, clipboard masking, TV remote support.
+- Dictation with real speech on a phone; TalkBack on a real device; the remote on a real TV.
+- Arrow navigation inside the emoji and clipboard panels and the toolbar.
 - TalkBack on a real device.
 
