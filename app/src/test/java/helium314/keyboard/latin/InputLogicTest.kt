@@ -982,6 +982,61 @@ class InputLogicTest {
         assertEquals("hello\n", text)
     }
 
+    // ------- undoing an autocorrection and cursor moves, branches that had no test (Caret) -------
+
+    private fun typeAndAutocorrect(typed: String, corrected: String, separator: Char) {
+        setInputType(InputType.TYPE_CLASS_TEXT or InputType.TYPE_TEXT_FLAG_AUTO_CORRECT)
+        chainInput(typed)
+        val info = SuggestedWordInfo(corrected, "", 0, 0, null, 0, 0)
+        val typedInfo = SuggestedWordInfo(typed, "", 0, 0, null, 0, 0)
+        latinIME.mInputLogic.setSuggestedWords(SuggestedWords(ArrayList(listOf(typedInfo, info)), null, typedInfo, false, true, false, 0, 0))
+        rawType(separator.toString())
+    }
+
+    @Test fun `backspace after an autocorrection ended by a period brings the typed word back with the period`() {
+        typeAndAutocorrect("hullo", "hello", '.')
+        assertEquals("hello.", text)
+        rawKey(KeyCode.DELETE)
+        assertEquals("hullo.", text)
+    }
+
+    @Test fun `typing after undoing an autocorrection starts a new word`() {
+        typeAndAutocorrect("hullo", "hello", ' ')
+        rawKey(KeyCode.DELETE)
+        assertEquals("hullo", text)
+        rawType("x")
+        assertEquals("hullo x", text)
+    }
+
+    @Test fun `a second backspace after undoing an autocorrection deletes a letter`() {
+        typeAndAutocorrect("hullo", "hello", ' ')
+        rawKey(KeyCode.DELETE)
+        rawKey(KeyCode.DELETE)
+        assertEquals("hull", text)
+    }
+
+    @Test fun `moving the cursor inside the word being typed keeps typing in that word`() {
+        chainInput("hello")
+        setCursorPosition(3)
+        rawType("x")
+        assertEquals("helxlo", text)
+    }
+
+    @Test fun `selecting the word being typed and typing replaces it`() {
+        chainInput("hello")
+        setCursorPosition(0, 5)
+        assertEquals("", composingText)
+        rawType("x")
+        assertEquals("x", text)
+    }
+
+    @Test fun `moving the cursor to another word and typing changes that word`() {
+        setText("hello there")
+        setCursorPosition(5)
+        rawType("s")
+        assertEquals("hellos there", text)
+    }
+
     // ------- separators, branches that had no test (Caret) -------
 
     private fun pickPunctuation(mark: String) {
