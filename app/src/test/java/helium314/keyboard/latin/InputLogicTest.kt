@@ -750,6 +750,63 @@ class InputLogicTest {
         setText("") // (re)sets selection and composing word
     }
 
+    // ------- backspace branches that had no test (Caret) -------
+
+    private fun repeatDelete(times: Int) = repeat(times) {
+        latinIME.onEvent(Event.createSoftwareKeypressEvent(Event.NOT_A_CODE_POINT, KeyCode.DELETE, 0,
+            Constants.NOT_A_COORDINATE, Constants.NOT_A_COORDINATE, true))
+        handleMessages()
+    }
+
+    @Test fun `backspace removes the selection`() {
+        setText("hello there friend")
+        setCursorPosition(6, 11) // "there"
+        functionalKeyPress(KeyCode.DELETE)
+        assertEquals("hello  friend", text)
+        assertEquals(6, cursor)
+    }
+
+    @Test fun `backspace at the start of the text changes nothing`() {
+        setText("hello")
+        setCursorPosition(0)
+        functionalKeyPress(KeyCode.DELETE)
+        assertEquals("hello", text)
+        assertEquals(0, cursor)
+    }
+
+    @Test fun `backspace in a field without an input type sends a key event`() {
+        setInputType(InputType.TYPE_NULL)
+        setText("hello")
+        functionalKeyPress(KeyCode.DELETE)
+        assertEquals("hell", text)
+    }
+
+    @Test fun `holding backspace with word delete off removes characters and speeds up`() {
+        latinIME.prefs().edit { putBoolean(Settings.PREF_HOLD_DELETE_BY_WORD, false) }
+        setText("one two three four five six seven eight nine ten")
+        repeatDelete(30)
+        val left = text
+        assert("one two three four five six seven eight nine ten".startsWith(left)) { "not a prefix: $left" }
+        assert(left.length in 5..17) { "expected 30 to 42 characters gone, left: '$left'" }
+    }
+
+    @Test fun `holding backspace with word delete on ends on a word boundary`() {
+        latinIME.prefs().edit { putBoolean(Settings.PREF_HOLD_DELETE_BY_WORD, true) }
+        setText("one two three four five six seven eight nine ten")
+        repeatDelete(30)
+        val left = text
+        assert("one two three four five six seven eight nine ten".startsWith(left)) { "not a prefix: $left" }
+        assert(left.isEmpty() || left.endsWith(" ")) { "stopped inside a word: '$left'" }
+        assert(left.length < 30) { "too little deleted for 30 repeats: '$left'" }
+    }
+
+    @Test fun `a short hold of backspace only removes characters`() {
+        latinIME.prefs().edit { putBoolean(Settings.PREF_HOLD_DELETE_BY_WORD, true) }
+        setText("one two three four five")
+        repeatDelete(5)
+        assertEquals("one two three four", text)
+    }
+
     // ------- text fields that do not behave (Caret) -------
     // These type without the consistency checks of input(), because here the field and the
     // keyboard's picture of it are expected to drift apart. What matters is what the user ends up with.
