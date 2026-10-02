@@ -4,39 +4,39 @@
  * SPDX-License-Identifier: Apache-2.0 AND GPL-3.0-only
  */
 
-package app.caret.latin.utils;
+package app.caret.latin.utils
 
-import android.text.Spanned;
-import android.text.TextUtils;
-import android.text.style.SuggestionSpan;
+import android.text.Spanned
+import android.text.TextUtils
+import android.text.style.SuggestionSpan
 
-import androidx.annotation.NonNull;
-
-import java.util.Arrays;
-import java.util.Objects;
+import java.util.Arrays
+import java.util.Objects
 
 /**
  * Represents a range of text, relative to the current cursor position.
  */
-public final class TextRange {
-    private final CharSequence mTextAtCursor;
-    private final int mWordAtCursorStartIndex;
-    private final int mWordAtCursorEndIndex;
-    private final int mCursorIndex;
+class TextRange {
+    private val mTextAtCursor: CharSequence
+    private val mWordAtCursorStartIndex: Int
+    private val mWordAtCursorEndIndex: Int
+    private val mCursorIndex: Int
 
-    public final CharSequence mWord;
-    public final boolean mHasUrlSpans;
+    @JvmField
+    val mWord: CharSequence
+    @JvmField
+    val mHasUrlSpans: Boolean
 
-    public int getNumberOfCharsInWordBeforeCursor() {
-        return mCursorIndex - mWordAtCursorStartIndex;
+    fun getNumberOfCharsInWordBeforeCursor(): Int {
+        return mCursorIndex - mWordAtCursorStartIndex
     }
 
-    public int getNumberOfCharsInWordAfterCursor() {
-        return mWordAtCursorEndIndex - mCursorIndex;
+    fun getNumberOfCharsInWordAfterCursor(): Int {
+        return mWordAtCursorEndIndex - mCursorIndex
     }
 
-    public int length() {
-        return mWord.length();
+    fun length(): Int {
+        return mWord.length
     }
 
     /**
@@ -44,10 +44,12 @@ public final class TextRange {
      * and end of the span matching the boundaries of the word.
      * @return the array of spans.
      */
-    public SuggestionSpan[] getSuggestionSpansAtWord() {
-        if (!(mTextAtCursor instanceof Spanned text && mWord instanceof Spanned)) {
-            return new SuggestionSpan[0];
+    @Suppress("UNCHECKED_CAST")
+    fun getSuggestionSpansAtWord(): Array<SuggestionSpan> {
+        if (!(mTextAtCursor is Spanned && mWord is Spanned)) {
+            return arrayOfNulls<SuggestionSpan>(0) as Array<SuggestionSpan>
         }
+        val text: Spanned = mTextAtCursor
         // Note: it's fine to pass indices negative or greater than the length of the string
         // to the #getSpans() method. The reason we need to get from -1 to +1 is that, the
         // spans were cut at the cursor position, and #getSpans(start, end) does not return
@@ -65,73 +67,74 @@ public final class TextRange {
         // -1 ~ +1 is enough.
         // Of course this is only relevant if the cursor is at one end of the word. If it's
         // in the middle, the -1 and +1 are not necessary, but they are harmless.
-        final SuggestionSpan[] spans = text.getSpans(mWordAtCursorStartIndex - 1,
-                mWordAtCursorEndIndex + 1, SuggestionSpan.class);
-        int readIndex = 0;
-        int writeIndex = 0;
-        for (; readIndex < spans.length; ++readIndex) {
-            final SuggestionSpan span = spans[readIndex];
+        val spans: Array<SuggestionSpan?> = text.getSpans(mWordAtCursorStartIndex - 1,
+                mWordAtCursorEndIndex + 1, SuggestionSpan::class.java)
+        var readIndex = 0
+        var writeIndex = 0
+        while (readIndex < spans.size) {
+            val span = spans[readIndex]
             // The span may be null, as we null them when we find duplicates. Cf a few lines
             // down.
-            if (null == span) continue;
+            if (null == span) {
+                ++readIndex
+                continue
+            }
             // Tentative span start and end. This may be modified later if we realize the
             // same span is also applied to other parts of the string.
-            int spanStart = text.getSpanStart(span);
-            int spanEnd = text.getSpanEnd(span);
-            for (int i = readIndex + 1; i < spans.length; ++i) {
-                if (span.equals(spans[i])) {
+            var spanStart = text.getSpanStart(span)
+            var spanEnd = text.getSpanEnd(span)
+            for (i in readIndex + 1 until spans.size) {
+                if (span == spans[i]) {
                     // We found the same span somewhere else. Read the new extent of this
                     // span, and adjust our values accordingly.
-                    spanStart = Math.min(spanStart, text.getSpanStart(spans[i]));
-                    spanEnd = Math.max(spanEnd, text.getSpanEnd(spans[i]));
+                    spanStart = Math.min(spanStart, text.getSpanStart(spans[i]))
+                    spanEnd = Math.max(spanEnd, text.getSpanEnd(spans[i]))
                     // ...and mark the span as processed.
-                    spans[i] = null;
+                    spans[i] = null
                 }
             }
             if (spanStart == mWordAtCursorStartIndex && spanEnd == mWordAtCursorEndIndex) {
                 // If the span does not start and stop here, ignore it. It probably extends
                 // past the start or end of the word, as happens in missing space correction
                 // or EasyEditSpans put by voice input.
-                spans[writeIndex++] = spans[readIndex];
+                spans[writeIndex++] = spans[readIndex]
             }
+            ++readIndex
         }
-        return writeIndex == readIndex ? spans : Arrays.copyOfRange(spans, 0, writeIndex);
+        return (if (writeIndex == readIndex) spans else Arrays.copyOfRange(spans, 0, writeIndex)) as Array<SuggestionSpan>
     }
 
-    @Override
-    public boolean equals(Object other) {
-        if (!(other instanceof TextRange textRange)) return false;
+    override fun equals(other: Any?): Boolean {
+        if (other !is TextRange) return false
+        val textRange: TextRange = other
         return mWordAtCursorStartIndex == textRange.mWordAtCursorStartIndex
             && mWordAtCursorEndIndex == textRange.mWordAtCursorEndIndex
             && mCursorIndex == textRange.mCursorIndex
             && mHasUrlSpans == textRange.mHasUrlSpans
             && TextUtils.equals(mTextAtCursor, textRange.mTextAtCursor)
-            && TextUtils.equals(mWord, textRange.mWord);
+            && TextUtils.equals(mWord, textRange.mWord)
     }
 
-    @Override
-    public int hashCode() {
-        return Objects.hash(mTextAtCursor, mWordAtCursorStartIndex, mWordAtCursorEndIndex, mCursorIndex, mWord, mHasUrlSpans);
+    override fun hashCode(): Int {
+        return Objects.hash(mTextAtCursor, mWordAtCursorStartIndex, mWordAtCursorEndIndex, mCursorIndex, mWord, mHasUrlSpans)
     }
 
-    @NonNull
-    @Override
-    public String toString() {
-        return mTextAtCursor + ", " + mWord + ", " + mCursorIndex;
+    override fun toString(): String {
+        return mTextAtCursor.toString() + ", " + mWord + ", " + mCursorIndex
     }
 
-    public TextRange(final CharSequence textAtCursor, final int wordAtCursorStartIndex,
-            final int wordAtCursorEndIndex, final int cursorIndex, final boolean hasUrlSpans) {
+    constructor(textAtCursor: CharSequence, wordAtCursorStartIndex: Int,
+            wordAtCursorEndIndex: Int, cursorIndex: Int, hasUrlSpans: Boolean) {
         if (wordAtCursorStartIndex < 0 || cursorIndex < wordAtCursorStartIndex
                 || cursorIndex > wordAtCursorEndIndex
-                || wordAtCursorEndIndex > textAtCursor.length()) {
-            throw new IndexOutOfBoundsException();
+                || wordAtCursorEndIndex > textAtCursor.length) {
+            throw IndexOutOfBoundsException()
         }
-        mTextAtCursor = textAtCursor;
-        mWordAtCursorStartIndex = wordAtCursorStartIndex;
-        mWordAtCursorEndIndex = wordAtCursorEndIndex;
-        mCursorIndex = cursorIndex;
-        mHasUrlSpans = hasUrlSpans;
-        mWord = mTextAtCursor.subSequence(mWordAtCursorStartIndex, mWordAtCursorEndIndex);
+        mTextAtCursor = textAtCursor
+        mWordAtCursorStartIndex = wordAtCursorStartIndex
+        mWordAtCursorEndIndex = wordAtCursorEndIndex
+        mCursorIndex = cursorIndex
+        mHasUrlSpans = hasUrlSpans
+        mWord = mTextAtCursor.subSequence(mWordAtCursorStartIndex, mWordAtCursorEndIndex)
     }
 }
