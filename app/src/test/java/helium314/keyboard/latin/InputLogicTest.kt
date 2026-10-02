@@ -1301,6 +1301,54 @@ class InputLogicTest {
         assertEquals("hello there", text)
     }
 
+    // ------- starting input in a field (Caret) -------
+
+    private fun startInput(restarting: Boolean) {
+        val ei = EditorInfo()
+        ei.inputType = currentInputType
+        ei.initialSelStart = selectionStart
+        ei.initialSelEnd = selectionEnd
+        latinIME.mHandler.onStartInput(ei, restarting)
+        latinIME.mHandler.onStartInputView(ei, restarting)
+        handleMessages()
+    }
+
+    // a chat app sends the message, empties its field and restarts input in the same field
+    @Test fun `after the app emptied the field and restarted input the old word is gone`() {
+        rawType("hello")
+        ShadowInputMethodService.text = ""
+        selectionStart = 0
+        selectionEnd = 0
+        composingStart = -1
+        composingEnd = -1
+        startInput(restarting = true)
+        rawType("yo")
+        assertEquals("yo", text)
+    }
+
+    @Test fun `restarting input in a field with text picks up the word at the cursor`() {
+        ShadowInputMethodService.text = "hello there"
+        selectionStart = 11
+        selectionEnd = 11
+        startInput(restarting = true)
+        assertEquals("there", composingText)
+        rawType("s")
+        assertEquals("hello theres", text)
+    }
+
+    @Test fun `moving to a field of another type starts clean`() {
+        rawType("hello")
+        ShadowInputMethodService.text = ""
+        selectionStart = 0
+        selectionEnd = 0
+        composingStart = -1
+        composingEnd = -1
+        currentInputType = InputType.TYPE_CLASS_NUMBER
+        startInput(restarting = false)
+        rawType("12")
+        assertEquals("12", text)
+    }
+
     private fun chainInput(text: String) = text.forEach { input(it.code) }
 
     private fun input(char: Char) = input(char.code)
