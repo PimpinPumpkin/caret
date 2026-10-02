@@ -63,7 +63,7 @@ class KeyboardAccessibilityNodeProvider<KV : KeyboardView>(
 
     private fun getKeyOf(virtualViewId: Int): Key? {
         val keyboard = mKeyboard ?: return null
-        val sortedKeys = keyboard.sortedKeys
+        val sortedKeys = keyboard.getSortedKeys()
         // Use a virtual view id as an index of the sorted keys list.
         return if (virtualViewId >= 0 && virtualViewId < sortedKeys.size) {
             sortedKeys[virtualViewId]
@@ -72,7 +72,7 @@ class KeyboardAccessibilityNodeProvider<KV : KeyboardView>(
 
     private fun getVirtualViewIdOf(key: Key): Int {
         val keyboard = mKeyboard ?: return View.NO_ID
-        val sortedKeys = keyboard.sortedKeys
+        val sortedKeys = keyboard.getSortedKeys()
         val size = sortedKeys.size
         for (index in 0 until size) {
             if (sortedKeys[index] === key) { // Use an index of the sorted keys list as a virtual view id.
@@ -161,7 +161,7 @@ class KeyboardAccessibilityNodeProvider<KV : KeyboardView>(
             ViewCompat.onInitializeAccessibilityNodeInfo(mKeyboardView, rootInfo)
             updateParentLocation()
             // Add the virtual children of the root View.
-            val sortedKeys = keyboard.sortedKeys
+            val sortedKeys = keyboard.getSortedKeys()
             val size = sortedKeys.size
             for (index in 0 until size) {
                 val key = sortedKeys[index]

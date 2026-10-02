@@ -206,7 +206,7 @@ class WordData(
     val topSuggestion: SuggestedWords.SuggestedWordInfo? = null
 ) {
     // keyboard is not immutable, so better store potentially relevant information immediately
-    private val keys = keyboard.sortedKeys
+    private val keys = keyboard.getSortedKeys()
     private val height = keyboard.mOccupiedHeight
     private val width = keyboard.mOccupiedWidth
 

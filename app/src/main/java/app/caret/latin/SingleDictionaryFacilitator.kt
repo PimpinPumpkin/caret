@@ -64,7 +64,7 @@ class SingleDictionaryFacilitator(private val dict: Dictionary) : DictionaryFaci
             false
         )
         suggestionResults.addAll(
-            dict.getSuggestions(composedData, ngramContext, keyboard.proximityInfo.nativeProximityInfo,
+            dict.getSuggestions(composedData, ngramContext, keyboard.getProximityInfo().nativeProximityInfo,
                 settingsValuesForSuggestion, sessionId, 1f,
                 floatArrayOf(Dictionary.NOT_A_WEIGHT_OF_LANG_MODEL_VS_SPATIAL_MODEL)
             )?.filter { !SupportedEmojis.isUnsupported(it.getWord()) }

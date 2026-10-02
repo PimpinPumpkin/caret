@@ -1659,13 +1659,13 @@ class LatinIME : InputMethodService(),
 
     // Hooks for hardware keyboard
     override fun onKeyDown(keyCode: Int, keyEvent: KeyEvent?): Boolean {
-        if (keyboardActionListener.onKeyDown(keyCode, keyEvent))
+        if (keyboardActionListener.onKeyDown(keyCode, keyEvent!!))
             return true
         return super.onKeyDown(keyCode, keyEvent)
     }
 
     override fun onKeyUp(keyCode: Int, keyEvent: KeyEvent?): Boolean {
-        if (keyboardActionListener.onKeyUp(keyCode, keyEvent))
+        if (keyboardActionListener.onKeyUp(keyCode, keyEvent!!))
             return true
         return super.onKeyUp(keyCode, keyEvent)
     }

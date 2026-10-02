@@ -450,7 +450,7 @@ f""", // no newline at the end
         val editorInfo = EditorInfo()
         val subtype = SubtypeUtilsAdditional.createEmojiCapableAdditionalSubtype(Locale.ENGLISH, "qwerty", true)
         val (kb, keys) = buildKeyboard(editorInfo, subtype, KeyboardElement.ALPHABET)
-        assertEquals(kb.sortedKeys.size, keys.sumOf { it.size })
+        assertEquals(kb.getSortedKeys().size, keys.sumOf { it.size })
     }
 
     @Test fun `dvorak has 4 rows`() {
@@ -478,12 +478,12 @@ f""", // no newline at the end
         val subtype = SubtypeUtilsAdditional.createEmojiCapableAdditionalSubtype(Locale.ENGLISH, "qwerty", true)
         val (kb, keys) = buildKeyboard(editorInfo, subtype, KeyboardElement.ALPHABET)
         val (kb2, keys2) = buildKeyboard(editorInfo, subtype, KeyboardElement.ALPHABET_AUTOMATIC_SHIFTED)
-        assertEquals(kb.sortedKeys.size, kb2.sortedKeys.size)
+        assertEquals(kb.getSortedKeys().size, kb2.getSortedKeys().size)
         keys.forEachIndexed { i, kpList -> kpList.forEachIndexed { j, kp ->
             assertEquals(kp.mPopupKeys?.size, keys2[i][j].mPopupKeys?.size)
         } }
-        kb.sortedKeys.forEachIndexed { index, key ->
-            assertEquals(key.popupKeys?.size, kb2.sortedKeys[index].popupKeys?.size)
+        kb.getSortedKeys().forEachIndexed { index, key ->
+            assertEquals(key.getPopupKeys()?.size, kb2.getSortedKeys()[index].getPopupKeys()?.size)
         }
     }
 

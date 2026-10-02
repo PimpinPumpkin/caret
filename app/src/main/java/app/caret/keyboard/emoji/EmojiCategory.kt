@@ -75,7 +75,7 @@ internal class EmojiCategory(private val context: Context, private val layoutSet
             prefs.getInt(Settings.PREF_LAST_SHOWN_EMOJI_CATEGORY_PAGE_ID, Defaults.PREF_LAST_SHOWN_EMOJI_CATEGORY_PAGE_ID)
         if (!isShownCategory(currentCategory)) {
             currentCategory = defaultCategory
-        } else if (currentCategory == Category.RECENTS && recentsKbd.sortedKeys.isEmpty()) {
+        } else if (currentCategory == Category.RECENTS && recentsKbd.getSortedKeys().isEmpty()) {
             currentCategory = defaultCategory
         }
 
@@ -126,7 +126,7 @@ internal class EmojiCategory(private val context: Context, private val layoutSet
 
     private fun computeCategoryPageCount(category: Category): Int {
         val keyboard = layoutSet.getKeyboard(category.element)
-        return (keyboard.sortedKeys.size - 1) / computeMaxKeyCountPerPage() + 1
+        return (keyboard.getSortedKeys().size - 1) / computeMaxKeyCountPerPage() + 1
     }
 
     // Returns a keyboard from the recycler view's adapter position.
@@ -159,7 +159,7 @@ internal class EmojiCategory(private val context: Context, private val layoutSet
 
             val keyboard = layoutSet.getKeyboard(category.element)
             val keyCountPerPage = computeMaxKeyCountPerPage()
-            val sortedKeysPages = sortKeysGrouped(keyboard.sortedKeys, keyCountPerPage)
+            val sortedKeysPages = sortKeysGrouped(keyboard.getSortedKeys(), keyCountPerPage)
             for (pageId in sortedKeysPages.indices) {
                 val tempKeyboard = DynamicGridKeyboard.ofKeyCount(prefs,
                     layoutSet.getKeyboard(KeyboardElement.EMOJI_RECENTS),
@@ -226,7 +226,7 @@ internal class EmojiCategory(private val context: Context, private val layoutSet
             if (lhs.code < rhs.code) -1 else 1
         }
 
-        private fun sortKeysGrouped(inKeys: MutableList<Key>, maxPageCount: Int): Array<Array<Key?>> {
+        private fun sortKeysGrouped(inKeys: List<Key>, maxPageCount: Int): Array<Array<Key?>> {
             val keys = ArrayList(inKeys)
             Collections.sort(keys, EMOJI_KEY_COMPARATOR)
             val pageCount = (keys.size - 1) / maxPageCount + 1
