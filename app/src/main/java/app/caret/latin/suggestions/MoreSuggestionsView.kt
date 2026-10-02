@@ -124,7 +124,7 @@ class MoreSuggestionsView @JvmOverloads constructor(
         val keyboard = moreSuggestionsBuilder.layout(
             suggestedWords, fromIndex, maxWidth,
             (maxWidth * layoutHelper.mMinMoreSuggestionsWidth).toInt(),
-            layoutHelper.maxMoreSuggestionsRow, parentKeyboard
+            layoutHelper.getMaxMoreSuggestionsRow(), parentKeyboard
         ).build()
         setKeyboard(keyboard)
         container.measure(ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT)
