@@ -4,25 +4,23 @@
  * SPDX-License-Identifier: Apache-2.0 AND GPL-3.0-only
  */
 
-package app.caret.keyboard.internal;
+package app.caret.keyboard.internal
 
-import androidx.annotation.NonNull;
+import app.caret.keyboard.Key
+import app.caret.keyboard.PointerTracker
 
-import app.caret.keyboard.Key;
-import app.caret.keyboard.PointerTracker;
-
-public interface TimerProxy {
+interface TimerProxy {
     /**
      * Start a timer to detect if a user is typing keys.
      * @param typedKey the key that is typed.
      */
-    void startTypingStateTimer(@NonNull Key typedKey);
+    fun startTypingStateTimer(typedKey: Key)
 
     /**
      * Check if a user is key typing.
      * @return true if a user is in typing.
      */
-    boolean isTypingState();
+    fun isTypingState(): Boolean
 
     /**
      * Start a timer to simulate repeated key presses while a user keep pressing a key.
@@ -30,7 +28,7 @@ public interface TimerProxy {
      * @param repeatCount the number of times that the key is repeating. Starting from 1.
      * @param delay the interval delay to the next key repeat, in millisecond.
      */
-    void startKeyRepeatTimerOf(@NonNull PointerTracker tracker, int repeatCount, int delay);
+    fun startKeyRepeatTimerOf(tracker: PointerTracker, repeatCount: Int, delay: Int)
 
     /**
      * Start a timer to detect a long pressed key.
@@ -39,92 +37,78 @@ public interface TimerProxy {
      * @param tracker the {@link PointerTracker} that starts long pressing.
      * @param delay the delay to fire the long press timer, in millisecond.
      */
-    void startLongPressTimerOf(@NonNull PointerTracker tracker, int delay);
+    fun startLongPressTimerOf(tracker: PointerTracker, delay: Int)
 
     /**
      * Cancel timers for detecting a long pressed key and a long press shift key.
      * @param tracker cancel long press timers of this {@link PointerTracker}.
      */
-    void cancelLongPressTimersOf(@NonNull PointerTracker tracker);
+    fun cancelLongPressTimersOf(tracker: PointerTracker)
 
     /**
      * Cancel a timer for detecting a long pressed shift key.
      */
-    void cancelLongPressShiftKeyTimer();
+    fun cancelLongPressShiftKeyTimer()
 
     /**
      * Cancel a timer for detecting a long pressed alpha/symbol key.
      */
-    void cancelLongPressAlphaSymbolKeyTimer();
+    fun cancelLongPressAlphaSymbolKeyTimer()
 
     /**
      * Cancel timers for detecting repeated key press, long pressed key, and long pressed shift key.
      * @param tracker the {@link PointerTracker} that starts timers to be canceled.
      */
-    void cancelKeyTimersOf(@NonNull PointerTracker tracker);
+    fun cancelKeyTimersOf(tracker: PointerTracker)
 
     /**
      * Start a timer to detect double tapped shift key.
      */
-    void startDoubleTapShiftKeyTimer();
+    fun startDoubleTapShiftKeyTimer()
 
     /**
      * Cancel a timer of detecting double tapped shift key.
      */
-    void cancelDoubleTapShiftKeyTimer();
+    fun cancelDoubleTapShiftKeyTimer()
 
     /**
      * Check if a timer of detecting double tapped shift key is running, then cancel it.
      * @return true if detecting double tapped shift key was ongoing.
      */
-    boolean popDoubleTapShiftKeyTimer();
+    fun popDoubleTapShiftKeyTimer(): Boolean
 
     /**
      * Start a timer to fire updating batch input while <code>tracker</code> is on hold.
      * @param tracker the {@link PointerTracker} that stops moving.
      */
-    void startUpdateBatchInputTimer(@NonNull PointerTracker tracker);
+    fun startUpdateBatchInputTimer(tracker: PointerTracker)
 
     /**
      * Cancel a timer of firing updating batch input.
      * @param tracker the {@link PointerTracker} that resumes moving or ends gesture input.
      */
-    void cancelUpdateBatchInputTimer(@NonNull PointerTracker tracker);
+    fun cancelUpdateBatchInputTimer(tracker: PointerTracker)
 
     /**
      * Cancel all timers of firing updating batch input.
      */
-    void cancelAllUpdateBatchInputTimers();
+    fun cancelAllUpdateBatchInputTimers()
 
-    class Adapter implements TimerProxy {
-        @Override
-        public void startTypingStateTimer(@NonNull Key typedKey) {}
-        @Override
-        public boolean isTypingState() { return false; }
-        @Override
-        public void startKeyRepeatTimerOf(@NonNull PointerTracker tracker, int repeatCount,
-                int delay) {}
-        @Override
-        public void startLongPressTimerOf(@NonNull PointerTracker tracker, int delay) {}
-        @Override
-        public void cancelLongPressTimersOf(@NonNull PointerTracker tracker) {}
-        @Override
-        public void cancelLongPressShiftKeyTimer() {}
-        @Override
-        public void cancelLongPressAlphaSymbolKeyTimer() {}
-        @Override
-        public void cancelKeyTimersOf(@NonNull PointerTracker tracker) {}
-        @Override
-        public void startDoubleTapShiftKeyTimer() {}
-        @Override
-        public void cancelDoubleTapShiftKeyTimer() {}
-        @Override
-        public boolean popDoubleTapShiftKeyTimer() { return false; }
-        @Override
-        public void startUpdateBatchInputTimer(@NonNull PointerTracker tracker) {}
-        @Override
-        public void cancelUpdateBatchInputTimer(@NonNull PointerTracker tracker) {}
-        @Override
-        public void cancelAllUpdateBatchInputTimers() {}
+    class Adapter : TimerProxy {
+        override fun startTypingStateTimer(typedKey: Key) {}
+        override fun isTypingState(): Boolean { return false }
+        override fun startKeyRepeatTimerOf(tracker: PointerTracker, repeatCount: Int,
+                delay: Int) {}
+        override fun startLongPressTimerOf(tracker: PointerTracker, delay: Int) {}
+        override fun cancelLongPressTimersOf(tracker: PointerTracker) {}
+        override fun cancelLongPressShiftKeyTimer() {}
+        override fun cancelLongPressAlphaSymbolKeyTimer() {}
+        override fun cancelKeyTimersOf(tracker: PointerTracker) {}
+        override fun startDoubleTapShiftKeyTimer() {}
+        override fun cancelDoubleTapShiftKeyTimer() {}
+        override fun popDoubleTapShiftKeyTimer(): Boolean { return false }
+        override fun startUpdateBatchInputTimer(tracker: PointerTracker) {}
+        override fun cancelUpdateBatchInputTimer(tracker: PointerTracker) {}
+        override fun cancelAllUpdateBatchInputTimers() {}
     }
 }
