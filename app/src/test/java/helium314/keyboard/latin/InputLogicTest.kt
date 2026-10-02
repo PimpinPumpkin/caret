@@ -810,6 +810,62 @@ class InputLogicTest {
         assertEquals("hello!", text)
     }
 
+    // ------- plain character input, branches that had no test (Caret) -------
+
+    @Test fun `an opening bracket typed over a selection wraps it`() {
+        setText("hello there")
+        setCursorPosition(6, 11)
+        rawType("(") // not input(): its checks assume the character lands right before the cursor
+        assertEquals("hello (there)", text)
+    }
+
+    @Test fun `a letter typed in front of a word is added to it`() {
+        setText("hello")
+        setCursorPosition(0)
+        rawType("x")
+        assertEquals("xhello", text)
+        assertEquals(1, cursor)
+    }
+
+    @Test fun `digits in a number field arrive`() {
+        setInputType(InputType.TYPE_CLASS_NUMBER)
+        rawType("123")
+        assertEquals("123", text)
+    }
+
+    @Test fun `a digit typed after letters stays in the same word`() {
+        chainInput("abc1")
+        assertEquals("abc1", text)
+        assertEquals("abc1", composingText)
+    }
+
+    @Test fun `a letter typed after a swiped word starts a new word`() {
+        glideTypingInput("hello")
+        rawType("s")
+        assertEquals("hello s", text)
+    }
+
+    @Test fun `a letter typed after a swiped word continues it when autospace after swiping is off`() {
+        latinIME.prefs().edit { putBoolean(Settings.PREF_AUTOSPACE_AFTER_GESTURE_TYPING, false) }
+        glideTypingInput("hello")
+        rawType("s")
+        assertEquals("hellos", text)
+    }
+
+    @Test fun `an apostrophe inside a word keeps it one word`() {
+        chainInput("don't")
+        assertEquals("don't", text)
+        assertEquals("don't", composingText)
+    }
+
+    @Test fun `with suggestions off nothing is composed`() {
+        latinIME.prefs().edit { putBoolean(Settings.PREF_SHOW_SUGGESTIONS, false) }
+        setText("")
+        chainInput("hi there")
+        assertEquals("hi there", text)
+        assertEquals("", composingText)
+    }
+
     // ------- separators, branches that had no test (Caret) -------
 
     private fun pickPunctuation(mark: String) {
