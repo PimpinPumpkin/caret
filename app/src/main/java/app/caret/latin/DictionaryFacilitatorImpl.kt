@@ -420,11 +420,11 @@ class DictionaryFacilitatorImpl : DictionaryFacilitator {
         if (mValidSpellingWordWriteCache == null)
             return
 
-        val lowerCaseWord = originalWord.lowercase(currentLocale)
+        val lowerCaseWord = originalWord.lowercase(getCurrentLocale())
         val lowerCaseValid = isValidSpellingWord(lowerCaseWord)
         mValidSpellingWordWriteCache?.put(lowerCaseWord, lowerCaseValid)
 
-        val capitalWord = StringUtils.capitalizeFirstAndDowncaseRest(originalWord, currentLocale)
+        val capitalWord = StringUtils.capitalizeFirstAndDowncaseRest(originalWord, getCurrentLocale())
         val capitalValid = if (lowerCaseValid) {
             true // The lower case form of the word is valid, so the upper case must be valid.
         } else {
@@ -438,7 +438,7 @@ class DictionaryFacilitatorImpl : DictionaryFacilitator {
             return
 
         // if suggestion was auto-capitalized, check against both the suggestion and the de-capitalized suggestion
-        val decapitalizedSuggestion = if (wasAutoCapitalized) word.decapitalize(currentLocale) else word
+        val decapitalizedSuggestion = if (wasAutoCapitalized) word.decapitalize(getCurrentLocale()) else word
         val validWord = dictionaryGroups.map { isValidWord(word, DictionaryFacilitator.ALL_DICTIONARY_TYPES, it) }
         dictionaryGroups.forEach {
             if (isValidWord(word, DictionaryFacilitator.ALL_DICTIONARY_TYPES, it)) {

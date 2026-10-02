@@ -82,8 +82,8 @@ class Suggest(private val mDictionaryFacilitator: DictionaryFacilitator) {
         val trailingSingleQuotesCount = StringUtils.getTrailingSingleQuotesCount(typedWordString)
         val capsMode = getCapsModeForTyping(wordComposer, keyboard)
         val suggestionsContainer = ArrayList(suggestionResults)
-        capitalizeAndAddTrailingSingleQuotes(suggestionsContainer, capsMode, trailingSingleQuotesCount, mDictionaryFacilitator.mainLocale)
-        val capitalizedTypedWord = capitalize(typedWordString, capsMode, mDictionaryFacilitator.mainLocale)
+        capitalizeAndAddTrailingSingleQuotes(suggestionsContainer, capsMode, trailingSingleQuotesCount, mDictionaryFacilitator.getMainLocale())
+        val capitalizedTypedWord = capitalize(typedWordString, capsMode, mDictionaryFacilitator.getMainLocale())
 
         // store the original SuggestedWordInfo for typed word, as it will be removed
         // we may want to re-add it in case auto-correction happens, so that the original word can at least be selected
@@ -237,7 +237,7 @@ class Suggest(private val mDictionaryFacilitator: DictionaryFacilitator) {
             if (allowed && typedWordInfo != null && typedWordInfo.mScore > scoreLimit) {
                 // typed word is valid and has good score
                 // do not auto-correct if typed word is better match than first suggestion
-                val dictLocale = mDictionaryFacilitator.currentLocale
+                val dictLocale = mDictionaryFacilitator.getCurrentLocale()
                 if (firstSuggestion.mScore < scoreLimit) {
                     // don't allow if suggestion has too low score
                     return true to false
@@ -279,7 +279,7 @@ class Suggest(private val mDictionaryFacilitator: DictionaryFacilitator) {
         )
 
         // For transforming words that don't come from a dictionary, because it's our best bet
-        val locale = mDictionaryFacilitator.mainLocale
+        val locale = mDictionaryFacilitator.getMainLocale()
         val capsMode = getCapsModeForGesture(wordComposer, keyboard)
         val suggestionsContainer = ArrayList(suggestionResults)
         replaceSingleLetterFirstSuggestion(suggestionsContainer)

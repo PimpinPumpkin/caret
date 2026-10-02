@@ -1574,7 +1574,7 @@ class LatinIME : InputMethodService(),
     }
 
     override fun removeSuggestion(word: String?) {
-        dictionaryFacilitator.removeWord(word)
+        dictionaryFacilitator.removeWord(word!!)
     }
 
     override fun removeExternalSuggestions() {
