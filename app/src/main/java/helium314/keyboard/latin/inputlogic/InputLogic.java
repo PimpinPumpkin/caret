@@ -429,6 +429,30 @@ public final class InputLogic {
      * @param settingsValues the current values of the settings.
      * @return whether the cursor has moved as a result of user interaction.
      */
+    /**
+     * Whether a reported cursor move ends the word being composed. It does not when the cursor only
+     * moved inside that word, in which case the composer follows it.
+     */
+    private boolean cursorLeftComposingWord(final int oldSelStart, final int oldSelEnd, final int newSelStart,
+            final int newSelEnd, final SettingsValues settingsValues) {
+        final boolean selectionChangedOrSafeToReset =
+                oldSelStart != newSelStart || oldSelEnd != newSelEnd // selection changed
+                || !mWordComposer.isComposingWord(); // safe to reset
+        final boolean hasOrHadSelection = (oldSelStart != oldSelEnd || newSelStart != newSelEnd);
+        final int moveAmount = newSelStart - oldSelStart;
+        // As an added small gift from the framework, it happens upon rotation when there
+        // is a selection that we get a wrong cursor position delivered to startInput() that
+        // does not get reflected in the oldSel{Start,End} parameters to the next call to
+        // onUpdateSelection. In this case, we may have set a composition, and when we're here
+        // we realize we shouldn't have. In theory, in this case, selectionChangedOrSafeToReset
+        // should be true, but that is if the framework had taken that wrong cursor position
+        // into account, which means we have to reset the entire composing state whenever there
+        // is or was a selection regardless of whether it changed or not.
+        return hasOrHadSelection || !settingsValues.needsToLookupSuggestions()
+                || (selectionChangedOrSafeToReset
+                        && !mWordComposer.moveCursorByAndReturnIfInsideComposingWord(moveAmount));
+    }
+
     public boolean onUpdateSelection(int oldSelStart, int oldSelEnd, int newSelStart,
              int newSelEnd, int composingSpanStart, int composingSpanEnd, SettingsValues settingsValues) {
         boolean expectCursorMove = mightBeExpectedCursorMove(); // reset the timer
@@ -450,22 +474,7 @@ public final class InputLogic {
         // state-related special processing to kick in.
         mSpaceState = SpaceState.NONE;
 
-        final boolean selectionChangedOrSafeToReset =
-                oldSelStart != newSelStart || oldSelEnd != newSelEnd // selection changed
-                || !mWordComposer.isComposingWord(); // safe to reset
-        final boolean hasOrHadSelection = (oldSelStart != oldSelEnd || newSelStart != newSelEnd);
-        final int moveAmount = newSelStart - oldSelStart;
-        // As an added small gift from the framework, it happens upon rotation when there
-        // is a selection that we get a wrong cursor position delivered to startInput() that
-        // does not get reflected in the oldSel{Start,End} parameters to the next call to
-        // onUpdateSelection. In this case, we may have set a composition, and when we're here
-        // we realize we shouldn't have. In theory, in this case, selectionChangedOrSafeToReset
-        // should be true, but that is if the framework had taken that wrong cursor position
-        // into account, which means we have to reset the entire composing state whenever there
-        // is or was a selection regardless of whether it changed or not.
-        if (hasOrHadSelection || !settingsValues.needsToLookupSuggestions()
-                || (selectionChangedOrSafeToReset
-                        && !mWordComposer.moveCursorByAndReturnIfInsideComposingWord(moveAmount))) {
+        if (cursorLeftComposingWord(oldSelStart, oldSelEnd, newSelStart, newSelEnd, settingsValues)) {
             // If we are composing a word and moving the cursor, we would want to set a
             // suggestion span for recorrection to work correctly. Unfortunately, that
             // would involve the keyboard committing some new text, which would move the
@@ -2121,16 +2130,7 @@ public final class InputLogic {
         // TODO: should we check our saved separator against the actual contents of the text view?
         final int deleteLength = cancelLength + separatorLength;
         if (DebugFlags.DEBUG_ENABLED) {
-            if (mWordComposer.isComposingWord()) {
-                throw new RuntimeException("revertCommit, but we are composing a word");
-            }
-            final CharSequence wordBeforeCursor =
-                    mConnection.getTextBeforeCursor(deleteLength, 0).subSequence(0, cancelLength);
-            if (!TextUtils.equals(committedWord, wordBeforeCursor)) {
-                throw new RuntimeException("revertCommit check failed: we thought we were "
-                        + "reverting \"" + committedWord
-                        + "\", but before the cursor we found \"" + wordBeforeCursor + "\"");
-            }
+            checkCommittedWordIsBeforeCursor(committedWord, deleteLength);
         }
         mConnection.deleteTextBeforeCursor(deleteLength);
         if (!TextUtils.isEmpty(committedWord)) {
@@ -2138,35 +2138,8 @@ public final class InputLogic {
         }
         final String stringToCommit = originallyTypedWord +
                 (usePhantomSpace ? "" : separatorString);
-        final SpannableString textToCommit = new SpannableString(stringToCommit);
-        if (committedWord instanceof SpannableString committedWordWithSuggestionSpans) {
-            final Object[] spans = committedWordWithSuggestionSpans.getSpans(0,
-                    committedWord.length(), Object.class);
-            final int lastCharIndex = textToCommit.length() - 1;
-            // We will collect all suggestions in the following array.
-            final ArrayList<String> suggestions = new ArrayList<>();
-            // First, add the committed word to the list of suggestions.
-            suggestions.add(committedWordString);
-            for (final Object span : spans) {
-                // If this is a suggestion span, we check that the word is not the committed word.
-                // That should mostly be the case.
-                // Given this, we add it to the list of suggestions, otherwise we discard it.
-                if (span instanceof final SuggestionSpan suggestionSpan) {
-                    for (final String suggestion : suggestionSpan.getSuggestions()) {
-                        if (!suggestion.equals(committedWordString)) {
-                            suggestions.add(suggestion);
-                        }
-                    }
-                } else {
-                    // If this is not a suggestion span, we just add it as is.
-                    textToCommit.setSpan(span, 0, lastCharIndex, committedWordWithSuggestionSpans.getSpanFlags(span));
-                }
-            }
-            // Add the suggestion list to the list of suggestions.
-            textToCommit.setSpan(new SuggestionSpan(mLatinIME, inputTransaction.getSettingsValues().mLocale,
-                    suggestions.toArray(new String[0]), 0, null),
-                    0, lastCharIndex, 0);
-        }
+        final SpannableString textToCommit = withCommittedWordAsSuggestion(stringToCommit, committedWord,
+                inputTransaction.getSettingsValues());
 
         if (inputTransaction.getSettingsValues().mSpacingAndPunctuations.mCurrentLanguageHasSpaces) {
             mConnection.commitText(textToCommit, 1);
@@ -2186,6 +2159,58 @@ public final class InputLogic {
 
         // We have a separator between the word and the cursor: we should show predictions.
         inputTransaction.setRequiresUpdateSuggestions();
+    }
+
+    /** Debug builds only: fail loudly when the word about to be reverted is not what is in the text field. */
+    private void checkCommittedWordIsBeforeCursor(final CharSequence committedWord, final int deleteLength) {
+        if (mWordComposer.isComposingWord()) {
+            throw new RuntimeException("revertCommit, but we are composing a word");
+        }
+        final CharSequence wordBeforeCursor =
+                mConnection.getTextBeforeCursor(deleteLength, 0).subSequence(0, committedWord.length());
+        if (!TextUtils.equals(committedWord, wordBeforeCursor)) {
+            throw new RuntimeException("revertCommit check failed: we thought we were "
+                    + "reverting \"" + committedWord
+                    + "\", but before the cursor we found \"" + wordBeforeCursor + "\"");
+        }
+    }
+
+    /**
+     * The typed word that goes back into the text field when an autocorrection is undone. It
+     * carries the corrected word, and whatever else was suggested for it, as suggestions, so the
+     * app can still offer them.
+     */
+    private SpannableString withCommittedWordAsSuggestion(final String stringToCommit, final CharSequence committedWord,
+            final SettingsValues settingsValues) {
+        final SpannableString textToCommit = new SpannableString(stringToCommit);
+        if (!(committedWord instanceof SpannableString committedWordWithSuggestionSpans)) return textToCommit;
+        final String committedWordString = committedWord.toString();
+        final Object[] spans = committedWordWithSuggestionSpans.getSpans(0, committedWord.length(), Object.class);
+        final int lastCharIndex = textToCommit.length() - 1;
+        // We will collect all suggestions in the following array.
+        final ArrayList<String> suggestions = new ArrayList<>();
+        // First, add the committed word to the list of suggestions.
+        suggestions.add(committedWordString);
+        for (final Object span : spans) {
+            // If this is a suggestion span, we check that the word is not the committed word.
+            // That should mostly be the case.
+            // Given this, we add it to the list of suggestions, otherwise we discard it.
+            if (span instanceof final SuggestionSpan suggestionSpan) {
+                for (final String suggestion : suggestionSpan.getSuggestions()) {
+                    if (!suggestion.equals(committedWordString)) {
+                        suggestions.add(suggestion);
+                    }
+                }
+            } else {
+                // If this is not a suggestion span, we just add it as is.
+                textToCommit.setSpan(span, 0, lastCharIndex, committedWordWithSuggestionSpans.getSpanFlags(span));
+            }
+        }
+        // Add the suggestion list to the list of suggestions.
+        textToCommit.setSpan(new SuggestionSpan(mLatinIME, settingsValues.mLocale,
+                suggestions.toArray(new String[0]), 0, null),
+                0, lastCharIndex, 0);
+        return textToCommit;
     }
 
     /**
