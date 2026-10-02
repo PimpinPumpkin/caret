@@ -349,7 +349,7 @@ class DictionaryFacilitatorImpl : DictionaryFacilitator {
         val wordToUse: String
         // Check for isBeginningOfSentenceContext too, because not all text fields auto-capitalize in this case.
         // Even if the user capitalizes manually, they most likely don't want the capitalized form suggested.
-        if (wasAutoCapitalized || ngramContext.isBeginningOfSentenceContext) {
+        if (wasAutoCapitalized || ngramContext.isBeginningOfSentenceContext()) {
             val decapitalizedWord = word.decapitalize(dictionaryGroup.locale) // try undoing auto-capitalization
             if (isValidWord(word, DictionaryFacilitator.ALL_DICTIONARY_TYPES, dictionaryGroup)
                 && !isValidWord(decapitalizedWord, DictionaryFacilitator.ALL_DICTIONARY_TYPES, dictionaryGroup)
@@ -491,7 +491,7 @@ class DictionaryFacilitatorImpl : DictionaryFacilitator {
             getFutoSwipeResults(composedData, ngramContext, keyboard)?.let { return it }
             // the native code crashes on swipe input when no gesture typing library is loaded
             if (!FutoSwipe.hasOtherLibrary)
-                return SuggestionResults(SuggestedWords.MAX_SUGGESTIONS, ngramContext.isBeginningOfSentenceContext, false)
+                return SuggestionResults(SuggestedWords.MAX_SUGGESTIONS, ngramContext.isBeginningOfSentenceContext(), false)
         }
         val proximityInfoHandle = keyboard.proximityInfo.nativeProximityInfo
         val weightOfLangModelVsSpatialModel = floatArrayOf(Dictionary.NOT_A_WEIGHT_OF_LANG_MODEL_VS_SPATIAL_MODEL)
@@ -508,7 +508,7 @@ class DictionaryFacilitatorImpl : DictionaryFacilitator {
         suggestionsArray[0] = getSuggestions(composedData, ngramContext, settingsValuesForSuggestion, sessionId,
             proximityInfoHandle, weightOfLangModelVsSpatialModel, dictionaryGroups[0])
         val suggestionResults = SuggestionResults(
-            SuggestedWords.MAX_SUGGESTIONS, ngramContext.isBeginningOfSentenceContext, false
+            SuggestedWords.MAX_SUGGESTIONS, ngramContext.isBeginningOfSentenceContext(), false
         )
         waitForOtherDicts?.await()
 
@@ -538,7 +538,7 @@ class DictionaryFacilitatorImpl : DictionaryFacilitator {
         val mainDict = group.getDict(Dictionary.TYPE_MAIN)
         val suggestions = FutoSwipe.getSuggestions(userWords, { mainDict?.isInDictionary(it) == true }, composedData, ngramContext, keyboard, group.locale, sourceDict)
             ?: return null
-        val results = SuggestionResults(SuggestedWords.MAX_SUGGESTIONS, ngramContext.isBeginningOfSentenceContext, false)
+        val results = SuggestionResults(SuggestedWords.MAX_SUGGESTIONS, ngramContext.isBeginningOfSentenceContext(), false)
         suggestions.forEach {
             if (isBlacklisted(it.word)) return@forEach
             results.add(it)

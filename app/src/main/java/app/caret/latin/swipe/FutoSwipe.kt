@@ -219,7 +219,7 @@ object FutoSwipe {
 
     private fun contextWords(ngramContext: NgramContext): List<String> {
         val words = ArrayList<String>()
-        for (n in minOf(ngramContext.prevWordCount, MAX_CONTEXT_WORDS) downTo 1) {
+        for (n in minOf(ngramContext.getPrevWordCount(), MAX_CONTEXT_WORDS) downTo 1) {
             val word = ngramContext.getNthPrevWord(n)?.toString() ?: continue
             if (word.isNotEmpty() && word != NgramContext.BEGINNING_OF_SENTENCE_TAG) words.add(word)
         }

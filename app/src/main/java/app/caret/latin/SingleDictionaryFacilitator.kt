@@ -60,7 +60,7 @@ class SingleDictionaryFacilitator(private val dict: Dictionary) : DictionaryFaci
         settingsValuesForSuggestion: SettingsValuesForSuggestion, sessionId: Int, inputStyle: Int
     ): SuggestionResults {
         val suggestionResults = SuggestionResults(
-            SuggestedWords.MAX_SUGGESTIONS, ngramContext.isBeginningOfSentenceContext,
+            SuggestedWords.MAX_SUGGESTIONS, ngramContext.isBeginningOfSentenceContext(),
             false
         )
         suggestionResults.addAll(
