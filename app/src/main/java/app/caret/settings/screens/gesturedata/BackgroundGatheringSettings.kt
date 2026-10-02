@@ -128,7 +128,7 @@ fun BackgroundGatheringSettings() {
                 if (it) {
                     val usedMainDicts = DictionaryFactory.getMainDictsForLocale(ctx, Settings.getValues().mLocale, false)
                     val hashes = getKnownDictHashes(ctx)
-                    if (usedMainDicts.none { ((it as? BinaryDictionary)?.hash ?: (it as? ReadOnlyBinaryDictionary)?.hash) in hashes })
+                    if (usedMainDicts.none { ((it as? BinaryDictionary)?.hash ?: (it as? ReadOnlyBinaryDictionary)?.getHash()) in hashes })
                         showNoDictDialog = true
                 }
                 backgroundGathering = it

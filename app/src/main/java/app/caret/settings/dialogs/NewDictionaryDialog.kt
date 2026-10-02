@@ -128,7 +128,7 @@ private fun checkDict(file: File): Pair<Int?, DictionaryHeader?> {
 
     val locale = newHeader.mLocaleString.constructLocale()
     val dict = ReadOnlyBinaryDictionary(file.absolutePath, 0, file.length(), false, locale, "test")
-    if (!dict.isValidDictionary) {
+    if (!dict.isValidDictionary()) {
         dict.close()
         return R.string.dictionary_load_error to null
     }

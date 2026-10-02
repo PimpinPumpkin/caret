@@ -94,7 +94,7 @@ object DictionaryFactory {
             file.absolutePath, 0, file.length(), false, locale, dictType
         )
 
-        if (readOnlyBinaryDictionary.isValidDictionary) {
+        if (readOnlyBinaryDictionary.isValidDictionary()) {
             if (locale.language == "ko") {
                 // Use KoreanDictionary for Korean locale
                 return KoreanDictionary(readOnlyBinaryDictionary)

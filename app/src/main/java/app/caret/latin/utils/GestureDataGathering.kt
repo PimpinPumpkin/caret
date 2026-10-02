@@ -256,7 +256,7 @@ class WordData(
                 else context.protectedPrefs().getString(Settings.PREF_LIBRARY_CHECKSUM, "") == JniUtils.expectedDefaultChecksum(),
             targetWord,
             dictionariesInUsedSuggestions.map { (dict, _) ->
-                val hash = (dict as? BinaryDictionary)?.hash ?: (dict as? ReadOnlyBinaryDictionary)?.hash
+                val hash = (dict as? BinaryDictionary)?.hash ?: (dict as? ReadOnlyBinaryDictionary)?.getHash()
                 DictInfo(hash, dict.mDictType, dict.mLocale?.toLanguageTag())
             },
             // index not needed any more
@@ -345,7 +345,7 @@ class WordData(
         SuggestedWords.SuggestedWordInfo("", "", Int.MIN_VALUE, 0, mSourceDict, 0, 0)
 
     private fun SuggestedWords.SuggestedWordInfo.isFromKnownMainDict(context: Context): Boolean {
-        val hash = (mSourceDict as? BinaryDictionary)?.hash ?: (mSourceDict as? ReadOnlyBinaryDictionary)?.hash ?: return false
+        val hash = (mSourceDict as? BinaryDictionary)?.hash ?: (mSourceDict as? ReadOnlyBinaryDictionary)?.getHash() ?: return false
         return hash in getKnownDictHashes(context)
     }
 }
