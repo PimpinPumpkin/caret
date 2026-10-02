@@ -571,14 +571,14 @@ public final class KeyboardSwitcher {
         mFakeToastView = mCurrentInputView.findViewById(R.id.fakeToast);
 
         mKeyboardViewWrapper = mCurrentInputView.findViewById(R.id.keyboard_view_wrapper);
-        mKeyboardViewWrapper.setKeyboardActionListener(mLatinIME.mKeyboardActionListener);
+        mKeyboardViewWrapper.setKeyboardActionListener(mLatinIME.keyboardActionListener);
         mKeyboardView = mCurrentInputView.findViewById(R.id.keyboard_view);
         mKeyboardView.setHardwareAcceleratedDrawingEnabled(isHardwareAcceleratedDrawingEnabled);
-        mKeyboardView.setKeyboardActionListener(mLatinIME.mKeyboardActionListener);
+        mKeyboardView.setKeyboardActionListener(mLatinIME.keyboardActionListener);
         mEmojiPalettesView.setHardwareAcceleratedDrawingEnabled(isHardwareAcceleratedDrawingEnabled);
-        mEmojiPalettesView.setKeyboardActionListener(mLatinIME.mKeyboardActionListener);
+        mEmojiPalettesView.setKeyboardActionListener(mLatinIME.keyboardActionListener);
         mClipboardHistoryView.setHardwareAcceleratedDrawingEnabled(isHardwareAcceleratedDrawingEnabled);
-        mClipboardHistoryView.setKeyboardActionListener(mLatinIME.mKeyboardActionListener);
+        mClipboardHistoryView.setKeyboardActionListener(mLatinIME.keyboardActionListener);
         mEmojiTabStripView = mCurrentInputView.findViewById(R.id.emoji_tab_strip);
         mClipboardStripView = mCurrentInputView.findViewById(R.id.clipboard_strip);
         mClipboardStripScrollView = mCurrentInputView.findViewById(R.id.clipboard_strip_scroll_view);
@@ -675,7 +675,7 @@ public final class KeyboardSwitcher {
             mEmojiTabStripView.setVisibility(View.VISIBLE);
             mClipboardHistoryView.setVisibility(View.GONE);
             mEmojiPalettesView.startEmojiPalettes(mKeyboardView.getKeyVisualAttribute(),
-                mLatinIME.getCurrentInputEditorInfo(), mLatinIME.mKeyboardActionListener);
+                mLatinIME.getCurrentInputEditorInfo(), mLatinIME.keyboardActionListener);
             mEmojiPalettesView.setVisibility(View.VISIBLE);
         }
 
@@ -696,7 +696,7 @@ public final class KeyboardSwitcher {
             mClipboardStripScrollView.setVisibility(View.VISIBLE);
             mEmojiPalettesView.setVisibility(View.GONE);
             mClipboardHistoryView.startClipboardHistory(mLatinIME.getClipboardHistoryManager(), mKeyboardView.getKeyVisualAttribute(),
-                mLatinIME.getCurrentInputEditorInfo(), mLatinIME.mKeyboardActionListener);
+                mLatinIME.getCurrentInputEditorInfo(), mLatinIME.keyboardActionListener);
             mClipboardHistoryView.setVisibility(View.VISIBLE);
         }
 

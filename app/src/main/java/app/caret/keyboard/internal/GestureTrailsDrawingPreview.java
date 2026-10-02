@@ -152,10 +152,10 @@ public final class GestureTrailsDrawingPreview extends AbstractDrawingPreview im
         }
         GestureTrailDrawingPoints trail;
         synchronized (mGestureTrails) {
-            trail = mGestureTrails.get(tracker.mPointerId);
+            trail = mGestureTrails.get(tracker.pointerId);
             if (trail == null) {
                 trail = new GestureTrailDrawingPoints();
-                mGestureTrails.put(tracker.mPointerId, trail);
+                mGestureTrails.put(tracker.pointerId, trail);
             }
         }
         trail.addStroke(tracker.getGestureStrokeDrawingPoints(), tracker.getDownTime());

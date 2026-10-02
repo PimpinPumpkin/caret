@@ -74,7 +74,7 @@ class KeyboardActionListenerImpl(private val latinIME: LatinIME, private val inp
             return false
 
         val keyIdentifier = keyEvent.deviceId.toLong() shl 32 + keyEvent.keyCode
-        return inputLogic.mCurrentlyPressedHardwareKeys.remove(keyIdentifier)
+        return inputLogic.currentlyPressedHardwareKeys.remove(keyIdentifier)
     }
 
     override fun onKeyDown(keyCode: Int, keyEvent: KeyEvent): Boolean {

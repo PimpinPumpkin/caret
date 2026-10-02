@@ -58,15 +58,15 @@ import kotlin.test.assertEquals
 class InputLogicTest {
     private val latinIME = Robolectric.setupService(LatinIME::class.java)
     private val settingsValues get() = Settings.getValues()
-    private val inputLogic get() = latinIME.mInputLogic
+    private val inputLogic get() = latinIME.inputLogic
     private val connection: RichInputConnection get() = inputLogic.mConnection
-    private val composerReader = InputLogic::class.java.getDeclaredField("mWordComposer").apply { isAccessible = true }
+    private val composerReader = InputLogic::class.java.getDeclaredField("wordComposer").apply { isAccessible = true }
     private val composer get() = composerReader.get(inputLogic) as WordComposer
-    private val spaceStateReader = InputLogic::class.java.getDeclaredField("mSpaceState").apply { isAccessible = true }
+    private val spaceStateReader = InputLogic::class.java.getDeclaredField("spaceState").apply { isAccessible = true }
     private val spaceState get() = spaceStateReader.get(inputLogic) as Int
-    private val beforeComposingReader = RichInputConnection::class.java.getDeclaredField("mCommittedTextBeforeComposingText").apply { isAccessible = true }
+    private val beforeComposingReader = RichInputConnection::class.java.getDeclaredField("committedTextBeforeComposingText").apply { isAccessible = true }
     private val connectionTextBeforeComposingText get() = (beforeComposingReader.get(connection) as CharSequence).toString()
-    private val composingReader = RichInputConnection::class.java.getDeclaredField("mComposingText").apply { isAccessible = true }
+    private val composingReader = RichInputConnection::class.java.getDeclaredField("composingText").apply { isAccessible = true }
     private val connectionComposingText get() = (composingReader.get(connection) as CharSequence).toString()
 
     private val textBeforeCursor get() = ShadowInputMethodService.textBeforeCursor
@@ -721,17 +721,17 @@ class InputLogicTest {
     @Test fun moveCursorHorizontally() {
         chainInput("hello")
         assertEquals(5, cursor)
-        latinIME.mKeyboardActionListener.onHorizontalSpaceSwipe(-2)
+        latinIME.keyboardActionListener.onHorizontalSpaceSwipe(-2)
         assertEquals(3, cursor)
-        latinIME.mKeyboardActionListener.onHorizontalSpaceSwipe(-5)
+        latinIME.keyboardActionListener.onHorizontalSpaceSwipe(-5)
         assertEquals(0, cursor)
-        latinIME.mKeyboardActionListener.onHorizontalSpaceSwipe(-1)
+        latinIME.keyboardActionListener.onHorizontalSpaceSwipe(-1)
         assertEquals(0, cursor)
-        latinIME.mKeyboardActionListener.onHorizontalSpaceSwipe(3)
+        latinIME.keyboardActionListener.onHorizontalSpaceSwipe(3)
         assertEquals(3, cursor)
-        latinIME.mKeyboardActionListener.onHorizontalSpaceSwipe(3)
+        latinIME.keyboardActionListener.onHorizontalSpaceSwipe(3)
         assertEquals(5, cursor)
-        latinIME.mKeyboardActionListener.onHorizontalSpaceSwipe(1)
+        latinIME.keyboardActionListener.onHorizontalSpaceSwipe(1)
         assertEquals(5, cursor)
     }
 
@@ -803,7 +803,7 @@ class InputLogicTest {
     @Test fun `a picked punctuation suggestion goes in like a typed one`() {
         setText("hello")
         val suggestions = PunctuationSuggestions.newPunctuationSuggestions(arrayOf("!", "?"))
-        latinIME.mInputLogic.setSuggestedWords(suggestions)
+        latinIME.inputLogic.setSuggestedWords(suggestions)
         val info = suggestions.getInfo(0)
         latinIME.pickSuggestionManually(info)
         handleMessages()
@@ -870,7 +870,7 @@ class InputLogicTest {
 
     /** A whole swipe: the start, which commits what was being typed, then the recognized word. */
     private fun swipe(word: String) {
-        latinIME.mInputLogic.onStartBatchInput(settingsValues, KeyboardSwitcher.getInstance(), latinIME.mHandler)
+        latinIME.inputLogic.onStartBatchInput(settingsValues, KeyboardSwitcher.getInstance(), latinIME.mHandler)
         handleMessages()
         glideTypingInput(word)
         handleMessages()
@@ -989,7 +989,7 @@ class InputLogicTest {
         chainInput(typed)
         val info = SuggestedWordInfo(corrected, "", 0, 0, null, 0, 0)
         val typedInfo = SuggestedWordInfo(typed, "", 0, 0, null, 0, 0)
-        latinIME.mInputLogic.setSuggestedWords(SuggestedWords(ArrayList(listOf(typedInfo, info)), null, typedInfo, false, true, false, 0, 0))
+        latinIME.inputLogic.setSuggestedWords(SuggestedWords(ArrayList(listOf(typedInfo, info)), null, typedInfo, false, true, false, 0, 0))
         rawType(separator.toString())
     }
 
@@ -1041,7 +1041,7 @@ class InputLogicTest {
 
     private fun pickPunctuation(mark: String) {
         val suggestions = PunctuationSuggestions.newPunctuationSuggestions(arrayOf(mark))
-        latinIME.mInputLogic.setSuggestedWords(suggestions)
+        latinIME.inputLogic.setSuggestedWords(suggestions)
         latinIME.pickSuggestionManually(suggestions.getInfo(0))
         handleMessages()
     }
@@ -1366,7 +1366,7 @@ class InputLogicTest {
 
         if (!latinIME.prefs().getString(Settings.PREF_SELECTED_SUBTYPE, "")!!.contains("CombiningRules") // check fails if combiner merges symbols
             && !(codePoint == Constants.CODE_SPACE && oldBefore.lastOrNull() == ' ') // check fails when 2 spaces are converted into a period
-            && !latinIME.mInputLogic.mSuggestedWords.mWillAutoCorrect // autocorrect obviously creates inconsistencies
+            && !latinIME.inputLogic.mSuggestedWords.mWillAutoCorrect // autocorrect obviously creates inconsistencies
             ) {
             if (phantomSpaceToInsert.isEmpty())
                 assertEquals(oldBefore + insert, textBeforeCursor)
@@ -1479,7 +1479,7 @@ class InputLogicTest {
         val info = SuggestedWordInfo(suggestion, "", 0, 0, null, 0, 0)
         val typedInfo = SuggestedWordInfo(typedWord, "", 0, 0, null, 0, 0)
         val sw = SuggestedWords(ArrayList(listOf(typedInfo, info)), null, typedInfo, false, true, false, 0, 0)
-        latinIME.mInputLogic.setSuggestedWords(sw) // this prepares for autocorrect
+        latinIME.inputLogic.setSuggestedWords(sw) // this prepares for autocorrect
         input(' ')
         checkConnectionConsistency()
     }
@@ -1487,7 +1487,7 @@ class InputLogicTest {
     private fun glideTypingInput(word: String) {
         val info = SuggestedWordInfo(word, "", 0, 0, null, 0, 0)
         val sw = SuggestedWords(ArrayList(listOf(info)), null, info, true, false, false, 0, 0)
-        latinIME.mInputLogic.onUpdateTailBatchInputCompleted(settingsValues, sw, KeyboardSwitcher.getInstance())
+        latinIME.inputLogic.onUpdateTailBatchInputCompleted(settingsValues, sw, KeyboardSwitcher.getInstance())
     }
 
     private fun checkConnectionConsistency() {

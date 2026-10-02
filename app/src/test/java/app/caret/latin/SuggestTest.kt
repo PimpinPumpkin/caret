@@ -45,7 +45,7 @@ import kotlin.test.assertEquals
 ])
 class SuggestTest {
     private val latinIME = Robolectric.setupService(LatinIME::class.java)
-    private val suggest get() = latinIME.mInputLogic.mSuggest
+    private val suggest get() = latinIME.inputLogic.suggest
 
     private val confidenceModest = 0.24f
     private val confidenceAggressive = 0.65f

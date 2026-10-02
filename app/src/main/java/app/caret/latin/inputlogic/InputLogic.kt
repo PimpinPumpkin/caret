@@ -82,53 +82,53 @@ import java.util.concurrent.TimeUnit
 class InputLogic(
     // TODO : Remove this member when we can.
     @JvmField val mLatinIME: LatinIME,
-    private val mSuggestionStripViewAccessor: SuggestionStripViewAccessor,
+    private val suggestionStripViewAccessor: SuggestionStripViewAccessor,
     dictionaryFacilitator: DictionaryFacilitator
 ) {
     // This has package visibility so it can be accessed from InputLogicHandler.
-    @JvmField val mWordComposer: WordComposer = WordComposer()
+    @JvmField val wordComposer: WordComposer = WordComposer()
     @JvmField val mConnection: RichInputConnection = RichInputConnection(mLatinIME)
-    private val mInputLogicHandler: InputLogicHandler = InputLogicHandler(mLatinIME.mHandler, this)
+    private val inputLogicHandler: InputLogicHandler = InputLogicHandler(mLatinIME.mHandler, this)
 
     // TODO : make all these fields private as soon as possible.
     // Current space state of the input method. This can be any of the above constants.
-    private var mSpaceState = 0
+    private var spaceState = 0
     // Never null
     @JvmField var mSuggestedWords: SuggestedWords = SuggestedWords.getEmptyInstance()
-    @JvmField var mSuggest: Suggest = Suggest(dictionaryFacilitator) // non-final for active gesture data gathering, revert when data gathering phase is done (end of 2026 latest)
+    @JvmField var suggest: Suggest = Suggest(dictionaryFacilitator) // non-final for active gesture data gathering, revert when data gathering phase is done (end of 2026 latest)
     @JvmField var mDictionaryFacilitator: DictionaryFacilitator = dictionaryFacilitator // non-final for active gesture data gathering, revert when data gathering phase is done (end of 2026 latest)
-    private var mEmojiDictionaryFacilitator: SingleDictionaryFacilitator? = null
+    private var emojiDictionaryFacilitator: SingleDictionaryFacilitator? = null
     fun setFacilitator(facilitator: DictionaryFacilitator) { // only for active gesture data gathering, remove when data gathering phase is done (end of 2026 latest)
         if (mDictionaryFacilitator === facilitator) return
         mDictionaryFacilitator = facilitator
-        mSuggest = Suggest(mDictionaryFacilitator)
+        suggest = Suggest(mDictionaryFacilitator)
     }
 
     @JvmField var mLastComposedWord: LastComposedWord = LastComposedWord.NOT_A_COMPOSED_WORD
-    private val mRecapitalizeStatus = RecapitalizeStatus()
+    private val recapitalizeStatus = RecapitalizeStatus()
 
-    private var mDeleteCount = 0
-    private var mLastKeyTime: Long = 0
+    private var deleteCount = 0
+    private var lastKeyTime: Long = 0
     // todo: this is not used, so either remove it or do something with it
-    @JvmField val mCurrentlyPressedHardwareKeys = TreeSet<Long>()
+    @JvmField val currentlyPressedHardwareKeys = TreeSet<Long>()
 
     // Keeps track of most recently inserted text (multi-character key) for reverting
-    private var mEnteredText: String? = null
+    private var enteredText: String? = null
 
     // TODO: This boolean is persistent state and causes large side effects at unexpected times.
     // Find a way to remove it for readability.
-    private var mIsAutoCorrectionIndicatorOn = false
-    private var mDoubleSpacePeriodCountdownStart: Long = 0
+    private var isAutoCorrectionIndicatorOn = false
+    private var doubleSpacePeriodCountdownStart: Long = 0
 
     // The word being corrected while the cursor is in the middle of the word.
     // Note: This does not have a composing span, so it must be handled separately.
-    private var mWordBeingCorrectedByCursor: String? = null
+    private var wordBeingCorrectedByCursor: String? = null
 
-    private var mJustRevertedACommit = false
+    private var justRevertedACommit = false
 
-    private var mCursorMoveExpectedUntil = 0L
+    private var cursorMoveExpectedUntil = 0L
 
-    private var mAutoCommitSequenceNumber = 1
+    private var autoCommitSequenceNumber = 1
 
     /**
      * Initializes the input logic for input in an editor.
@@ -139,27 +139,27 @@ class InputLogic(
      * @param settingsValues the current settings values
      */
     fun startInput(combiningSpec: String?, settingsValues: SettingsValues) {
-        mEnteredText = null
-        mWordBeingCorrectedByCursor = null
+        enteredText = null
+        wordBeingCorrectedByCursor = null
         mConnection.onStartInput()
-        if (!mWordComposer.getTypedWord().isEmpty()) {
+        if (!wordComposer.getTypedWord().isEmpty()) {
             // For messaging apps that offer send button, the IME does not get the opportunity
             // to capture the last word. This block should capture those uncommitted words.
             // The timestamp at which it is captured is not accurate but close enough.
-            StatsUtils.onWordCommitUserTyped(mWordComposer.getTypedWord(), mWordComposer.isBatchMode())
+            StatsUtils.onWordCommitUserTyped(wordComposer.getTypedWord(), wordComposer.isBatchMode())
         }
-        mWordComposer.restartCombining(combiningSpec)
+        wordComposer.restartCombining(combiningSpec)
         resetComposingState(true /* alsoResetLastComposedWord */)
-        mDeleteCount = 0
-        mSpaceState = SpaceState.NONE
-        mRecapitalizeStatus.disable() // Do not perform recapitalize until the cursor is moved once
-        mCurrentlyPressedHardwareKeys.clear()
+        deleteCount = 0
+        spaceState = SpaceState.NONE
+        recapitalizeStatus.disable() // Do not perform recapitalize until the cursor is moved once
+        currentlyPressedHardwareKeys.clear()
         mSuggestedWords = SuggestedWords.getEmptyInstance()
         // In some cases (e.g. after rotation of the device, or when scrolling the text before bringing up keyboard)
         // editorInfo.initialSelStart is not the actual cursor position, so we try using some heuristics to find the correct position.
         mConnection.tryFixIncorrectCursorPosition()
         cancelDoubleSpacePeriodCountdown()
-        mInputLogicHandler.reset()
+        inputLogicHandler.reset()
         mConnection.requestCursorUpdates(true, true)
         setInlineEmojiSearchAction(false)
     }
@@ -181,7 +181,7 @@ class InputLogic(
     fun onOrientationChange(settingsValues: SettingsValues) {
         // If !isComposingWord, #commitTyped() is a no-op, but still, it's better to avoid
         // the useless IPC of {begin,end}BatchEdit.
-        if (mWordComposer.isComposingWord()) {
+        if (wordComposer.isComposingWord()) {
             mConnection.beginBatchEdit()
             // If we had a composition in progress, we need to commit the word so that the
             // suggestionsSpan will be added. This will allow resuming on the same suggestions
@@ -195,13 +195,13 @@ class InputLogic(
      * Clean up the input logic after input is finished.
      */
     fun finishInput() {
-        if (mWordComposer.isComposingWord()) {
+        if (wordComposer.isComposingWord()) {
             mConnection.finishComposingText()
-            StatsUtils.onWordCommitUserTyped(mWordComposer.getTypedWord(), mWordComposer.isBatchMode())
+            StatsUtils.onWordCommitUserTyped(wordComposer.getTypedWord(), wordComposer.isBatchMode())
         }
         resetComposingState(true)
-        mInputLogicHandler.reset()
-        mSpaceState = SpaceState.NONE
+        inputLogicHandler.reset()
+        spaceState = SpaceState.NONE
     }
 
     /**
@@ -217,15 +217,15 @@ class InputLogic(
     fun onTextInput(settingsValues: SettingsValues, event: Event, keyboardCapsMode: CapsMode, handler: LatinIME.UIHandler): InputTransaction {
         val rawText = event.textToCommit!!.toString()
         val inputTransaction = InputTransaction(settingsValues, event,
-                SystemClock.uptimeMillis(), mSpaceState,
+                SystemClock.uptimeMillis(), spaceState,
                 getActualCapsMode(settingsValues, keyboardCapsMode))
         mConnection.beginBatchEdit()
         if (useBackgroundGathering && mConnection.hasSelection())
             BackgroundGatheringCache.onEditSelection(mConnection.getSelectedText(0), mConnection.getTextBeforeCursor(40, 0), mConnection.getTextAfterCursor(40, 0))
-        if (mWordComposer.isComposingWord()) {
-            if (mWordComposer.isCursorFrontOrMiddleOfComposingWord()) {
+        if (wordComposer.isComposingWord()) {
+            if (wordComposer.isCursorFrontOrMiddleOfComposingWord()) {
                 if (useBackgroundGathering)
-                    BackgroundGatheringCache.onEditWord(mWordComposer.getTypedWord())
+                    BackgroundGatheringCache.onEditWord(wordComposer.getTypedWord())
 
                 // stop composing, otherwise the text will end up at the end of the current word
                 mConnection.finishComposingText()
@@ -240,16 +240,16 @@ class InputLogic(
         }
         handler.postUpdateSuggestionStrip(SuggestedWords.INPUT_STYLE_TYPING)
         val text = performSpecificTldProcessingOnTextInput(rawText)
-        if (SpaceState.PHANTOM == mSpaceState) {
+        if (SpaceState.PHANTOM == spaceState) {
             insertAutomaticSpaceIfOptionsAndTextAllow(settingsValues)
         }
         mConnection.commitText(text, 1)
-        StatsUtils.onWordCommitUserTyped(mEnteredText, mWordComposer.isBatchMode())
+        StatsUtils.onWordCommitUserTyped(enteredText, wordComposer.isBatchMode())
         mConnection.endBatchEdit()
         // Space state must be updated before calling updateShiftState
-        mSpaceState = SpaceState.NONE
-        mEnteredText = text
-        mWordBeingCorrectedByCursor = null
+        spaceState = SpaceState.NONE
+        enteredText = text
+        wordBeingCorrectedByCursor = null
         inputTransaction.setDidAffectContents()
         inputTransaction.requireShiftUpdate(InputTransaction.SHIFT_UPDATE_NOW)
         return inputTransaction
@@ -282,22 +282,22 @@ class InputLogic(
             return onCodeInput(settingsValues, event, keyboardCapsMode, currentKeyboardScript, handler)
         }
         if (useBackgroundGathering) {
-            if (mWordComposer.isBatchMode())
+            if (wordComposer.isBatchMode())
                 // should only happen selecting different suggestion for gesture typed word
-                BackgroundGatheringCache.onPickSuggestionAfterGesturing(suggestionInfo, mWordComposer.getTypedWord())
+                BackgroundGatheringCache.onPickSuggestionAfterGesturing(suggestionInfo, wordComposer.getTypedWord())
             else
-                BackgroundGatheringCache.onPickSuggestion(suggestionInfo, mWordComposer.getTypedWord())
+                BackgroundGatheringCache.onPickSuggestion(suggestionInfo, wordComposer.getTypedWord())
         }
 
         val event = Event.createSuggestionPickedEvent(suggestionInfo)
         val inputTransaction = InputTransaction(settingsValues, event,
-            SystemClock.uptimeMillis(), mSpaceState, keyboardCapsMode)
+            SystemClock.uptimeMillis(), spaceState, keyboardCapsMode)
         // Manual pick affects the contents of the editor, so we take note of this. It's important
         // for the sequence of language switching.
         inputTransaction.setDidAffectContents()
         mConnection.beginBatchEdit()
         insertSpaceBeforePickedSuggestionIfNeeded(settingsValues, suggestion)
-        mJustRevertedACommit = false
+        justRevertedACommit = false
 
         // TODO: We should not need the following branch. We should be able to take the same
         // code path as for other kinds, use commitChosenWord, and do everything normally. We will
@@ -305,7 +305,7 @@ class InputLogic(
         // the risk of calling commitCompletion twice because we don't know how the app will react.
         if (suggestionInfo.isKindOf(SuggestedWordInfo.KIND_APP_DEFINED)) {
             mSuggestedWords = SuggestedWords.getEmptyInstance()
-            mSuggestionStripViewAccessor.setNeutralSuggestionStrip()
+            suggestionStripViewAccessor.setNeutralSuggestionStrip()
             inputTransaction.requireShiftUpdate(InputTransaction.SHIFT_UPDATE_NOW)
             resetComposingState(true /* alsoResetLastComposedWord */)
             mConnection.commitCompletion(suggestionInfo.mApplicationSpecifiedCompletionInfo)
@@ -325,7 +325,7 @@ class InputLogic(
 
         // Space state must be updated before calling updateShiftState
         if (settingsValues.mAutospaceAfterSuggestion)
-            mSpaceState = SpaceState.PHANTOM
+            spaceState = SpaceState.PHANTOM
         inputTransaction.requireShiftUpdate(InputTransaction.SHIFT_UPDATE_NOW)
         setInlineEmojiSearchAction(false)
 
@@ -334,7 +334,7 @@ class InputLogic(
         handler.postUpdateSuggestionStrip(SuggestedWords.INPUT_STYLE_NONE)
 
         StatsUtils.onPickSuggestionManually(mSuggestedWords, suggestionInfo, mDictionaryFacilitator)
-        StatsUtils.onWordCommitSuggestionPickedManually(suggestionInfo.mWord, mWordComposer.isBatchMode())
+        StatsUtils.onWordCommitSuggestionPickedManually(suggestionInfo.mWord, wordComposer.isBatchMode())
         return inputTransaction
     }
 
@@ -343,13 +343,13 @@ class InputLogic(
      * "phantom" space), unless the pick only replaces what is already there.
      */
     private fun insertSpaceBeforePickedSuggestionIfNeeded(settingsValues: SettingsValues, suggestion: String) {
-        if (SpaceState.PHANTOM != mSpaceState || suggestion.isEmpty()) return
+        if (SpaceState.PHANTOM != spaceState || suggestion.isEmpty()) return
         // In the batch input mode, a manually picked suggested word should just replace
         // the current batch input text and there is no need for a phantom space.
-        if (mWordComposer.isBatchMode()) return
+        if (wordComposer.isBatchMode()) return
         // when a commit was reverted and user chose a different suggestion, we don't want
         // to insert a space before the picked word
-        if (mJustRevertedACommit) return
+        if (justRevertedACommit) return
         val firstChar = Character.codePointAt(suggestion, 0)
         if (!settingsValues.isWordSeparator(firstChar) || settingsValues.isUsuallyPrecededBySpace(firstChar)) {
             insertAutomaticSpaceIfOptionsAndTextAllow(settingsValues)
@@ -366,8 +366,8 @@ class InputLogic(
      * See <a href="https://github.com/HeliBorg/HeliBoard/issues/2611">HeliBoard issue 2611</a>.
      */
     private fun extendComposingRegionOverLeadingPart(settingsValues: SettingsValues, suggestion: String) {
-        if (!mWordComposer.isComposingWord() || mWordComposer.isBatchMode()) return
-        val typedWord = mWordComposer.getTypedWord()
+        if (!wordComposer.isComposingWord() || wordComposer.isBatchMode()) return
+        val typedWord = wordComposer.getTypedWord()
         val cursor = mConnection.getExpectedSelectionStart()
         val before = mConnection.getTextBeforeCursor(Constants.EDITOR_CONTENTS_CACHE_SIZE, 0)
         if (before == null || cursor < 0 || before.length < typedWord.length) return
@@ -387,12 +387,12 @@ class InputLogic(
 
     /** indicates that the next selection update is expected to be a cursor move (though not needed for arrow keys) */
     fun setExpectCursorMove() {
-        mCursorMoveExpectedUntil = SystemClock.elapsedRealtime() + 500
+        cursorMoveExpectedUntil = SystemClock.elapsedRealtime() + 500
     }
 
     private fun mightBeExpectedCursorMove(): Boolean {
-        val isMove = mCursorMoveExpectedUntil > SystemClock.elapsedRealtime()
-        mCursorMoveExpectedUntil = 0L
+        val isMove = cursorMoveExpectedUntil > SystemClock.elapsedRealtime()
+        cursorMoveExpectedUntil = 0L
         return isMove
     }
 
@@ -415,7 +415,7 @@ class InputLogic(
             newSelEnd: Int, settingsValues: SettingsValues): Boolean {
         val selectionChangedOrSafeToReset =
                 oldSelStart != newSelStart || oldSelEnd != newSelEnd // selection changed
-                || !mWordComposer.isComposingWord() // safe to reset
+                || !wordComposer.isComposingWord() // safe to reset
         val hasOrHadSelection = (oldSelStart != oldSelEnd || newSelStart != newSelEnd)
         val moveAmount = newSelStart - oldSelStart
         // As an added small gift from the framework, it happens upon rotation when there
@@ -428,7 +428,7 @@ class InputLogic(
         // is or was a selection regardless of whether it changed or not.
         return hasOrHadSelection || !settingsValues.needsToLookupSuggestions()
                 || (selectionChangedOrSafeToReset
-                        && !mWordComposer.moveCursorByAndReturnIfInsideComposingWord(moveAmount))
+                        && !wordComposer.moveCursorByAndReturnIfInsideComposingWord(moveAmount))
     }
 
     fun onUpdateSelection(oldSelStart: Int, oldSelEnd: Int, newSelStart: Int,
@@ -450,7 +450,7 @@ class InputLogic(
         // the call to updateShiftState.
         // We set this to NONE because after a cursor move, we don't want the space
         // state-related special processing to kick in.
-        mSpaceState = SpaceState.NONE
+        spaceState = SpaceState.NONE
 
         if (cursorLeftComposingWord(oldSelStart, oldSelEnd, newSelStart, newSelEnd, settingsValues)) {
             // If we are composing a word and moving the cursor, we would want to set a
@@ -470,8 +470,8 @@ class InputLogic(
             resetEntireInputState(newSelStart, newSelEnd, false /* clearSuggestionStrip */)
             // If the user is in the middle of correcting a word, we should learn it before moving
             // the cursor away.
-            if (!TextUtils.isEmpty(mWordBeingCorrectedByCursor)) {
-                performAdditionToUserHistoryDictionary(settingsValues, mWordBeingCorrectedByCursor!!,
+            if (!TextUtils.isEmpty(wordBeingCorrectedByCursor)) {
+                performAdditionToUserHistoryDictionary(settingsValues, wordBeingCorrectedByCursor!!,
                         NgramContext.EMPTY_PREV_WORDS_INFO)
             }
         } else {
@@ -484,17 +484,17 @@ class InputLogic(
         }
 
         // The cursor has been moved : we now accept to perform recapitalization
-        mRecapitalizeStatus.enable()
+        recapitalizeStatus.enable()
         // We moved the cursor. If we are touching a word, we need to resume suggestion.
         mLatinIME.mHandler.postResumeSuggestions(true /* shouldDelay */)
         // Stop the last recapitalization, if started.
-        mRecapitalizeStatus.stop()
-        mWordBeingCorrectedByCursor = null
+        recapitalizeStatus.stop()
+        wordBeingCorrectedByCursor = null
         return true
     }
 
     fun moveCursorByAndReturnIfInsideComposingWord(distance: Int): Boolean {
-        return mWordComposer.moveCursorByAndReturnIfInsideComposingWord(distance)
+        return wordComposer.moveCursorByAndReturnIfInsideComposingWord(distance)
     }
 
     /**
@@ -512,31 +512,31 @@ class InputLogic(
      */
     fun onCodeInput(settingsValues: SettingsValues, event: Event,
             keyboardCapsMode: CapsMode, currentKeyboardScript: String, handler: LatinIME.UIHandler): InputTransaction {
-        mWordBeingCorrectedByCursor = null
-        mJustRevertedACommit = false
+        wordBeingCorrectedByCursor = null
+        justRevertedACommit = false
 
         if (useBackgroundGathering && mConnection.hasSelection())
             BackgroundGatheringCache.onEditSelection(mConnection.getSelectedText(0), mConnection.getTextBeforeCursor(40, 0), mConnection.getTextAfterCursor(40, 0))
-        if (useBackgroundGathering && mWordComposer.isComposingWord() && mWordComposer.isCursorFrontOrMiddleOfComposingWord())
-            BackgroundGatheringCache.onEditWord(mWordComposer.getTypedWord())
+        if (useBackgroundGathering && wordComposer.isComposingWord() && wordComposer.isCursorFrontOrMiddleOfComposingWord())
+            BackgroundGatheringCache.onEditWord(wordComposer.getTypedWord())
 
-        val processedEvent = mWordComposer.processEvent(event)
+        val processedEvent = wordComposer.processEvent(event)
         val inputTransaction = InputTransaction(settingsValues,
-                processedEvent, SystemClock.uptimeMillis(), mSpaceState,
+                processedEvent, SystemClock.uptimeMillis(), spaceState,
                 getActualCapsMode(settingsValues, keyboardCapsMode))
         if (processedEvent.keyCode != KeyCode.DELETE
-                || inputTransaction.timestamp > mLastKeyTime + Constants.LONG_PRESS_MILLISECONDS) {
-            mDeleteCount = 0
+                || inputTransaction.timestamp > lastKeyTime + Constants.LONG_PRESS_MILLISECONDS) {
+            deleteCount = 0
         }
-        mLastKeyTime = inputTransaction.timestamp
+        lastKeyTime = inputTransaction.timestamp
         mConnection.beginBatchEdit()
-        if (!mWordComposer.isComposingWord()) {
+        if (!wordComposer.isComposingWord()) {
             // TODO: is this useful? It doesn't look like it should be done here, but rather after
             // a word is committed.
-            mIsAutoCorrectionIndicatorOn = false
+            isAutoCorrectionIndicatorOn = false
         }
 
-        // TODO: Consolidate the double-space period timer, mLastKeyTime, and the space state.
+        // TODO: Consolidate the double-space period timer, lastKeyTime, and the space state.
         if (processedEvent.codePoint != Constants.CODE_SPACE) {
             cancelDoubleSpacePeriodCountdown()
         }
@@ -554,11 +554,11 @@ class InputLogic(
         }
         // Try to record the word being corrected when the user enters a word character or
         // the backspace key.
-        if (!mConnection.hasSlowInputConnection() && !mWordComposer.isComposingWord()
+        if (!mConnection.hasSlowInputConnection() && !wordComposer.isComposingWord()
                 && (settingsValues.isWordCodePoint(processedEvent.codePoint)
                     || processedEvent.keyCode == KeyCode.DELETE)
                 ) {
-            mWordBeingCorrectedByCursor = getWordAtCursor(settingsValues, currentKeyboardScript)
+            wordBeingCorrectedByCursor = getWordAtCursor(settingsValues, currentKeyboardScript)
         }
         if (!inputTransaction.didAutoCorrect() && processedEvent.keyCode != KeyCode.SHIFT
                 && processedEvent.keyCode != KeyCode.CAPS_LOCK
@@ -567,7 +567,7 @@ class InputLogic(
                 && processedEvent.keyCode != KeyCode.SYMBOL)
             mLastComposedWord.deactivate()
         if (KeyCode.DELETE != processedEvent.keyCode) {
-            mEnteredText = null
+            enteredText = null
         }
         mConnection.endBatchEdit()
         return inputTransaction
@@ -575,16 +575,16 @@ class InputLogic(
 
     fun onStartBatchInput(settingsValues: SettingsValues,
             keyboardSwitcher: KeyboardSwitcher, handler: LatinIME.UIHandler) {
-        mWordBeingCorrectedByCursor = null
-        mInputLogicHandler.onStartBatchInput()
+        wordBeingCorrectedByCursor = null
+        inputLogicHandler.onStartBatchInput()
         handler.showGesturePreviewAndSetSuggestions(SuggestedWords.getEmptyBatchInstance(), false)
         handler.cancelUpdateSuggestionStrip()
-        ++mAutoCommitSequenceNumber
+        ++autoCommitSequenceNumber
 
         if (useBackgroundGathering && mConnection.hasSelection())
             BackgroundGatheringCache.onEditSelection(mConnection.getSelectedText(0), mConnection.getTextBeforeCursor(40, 0), mConnection.getTextAfterCursor(40, 0))
-        if (useBackgroundGathering && mWordComposer.isComposingWord() && mWordComposer.isCursorFrontOrMiddleOfComposingWord())
-            BackgroundGatheringCache.onEditWord(mWordComposer.getTypedWord())
+        if (useBackgroundGathering && wordComposer.isComposingWord() && wordComposer.isCursorFrontOrMiddleOfComposingWord())
+            BackgroundGatheringCache.onEditWord(wordComposer.getTypedWord())
 
         mConnection.beginBatchEdit()
         finishTextBeforeSwipe(settingsValues, handler)
@@ -594,20 +594,20 @@ class InputLogic(
             oweSpaceBeforeSwipe(settingsValues, keyboardSwitcher)
         }
         mConnection.endBatchEdit()
-        mWordComposer.setCapitalizedModeAtStartComposingTime(
+        wordComposer.setCapitalizedModeAtStartComposingTime(
                 getActualCapsMode(settingsValues, keyboardSwitcher.getKeyboardCapsMode()))
     }
 
     /** A swipe starts a new word: what was being typed is committed, a selection will be replaced. */
     private fun finishTextBeforeSwipe(settingsValues: SettingsValues, handler: LatinIME.UIHandler) {
-        if (mWordComposer.isComposingWord()) {
-            if (mWordComposer.isCursorFrontOrMiddleOfComposingWord()) {
+        if (wordComposer.isComposingWord()) {
+            if (wordComposer.isCursorFrontOrMiddleOfComposingWord()) {
                 // If we are in the middle of a recorrection, we need to commit the recorrection
                 // first so that we can insert the batch input at the current cursor position.
                 // We also need to unlearn the original word that is now being corrected.
-                unlearnWord(mWordComposer.getTypedWord(), settingsValues, DictionaryFacilitator.UnlearnEvent.BACKSPACE)
+                unlearnWord(wordComposer.getTypedWord(), settingsValues, DictionaryFacilitator.UnlearnEvent.BACKSPACE)
                 resetEntireInputState(mConnection.getExpectedSelectionStart(), mConnection.getExpectedSelectionEnd(), true)
-            } else if (mWordComposer.isSingleLetter() && !isInlineEmojiSearchAction()) {
+            } else if (wordComposer.isSingleLetter() && !isInlineEmojiSearchAction()) {
                 // We auto-correct the previous (typed, not gestured) string iff it's one character
                 // long. The reason for this is, even in the middle of gesture typing, you'll still
                 // tap one-letter words and you want them auto-corrected (typically, "i" in English
@@ -624,7 +624,7 @@ class InputLogic(
             val selectedText = mConnection.getSelectedText(0)
             if (selectedText != null)
                 // set selected text as rejected to avoid glide typing resulting in exactly the selected word again
-                mWordComposer.setRejectedBatchModeSuggestion(selectedText.toString())
+                wordComposer.setRejectedBatchModeSuggestion(selectedText.toString())
         }
     }
 
@@ -642,7 +642,7 @@ class InputLogic(
         val autoShiftHasBeenOverridden =
             (keyboardSwitcher.getKeyboardCapsMode() == CapsMode.OFF) != (getCurrentAutoCapsState(settingsValues) == 0)
         if (settingsValues.mAutospaceBeforeGestureTyping)
-            mSpaceState = SpaceState.PHANTOM // influences autoCapsState
+            spaceState = SpaceState.PHANTOM // influences autoCapsState
         if (!autoShiftHasBeenOverridden) {
             // When we change the space state, we need to update the shift state of the
             // keyboard unless it has been overridden manually. This is happening for example
@@ -668,16 +668,16 @@ class InputLogic(
      * earlier sequence number.
      */
     fun onUpdateBatchInput(batchPointers: InputPointers) {
-        mInputLogicHandler.onUpdateBatchInput(batchPointers, mAutoCommitSequenceNumber)
+        inputLogicHandler.onUpdateBatchInput(batchPointers, autoCommitSequenceNumber)
     }
 
     fun onEndBatchInput(batchPointers: InputPointers) {
-        mInputLogicHandler.updateTailBatchInput(batchPointers, mAutoCommitSequenceNumber)
-        ++mAutoCommitSequenceNumber
+        inputLogicHandler.updateTailBatchInput(batchPointers, autoCommitSequenceNumber)
+        ++autoCommitSequenceNumber
     }
 
     fun onCancelBatchInput(handler: LatinIME.UIHandler) {
-        mInputLogicHandler.onCancelBatchInput()
+        inputLogicHandler.onCancelBatchInput()
         handler.showGesturePreviewAndSetSuggestions(
                 SuggestedWords.getEmptyInstance(), true /* dismissGestureFloatingPreviewText */)
     }
@@ -691,18 +691,18 @@ class InputLogic(
                 suggestedWordInfo = suggestedWords.getInfo(SuggestedWords.INDEX_OF_AUTO_CORRECTION)
             } else {
                 // We can't use suggestedWords.getWord(SuggestedWords.INDEX_OF_TYPED_WORD)
-                // because it may differ from mWordComposer.mTypedWord.
+                // because it may differ from wordComposer.mTypedWord.
                 suggestedWordInfo = suggestedWords.mTypedWordInfo
             }
-            mWordComposer.setAutoCorrection(suggestedWordInfo)
+            wordComposer.setAutoCorrection(suggestedWordInfo)
         }
         mSuggestedWords = suggestedWords
         val newAutoCorrectionIndicator = suggestedWords.mWillAutoCorrect
 
         // Put a blue underline to a word in TextView which will be auto-corrected.
-        if (mIsAutoCorrectionIndicatorOn != newAutoCorrectionIndicator && mWordComposer.isComposingWord()) {
-            mIsAutoCorrectionIndicatorOn = newAutoCorrectionIndicator
-            val textWithUnderline = getTextWithUnderline(mWordComposer.getTypedWord())
+        if (isAutoCorrectionIndicatorOn != newAutoCorrectionIndicator && wordComposer.isComposingWord()) {
+            isAutoCorrectionIndicatorOn = newAutoCorrectionIndicator
+            val textWithUnderline = getTextWithUnderline(wordComposer.getTypedWord())
             // TODO: when called from an updateSuggestionStrip() call that results from a posted
             // message, this is called outside any batch edit. Potentially, this may result in some
             // janky flickering of the screen, although the display speed makes it unlikely in
@@ -729,19 +729,19 @@ class InputLogic(
             mConnection.commitText(textToCommit, 1)
             inputTransaction.setDidAffectContents()
         }
-        if (mWordComposer.isComposingWord()) {
+        if (wordComposer.isComposingWord()) {
             // Khipro auto-space after suggestion: when user picks a suggestion and starts composing the next word,
             // insert space automatically, but skip it if the next character is punctuation (. , ; : ! ?) or word connector.
             val codePoint = event.codePoint
             val settingsValues = inputTransaction.settingsValues
             if (SpaceState.PHANTOM == inputTransaction.spaceState
-                    && "bn_khipro" == mWordComposer.getCombiningSpec()
+                    && "bn_khipro" == wordComposer.getCombiningSpec()
                     && !settingsValues.isWordConnector(codePoint)
                     && !settingsValues.isUsuallyFollowedBySpace(codePoint)) {
                 insertAutomaticSpaceIfOptionsAndTextAllow(settingsValues)
-                mSpaceState = SpaceState.NONE
+                spaceState = SpaceState.NONE
             }
-            setComposingTextInternal(mWordComposer.getTypedWord(), 1)
+            setComposingTextInternal(wordComposer.getTypedWord(), 1)
             inputTransaction.setDidAffectContents()
             inputTransaction.setRequiresUpdateSuggestions()
         }
@@ -809,7 +809,7 @@ class InputLogic(
                 // added in the hangul branch, createEventChainFromSequence
                 // this introduces issues like space being added behind cursor, or input deleting
                 // a word, but the keepCursorPosition applyProcessedEvent seems to help here
-                mWordComposer.applyProcessedEvent(event, true)
+                wordComposer.applyProcessedEvent(event, true)
             KeyCode.CLIPBOARD_SELECT_ALL ->
                 mConnection.selectAll()
             KeyCode.CLIPBOARD_SELECT_WORD ->
@@ -836,7 +836,7 @@ class InputLogic(
                 moveToEndOfPage(event)
             KeyCode.UNDO -> {
                 if (useBackgroundGathering)
-                    BackgroundGatheringCache.onUndo(if (mWordComposer.isComposingWord()) mWordComposer.getTypedWord() else mLastComposedWord.mCommittedWord)
+                    BackgroundGatheringCache.onUndo(if (wordComposer.isComposingWord()) wordComposer.getTypedWord() else mLastComposedWord.mCommittedWord)
                 sendDownUpKeyEventWithMetaState(KeyEvent.KEYCODE_Z, KeyEvent.META_CTRL_ON)
             }
             KeyCode.REDO ->
@@ -890,8 +890,8 @@ class InputLogic(
         performRecapitalization(sv)
         inputTransaction.requireShiftUpdate(InputTransaction.SHIFT_UPDATE_NOW)
         inputTransaction.setRequiresUpdateSuggestions()
-        if (mSpaceState == SpaceState.PHANTOM && sv.mShiftRemovesAutospace)
-            mSpaceState = SpaceState.NONE
+        if (spaceState == SpaceState.PHANTOM && sv.mShiftRemovesAutospace)
+            spaceState = SpaceState.NONE
     }
 
     /** Cut: copy the selection, then remove it the way backspace would. */
@@ -1022,11 +1022,11 @@ class InputLogic(
         handler: LatinIME.UIHandler
     ) {
         val codePoint = event.codePoint
-        mSpaceState = SpaceState.NONE
+        spaceState = SpaceState.NONE
         val sv = inputTransaction.settingsValues
 
         // wrap / unwrap selected text in codepoint pairs
-        if (!mWordComposer.isComposingWord() && mConnection.hasSelection()) { // we should never be composing when something is selected
+        if (!wordComposer.isComposingWord() && mConnection.hasSelection()) { // we should never be composing when something is selected
             val pairedCodepoint = sv.mSpacingAndPunctuations.getSecondInSymbolPair(codePoint)
             if (pairedCodepoint != Constants.NOT_A_CODE) {
                 wrapSelection(codePoint, pairedCodepoint)
@@ -1040,11 +1040,11 @@ class InputLogic(
             addToHistoryIfEmoji(StringUtils.newSingleCodePointString(codePoint), sv)
         } else {
             if (SpaceState.PHANTOM == inputTransaction.spaceState) {
-                if (mWordComposer.isCursorFrontOrMiddleOfComposingWord()) {
+                if (wordComposer.isCursorFrontOrMiddleOfComposingWord()) {
                     // If we are in the middle of a recorrection, we need to commit the recorrection
                     // first so that we can insert the character at the current cursor position.
                     // We also need to unlearn the original word that is now being corrected.
-                    unlearnWord(mWordComposer.getTypedWord(), sv, DictionaryFacilitator.UnlearnEvent.BACKSPACE)
+                    unlearnWord(wordComposer.getTypedWord(), sv, DictionaryFacilitator.UnlearnEvent.BACKSPACE)
                     resetEntireInputState(mConnection.getExpectedSelectionStart(),
                             mConnection.getExpectedSelectionEnd(), true /* clearSuggestionStrip */)
                 } else {
@@ -1075,7 +1075,7 @@ class InputLogic(
         if (!sv.isWordSeparator(codePoint)) return false
         return Character.isWhitespace(codePoint) // whitespace is always a separator
                 || !textBeforeCursorMayBeUrlOrSimilar(sv, false) // if text before is not URL or similar, it's a separator
-                || (codePoint == '/'.code && mWordComposer.lastChar() == '/') // break composing at 2 consecutive slashes
+                || (codePoint == '/'.code && wordComposer.lastChar() == '/') // break composing at 2 consecutive slashes
     }
 
     private fun handleNonSeparatorEvent(
@@ -1083,8 +1083,8 @@ class InputLogic(
         inputTransaction: InputTransaction
     ) {
         val codePoint = event.codePoint
-        var isComposingWord = mWordComposer.isComposingWord()
-        mWordComposer.unsetBatchMode() // relevant in case we continue a batch word with normal typing
+        var isComposingWord = wordComposer.isComposingWord()
+        wordComposer.unsetBatchMode() // relevant in case we continue a batch word with normal typing
 
         if (!isComposingWord && continuesWordAfterConnector(settingsValues, inputTransaction)) {
             val text = mConnection.textBeforeCursorUntilLastWhitespaceOrDoubleSlash()
@@ -1105,17 +1105,17 @@ class InputLogic(
             insertAutomaticSpaceIfOptionsAndTextAllow(settingsValues)
         }
 
-        if (mWordComposer.isCursorInFrontOfComposingWord()) {
+        if (wordComposer.isCursorInFrontOfComposingWord()) {
             // we add something in front of the composing word, this is likely for adding something
             // and not for a correction
             // keep composing and don't unlearn word in this case
             resetEntireInputState(mConnection.getExpectedSelectionStart(), mConnection.getExpectedSelectionEnd(), false)
             isComposingWord = false
-        } else if (mWordComposer.isCursorFrontOrMiddleOfComposingWord()) {
+        } else if (wordComposer.isCursorFrontOrMiddleOfComposingWord()) {
             // If we are in the middle of a recorrection, we need to commit the recorrection
             // first so that we can insert the character at the current cursor position.
             // We also need to unlearn the original word that is now being corrected.
-            unlearnWord(mWordComposer.getTypedWord(), inputTransaction.settingsValues, DictionaryFacilitator.UnlearnEvent.BACKSPACE)
+            unlearnWord(wordComposer.getTypedWord(), inputTransaction.settingsValues, DictionaryFacilitator.UnlearnEvent.BACKSPACE)
             resetEntireInputState(mConnection.getExpectedSelectionStart(), mConnection.getExpectedSelectionEnd(), true)
             isComposingWord = false
         }
@@ -1136,12 +1136,12 @@ class InputLogic(
         enterInlineEmojiSearchIfNeeded(codePoint, settingsValues)
 
         if (isComposingWord) {
-            mWordComposer.applyProcessedEvent(event)
+            wordComposer.applyProcessedEvent(event)
             // If it's the first letter, make note of auto-caps state
-            if (mWordComposer.isSingleLetter()) {
-                mWordComposer.setCapitalizedModeAtStartComposingTime(inputTransaction.shiftState)
+            if (wordComposer.isSingleLetter()) {
+                wordComposer.setCapitalizedModeAtStartComposingTime(inputTransaction.shiftState)
             }
-            setComposingTextInternal(getTextWithUnderline(mWordComposer.getTypedWord()), 1)
+            setComposingTextInternal(getTextWithUnderline(wordComposer.getTypedWord()), 1)
         } else {
             commitCharacterOutsideWord(event, settingsValues, inputTransaction)
         }
@@ -1195,7 +1195,7 @@ class InputLogic(
         val swapWeakSpace = tryStripSpaceAndReturnWhetherShouldSwapInstead(event, inputTransaction)
 
         if (swapWeakSpace && trySwapSwapperAndSpace(event, inputTransaction)) {
-            mSpaceState = SpaceState.WEAK
+            spaceState = SpaceState.WEAK
         } else if ((settingsValues.mInputAttributes.mInputType and InputType.TYPE_MASK_CLASS) != InputType.TYPE_CLASS_TEXT
                 && codePoint >= '0'.code && codePoint <= '9'.code) {
             // weird issue when committing text: https://github.com/HeliBorg/HeliBoard/issues/585
@@ -1224,22 +1224,22 @@ class InputLogic(
     ) {
         val codePoint = event.codePoint
         val settingsValues = inputTransaction.settingsValues
-        val wasComposingWord = mWordComposer.isComposingWord()
+        val wasComposingWord = wordComposer.isComposingWord()
         // We avoid sending spaces in languages without spaces if we were composing.
         val shouldAvoidSendingCode = Constants.CODE_SPACE == codePoint
                 && !settingsValues.mSpacingAndPunctuations.mCurrentLanguageHasSpaces
                 && wasComposingWord
 
-        if (mWordComposer.isCursorFrontOrMiddleOfComposingWord()) {
+        if (wordComposer.isCursorFrontOrMiddleOfComposingWord()) {
             // If we are in the middle of a recorrection, we need to commit the recorrection
             // first so that we can insert the separator at the current cursor position.
             // We also need to unlearn the original word that is now being corrected.
-            unlearnWord(mWordComposer.getTypedWord(), settingsValues, DictionaryFacilitator.UnlearnEvent.BACKSPACE)
+            unlearnWord(wordComposer.getTypedWord(), settingsValues, DictionaryFacilitator.UnlearnEvent.BACKSPACE)
             resetEntireInputState(mConnection.getExpectedSelectionStart(),
                     mConnection.getExpectedSelectionEnd(), true /* clearSuggestionStrip */)
         }
         // isComposingWord() may have changed since we stored wasComposing
-        if (mWordComposer.isComposingWord()) {
+        if (wordComposer.isComposingWord()) {
             commitComposingWordBeforeSeparator(codePoint, shouldAvoidSendingCode, inputTransaction, handler)
         }
 
@@ -1253,12 +1253,12 @@ class InputLogic(
         }
 
         if (tryPerformDoubleSpacePeriod(event, inputTransaction)) {
-            mSpaceState = SpaceState.DOUBLE
+            spaceState = SpaceState.DOUBLE
             inputTransaction.setRequiresUpdateSuggestions()
             StatsUtils.onDoubleSpacePeriod()
         } else if (swapWeakSpace && trySwapSwapperAndSpace(event, inputTransaction)) {
-            mSpaceState = SpaceState.SWAP_PUNCTUATION
-            mSuggestionStripViewAccessor.setNeutralSuggestionStrip()
+            spaceState = SpaceState.SWAP_PUNCTUATION
+            suggestionStripViewAccessor.setNeutralSuggestionStrip()
         } else if (Constants.CODE_SPACE == codePoint) {
             commitSpace(inputTransaction, wasComposingWord, shouldAvoidSendingCode)
         } else {
@@ -1311,7 +1311,7 @@ class InputLogic(
         shouldAvoidSendingCode: Boolean
     ) {
         if (!mSuggestedWords.isPunctuationSuggestions()) {
-            mSpaceState = SpaceState.WEAK
+            spaceState = SpaceState.WEAK
         }
 
         startDoubleSpacePeriodCountdown(inputTransaction)
@@ -1342,9 +1342,9 @@ class InputLogic(
             // separator does not normally need a space on the right (that's the difference
             // between swappers and strippers), so we should not stay in phantom space state if
             // the separator is a stripper. Hence the additional test above.
-            mSpaceState = SpaceState.PHANTOM
+            spaceState = SpaceState.PHANTOM
         } else {
-            // mSpaceState is still SpaceState.NONE, but some characters should typically
+            // spaceState is still SpaceState.NONE, but some characters should typically
             // be followed by space. Set phantom space state for such characters if the user
             // enabled the setting and was not composing a word. The latter avoids setting
             // phantom space state when typing decimal numbers, with the drawback of not
@@ -1354,7 +1354,7 @@ class InputLogic(
             if (wasComposingWord
                     && settingsValues.mAutospaceAfterPunctuation
                     && (settingsValues.isUsuallyFollowedBySpace(codePoint) || isInsideDoubleQuoteOrAfterDigit)) {
-                mSpaceState = SpaceState.PHANTOM
+                spaceState = SpaceState.PHANTOM
             }
         }
 
@@ -1367,7 +1367,7 @@ class InputLogic(
         } else {
             // Set punctuation right away. onUpdateSelection will fire but tests whether it is
             // already displayed or not, so it's okay.
-            mSuggestionStripViewAccessor.setNeutralSuggestionStrip()
+            suggestionStripViewAccessor.setNeutralSuggestionStrip()
         }
     }
 
@@ -1380,8 +1380,8 @@ class InputLogic(
         event: Event, inputTransaction: InputTransaction,
         currentKeyboardScript: String
     ) {
-        mSpaceState = SpaceState.NONE
-        mDeleteCount++
+        spaceState = SpaceState.NONE
+        deleteCount++
 
         // In many cases after backspace, we need to update the shift state. Normally we need
         // to do this right away to avoid the shift state being out of date in case the user types
@@ -1396,16 +1396,16 @@ class InputLogic(
         inputTransaction.requireShiftUpdate(shiftUpdateKind)
 
         val settingsValues = inputTransaction.settingsValues
-        if (mWordComposer.isCursorFrontOrMiddleOfComposingWord()) {
+        if (wordComposer.isCursorFrontOrMiddleOfComposingWord()) {
             // If we are in the middle of a recorrection, we need to commit the recorrection
             // first so that we can remove the character at the current cursor position.
             // We also need to unlearn the original word that is now being corrected.
-            unlearnWord(mWordComposer.getTypedWord(), settingsValues, DictionaryFacilitator.UnlearnEvent.BACKSPACE)
+            unlearnWord(wordComposer.getTypedWord(), settingsValues, DictionaryFacilitator.UnlearnEvent.BACKSPACE)
             resetEntireInputState(mConnection.getExpectedSelectionStart(),
                     mConnection.getExpectedSelectionEnd(), true /* clearSuggestionStrip */)
-            // When we exit this if-clause, mWordComposer.isComposingWord() will return false.
+            // When we exit this if-clause, wordComposer.isComposingWord() will return false.
         }
-        if (mWordComposer.isComposingWord()) {
+        if (wordComposer.isComposingWord()) {
             backspaceInComposingWord(event, inputTransaction)
             return
         }
@@ -1428,7 +1428,7 @@ class InputLogic(
             unlearnWordBeingDeleted(settingsValues, currentKeyboardScript)
         }
         if (mConnection.hasSlowInputConnection()) {
-            mSuggestionStripViewAccessor.setNeutralSuggestionStrip()
+            suggestionStripViewAccessor.setNeutralSuggestionStrip()
         } else if (settingsValues.needsToLookupSuggestions()
                 && settingsValues.mSpacingAndPunctuations.mCurrentLanguageHasSpaces) {
             restartSuggestionsOnWordTouchedByCursor(settingsValues, currentKeyboardScript)
@@ -1447,24 +1447,24 @@ class InputLogic(
 
     /** Backspace while a word is being composed: drop a swiped word whole, a typed one by a character. */
     private fun backspaceInComposingWord(event: Event, inputTransaction: InputTransaction) {
-        if (mWordComposer.isBatchMode()) {
-            val rejectedSuggestion = mWordComposer.getTypedWord()
+        if (wordComposer.isBatchMode()) {
+            val rejectedSuggestion = wordComposer.getTypedWord()
             if (useBackgroundGathering)
                 BackgroundGatheringCache.onRejectedSuggestion(rejectedSuggestion)
-            mWordComposer.reset()
-            mWordComposer.setRejectedBatchModeSuggestion(rejectedSuggestion)
+            wordComposer.reset()
+            wordComposer.setRejectedBatchModeSuggestion(rejectedSuggestion)
             if (!TextUtils.isEmpty(rejectedSuggestion)) {
                 unlearnWord(rejectedSuggestion, inputTransaction.settingsValues, DictionaryFacilitator.UnlearnEvent.REJECTION)
             }
             StatsUtils.onBackspaceWordDelete(rejectedSuggestion.length)
         } else {
             if (useBackgroundGathering)
-                BackgroundGatheringCache.removeLast(mWordComposer.getTypedWord())
-            mWordComposer.applyProcessedEvent(event)
+                BackgroundGatheringCache.removeLast(wordComposer.getTypedWord())
+            wordComposer.applyProcessedEvent(event)
             StatsUtils.onBackspacePressed(1)
         }
-        if (mWordComposer.isComposingWord()) {
-            setComposingTextInternal(getTextWithUnderline(mWordComposer.getTypedWord()), 1)
+        if (wordComposer.isComposingWord()) {
+            setComposingTextInternal(getTextWithUnderline(wordComposer.getTypedWord()), 1)
         } else {
             mConnection.commitText("", 1)
         }
@@ -1484,7 +1484,7 @@ class InputLogic(
             val lastComposedWord = mLastComposedWord.mTypedWord
             revertCommit(inputTransaction)
             StatsUtils.onRevertAutoCorrect()
-            StatsUtils.onWordCommitUserTyped(lastComposedWord, mWordComposer.isBatchMode())
+            StatsUtils.onWordCommitUserTyped(lastComposedWord, wordComposer.isBatchMode())
             // Restart suggestions when backspacing into a reverted word. This is required for
             // the final corrected word to be learned, as learning only occurs when suggestions
             // are active.
@@ -1503,10 +1503,10 @@ class InputLogic(
         if (SpaceState.DOUBLE == inputTransaction.spaceState) {
             cancelDoubleSpacePeriodCountdown()
             if (mConnection.revertDoubleSpacePeriod(settingsValues.mSpacingAndPunctuations)) {
-                // No need to reset mSpaceState, it has already be done (that's why we
+                // No need to reset spaceState, it has already be done (that's why we
                 // receive it as a parameter)
                 inputTransaction.setRequiresUpdateSuggestions()
-                mWordComposer.setCapitalizedModeAtStartComposingTime(CapsMode.OFF)
+                wordComposer.setCapitalizedModeAtStartComposingTime(CapsMode.OFF)
                 StatsUtils.onRevertDoubleSpacePeriod()
                 return true
             }
@@ -1553,7 +1553,7 @@ class InputLogic(
         var result = BackspaceResult.DELETED
         sendDownUpKeyEvent(KeyEvent.KEYCODE_DEL)
         var totalDeletedLength = 1
-        if (mDeleteCount > Constants.DELETE_ACCELERATE_AT) {
+        if (deleteCount > Constants.DELETE_ACCELERATE_AT) {
             // If this is an accelerated (i.e., double) deletion, then we need to
             // consider unlearning here because we may have already reached
             // the previous word, and will lose it after next deletion.
@@ -1594,10 +1594,10 @@ class InputLogic(
         var lengthToDelete = mConnection.getCharCountToDeleteBeforeCursor()
         // Caret: holding backspace deletes characters first, then whole words
         val deleteWords = event.isKeyRepeat && settingsValues.mHoldDeleteByWord
-                && mDeleteCount > Constants.DELETE_WORDS_AT
+                && deleteCount > Constants.DELETE_WORDS_AT
         if (deleteWords) {
             // one word every few repeats, or a paragraph is gone before the finger lifts
-            if (mDeleteCount % Constants.DELETE_WORDS_EVERY != 0) return BackspaceResult.DONE
+            if (deleteCount % Constants.DELETE_WORDS_EVERY != 0) return BackspaceResult.DONE
             val before = mConnection.getTextBeforeCursor(Constants.DELETE_WORDS_LOOKBACK, 0)
             val wordLength = if (before == null) 0
                     else lengthOfWordBeforeCursor(before, settingsValues.mSpacingAndPunctuations)
@@ -1609,7 +1609,7 @@ class InputLogic(
         }
         mConnection.deleteTextBeforeCursor(lengthToDelete)
         var totalDeletedLength = lengthToDelete
-        if (!deleteWords && mDeleteCount > Constants.DELETE_ACCELERATE_AT) {
+        if (!deleteWords && deleteCount > Constants.DELETE_ACCELERATE_AT) {
             // If this is an accelerated (i.e., double) deletion, then we need to
             // consider unlearning here because we may have already reached
             // the previous word, and will lose it after next deletion.
@@ -1704,7 +1704,7 @@ class InputLogic(
     private fun tryStripSpaceAndReturnWhetherShouldSwapInstead(event: Event,
             inputTransaction: InputTransaction): Boolean {
         val codePoint = event.codePoint
-        if (codePoint == INLINE_EMOJI_SEARCH_MARKER.code && mEmojiDictionaryFacilitator != null) {
+        if (codePoint == INLINE_EMOJI_SEARCH_MARKER.code && emojiDictionaryFacilitator != null) {
             // Avoid interfering with inline emoji search
             return false
         }
@@ -1730,15 +1730,15 @@ class InputLogic(
     }
 
     fun startDoubleSpacePeriodCountdown(inputTransaction: InputTransaction) {
-        mDoubleSpacePeriodCountdownStart = inputTransaction.timestamp
+        doubleSpacePeriodCountdownStart = inputTransaction.timestamp
     }
 
     fun cancelDoubleSpacePeriodCountdown() {
-        mDoubleSpacePeriodCountdownStart = 0
+        doubleSpacePeriodCountdownStart = 0
     }
 
     fun isDoubleSpacePeriodCountdownActive(inputTransaction: InputTransaction): Boolean {
-        return inputTransaction.timestamp - mDoubleSpacePeriodCountdownStart <
+        return inputTransaction.timestamp - doubleSpacePeriodCountdownStart <
                 inputTransaction.settingsValues.mDoubleSpacePeriodTimeout
     }
 
@@ -1799,7 +1799,7 @@ class InputLogic(
      * @param settingsValues The current settings values.
      */
     private fun performRecapitalization(settingsValues: SettingsValues) {
-        if (!mConnection.hasSelection() || !mRecapitalizeStatus.isEnabled()) {
+        if (!mConnection.hasSelection() || !recapitalizeStatus.isEnabled()) {
             return // No selection or recapitalize is disabled for now
         }
         val selectionStart = mConnection.getExpectedSelectionStart()
@@ -1812,18 +1812,18 @@ class InputLogic(
             return
         }
         // If we have a recapitalize in progress, use it; otherwise, start a new one.
-        if (!mRecapitalizeStatus.isStarted()
-                || !mRecapitalizeStatus.isSetAt(selectionStart, selectionEnd)) {
+        if (!recapitalizeStatus.isStarted()
+                || !recapitalizeStatus.isSetAt(selectionStart, selectionEnd)) {
             val selectedText = mConnection.getSelectedText(0 /* flags, 0 for no styles */)
             if (TextUtils.isEmpty(selectedText)) return // Race condition with the input connection
-            mRecapitalizeStatus.start(selectedText.toString(), selectionStart, settingsValues.mLocale,
+            recapitalizeStatus.start(selectedText.toString(), selectionStart, settingsValues.mLocale,
                     settingsValues.mSpacingAndPunctuations.mSortedWordSeparators)
         }
         mConnection.finishComposingText()
-        mRecapitalizeStatus.rotate()
+        recapitalizeStatus.rotate()
         mConnection.setSelection(selectionEnd, selectionEnd)
         mConnection.deleteTextBeforeCursor(numCharsSelected)
-        val replacement = mRecapitalizeStatus.textReplacement()
+        val replacement = recapitalizeStatus.textReplacement()
         mConnection.commitText(replacement.text, 0)
         mConnection.setSelection(replacement.startPosition, replacement.endPosition())
     }
@@ -1833,9 +1833,9 @@ class InputLogic(
         // For addition to user history we want suggestions (even if just for autocorrect) or a gestured word.
         // That's to avoid unintended additions in some sensitive fields, or fields that
         // expect to receive non-words.
-        if ((!settingsValues.needsToLookupSuggestions() && !mWordComposer.isBatchMode()) || TextUtils.isEmpty(suggestion))
+        if ((!settingsValues.needsToLookupSuggestions() && !wordComposer.isBatchMode()) || TextUtils.isEmpty(suggestion))
             return
-        val wasAutoCapitalized = mWordComposer.wasAutoCapitalized() && !mWordComposer.isMostlyCaps()
+        val wasAutoCapitalized = wordComposer.wasAutoCapitalized() && !wordComposer.isMostlyCaps()
         val word = stripTrailingSeparatorsAndConnectors(suggestion, settingsValues.mSpacingAndPunctuations)
         if (settingsValues.mIncognitoModeEnabled) {
             // don't add to history, but still adjust confidences
@@ -1858,7 +1858,7 @@ class InputLogic(
 
     private fun addToHistoryIfEmoji(text: String, settingsValues: SettingsValues) {
         if (mLastComposedWord == LastComposedWord.NOT_A_COMPOSED_WORD // we want a last composed word, also to avoid storing consecutive emojis
-            || mWordComposer.isComposingWord() // emoji will be part of the word in this case, better do nothing
+            || wordComposer.isComposingWord() // emoji will be part of the word in this case, better do nothing
             || !settingsValues.mBigramPredictionEnabled // this is only for next word suggestions, so they need to be enabled
             || settingsValues.mIncognitoModeEnabled
             || !settingsValues.needsToLookupSuggestions()
@@ -1885,26 +1885,26 @@ class InputLogic(
         }
         // Check if we have a suggestion engine attached.
         if (!settingsValues.needsToLookupSuggestions()) {
-            if (mWordComposer.isComposingWord()) {
+            if (wordComposer.isComposingWord()) {
                 Log.w(TAG, "Called updateSuggestionsOrPredictions but suggestions were not "
                         + "requested!")
             }
             // Clear the suggestions strip.
-            mSuggestionStripViewAccessor.setSuggestions(SuggestedWords.getEmptyInstance())
+            suggestionStripViewAccessor.setSuggestions(SuggestedWords.getEmptyInstance())
             return
         }
 
-        if (!mWordComposer.isComposingWord() && !settingsValues.mBigramPredictionEnabled) {
-            mSuggestionStripViewAccessor.setNeutralSuggestionStrip()
+        if (!wordComposer.isComposingWord() && !settingsValues.mBigramPredictionEnabled) {
+            suggestionStripViewAccessor.setNeutralSuggestionStrip()
             return
         }
 
         val holder = AsyncResultHolder<SuggestedWords>("Suggest")
-        mInputLogicHandler.getSuggestedWords { getSuggestedWords(
+        inputLogicHandler.getSuggestedWords { getSuggestedWords(
             inputStyle, SuggestedWords.NOT_A_SEQUENCE_NUMBER,
             object : OnGetSuggestedWordsCallback {
                 override fun onGetSuggestedWords(suggestedWords: SuggestedWords?) {
-                    val typedWordString = mWordComposer.getTypedWord()
+                    val typedWordString = wordComposer.getTypedWord()
                     val typedWordInfo = SuggestedWordInfo(
                         typedWordString, "", SuggestedWordInfo.MAX_SCORE, SuggestedWordInfo.KIND_TYPED,
                         Dictionary.DICTIONARY_USER_TYPED, SuggestedWordInfo.NOT_AN_INDEX, SuggestedWordInfo.NOT_A_CONFIDENCE
@@ -1927,10 +1927,10 @@ class InputLogic(
             // Prefer clipboard suggestions (if available and setting is enabled) over beginning of sentence predictions.
             if (!(suggestedWords.mInputStyle == SuggestedWords.INPUT_STYLE_BEGINNING_OF_SENTENCE_PREDICTION
                     && mLatinIME.tryShowClipboardSuggestion())) {
-                mSuggestionStripViewAccessor.setSuggestions(suggestedWords)
+                suggestionStripViewAccessor.setSuggestions(suggestedWords)
             }
             if (!suggestedWords.isEmpty() && settingsValues.mSuggestionsEnabled && isInlineEmojiSearchAction()) {
-                mSuggestionStripViewAccessor.showSuggestionStrip()
+                suggestionStripViewAccessor.showSuggestionStrip()
             }
         }
         if (DebugFlags.DEBUG_ENABLED) {
@@ -1957,18 +1957,18 @@ class InputLogic(
                 // If we are currently in a batch input, we must not resume suggestions, or the result
                 // of the batch input will replace the new composition. This may happen in the corner case
                 // that the app moves the cursor on its own accord during a batch input.
-                || mInputLogicHandler.isInBatchInput()
+                || inputLogicHandler.isInBatchInput()
                 // If the cursor is not touching a word, or if there is a selection, return right away.
                 || mConnection.hasSelection()
                 // If we don't know the cursor location, return.
                 || mConnection.getExpectedSelectionStart() < 0) {
-            mSuggestionStripViewAccessor.setNeutralSuggestionStrip()
+            suggestionStripViewAccessor.setNeutralSuggestionStrip()
             return
         }
 
         updateInlineEmojiSearch()
         if (isInlineEmojiSearchAction()) {
-            mInputLogicHandler.getSuggestedWords { getSuggestedWords(SuggestedWords.INPUT_STYLE_TYPING,
+            inputLogicHandler.getSuggestedWords { getSuggestedWords(SuggestedWords.INPUT_STYLE_TYPING,
                 SuggestedWords.NOT_A_SEQUENCE_NUMBER, object : OnGetSuggestedWordsCallback {
                     override fun onGetSuggestedWords(suggestedWords: SuggestedWords?) {
                         doShowSuggestionsAndClearAutoCorrectionIndicator(suggestedWords!!)
@@ -1979,7 +1979,7 @@ class InputLogic(
 
         if (!mConnection.isCursorTouchingWord(settingsValues.mSpacingAndPunctuations, true /* checkTextAfter */)) {
             // Show predictions.
-            mWordComposer.setCapitalizedModeAtStartComposingTime(CapsMode.OFF)
+            wordComposer.setCapitalizedModeAtStartComposingTime(CapsMode.OFF)
             mLatinIME.mHandler.postUpdateSuggestionStrip(SuggestedWords.INPUT_STYLE_RECORRECTION)
             // "unselect" the previous text
             mConnection.finishComposingText()
@@ -2001,7 +2001,7 @@ class InputLogic(
         // we take very complicated steps to preserve the whole link, we can't do things right so
         // we just do not resume because it's safer.
         if (!isResumableWord(settingsValues, range.mWord.toString())) {
-            mSuggestionStripViewAccessor.setNeutralSuggestionStrip()
+            suggestionStripViewAccessor.setNeutralSuggestionStrip()
             // "unselect" the previous text
             mConnection.finishComposingText()
             return
@@ -2036,15 +2036,15 @@ class InputLogic(
             }
         }
         val codePoints = StringUtils.toCodePointArray(typedWordString)
-        mWordComposer.setComposingWord(codePoints, mLatinIME.getCoordinatesForCurrentKeyboard(codePoints))
-        mWordComposer.setCursorPositionWithinWord(typedWordString.codePointCount(0, numberOfCharsInWordBeforeCursor))
+        wordComposer.setComposingWord(codePoints, mLatinIME.getCoordinatesForCurrentKeyboard(codePoints))
+        wordComposer.setCursorPositionWithinWord(typedWordString.codePointCount(0, numberOfCharsInWordBeforeCursor))
         mConnection.setComposingRegion(expectedCursorPosition - numberOfCharsInWordBeforeCursor,
                 expectedCursorPosition + range.getNumberOfCharsInWordAfterCursor())
         if (suggestions.size <= 1) {
             // If there weren't any suggestion spans on this word, suggestions#size() will be 1
             // if shouldIncludeResumedWordInSuggestions is true, 0 otherwise. In this case, we
             // have no useful suggestions, so we will try to compute some for it instead.
-            mInputLogicHandler.getSuggestedWords { getSuggestedWords(SuggestedWords.INPUT_STYLE_TYPING,
+            inputLogicHandler.getSuggestedWords { getSuggestedWords(SuggestedWords.INPUT_STYLE_TYPING,
                 SuggestedWords.NOT_A_SEQUENCE_NUMBER, object : OnGetSuggestedWordsCallback {
                     override fun onGetSuggestedWords(suggestedWords: SuggestedWords?) {
                         doShowSuggestionsAndClearAutoCorrectionIndicator(suggestedWords!!)
@@ -2064,7 +2064,7 @@ class InputLogic(
     }
 
     private fun doShowSuggestionsAndClearAutoCorrectionIndicator(suggestedWords: SuggestedWords) {
-        mIsAutoCorrectionIndicatorOn = false
+        isAutoCorrectionIndicatorOn = false
         mLatinIME.mHandler.setSuggestions(suggestedWords)
     }
 
@@ -2104,14 +2104,14 @@ class InputLogic(
         if (inputTransaction.settingsValues.mSpacingAndPunctuations.mCurrentLanguageHasSpaces) {
             mConnection.commitText(textToCommit, 1)
             if (usePhantomSpace) {
-                mJustRevertedACommit = true
-                mSpaceState = SpaceState.PHANTOM
+                justRevertedACommit = true
+                spaceState = SpaceState.PHANTOM
             }
         } else {
             // For languages without spaces, we revert the typed string but the cursor is flush
             // with the typed word, so we need to resume suggestions right away.
             val codePoints = StringUtils.toCodePointArray(stringToCommit)
-            mWordComposer.setComposingWord(codePoints, mLatinIME.getCoordinatesForCurrentKeyboard(codePoints))
+            wordComposer.setComposingWord(codePoints, mLatinIME.getCoordinatesForCurrentKeyboard(codePoints))
             setComposingTextInternal(textToCommit, 1)
         }
         // Don't restart suggestion yet. We'll restart if the user deletes the separator.
@@ -2123,7 +2123,7 @@ class InputLogic(
 
     /** Debug builds only: fail loudly when the word about to be reverted is not what is in the text field. */
     private fun checkCommittedWordIsBeforeCursor(committedWord: CharSequence, deleteLength: Int) {
-        if (mWordComposer.isComposingWord()) {
+        if (wordComposer.isComposingWord()) {
             throw RuntimeException("revertCommit, but we are composing a word")
         }
         val wordBeforeCursor =
@@ -2213,20 +2213,20 @@ class InputLogic(
         val ei = getCurrentInputEditorInfo()
         if (ei == null) return Constants.TextUtils.CAP_MODE_OFF
         val inputType = ei.inputType
-        // Warning: this depends on mSpaceState, which may not be the most current value. If
-        // mSpaceState gets updated later, whoever called this may need to be told about it.
+        // Warning: this depends on spaceState, which may not be the most current value. If
+        // spaceState gets updated later, whoever called this may need to be told about it.
         return mConnection.getCursorCapsMode(inputType, settingsValues.mSpacingAndPunctuations,
-                SpaceState.PHANTOM == mSpaceState)
+                SpaceState.PHANTOM == spaceState)
     }
 
     fun getCurrentRecapitalizeState(): RecapitalizeMode? {
-        if (!mRecapitalizeStatus.isStarted()
-                || !mRecapitalizeStatus.isSetAt(mConnection.getExpectedSelectionStart(),
+        if (!recapitalizeStatus.isStarted()
+                || !recapitalizeStatus.isSetAt(mConnection.getExpectedSelectionStart(),
                         mConnection.getExpectedSelectionEnd())) {
             // Not recapitalizing at the moment
             return null
         }
-        return mRecapitalizeStatus.getCurrentMode()
+        return recapitalizeStatus.getCurrentMode()
     }
 
     /**
@@ -2284,7 +2284,7 @@ class InputLogic(
         }
         // We have a TLD (or something that looks like this): make sure we don't add
         // a space even if currently in phantom mode.
-        mSpaceState = SpaceState.NONE
+        spaceState = SpaceState.NONE
         val codePointBeforeCursor = mConnection.getCodePointBeforeCursor()
         // If no code point, #getCodePointBeforeCursor returns NOT_A_CODE_POINT.
         if (Constants.CODE_PERIOD == codePointBeforeCursor) {
@@ -2313,10 +2313,10 @@ class InputLogic(
     // TODO: how is this different from startInput ?!
     private fun resetEntireInputState(newSelStart: Int, newSelEnd: Int,
             clearSuggestionStrip: Boolean) {
-        val shouldFinishComposition = mWordComposer.isComposingWord()
+        val shouldFinishComposition = wordComposer.isComposingWord()
         resetComposingState(true /* alsoResetLastComposedWord */)
         if (clearSuggestionStrip) {
-            mSuggestionStripViewAccessor.setNeutralSuggestionStrip()
+            suggestionStripViewAccessor.setNeutralSuggestionStrip()
         }
         mConnection.resetCachesUponCursorMoveAndReturnSuccess(newSelStart, newSelEnd, shouldFinishComposition)
     }
@@ -2330,7 +2330,7 @@ class InputLogic(
      * @param alsoResetLastComposedWord whether to also reset the last composed word.
      */
     private fun resetComposingState(alsoResetLastComposedWord: Boolean) {
-        mWordComposer.reset()
+        wordComposer.reset()
         if (alsoResetLastComposedWord) {
             mLastComposedWord = LastComposedWord.NOT_A_COMPOSED_WORD
         }
@@ -2364,7 +2364,7 @@ class InputLogic(
     // TODO: Shouldn't this go in some *Utils class instead?
     private fun getTextWithUnderline(text: String): CharSequence {
         // TODO: Locale should be determined based on context and the text given.
-        return if (mIsAutoCorrectionIndicatorOn)
+        return if (isAutoCorrectionIndicatorOn)
             getTextWithAutoCorrectionIndicatorUnderline(
                     mLatinIME, text, getDictionaryFacilitatorLocale())
         else text
@@ -2431,10 +2431,10 @@ class InputLogic(
                 else !mConnection.spaceBeforeCursor()))
             return true
         // already contains a SometimesWordConnector -> may be URL (not so sure, only do with detection enabled
-        if (settingsValues.mUrlDetectionEnabled && settingsValues.mSpacingAndPunctuations.containsSometimesWordConnector(mWordComposer.getTypedWord()))
+        if (settingsValues.mUrlDetectionEnabled && settingsValues.mSpacingAndPunctuations.containsSometimesWordConnector(wordComposer.getTypedWord()))
             return true
         // "://" before typed word -> very much looks like URL
-        val textBeforeCursor = mConnection.getTextBeforeCursor(mWordComposer.getTypedWord().length + 3, 0)
+        val textBeforeCursor = mConnection.getTextBeforeCursor(wordComposer.getTypedWord().length + 3, 0)
         if (textBeforeCursor != null && textBeforeCursor.toString().startsWith("://"))
             return true
         return false
@@ -2452,17 +2452,17 @@ class InputLogic(
             return
         }
         mConnection.beginBatchEdit()
-        if (SpaceState.PHANTOM == mSpaceState) {
+        if (SpaceState.PHANTOM == spaceState) {
             insertAutomaticSpaceIfOptionsAndTextAllow(settingsValues)
-            mSpaceState = SpaceState.NONE
+            spaceState = SpaceState.NONE
         }
-        mWordComposer.setBatchInputWord(batchInputText)
+        wordComposer.setBatchInputWord(batchInputText)
         enterInlineEmojiSearchIfNeeded(batchInputText!!.codePointAt(0), settingsValues)
         setComposingTextInternal(batchInputText, 1)
         mConnection.endBatchEdit()
         // Space state must be updated before calling updateShiftState
         if (settingsValues.mAutospaceAfterGestureTyping)
-            mSpaceState = SpaceState.PHANTOM
+            spaceState = SpaceState.PHANTOM
         keyboardSwitcher.updateShiftState(getCurrentAutoCapsState(settingsValues), getCurrentRecapitalizeState())
 
         if (isInlineEmojiSearchAction()) {
@@ -2491,10 +2491,10 @@ class InputLogic(
      * @param separatorString the separator that's causing the commit, or NOT_A_SEPARATOR if none.
      */
     fun commitTyped(settingsValues: SettingsValues, separatorString: String) {
-        if (!mWordComposer.isComposingWord()) return
-        val typedWord = mWordComposer.getTypedWord()
+        if (!wordComposer.isComposingWord()) return
+        val typedWord = wordComposer.getTypedWord()
         if (typedWord.length > 0) {
-            val isBatchMode = mWordComposer.isBatchMode()
+            val isBatchMode = wordComposer.isBatchMode()
             commitChosenWord(settingsValues, typedWord, LastComposedWord.COMMIT_TYPE_USER_TYPED_WORD, separatorString)
             StatsUtils.onWordCommitUserTyped(typedWord, isBatchMode)
         }
@@ -2531,11 +2531,11 @@ class InputLogic(
             // INPUT_STYLE_TYPING.
             performUpdateSuggestionStripSync(settingsValues, SuggestedWords.INPUT_STYLE_TYPING)
         }
-        val autoCorrectionOrNull: SuggestedWordInfo? = mWordComposer.getAutoCorrectionOrNull()
-        val typedWord = mWordComposer.getTypedWord()
+        val autoCorrectionOrNull: SuggestedWordInfo? = wordComposer.getAutoCorrectionOrNull()
+        val typedWord = wordComposer.getTypedWord()
         val stringToCommit: String? = if (autoCorrectionOrNull != null) autoCorrectionOrNull.mWord else typedWord
         if (stringToCommit != null) {
-            val isBatchMode = mWordComposer.isBatchMode()
+            val isBatchMode = wordComposer.isBatchMode()
             commitChosenWord(settingsValues, stringToCommit, LastComposedWord.COMMIT_TYPE_DECIDED_WORD, separator)
             if (typedWord != stringToCommit) {
                 // This will make the correction flash for a short while as a visual clue
@@ -2580,7 +2580,7 @@ class InputLogic(
         // 1st previous word is the word to be committed. Otherwise get n-gram context from the 1st
         // previous word.
         val ngramContext = mConnection.getNgramContextFromNthPreviousWord(
-                settingsValues.mSpacingAndPunctuations, if (mWordComposer.isComposingWord()) 2 else 1)
+                settingsValues.mSpacingAndPunctuations, if (wordComposer.isComposingWord()) 2 else 1)
         mConnection.commitText(chosenWordWithSuggestions, 1)
         // Add the word to the user history dictionary
         performAdditionToUserHistoryDictionary(settingsValues, chosenWord, ngramContext)
@@ -2588,7 +2588,7 @@ class InputLogic(
         // what user typed. Note: currently this is done much later in
         // LastComposedWord#didCommitTypedWord by string equality of the remembered
         // strings.
-        mLastComposedWord = mWordComposer.commitWord(commitType, chosenWord, separatorString, ngramContext)
+        mLastComposedWord = wordComposer.commitWord(commitType, chosenWord, separatorString, ngramContext)
     }
 
     /**
@@ -2655,16 +2655,16 @@ class InputLogic(
             return
         }
         val settingsValues = Settings.getValues()
-        mWordComposer.adviseCapitalizedModeBeforeFetchingSuggestions(
+        wordComposer.adviseCapitalizedModeBeforeFetchingSuggestions(
                 getActualCapsMode(settingsValues, KeyboardSwitcher.getInstance().getKeyboardCapsMode()))
         try {
-            val suggestedWords = mSuggest.getSuggestedWords(mWordComposer.copy(),
+            val suggestedWords = suggest.getSuggestedWords(wordComposer.copy(),
                     getNgramContextFromNthPreviousWordForSuggestion(
                     settingsValues.mSpacingAndPunctuations,
                     // Get the word on which we should search the bigrams. If we are composing
                     // a word, it's whatever is *before* the half-committed word in the buffer,
                     // hence 2; if we aren't, we should just skip whitespace if any, so 1.
-                    if (mWordComposer.isComposingWord()) 2 else 1),
+                    if (wordComposer.isComposingWord()) 2 else 1),
                     keyboard,
                     settingsValues.mSettingsValuesForSuggestion,
                     settingsValues.mAutoCorrectEnabled,
@@ -2726,7 +2726,7 @@ class InputLogic(
         }
         if (!mConnection.setComposingText(composingTextToBeSet, newCursorPosition))
             // inconsistency in set and found composing text, better cancel composing (should be restarted automatically)
-            mWordComposer.reset()
+            wordComposer.reset()
     }
 
     /**
@@ -2755,7 +2755,7 @@ class InputLogic(
         if (!mConnection.isCursorPositionKnown() || mConnection.hasSelection()) {
             return -1
         }
-        return mConnection.getExpectedSelectionStart() - mWordComposer.size()
+        return mConnection.getExpectedSelectionStart() - wordComposer.size()
     }
 
     /**
@@ -2767,7 +2767,7 @@ class InputLogic(
     // TODO: try and see if we can get rid of this method. Ideally the users of this class should
     // never need to know this.
     fun getComposingLength(): Int {
-        return mWordComposer.size()
+        return wordComposer.size()
     }
 
     private fun paste(packageName: String) {
@@ -2786,16 +2786,16 @@ class InputLogic(
     }
 
     private fun enterInlineEmojiSearchIfNeeded(codePoint: Int, settingsValues: SettingsValues) {
-        if (mEmojiDictionaryFacilitator == null || isInlineEmojiSearchAction()) {
+        if (emojiDictionaryFacilitator == null || isInlineEmojiSearchAction()) {
             return
         }
 
         if (isStartOfInlineEmojiSearch(codePoint, mConnection.getCodePointBeforeCursor(), mConnection.getCharBeforeBeforeCursor(),
                                        settingsValues)) {
-            if (mWordComposer.isBatchMode())
+            if (wordComposer.isBatchMode())
                 // when entering inline emoji search with glide typing, the action is not set when the word is added
                 // this means we don't detect inline search mode, so we remove to word now
-                BackgroundGatheringCache.removeLast(mWordComposer.getTypedWord())
+                BackgroundGatheringCache.removeLast(wordComposer.getTypedWord())
             setInlineEmojiSearchAction(true)
         }
     }
@@ -2819,7 +2819,7 @@ class InputLogic(
             return
         }
 
-        val suggestions = mEmojiDictionaryFacilitator!!.getSuggestions(input!!.splitOnWhitespace())
+        val suggestions = emojiDictionaryFacilitator!!.getSuggestions(input!!.splitOnWhitespace())
         if (suggestions.isEmpty()) {
             callback.onGetSuggestedWords(SuggestedWords.getEmptyInstance())
             return
@@ -2851,7 +2851,7 @@ class InputLogic(
     }
 
     private fun getInlineEmojiSearchString(): String? {
-        if (mEmojiDictionaryFacilitator == null) {
+        if (emojiDictionaryFacilitator == null) {
             return null
         }
 
@@ -2860,11 +2860,11 @@ class InputLogic(
 
     fun updateEmojiDictionary(locale: Locale) {
         if (Settings.getValues().mInlineEmojiSearch && Settings.getValues().needsToLookupSuggestions() && ! mLatinIME.isEmojiSearch()) {
-            if (mEmojiDictionaryFacilitator == null || ! mEmojiDictionaryFacilitator!!.isForLocale(locale)) {
+            if (emojiDictionaryFacilitator == null || ! emojiDictionaryFacilitator!!.isForLocale(locale)) {
                 closeEmojiDictionary()
                 val dictFile = DictionaryInfoUtils.getCachedDictForLocaleAndType(locale, "emoji", mLatinIME)
                 val dictionary = if (dictFile != null) DictionaryFactory.getDictionary(dictFile, locale) else null
-                mEmojiDictionaryFacilitator = if (dictionary != null) SingleDictionaryFacilitator(dictionary) else null
+                emojiDictionaryFacilitator = if (dictionary != null) SingleDictionaryFacilitator(dictionary) else null
             }
         } else {
             closeEmojiDictionary()
@@ -2872,9 +2872,9 @@ class InputLogic(
     }
 
     private fun closeEmojiDictionary() {
-        if (mEmojiDictionaryFacilitator != null) {
-            mEmojiDictionaryFacilitator!!.closeDictionaries()
-            mEmojiDictionaryFacilitator = null
+        if (emojiDictionaryFacilitator != null) {
+            emojiDictionaryFacilitator!!.closeDictionaries()
+            emojiDictionaryFacilitator = null
         }
     }
 

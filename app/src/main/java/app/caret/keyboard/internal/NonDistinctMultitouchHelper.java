@@ -42,7 +42,7 @@ public final class NonDistinctMultitouchHelper {
 
         // In single-touch.
         if (oldPointerCount == 1 && pointerCount == 1) {
-            if (me.getPointerId(index) == mainTracker.mPointerId) {
+            if (me.getPointerId(index) == mainTracker.pointerId) {
                 mainTracker.processMotionEvent(me, keyDetector);
                 return;
             }
