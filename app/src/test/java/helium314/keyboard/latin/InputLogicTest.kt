@@ -19,6 +19,7 @@ import helium314.keyboard.keyboard.KeyboardSwitcher
 import helium314.keyboard.keyboard.MainKeyboardView
 import helium314.keyboard.keyboard.internal.keyboard_parser.floris.KeyCode
 import helium314.keyboard.latin.ShadowFacilitator2.Companion.lastAddedWord
+import helium314.keyboard.latin.PunctuationSuggestions
 import helium314.keyboard.latin.SuggestedWords.SuggestedWordInfo
 import helium314.keyboard.latin.common.Constants
 import helium314.keyboard.latin.common.LocaleUtils.constructLocale
@@ -748,6 +749,65 @@ class InputLogicTest {
         latinIME.prefs().edit { clear() }
 
         setText("") // (re)sets selection and composing word
+    }
+
+    // ------- picking a suggestion, branches that had no test (Caret) -------
+
+    @Test fun `a picked suggestion replaces the word being typed`() {
+        chainInput("hel")
+        pickSuggestion("hello")
+        assertEquals("hello", text)
+        assertEquals("", composingText)
+    }
+
+    @Test fun `a picked suggestion replaces only the word being typed`() {
+        setText("well ")
+        chainInput("hel")
+        pickSuggestion("hello")
+        assertEquals("well hello", text)
+    }
+
+    @Test fun `two picked suggestions get a space between them`() {
+        pickSuggestion("hello")
+        pickSuggestion("there")
+        assertEquals("hello there", text)
+    }
+
+    @Test fun `no space after a picked suggestion when autospace is off`() {
+        latinIME.prefs().edit { putBoolean(Settings.PREF_AUTOSPACE_AFTER_SUGGESTION, false) }
+        pickSuggestion("hello")
+        input('t')
+        assertEquals("hellot", text)
+    }
+
+    @Test fun `a period after a picked suggestion sits right against it`() {
+        pickSuggestion("hello")
+        input('.')
+        assertEquals("hello.", text)
+    }
+
+    @Test fun `a picked suggestion replaces a swiped word without adding a space`() {
+        setText("well ")
+        glideTypingInput("hello")
+        pickSuggestion("help")
+        assertEquals("well help", text)
+    }
+
+    @Test fun `picking a suggestion cannot be undone by backspace`() {
+        chainInput("hel")
+        pickSuggestion("hello")
+        functionalKeyPress(KeyCode.DELETE)
+        assertEquals("hell", text)
+    }
+
+    @Test fun `a picked punctuation suggestion goes in like a typed one`() {
+        setText("hello")
+        val suggestions = PunctuationSuggestions.newPunctuationSuggestions(arrayOf("!", "?"))
+        latinIME.mInputLogic.setSuggestedWords(suggestions)
+        val info = suggestions.getInfo(0)
+        latinIME.pickSuggestionManually(info)
+        handleMessages()
+        assertEquals("hello!", text)
     }
 
     // ------- backspace branches that had no test (Caret) -------
