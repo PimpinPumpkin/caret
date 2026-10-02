@@ -157,8 +157,13 @@ Done:
   steps pulled out, timing logs removed.
 - Separators (`handleSeparatorEvent`): five new tests, split into four steps.
 
+- Plain character input (`handleNonSpecialCharacterEvent`, `handleNonSeparatorEvent`): eight new
+  tests, four decisions pulled out into named methods.
+- Start of a swipe (`onStartBatchInput`): six new tests, split into two steps.
+
 Next, in this order:
-1. Plain character input (`handleNonSeparatorEvent`).
-2. Swipe input (`onStartBatchInput` to `onEndBatchInput`).
-3. `RichInputConnection`: the cached picture of the text field.
-4. `LatinIME` and `PointerTracker`.
+1. The rest of `InputLogic`: `handleFunctionalEvent` (a 200-line switch), `revertCommit`,
+   `onUpdateSelection`.
+2. `RichInputConnection`: the cached picture of the text field.
+3. `LatinIME` and `PointerTracker`.
+4. Kotlin conversion of `InputLogic`, once nothing in it is longer than a screen.
