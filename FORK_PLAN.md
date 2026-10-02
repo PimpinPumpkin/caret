@@ -161,9 +161,12 @@ Done:
   tests, four decisions pulled out into named methods.
 - Start of a swipe (`onStartBatchInput`): six new tests, split into two steps.
 
+- Function keys (`handleFunctionalEvent`): eight new tests, long cases pulled out. The tests found
+  a bug: after "page start" or "page end" in a field that ignores the key event (Compose fields),
+  the next letter went into the previously composed word. Fixed.
+
 Next, in this order:
-1. The rest of `InputLogic`: `handleFunctionalEvent` (a 200-line switch), `revertCommit`,
-   `onUpdateSelection`.
+1. The rest of `InputLogic`: `revertCommit`, `onUpdateSelection`.
 2. `RichInputConnection`: the cached picture of the text field.
 3. `LatinIME` and `PointerTracker`.
 4. Kotlin conversion of `InputLogic`, once nothing in it is longer than a screen.
