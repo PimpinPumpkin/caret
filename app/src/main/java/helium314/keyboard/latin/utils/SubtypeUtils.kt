@@ -120,7 +120,7 @@ class SubtypeState(private val switchToSubtype: (InputMethodSubtype?) -> Unit) {
     // 5. we don't switch.
     fun getSubtypeForLocales(
         richImm: RichInputMethodManager,
-        locales: MutableList<Locale>,
+        locales: List<Locale>,
         subtypeForApp: RichInputMethodSubtype?
     ): InputMethodSubtype? {
         val overridden = overriddenByLocale

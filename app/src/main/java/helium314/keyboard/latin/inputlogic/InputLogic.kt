@@ -2469,7 +2469,7 @@ class InputLogic(
             val latinIME = mLatinIME
             searchForEmojiInline(SuggestedWords.NOT_A_SEQUENCE_NUMBER, object : OnGetSuggestedWordsCallback {
                 override fun onGetSuggestedWords(suggestedWords: SuggestedWords?) {
-                    latinIME.setSuggestions(suggestedWords)
+                    latinIME.setSuggestions(suggestedWords!!)
                 }
             })
         }

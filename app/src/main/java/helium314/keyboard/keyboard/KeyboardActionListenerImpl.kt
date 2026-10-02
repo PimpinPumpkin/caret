@@ -53,7 +53,7 @@ class KeyboardActionListenerImpl(private val latinIME: LatinIME, private val inp
 
     override fun onPressKey(primaryCode: Int, repeatCount: Int, pointerCount: Int, hapticEvent: HapticEvent) {
         metaOnPressKey(primaryCode)
-        keyboardSwitcher.onPressKey(primaryCode, pointerCount, latinIME.currentAutoCapsState, latinIME.currentRecapitalizeState)
+        keyboardSwitcher.onPressKey(primaryCode, pointerCount, latinIME.getCurrentAutoCapsState(), latinIME.getCurrentRecapitalizeState())
         // we need to use LatinIME for handling of key-down audio and haptics
         latinIME.hapticAndAudioFeedback(primaryCode, repeatCount, hapticEvent)
     }
@@ -65,7 +65,7 @@ class KeyboardActionListenerImpl(private val latinIME: LatinIME, private val inp
 
     override fun onReleaseKey(primaryCode: Int, withSliding: Boolean) {
         metaOnReleaseKey(primaryCode)
-        keyboardSwitcher.onReleaseKey(primaryCode, withSliding, latinIME.currentAutoCapsState, latinIME.currentRecapitalizeState)
+        keyboardSwitcher.onReleaseKey(primaryCode, withSliding, latinIME.getCurrentAutoCapsState(), latinIME.getCurrentRecapitalizeState())
     }
 
     override fun onKeyUp(keyCode: Int, keyEvent: KeyEvent): Boolean {
@@ -161,7 +161,7 @@ class KeyboardActionListenerImpl(private val latinIME: LatinIME, private val inp
         if (editorMimeTypes.any { content.description.hasMimeType(it) }) {
             connection.commitContent(content, editorInfo)
         } else if (editorMimeTypes.isEmpty()) { // make the fallback optional?
-            latinIME.clipboardHistoryManager.pasteWithoutChangingClips(content)
+            latinIME.getClipboardHistoryManager().pasteWithoutChangingClips(content)
         }
     }
 
@@ -177,7 +177,7 @@ class KeyboardActionListenerImpl(private val latinIME: LatinIME, private val inp
     override fun onCancelInput() { }
 
     override fun onFinishSlidingInput() =
-        keyboardSwitcher.onFinishSlidingInput(latinIME.currentAutoCapsState, latinIME.currentRecapitalizeState)
+        keyboardSwitcher.onFinishSlidingInput(latinIME.getCurrentAutoCapsState(), latinIME.getCurrentRecapitalizeState())
 
     override fun onCustomRequest(request: KeyboardActionListener.CustomAction) = when (request) {
         KeyboardActionListener.CustomAction.SHOW_INPUT_METHOD_PICKER -> latinIME.showInputPickerDialog()
@@ -199,11 +199,11 @@ class KeyboardActionListenerImpl(private val latinIME: LatinIME, private val inp
         KeyboardActionListener.SwipeAction.MOVE_CURSOR -> onMoveCursorHorizontally(steps)
         KeyboardActionListener.SwipeAction.SWITCH_LANGUAGE -> onLanguageSlide(steps)
         KeyboardActionListener.SwipeAction.TOGGLE_NUMPAD -> {
-            toggleLayout(LayoutDirective.Utility.NUMPAD, latinIME.currentAutoCapsState, latinIME.currentRecapitalizeState)
+            toggleLayout(LayoutDirective.Utility.NUMPAD, latinIME.getCurrentAutoCapsState(), latinIME.getCurrentRecapitalizeState())
             true
         }
         KeyboardActionListener.SwipeAction.TOGGLE_DPAD -> {
-            toggleLayout(LayoutDirective.Utility.DPAD, latinIME.currentAutoCapsState, latinIME.currentRecapitalizeState)
+            toggleLayout(LayoutDirective.Utility.DPAD, latinIME.getCurrentAutoCapsState(), latinIME.getCurrentRecapitalizeState())
             true
         }
         else -> false
@@ -213,11 +213,11 @@ class KeyboardActionListenerImpl(private val latinIME: LatinIME, private val inp
         KeyboardActionListener.SwipeAction.MOVE_CURSOR -> onMoveCursorVertically(steps)
         KeyboardActionListener.SwipeAction.SWITCH_LANGUAGE -> onLanguageSlide(steps)
         KeyboardActionListener.SwipeAction.TOGGLE_NUMPAD -> {
-            toggleLayout(LayoutDirective.Utility.NUMPAD, latinIME.currentAutoCapsState, latinIME.currentRecapitalizeState)
+            toggleLayout(LayoutDirective.Utility.NUMPAD, latinIME.getCurrentAutoCapsState(), latinIME.getCurrentRecapitalizeState())
             true
         }
         KeyboardActionListener.SwipeAction.TOGGLE_DPAD -> {
-            toggleLayout(LayoutDirective.Utility.DPAD, latinIME.currentAutoCapsState, latinIME.currentRecapitalizeState)
+            toggleLayout(LayoutDirective.Utility.DPAD, latinIME.getCurrentAutoCapsState(), latinIME.getCurrentRecapitalizeState())
             true
         }
         KeyboardActionListener.SwipeAction.HIDE_KEYBOARD -> {
