@@ -4,35 +4,33 @@
  * SPDX-License-Identifier: Apache-2.0 AND GPL-3.0-only
  */
 
-package app.caret.keyboard.internal;
+package app.caret.keyboard.internal
 
-import app.caret.keyboard.internal.keyboard_parser.floris.KeyCode;
-import app.caret.latin.common.Constants;
+import app.caret.keyboard.internal.keyboard_parser.floris.KeyCode
+import app.caret.keyboard.internal.keyboard_parser.floris.KeyCode.checkAndConvertCode
+import app.caret.latin.common.Constants
 
-import java.util.HashMap;
+import java.util.HashMap
 
-public final class KeyboardCodesSet {
-    public static final String PREFIX_CODE = "!code/";
+object KeyboardCodesSet {
+    const val PREFIX_CODE = "!code/"
 
-    private static final HashMap<String, Integer> sNameToIdMap = new HashMap<>();
+    private val sNameToIdMap = HashMap<String?, Int>()
 
-    private KeyboardCodesSet() {
-        // This utility class is not publicly instantiable.
-    }
-
-    public static int getCode(String name) {
-        Integer id = sNameToIdMap.get(name);
+    @JvmStatic
+    fun getCode(name: String?): Int {
+        val id = sNameToIdMap[name]
         if (id == null) {
             try {
-                return KeyCode.INSTANCE.checkAndConvertCode(Integer.parseInt(name), true); // need to take care about longPress check in some other place
-            } catch (Exception e) {
-                throw new RuntimeException("Unknown key code: " + name);
+                return Integer.parseInt(name).checkAndConvertCode(true) // need to take care about longPress check in some other place
+            } catch (e: Exception) {
+                throw RuntimeException("Unknown key code: " + name)
             }
         }
-        return DEFAULT[id];
+        return DEFAULT[id]
     }
 
-    private static final String[] ID_TO_NAME = {
+    private val ID_TO_NAME = arrayOf(
         "key_tab",
         "key_enter",
         "key_space",
@@ -57,9 +55,9 @@ public final class KeyboardCodesSet {
         "key_stop_onehanded", // keep name to avoid breaking custom layouts
         "key_switch_onehanded",
         "key_emoji_search",
-    };
+    )
 
-    private static final int[] DEFAULT = {
+    private val DEFAULT = intArrayOf(
         Constants.CODE_TAB,
         Constants.CODE_ENTER,
         Constants.CODE_SPACE,
@@ -84,11 +82,11 @@ public final class KeyboardCodesSet {
         KeyCode.TOGGLE_ONE_HANDED_MODE,
         KeyCode.SWITCH_ONE_HANDED_MODE,
         KeyCode.EMOJI_SEARCH,
-    };
+    )
 
-    static {
-        for (int i = 0; i < ID_TO_NAME.length; i++) {
-            sNameToIdMap.put(ID_TO_NAME[i], i);
+    init {
+        for (i in 0 until ID_TO_NAME.size) {
+            sNameToIdMap.put(ID_TO_NAME[i], i)
         }
     }
 }

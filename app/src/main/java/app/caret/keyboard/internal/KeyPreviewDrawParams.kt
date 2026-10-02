@@ -4,18 +4,18 @@
  * SPDX-License-Identifier: Apache-2.0 AND GPL-3.0-only
  */
 
-package app.caret.keyboard.internal;
+package app.caret.keyboard.internal
 
-import android.content.res.TypedArray;
-import android.view.View;
+import android.content.res.TypedArray
+import android.view.View
 
-import app.caret.latin.R;
+import app.caret.latin.R
 
-public final class KeyPreviewDrawParams {
+class KeyPreviewDrawParams(mainKeyboardViewAttr: TypedArray) {
     // XML attributes of {@link MainKeyboardView}.
-    public final int mPreviewOffset;
-    public final int mPreviewBackgroundResId;
-    private boolean mShowPopup = true;
+    @JvmField val mPreviewOffset: Int
+    @JvmField val mPreviewBackgroundResId: Int
+    private var mShowPopup = true
 
     // The graphical geometry of the key preview.
     // <-width->
@@ -34,55 +34,55 @@ public final class KeyPreviewDrawParams {
     // paddings. To align the popup keys keyboard panel's visible part with the visible part of
     // the background, we need to record the width and height of key preview that don't include
     // invisible paddings.
-    private int mVisibleWidth;
-    private int mVisibleHeight;
+    private var mVisibleWidth = 0
+    private var mVisibleHeight = 0
     // The key preview may have an arbitrary offset and its background that may have a bottom
     // padding. To align the popup keys keyboard and the key preview we also need to record the
     // offset between the top edge of parent key and the bottom of the visible part of key
     // preview background.
-    private int mVisibleOffset;
+    private var mVisibleOffset = 0
 
-    public KeyPreviewDrawParams(final TypedArray mainKeyboardViewAttr) {
+    init {
         mPreviewOffset = mainKeyboardViewAttr.getDimensionPixelOffset(
-                R.styleable.MainKeyboardView_keyPreviewOffset, 0);
+                R.styleable.MainKeyboardView_keyPreviewOffset, 0)
         mPreviewBackgroundResId = mainKeyboardViewAttr.getResourceId(
-                R.styleable.MainKeyboardView_keyPreviewBackground, 0);
+                R.styleable.MainKeyboardView_keyPreviewBackground, 0)
     }
 
-    public void setVisibleOffset(final int previewVisibleOffset) {
-        mVisibleOffset = previewVisibleOffset;
+    fun setVisibleOffset(previewVisibleOffset: Int) {
+        mVisibleOffset = previewVisibleOffset
     }
 
-    public int getVisibleOffset() {
-        return mVisibleOffset;
+    fun getVisibleOffset(): Int {
+        return mVisibleOffset
     }
 
-    public void setGeometry(final View previewTextView) {
-        final int previewWidth = previewTextView.getMeasuredWidth();
-        final int previewHeight = previewTextView.getMeasuredHeight();
+    fun setGeometry(previewTextView: View) {
+        val previewWidth = previewTextView.measuredWidth
+        val previewHeight = previewTextView.measuredHeight
         // The width and height of visible part of the key preview background. The content marker
         // of the background 9-patch have to cover the visible part of the background.
-        mVisibleWidth = previewWidth - previewTextView.getPaddingLeft() - previewTextView.getPaddingRight();
-        mVisibleHeight = previewHeight - previewTextView.getPaddingTop() - previewTextView.getPaddingBottom();
+        mVisibleWidth = previewWidth - previewTextView.paddingLeft - previewTextView.paddingRight
+        mVisibleHeight = previewHeight - previewTextView.paddingTop - previewTextView.paddingBottom
         // The distance between the top edge of the parent key and the bottom of the visible part
         // of the key preview background.
-        setVisibleOffset(-previewTextView.getPaddingBottom() / 2);
+        setVisibleOffset(-previewTextView.paddingBottom / 2)
     }
 
-    public int getVisibleWidth() {
-        return mVisibleWidth;
+    fun getVisibleWidth(): Int {
+        return mVisibleWidth
     }
 
-    public int getVisibleHeight() {
-        return mVisibleHeight;
+    fun getVisibleHeight(): Int {
+        return mVisibleHeight
     }
 
-    public void setPopupEnabled(final boolean enabled) {
-        mShowPopup = enabled;
+    fun setPopupEnabled(enabled: Boolean) {
+        mShowPopup = enabled
     }
 
-    public boolean isPopupEnabled() {
-        return mShowPopup;
+    fun isPopupEnabled(): Boolean {
+        return mShowPopup
     }
 
 }
