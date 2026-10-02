@@ -162,7 +162,7 @@ def update_localized_number_row():
             if "[number_row]" in f.read():
                 locales.append(file.split(".")[0].split("-")[0])
     locales = list(dict.fromkeys(locales)) # for bn-BD and bn-IN
-    prefs = "app/src/main/java/helium314/keyboard/settings/screens/PreferencesScreen.kt"
+    prefs = "app/src/main/java/app/caret/settings/screens/PreferencesScreen.kt"
     with open(prefs, "r") as f:
         lines = f.readlines()
     for i, line in enumerate(lines):

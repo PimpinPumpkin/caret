@@ -6,7 +6,7 @@
 set -e
 cd "$(dirname "$0")/.."
 PKG=app.caret.debug
-IME=$PKG/helium314.keyboard.latin.LatinIME
+IME=$PKG/app.caret.latin.LatinIME
 APK=app/build/outputs/apk/debug/Caret_4.1-debug.apk
 [ -f "$APK" ] || ./gradlew --console=plain assembleDebug >/dev/null
 adb wait-for-device

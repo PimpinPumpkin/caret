@@ -1,6 +1,6 @@
 # Fork plan
 
-A hard fork of HeliBoard (GPL-3.0). Name: Caret, package id `app.caret`. Java packages keep the `helium314.keyboard` name so upstream changes still merge.
+A hard fork of HeliBoard (GPL-3.0). Name: Caret, package id `app.caret`. The code package is `app.caret` too (renamed from `helium314.keyboard`), so upstream changes are ported by hand, not merged.
 
 ## Goal
 
@@ -184,8 +184,13 @@ method but the function-key switch is longer than about 75 lines.
   Java callers pass as null. When converting the next files, check every non-private function for
   that before running the tests.
 
-Next, in this order:
-1. Tests for `PointerTracker` (taps, sliding between keys, long press, the start of a swipe).
-2. Kotlin conversion of `RichInputConnection`, `LatinIME`, `PointerTracker`.
-3. A cleanup pass over `InputLogic.kt`: drop the `m` prefixes, turn Java-style getters into
-   properties, remove the 13 `!!`.
+- `RichInputConnection`, `PointerTracker` and `LatinIME` are Kotlin too, converted the same way.
+  `PointerTracker` got touch tests first (`InputTest.kt`).
+- The code package was renamed from `helium314.keyboard` to `app.caret`. The keyboard service is
+  now `app.caret.latin.LatinIME`, so an install from before the rename has to enable and select
+  the keyboard once more after updating.
+
+Next:
+1. A cleanup pass over the converted files (`InputLogic.kt`, `RichInputConnection.kt`,
+   `PointerTracker.kt`, `LatinIME.kt`): drop the `m` prefixes, turn Java-style getters into
+   properties, remove the `!!`.

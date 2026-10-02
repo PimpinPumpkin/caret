@@ -5,7 +5,7 @@
     SPDX-License-Identifier: Apache-2.0 AND GPL-3.0-only
 -->
 
-<helium314.keyboard.keyboard.emoji.EmojiPalettesView
+<app.caret.keyboard.emoji.EmojiPalettesView
     xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
@@ -19,13 +19,13 @@
         android:id="@+id/emoji_pager"
         android:layout_width="match_parent"
         android:layout_height="wrap_content" />
-    <helium314.keyboard.keyboard.emoji.EmojiCategoryPageIndicatorView
+    <app.caret.keyboard.emoji.EmojiCategoryPageIndicatorView
         android:id="@+id/emoji_category_page_id_view"
         android:layout_width="match_parent"
         android:layout_height="2dip" />
-    <helium314.keyboard.keyboard.MainKeyboardView
+    <app.caret.keyboard.MainKeyboardView
         android:id="@+id/bottom_row_keyboard"
         android:layout_width="match_parent"
         android:layout_height="wrap_content" />
 
-</helium314.keyboard.keyboard.emoji.EmojiPalettesView>
+</app.caret.keyboard.emoji.EmojiPalettesView>

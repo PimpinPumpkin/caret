@@ -45,9 +45,9 @@
         <!-- A negative value to disable text shadow layer. -->
         <item name="languageOnSpacebarTextShadowRadius">-1.0</item>
     </style>
-    <!-- Though {@link helium314.keyboard.keyboard.emoji.EmojiPalettesView} doesn't extend
-         {@link helium314.keyboard.keyboard.KeyboardView}, some views inside it, for instance
-         delete button, need themed {@link helium314.keyboard.keyboard.KeyboardView}
+    <!-- Though {@link app.caret.keyboard.emoji.EmojiPalettesView} doesn't extend
+         {@link app.caret.keyboard.KeyboardView}, some views inside it, for instance
+         delete button, need themed {@link app.caret.keyboard.KeyboardView}
          attributes. -->
     <style
         name="EmojiPalettesView.LXX_Base"

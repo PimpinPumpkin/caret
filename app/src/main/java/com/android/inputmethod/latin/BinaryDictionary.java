@@ -7,27 +7,27 @@
 package com.android.inputmethod.latin;
 
 import android.text.TextUtils;
-import helium314.keyboard.latin.utils.ChecksumCalculator;
-import helium314.keyboard.latin.utils.Log;
+import app.caret.latin.utils.ChecksumCalculator;
+import app.caret.latin.utils.Log;
 import android.util.SparseArray;
 
 import androidx.annotation.NonNull;
 
-import helium314.keyboard.latin.dictionary.Dictionary;
-import helium314.keyboard.latin.NgramContext;
-import helium314.keyboard.latin.SuggestedWords.SuggestedWordInfo;
-import helium314.keyboard.latin.common.ComposedData;
-import helium314.keyboard.latin.common.Constants;
-import helium314.keyboard.latin.common.FileUtils;
-import helium314.keyboard.latin.common.InputPointers;
-import helium314.keyboard.latin.common.StringUtils;
-import helium314.keyboard.latin.makedict.DictionaryHeader;
-import helium314.keyboard.latin.makedict.FormatSpec.DictionaryOptions;
-import helium314.keyboard.latin.makedict.UnsupportedFormatException;
-import helium314.keyboard.latin.makedict.WordProperty;
-import helium314.keyboard.latin.settings.SettingsValuesForSuggestion;
+import app.caret.latin.dictionary.Dictionary;
+import app.caret.latin.NgramContext;
+import app.caret.latin.SuggestedWords.SuggestedWordInfo;
+import app.caret.latin.common.ComposedData;
+import app.caret.latin.common.Constants;
+import app.caret.latin.common.FileUtils;
+import app.caret.latin.common.InputPointers;
+import app.caret.latin.common.StringUtils;
+import app.caret.latin.makedict.DictionaryHeader;
+import app.caret.latin.makedict.FormatSpec.DictionaryOptions;
+import app.caret.latin.makedict.UnsupportedFormatException;
+import app.caret.latin.makedict.WordProperty;
+import app.caret.latin.settings.SettingsValuesForSuggestion;
 import com.android.inputmethod.latin.utils.BinaryDictionaryUtils;
-import helium314.keyboard.latin.utils.JniUtils;
+import app.caret.latin.utils.JniUtils;
 import com.android.inputmethod.latin.utils.WordInputEventForPersonalization;
 
 import java.io.File;

@@ -109,7 +109,7 @@ android {
         includeInBundle = false
     }
 
-    namespace = "helium314.keyboard.latin"
+    namespace = "app.caret.latin"
     lint {
         abortOnError = true
     }
