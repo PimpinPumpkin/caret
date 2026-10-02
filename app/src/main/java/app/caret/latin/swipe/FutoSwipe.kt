@@ -300,9 +300,14 @@ object FutoSwipe {
                 userTrie = 0L
             }
             userTrieTime = 0L
-            trie = SwipeDecoder.nativeLoadTrie(wordList.keysFile(swipeLayout.letters).path, swipeLayout.letters)
+            val start = System.currentTimeMillis()
+            val keysFile = wordList.keysFile(swipeLayout.letters)
+            val afterKeys = System.currentTimeMillis()
+            trie = SwipeDecoder.nativeLoadTrie(keysFile.path, swipeLayout.letters)
             if (trie == 0L) return null
+            val afterTrie = System.currentTimeMillis()
             val forms = wordList.surfaceForms(swipeLayout.letters)
+            Log.i(TAG, "word list ${afterKeys - start} ms, trie ${afterTrie - afterKeys} ms, spellings ${System.currentTimeMillis() - afterTrie} ms")
             surfaceForms = forms.first
             alternateForms = forms.second
         }
@@ -427,6 +432,49 @@ class WordList private constructor(val file: File) {
      * same keys that differ by more than capitals, such as "it's" for "its" or "schön" for "schon".
      */
     fun surfaceForms(letters: String): Pair<Map<String, String>, Map<String, List<String>>> {
+        // working this out reads the whole word list, which delays the first swipe after the
+        // keyboard starts; the result is small and kept in a file next to the list
+        val cache = File(file.parentFile, "${file.name}.${Integer.toHexString(letters.hashCode())}.forms")
+        readForms(cache)?.let { return it }
+        return computeSurfaceForms(letters).also { writeForms(cache, it) }
+    }
+
+    private fun readForms(cache: File): Pair<Map<String, String>, Map<String, List<String>>>? {
+        if (!cache.isFile || cache.length() == 0L) return null
+        return try {
+            val primary = HashMap<String, String>()
+            val alternates = HashMap<String, List<String>>()
+            cache.forEachLine { line ->
+                val parts = line.split('\t')
+                if (parts.size < 2) return@forEachLine
+                if (parts[1].isNotEmpty()) primary[parts[0]] = parts[1]
+                if (parts.size > 2) alternates[parts[0]] = parts.subList(2, parts.size)
+            }
+            primary to alternates
+        } catch (e: Exception) {
+            null
+        }
+    }
+
+    private fun writeForms(cache: File, forms: Pair<Map<String, String>, Map<String, List<String>>>) {
+        try {
+            val tmp = File(cache.path + ".tmp")
+            tmp.bufferedWriter().use { writer ->
+                (forms.first.keys + forms.second.keys).forEach { keys ->
+                    writer.write(keys)
+                    writer.write("\t")
+                    writer.write(forms.first[keys] ?: "")
+                    forms.second[keys]?.forEach { writer.write("\t"); writer.write(it) }
+                    writer.write("\n")
+                }
+            }
+            if (!tmp.renameTo(cache)) tmp.delete()
+        } catch (e: Exception) {
+            Log.w("FutoSwipe", "could not keep the spellings", e)
+        }
+    }
+
+    private fun computeSurfaceForms(letters: String): Pair<Map<String, String>, Map<String, List<String>>> {
         val spellings = HashMap<String, ArrayList<Pair<String, Int>>>()
         val plain = HashSet<String>()
         forEachWord { word, frequency ->
