@@ -3,6 +3,8 @@
 
     scripts/typing-benchmark.py [package] [--sigma 0.3] [--sentences 30] [--seed 7]
     scripts/typing-benchmark.py [package] --rare --sigma 0    rarer words typed cleanly: what corrections break
+    --save-keys FILE / --keys FILE    reuse key positions for a keyboard that does not report them
+    --pause SECONDS                   wait after each word, for keyboards that correct in the background
 
 Focus a text field with the keyboard showing first (a messaging app works; a search field gets no
 corrections). Every letter is tapped at its key center plus random noise, sigma times the key size,
@@ -13,7 +15,7 @@ accessibility tree: switch on any accessibility service before the keyboard appe
     words right             what the field holds in the end, after corrections
     taps on the right key   how many words were tapped right as they were, for comparison
 """
-import random, re, subprocess, sys, time
+import json, random, re, subprocess, sys, time
 
 SENTENCES = """
 are you coming to the party tonight
@@ -149,7 +151,16 @@ def main():
     sigma = float(args[args.index("--sigma") + 1]) if "--sigma" in args else 0.3
     count = int(args[args.index("--sentences") + 1]) if "--sentences" in args else 30
     sentences = RARE if "--rare" in args else SENTENCES
-    layout = keys(package)
+    # keyboards that correct in the background (FUTO's language model) need a moment after each word
+    pause = float(args[args.index("--pause") + 1]) if "--pause" in args else 0
+    if "--keys" in args:
+        # a keyboard that does not show its keys to accessibility services (FUTO) borrows the
+        # positions of one with the same layout, saved before with --save-keys
+        layout = {k: tuple(v) for k, v in json.load(open(args[args.index("--keys") + 1])).items()}
+    else:
+        layout = keys(package)
+    if "--save-keys" in args:
+        json.dump(layout, open(args[args.index("--save-keys") + 1], "w"))
     missing = [c for c in "abcdefghijklmnopqrstuvwxyz " if c not in layout]
     if missing:
         sys.exit(f"keys not found for {package}: {''.join(missing)!r} (accessibility on before the keyboard showed?)")
@@ -182,6 +193,8 @@ def main():
                     else:
                         x, y = cx, cy
                 commands.append(f"input tap {int(x)} {int(y)}")
+                if c == " " and pause:
+                    commands.append(f"sleep {pause}")
                 # which key the tap really landed on, to know whether the typo was there to fix
                 hit.append(letter_at(layout, x, y, pitch) or " ")
             tapped.append("".join(hit).strip())
