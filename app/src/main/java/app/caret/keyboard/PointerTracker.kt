@@ -95,6 +95,8 @@ class PointerTracker private constructor(id: Int) : PointerTrackerQueue.Element,
     private var lastY: Int = 0
     private var startX: Int = 0
     private var startY: Int = 0
+    /** Where this touch went down; [startY] moves along during a swipe on the space bar. */
+    private var downY: Int = 0
     private var startTime: Long = 0
     private var inHorizontalSwipe = false
     private var inVerticalSwipe = false
@@ -578,6 +580,7 @@ class PointerTracker private constructor(id: Int) : PointerTrackerQueue.Element,
             setPressedKeyGraphics(key, eventTime)
             startX = x
             startY = y
+            downY = y
             startTime = SystemClock.elapsedRealtime()
         }
     }
@@ -979,6 +982,10 @@ class PointerTracker private constructor(id: Int) : PointerTrackerQueue.Element,
                 && (releasedKey.code == repeatingKeyCode) && !wasInDraggingFinger) {
             return
         }
+        // Caret: a touch that starts on the space bar and leaves it upwards is the system's swipe home
+        // (or a slip), not a space. Typed anyway it shows the other side of a chat that one is typing.
+        if (releasedKey != null && releasedKey.code == Constants.CODE_SPACE && downY - y > releasedKey.height / 2)
+            return
         detectAndSendKey(releasedKey, keyX, keyY, eventTime)
         if (wasInSlidingKeyInput) {
             callListenerOnFinishSlidingInput()
