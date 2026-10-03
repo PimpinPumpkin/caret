@@ -15,7 +15,7 @@ accessibility tree: switch on any accessibility service before the keyboard appe
     words right             what the field holds in the end, after corrections
     taps on the right key   how many words were tapped right as they were, for comparison
 """
-import json, random, re, subprocess, sys, time
+import difflib, json, random, re, subprocess, sys, time
 
 SENTENCES = """
 are you coming to the party tonight
@@ -202,15 +202,19 @@ def main():
         time.sleep(1)
         got = re.sub(r"[^a-z' ]", " ", field().lower()).split()
         want = sentence.split()
+        # line the words up the way a person would read them, so one split or merged word
+        # counts once instead of shifting every word after it
+        matched = set()
+        for block in difflib.SequenceMatcher(a=want, b=got, autojunk=False).get_matching_blocks():
+            matched.update(range(block.a, block.a + block.size))
         for n, w in enumerate(want):
             words += 1
-            ok = n < len(got) and got[n] == w
-            right += ok
+            right += n in matched
             clean += tapped[n] == w
-            if not ok:
-                misses.append(f"{w} <- {got[n] if n < len(got) else '?'} (tapped {tapped[n]})")
+            if n not in matched:
+                misses.append(f"{w} (tapped {tapped[n]})")
         if len(got) != len(want):
-            misses.append(f"  (sentence came out with {len(got)} words: {' '.join(got)})")
+            misses.append(f"  (came out as: {' '.join(got)})")
     print(f"{package}: words right {100 * right / words:.1f}% of {words}, taps on the right key {100 * clean / words:.1f}%")
     for m in misses:
         print("  " + m)
