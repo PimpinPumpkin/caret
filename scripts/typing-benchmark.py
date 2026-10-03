@@ -97,7 +97,10 @@ def keys(package):
         label = m[1].lower().removeprefix("capital ")
         x0, y0, x1, y1 = map(int, m.groups()[1:])
         if len(label) == 1 and label.isalpha():
-            found[label] = (x0, y0, x1, y1)
+            # some keyboards (Gboard) report a key twice, its touch area and the drawn key: keep the larger
+            old = found.get(label)
+            if old is None or (x1 - x0) * (y1 - y0) > (old[2] - old[0]) * (old[3] - old[1]):
+                found[label] = (x0, y0, x1, y1)
         elif label == "space":
             found[" "] = (x0, y0, x1, y1)
     screen = int(re.search(r"x(\d+)", sh("wm size"))[1])
@@ -112,8 +115,16 @@ def keys(package):
     return found
 
 
-def letter_at(layout, x, y):
-    return next((k for k, (a, b, c, d) in layout.items() if k != " " and a <= x < c and b <= y < d), None)
+def center(box):
+    return (box[0] + box[2]) / 2, (box[1] + box[3]) / 2
+
+
+def letter_at(layout, x, y, pitch):
+    """The letter key whose center is nearest, or None when the tap is off the letter area."""
+    # on a letter key's touch area at all, so a sloppy tap never becomes space, comma or shift
+    if not any(a <= x < c and b <= y < d for k, (a, b, c, d) in layout.items() if k != " "):
+        return None
+    return min((k for k in layout if k != " "), key=lambda k: (center(layout[k])[0] - x) ** 2 + (center(layout[k])[1] - y) ** 2)
 
 
 def field():
@@ -142,9 +153,11 @@ def main():
     missing = [c for c in "abcdefghijklmnopqrstuvwxyz " if c not in layout]
     if missing:
         sys.exit(f"keys not found for {package}: {''.join(missing)!r} (accessibility on before the keyboard showed?)")
-    # key sizes from the letter keys, so the noise does not depend on how far a key's touch area reaches
-    width = sorted(x1 - x0 for c, (x0, y0, x1, y1) in layout.items() if c != " ")[13]
-    height = sorted(y1 - y0 for c, (x0, y0, x1, y1) in layout.items() if c != " ")[13]
+    # The noise is scaled by the distance between key centers, not by key sizes, which keyboards
+    # report differently (touch area or drawn key); so every keyboard gets equally sloppy taps.
+    width = center(layout["w"])[0] - center(layout["q"])[0]
+    height = center(layout["a"])[1] - center(layout["q"])[1]
+    pitch = (width, height)
     rng = random.Random(int(args[args.index("--seed") + 1]) if "--seed" in args else 7)
     words = right = clean = 0
     misses = []
@@ -158,20 +171,19 @@ def main():
         for word in sentence.split():
             hit = []
             for c in word + " ":
-                x0, y0, x1, y1 = layout[c]
-                cx, cy = (x0 + x1) / 2, (y0 + y1) / 2
+                cx, cy = center(layout[c])
                 x, y = cx, cy
                 if c != " ":
                     # a sloppy tap lands on the key or a neighbor, not on space or off the keyboard
                     for _ in range(20):
                         x, y = cx + rng.gauss(0, sigma) * width, cy + rng.gauss(0, sigma) * height
-                        if letter_at(layout, x, y) is not None:
+                        if letter_at(layout, x, y, pitch) is not None:
                             break
                     else:
                         x, y = cx, cy
                 commands.append(f"input tap {int(x)} {int(y)}")
                 # which key the tap really landed on, to know whether the typo was there to fix
-                hit.append(letter_at(layout, x, y) or " ")
+                hit.append(letter_at(layout, x, y, pitch) or " ")
             tapped.append("".join(hit).strip())
         sh(";".join(commands))
         time.sleep(1)
