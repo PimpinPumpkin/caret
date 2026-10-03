@@ -48,8 +48,24 @@ index 559a2bf..ad202ec 100644
  		if [ -f "$$LIBCXX" ]; then adb push "$$LIBCXX" $(DEVICE_DIR)/; fi
  	adb shell "chmod +x $(DEVICE_DIR)/benchmark_e2e"
  
+diff --git a/include/swipe_decoder/engine.hpp b/include/swipe_decoder/engine.hpp
+index 26fa5f3..f65fe4e 100644
+--- a/include/swipe_decoder/engine.hpp
++++ b/include/swipe_decoder/engine.hpp
+@@ -178,6 +178,11 @@ public:
+         int k = 10
+     );
+ 
++    // Scores of the given words as the next word after the context, from the context LM
++    // (higher is likelier). Empty when no LM is loaded.
++    std::vector<float> score_words(const std::vector<std::string>& context_words,
++                                   const std::vector<std::string>& words);
++
+     const Timing& last_timing() const;
+ 
+     const ScoringParams &scoring() const;
 diff --git a/jni/swipe_jni.cpp b/jni/swipe_jni.cpp
-index f2c968d..fcc4fa0 100644
+index f2c968d..725e4d7 100644
 --- a/jni/swipe_jni.cpp
 +++ b/jni/swipe_jni.cpp
 @@ -4,6 +4,7 @@
@@ -60,7 +76,45 @@ index f2c968d..fcc4fa0 100644
  
  #include <jni.h>
  #include <android/log.h>
-@@ -392,6 +393,43 @@ Java_org_futo_ml_inference_SwipeDecoder_nativeSetCaseMapping(
+@@ -204,6 +205,37 @@ Java_org_futo_ml_inference_SwipeDecoder_nativeRecognize(
+     return out;
+ }
+ 
++static std::vector<std::string> to_strings(JNIEnv* env, jobjectArray array) {
++    std::vector<std::string> out;
++    if (!array) return out;
++    jint len = env->GetArrayLength(array);
++    out.reserve(len);
++    for (jint i = 0; i < len; ++i) {
++        auto jstr = static_cast<jstring>(env->GetObjectArrayElement(array, i));
++        if (!jstr) { out.emplace_back(); continue; }
++        const char* cstr = env->GetStringUTFChars(jstr, nullptr);
++        out.emplace_back(cstr);
++        env->ReleaseStringUTFChars(jstr, cstr);
++        env->DeleteLocalRef(jstr);
++    }
++    return out;
++}
++
++// Caret: context LM scores for given words, to rank typing corrections.
++JNIEXPORT jfloatArray JNICALL
++Java_org_futo_ml_inference_SwipeDecoder_nativeScoreWords(
++    JNIEnv* env, jobject /* obj */,
++    jlong handle, jobjectArray contextArray, jobjectArray wordsArray
++) {
++    auto* engine = to_engine(handle);
++    if (!engine || !wordsArray) return nullptr;
++    auto scores = engine->score_words(to_strings(env, contextArray), to_strings(env, wordsArray));
++    if (scores.empty()) return nullptr;
++    jfloatArray out = env->NewFloatArray(static_cast<jsize>(scores.size()));
++    env->SetFloatArrayRegion(out, 0, static_cast<jsize>(scores.size()), scores.data());
++    return out;
++}
++
+ JNIEXPORT jobjectArray JNICALL
+ Java_org_futo_ml_inference_SwipeDecoder_nativePredictNext(
+     JNIEnv* env, jobject /* obj */,
+@@ -392,6 +424,43 @@ Java_org_futo_ml_inference_SwipeDecoder_nativeSetCaseMapping(
      if (to)   env->ReleaseIntArrayElements(toArray,   to,   JNI_ABORT);
  }
  
@@ -104,3 +158,21 @@ index f2c968d..fcc4fa0 100644
  JNIEXPORT void JNICALL
  Java_org_futo_ml_inference_SwipeDecoder_nativeDestroy(
      JNIEnv* /* env */, jobject /* obj */, jlong handle
+diff --git a/src/engine.cpp b/src/engine.cpp
+index e02e532..c705496 100644
+--- a/src/engine.cpp
++++ b/src/engine.cpp
+@@ -811,6 +811,13 @@ std::vector<std::pair<std::string, float>> SwipeEngine::predict_next(
+     return impl_->lm_scorer->predict_topk(context_words, k);
+ }
+ 
++std::vector<float> SwipeEngine::score_words(
++    const std::vector<std::string>& context_words, const std::vector<std::string>& words
++) {
++    if (!impl_->lm_scorer || !impl_->lm_scorer->is_loaded()) return {};
++    return impl_->lm_scorer->score(context_words, words);
++}
++
+ const ScoringParams &SwipeEngine::scoring() const {
+     return impl_->scoring;
+ }

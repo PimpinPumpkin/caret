@@ -130,6 +130,17 @@ class SwipeDecoder(
         return results?.toList() ?: emptyList()
     }
 
+    /**
+     * Scores of [words] as the next word after the current context, from the context LM; higher
+     * is likelier. Null when no LM is loaded. (Added for Caret, to rank typing corrections.)
+     */
+    fun scoreWords(words: List<String>): FloatArray? {
+        check(handle != 0L) { "SwipeDecoder has been closed" }
+        if (words.isEmpty()) return FloatArray(0)
+        val ctx = if (contextWords.isNotEmpty()) contextWords.toTypedArray() else null
+        return nativeScoreWords(handle, ctx, words.map { it.lowercase(Locale.ROOT) }.toTypedArray())
+    }
+
     /** Per-stage timing from the most recent recognize() call. */
     fun lastTiming(): Timing {
         check(handle != 0L) { "SwipeDecoder has been closed" }
@@ -239,6 +250,7 @@ class SwipeDecoder(
     private external fun nativeGetLastTiming(handle: Long): FloatArray?
 
     private external fun nativeGetScoring(handle: Long): FloatArray?
+    private external fun nativeScoreWords(handle: Long, context: Array<String>?, words: Array<String>): FloatArray?
 
     private external fun nativeHasDecoder(handle: Long): Boolean
 

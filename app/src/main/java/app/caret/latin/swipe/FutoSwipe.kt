@@ -191,6 +191,27 @@ object FutoSwipe {
     }
 
     /**
+     * How likely each of [words] is as the next word after the text before it, from the context
+     * language model of the swipe models; higher is likelier. Null when that model is not loaded
+     * (see [predictNext]). Used to rank the corrections of a typed word by what fits the sentence.
+     */
+    @Synchronized
+    fun scoreWords(ngramContext: NgramContext, locale: Locale, words: List<String>): FloatArray? {
+        val context = appContext ?: return null
+        if (locale.language != "en" || loadedLocale?.language != "en" || !isActive(context)) return null
+        val engine = decoder ?: return null
+        return try {
+            if (!engine.hasLm()) return null
+            engine.setContext(contextWords(ngramContext))
+            engine.scoreWords(words)
+        } catch (e: Throwable) {
+            // also an UnsatisfiedLinkError, from a swipe library built before it could score words
+            Log.w(TAG, "scoring words failed", e)
+            null
+        }
+    }
+
+    /**
      * The words most likely to come next after the text in [ngramContext], best first, from the
      * context language model that ships with the swipe models. Null when that model is not loaded:
      * models not installed, engine switched off, another language than English, no keyboard

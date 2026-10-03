@@ -17,7 +17,7 @@ if [ ! -d "$LIB" ]; then
     git -C "$LIB" checkout -q "$COMMIT"
     git -C "$LIB" submodule update --init --recursive --depth 1
 fi
-if ! grep -q nativeLoadTrie "$LIB/jni/swipe_jni.cpp"; then
+if ! grep -q nativeScoreWords "$LIB/jni/swipe_jni.cpp"; then
     git -C "$LIB" apply "$ROOT/swipe/caret.patch"
 fi
 

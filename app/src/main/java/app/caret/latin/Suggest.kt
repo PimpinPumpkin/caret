@@ -21,9 +21,11 @@ import app.caret.latin.dictionary.Dictionary
 import app.caret.latin.settings.Settings
 import app.caret.latin.settings.SettingsValuesForSuggestion
 import app.caret.latin.suggestions.SuggestionStripView
+import app.caret.latin.swipe.FutoSwipe
 import app.caret.latin.swipe.SwipeRecorder
 import app.caret.latin.utils.AutoCorrectionUtils
 import app.caret.latin.utils.Log
+import app.caret.latin.utils.prefs
 import app.caret.latin.utils.BackgroundGatheringCache
 import app.caret.latin.utils.SuggestionResults
 import app.caret.latin.utils.WordData
@@ -92,8 +94,11 @@ class Suggest(private val dictionaryFacilitator: DictionaryFacilitator) {
         val typedWordFirstOccurrenceWordInfo = suggestionsContainer.firstOrNull { it.word == capitalizedTypedWord }
         val firstOccurrenceOfTypedWordInSuggestions = SuggestedWordInfo.removeDupsAndTypedWord(capitalizedTypedWord, suggestionsContainer)
         makeFirstTwoSuggestionsNonEmoji(suggestionsContainer)
+        val fit = if (isCorrectionEnabled && !resultsArePredictions && typedWordString.isNotEmpty())
+                fitToSentence(typedWordString, suggestionsContainer, ngramContext)
+            else null
 
-        val (allowsToBeAutoCorrected, hasAutoCorrection) = shouldBeAutoCorrected(
+        val (allowsToBeAutoCorrected, dictionaryAutoCorrection) = shouldBeAutoCorrected(
             trailingSingleQuotesCount,
             capitalizedTypedWord,
             suggestionsContainer.firstOrNull(),
@@ -110,6 +115,8 @@ class Suggest(private val dictionaryFacilitator: DictionaryFacilitator) {
             firstOccurrenceOfTypedWordInSuggestions,
             typedWordFirstOccurrenceWordInfo
         )
+        val hasAutoCorrection = correctBySentence(dictionaryAutoCorrection, fit, typedWordFirstOccurrenceWordInfo != null,
+            typedWordString, suggestionsContainer, isCorrectionEnabled, wordComposer)
         val typedWordInfo = SuggestedWordInfo(typedWordString, "", SuggestedWordInfo.MAX_SCORE,
             SuggestedWordInfo.KIND_TYPED, typedWordFirstOccurrenceWordInfo?.sourceDict ?: Dictionary.DICTIONARY_USER_TYPED,
             SuggestedWordInfo.NOT_AN_INDEX , SuggestedWordInfo.NOT_A_CONFIDENCE)
@@ -153,6 +160,65 @@ class Suggest(private val dictionaryFacilitator: DictionaryFacilitator) {
         val isTypedWordValid = firstOccurrenceOfTypedWordInSuggestions > -1 || (!resultsArePredictions && !allowsToBeAutoCorrected)
         return SuggestedWords(suggestionsList, suggestionResults.rawSuggestions, typedWordInfo,
             isTypedWordValid, hasAutoCorrection || correctToCapitalizedWord, false, inputStyle, sequenceNumber)
+    }
+
+    /** What the language model says about the typed word and the first suggestions. */
+    class SentenceFit(val typed: Float, val scores: Map<SuggestedWordInfo, Float>, val best: SuggestedWordInfo?)
+
+    /**
+     * Caret: scores the first suggestions by how well they fit the sentence so far, with the
+     * context language model that comes with the swipe models. The dictionary ranks by spelling
+     * and frequency alone, so "if" and "of" or "go" and "to" look alike to it. The typed word in
+     * other capitals counts as the typed word, not as a correction.
+     */
+    private fun fitToSentence(typedWord: String, suggestions: List<SuggestedWordInfo>, ngramContext: NgramContext): SentenceFit? {
+        val head = suggestions.take(SENTENCE_RANKED_SUGGESTIONS).filter { info ->
+            info.word.all { it.isLetter() || it == '\'' } && !info.word.equals(typedWord, ignoreCase = true)
+        }
+        if (head.isEmpty()) return null
+        val lm = FutoSwipe.scoreWords(ngramContext, dictionaryFacilitator.getMainLocale(), listOf(typedWord) + head.map { it.word })
+            ?: return null
+        val scores = head.withIndex().associate { (i, info) -> info to lm[i + 1] }
+        val weight = SENTENCE_WEIGHT
+        val best = head.maxByOrNull { BinaryDictionaryUtils.calcNormalizedScore(typedWord, it.word, it.score) + weight * scores.getValue(it) }
+        if (BuildConfig.DEBUG) Log.d(TAG, "fit for $typedWord (${lm[0]}): " +
+            head.joinToString { "${it.word} ${BinaryDictionaryUtils.calcNormalizedScore(typedWord, it.word, it.score)} ${scores[it]}" })
+        return SentenceFit(lm[0], scores, best)
+    }
+
+    /**
+     * Caret: what the language model changes about autocorrecting, with the word it settles on
+     * moved to the front of [suggestions]:
+     * - a correction goes to the suggestion that fits the sentence better, when its spelling is about as close;
+     * - a correction is dropped when the typed word, a word itself, fits the sentence clearly better;
+     * - a typed word that is a word itself ("if", "go") is replaced when a close suggestion fits
+     *   the sentence far better ("of", "to").
+     */
+    private fun correctBySentence(
+        dictionarySays: Boolean, fit: SentenceFit?, typedIsWord: Boolean, typedWord: String,
+        suggestions: ArrayList<SuggestedWordInfo>, isCorrectionEnabled: Boolean, wordComposer: WordComposer,
+    ): Boolean {
+        val best = fit?.best ?: return dictionarySays
+        val first = suggestions.firstOrNull() ?: return dictionarySays
+        if (SENTENCE_WEIGHT < 0) return dictionarySays // switched off, for comparing
+        val bestFit = fit.scores.getValue(best)
+        fun promoteBest() {
+            suggestions.remove(best)
+            suggestions.add(0, best)
+        }
+        if (dictionarySays) {
+            if (first.word.equals(typedWord, ignoreCase = true)) return true // a change of capitals only
+            if (typedIsWord && fit.typed - (fit.scores[first] ?: bestFit) >= SENTENCE_KEEP_MARGIN) return false
+            if (best !== first && fit.scores[first] != null && isAllowedByAutoCorrectionWithSpaceFilter(best)) promoteBest()
+            return true
+        }
+        if (!isCorrectionEnabled || !typedIsWord || wordComposer.hasDigits() || wordComposer.isResumed
+            || (wordComposer.isMostlyCaps && !wordComposer.isAllUpperCase()) || !isAllowedByAutoCorrectionWithSpaceFilter(best))
+            return false
+        val spelling = BinaryDictionaryUtils.calcNormalizedScore(typedWord, best.word, best.score)
+        if (bestFit - fit.typed < SENTENCE_REPLACE_MARGIN || spelling < SENTENCE_REPLACE_SPELLING) return false
+        promoteBest()
+        return true
     }
 
     // returns [allowsToBeAutoCorrected, hasAutoCorrection]
@@ -372,6 +438,33 @@ class Suggest(private val dictionaryFacilitator: DictionaryFacilitator) {
         // We are sharing the same ID between typing and gesture to save RAM footprint.
         const val SESSION_ID_TYPING = 0
         const val SESSION_ID_GESTURE = 0
+
+        /** How many of the first suggestions the language model reorders. */
+        private const val SENTENCE_RANKED_SUGGESTIONS = 6
+        /** Weight of the language model score against the spelling score when reordering. */
+        private val SENTENCE_WEIGHT get() = tuning("sentence_weight", 0.06f)
+        /** How much better a suggestion has to fit the sentence to replace a typed word that is a word itself. */
+        private val SENTENCE_REPLACE_MARGIN get() = tuning("sentence_replace_margin", 8f)
+        /** ...and how close it has to be to what was typed. */
+        private val SENTENCE_REPLACE_SPELLING get() = tuning("sentence_replace_spelling", 0.15f)
+        /** How much better a typed word has to fit the sentence to be kept although a correction is ready. */
+        private val SENTENCE_KEEP_MARGIN get() = tuning("sentence_keep_margin", 4f)
+
+        // Debug builds read these from tuning.properties in the app's external files folder, to tune
+        // them with scripts/typing-benchmark.py: adb push the file, then restart the keyboard.
+        private val tuningValues: java.util.Properties by lazy {
+            java.util.Properties().apply {
+                if (BuildConfig.DEBUG) try {
+                    val file = java.io.File(Settings.currentContext.getExternalFilesDir(null), "tuning.properties")
+                    if (file.isFile) file.inputStream().use { load(it) }
+                    Log.i(TAG, "tuning: $this")
+                } catch (e: Exception) {
+                    Log.w(TAG, "no tuning values", e)
+                }
+            }
+        }
+
+        private fun tuning(name: String, default: Float) = tuningValues.getProperty(name)?.toFloatOrNull() ?: default
 
         // Close to -2**31
         private const val SUPPRESS_SUGGEST_THRESHOLD = -2000000000
