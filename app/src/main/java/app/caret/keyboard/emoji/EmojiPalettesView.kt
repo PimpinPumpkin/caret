@@ -430,10 +430,23 @@ class EmojiPalettesView(context: Context, attrs: AttributeSet?, defStyle: Int) :
                 val old: View? = strip.findViewWithTag(oldCategory)
                 val current: View? = strip.findViewWithTag(category)
 
-                if (old is ImageView)
+                if (old is ImageView) {
                     Settings.values.colors.setColor(old, ColorType.EMOJI_CATEGORY)
-                if (current is ImageView)
-                    Settings.values.colors.setColor(current, ColorType.EMOJI_CATEGORY_SELECTED)
+                    Settings.values.colors.setBackground(old, ColorType.STRIP_BACKGROUND)
+                }
+                if (current is ImageView) {
+                    // Caret: the category in view sits in a filled circle, as on Gboard; the circle
+                    // marks it, so the icon keeps the color of the others and stays readable on it
+                    Settings.values.colors.setColor(current, ColorType.EMOJI_CATEGORY)
+                    val circle = android.graphics.drawable.GradientDrawable().apply {
+                        shape = android.graphics.drawable.GradientDrawable.OVAL
+                        setColor(Settings.values.colors.get(ColorType.FUNCTIONAL_KEY_BACKGROUND))
+                    }
+                    val size = (36 * resources.displayMetrics.density).toInt()
+                    val insetX = ((current.width - size) / 2).coerceAtLeast(0)
+                    val insetY = ((current.height - size) / 2).coerceAtLeast(0)
+                    current.background = android.graphics.drawable.InsetDrawable(circle, insetX, insetY, insetX, insetY)
+                }
             }
         }
     }

@@ -234,6 +234,7 @@
     <!-- Description for "swipe_delete_by_word" option. -->
     <string name="swipe_delete_by_word_summary">When swiping from the backspace key, select and delete whole words instead of individual characters</string>
     <!-- Preferences item and dialog title for backup and restore -->
+    <string name="clipboard_empty">Text you copy shows up here. Hold a clip to pin it.</string>
     <string name="settings_export">Export settings</string>
     <string name="settings_export_summary">Only the settings you changed, as a small file you can read</string>
     <string name="settings_export_done">Settings exported</string>

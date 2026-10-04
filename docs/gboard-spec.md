@@ -58,6 +58,11 @@ A search field at the top left, category icons across the top with the current o
 circle, a section title ("Smileys & Emotions"), 8 emoji per row, and at the bottom ABC on the left,
 then tabs for emoji, GIF, stickers and emoticons, and delete on the right.
 
+Done in 0.1.18: the category in view sits in a filled circle. Caret keeps its own bottom row (ABC,
+a search key when an emoji dictionary is installed, the space bar, delete): the space bar there is
+more useful than GIF and sticker tabs Caret has nothing behind. Still different: Gboard's panel is
+taller than the keyboard and shows a section title above each group.
+
 ## 4. Key preview and long-press popups
 
 Gboard: pressing a key shows a white, slightly raised bubble above it with the letter (and three

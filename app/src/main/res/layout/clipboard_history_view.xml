@@ -22,9 +22,10 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_gravity="center"
+            android:gravity="center"
+            android:paddingHorizontal="32dp"
             android:visibility="invisible"
-            android:text="¯\\_(ツ)_/¯"
-            tools:ignore="HardcodedText" />
+            android:text="@string/clipboard_empty" />
 
         <app.caret.keyboard.clipboard.ClipboardHistoryRecyclerView
             android:id="@+id/clipboard_list"

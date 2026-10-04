@@ -119,8 +119,8 @@ is visible to the user. Things that need the user's eyes or a decision are colle
 | 4 | Settings backup that stays small | done (0.1.15) |
 | 5 | Dictation polish in Caret and Alyo: current word highlighted, no pause periods, smooth partial to final | done in Caret (0.1.16) and Alyo's recognizer; Alyo's own keyboard still puts a period at every pause |
 | 6 | Gboard spec: long-press popups and key previews | done (0.1.17) |
-| 7 | Gboard spec: emoji panel | next |
-| 8 | Gboard spec: clipboard, one-handed, floating | |
+| 7 | Gboard spec: emoji panel | category circle done (0.1.18); taller panel and section titles left |
+| 8 | Gboard spec: clipboard, one-handed, floating | next |
 | 9 | Gboard spec: settings layout (reorder, Advanced per category, nothing removed) | |
 | 10 | Typing model runtime in Caret (llama.cpp), tested on a small stand-in model | |
 | 11 | Typing fine-tune on simulated taps (when the base model is done), then in Caret, benchmarked against Gboard | |
