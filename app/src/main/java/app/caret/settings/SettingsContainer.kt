@@ -84,6 +84,8 @@ object SettingsWithoutKey {
     const val SWIPE_MODELS = "swipe_models"
     const val SWIPE_PRACTICE = "swipe_practice"
     const val SWIPE_RECORDING_SAVE = "swipe_recording_save"
+    const val CORRECTIONS_SAVE = "corrections_save"
+    const val CORRECTIONS_DELETE = "corrections_delete"
     const val SWIPE_RECORDING_DELETE = "swipe_recording_delete"
     const val EMOJI_FONT_LINK = "emoji_font_link"
     const val BACKGROUND_IMAGE = "background_image"

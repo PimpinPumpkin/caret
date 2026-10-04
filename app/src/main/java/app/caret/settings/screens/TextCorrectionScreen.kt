@@ -34,6 +34,8 @@ import app.caret.settings.Setting
 import app.caret.settings.SettingsActivity
 import app.caret.settings.SettingsDestination
 import app.caret.settings.SettingsWithoutKey
+import app.caret.settings.preferences.RecordingDeletePreference
+import app.caret.settings.preferences.RecordingSavePreference
 import app.caret.latin.utils.Theme
 import app.caret.settings.dialogs.ConfirmationDialog
 import app.caret.settings.initPreview
@@ -97,6 +99,10 @@ fun TextCorrectionScreen(
             Settings.PREF_ADD_TO_PERSONAL_DICTIONARY else null,
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S)
             Settings.PREF_SPELLCHECK_SUGGEST else null,
+        R.string.settings_category_learning,
+        Settings.PREF_RECORD_CORRECTIONS,
+        SettingsWithoutKey.CORRECTIONS_SAVE,
+        SettingsWithoutKey.CORRECTIONS_DELETE,
     )
     SearchSettingsScreen(
         onClickBack = onClickBack,
@@ -136,6 +142,16 @@ fun createCorrectionSettings(context: Context) = listOf(
         R.string.auto_correct_capitalized_suggestions, R.string.auto_correct_capitalized_suggestions_description
     ) {
         SwitchPreference(it, Defaults.PREF_AUTOCORRECT_CAPITALIZED_SUGGESTION)
+    },
+    Setting(context, Settings.PREF_RECORD_CORRECTIONS, R.string.record_corrections, R.string.record_corrections_summary) {
+        SwitchPreference(it, Defaults.PREF_RECORD_CORRECTIONS)
+    },
+    Setting(context, SettingsWithoutKey.CORRECTIONS_SAVE, R.string.corrections_save) {
+        RecordingSavePreference(it, { ctx -> app.caret.latin.CorrectionRecorder.file(ctx) },
+            { ctx -> app.caret.latin.CorrectionRecorder.count(ctx) }, "caret-corrections.jsonl", R.string.corrections_save_summary)
+    },
+    Setting(context, SettingsWithoutKey.CORRECTIONS_DELETE, R.string.corrections_delete) {
+        RecordingDeletePreference(it, R.string.corrections_delete_message) { ctx -> app.caret.latin.CorrectionRecorder.clear(ctx) }
     },
     Setting(context, Settings.PREF_AUTO_CORRECT_CONFIDENCE, R.string.auto_correction_confidence) { setting ->
         SliderPreference(

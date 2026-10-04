@@ -55,6 +55,7 @@ import app.caret.latin.dictionary.Dictionary
 import app.caret.latin.dictionary.DictionaryFactory
 import app.caret.latin.settings.Settings
 import app.caret.latin.swipe.FutoSwipe
+import app.caret.latin.CorrectionRecorder
 import app.caret.latin.swipe.SwipeRecorder
 import app.caret.latin.settings.SettingsValues
 import app.caret.latin.settings.SpacingAndPunctuations
@@ -2083,6 +2084,9 @@ class InputLogic(
     private fun revertCommit(inputTransaction: InputTransaction) {
         val originallyTypedWord = lastComposedWord.typedWord
         val committedWord = lastComposedWord.committedWord
+        if (lastComposedWord.inputPointers.pointerSize > 0)
+            CorrectionRecorder.onUndone(latinIME, KeyboardSwitcher.getInstance().keyboard, lastComposedWord.inputPointers,
+                originallyTypedWord, committedWord.toString(), FutoSwipe.textBeforeWord)
         val committedWordString = committedWord.toString()
         val cancelLength = committedWord.length
         val separatorString = lastComposedWord.separatorString
@@ -2592,6 +2596,11 @@ class InputLogic(
         // previous word.
         val ngramContext = connection.getNgramContextFromNthPreviousWord(
                 settingsValues.spacingAndPunctuations, if (wordComposer.isComposingWord) 2 else 1)
+        // Caret: what the correction recorder needs to know before the word is gone from the composer
+        val typing = wordComposer.isComposingWord && !wordComposer.isBatchMode
+        val wordStart = if (typing) connection.expectedSelectionStart - wordComposer.typedWord.length else -1
+        val wouldHaveBeen = if (suggestedWords.willAutoCorrect && suggestedWords.size() > SuggestedWords.INDEX_OF_AUTO_CORRECTION)
+                suggestedWords.getWord(SuggestedWords.INDEX_OF_AUTO_CORRECTION) else wordComposer.typedWord
         connection.commitText(chosenWordWithSuggestions, 1)
         // Add the word to the user history dictionary
         performAdditionToUserHistoryDictionary(settingsValues, chosenWord, ngramContext)
@@ -2600,6 +2609,9 @@ class InputLogic(
         // LastComposedWord#didCommitTypedWord by string equality of the remembered
         // strings.
         lastComposedWord = wordComposer.commitWord(commitType, chosenWord, separatorString, ngramContext)
+        if (typing) CorrectionRecorder.onCommit(latinIME, KeyboardSwitcher.getInstance().keyboard, lastComposedWord.inputPointers,
+            lastComposedWord.typedWord, chosenWord, wouldHaveBeen, commitType == LastComposedWord.COMMIT_TYPE_MANUAL_PICK,
+            wordStart, FutoSwipe.textBeforeWord)
     }
 
     /**
