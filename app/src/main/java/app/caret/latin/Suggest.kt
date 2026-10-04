@@ -116,8 +116,10 @@ class Suggest(private val dictionaryFacilitator: DictionaryFacilitator) {
             firstOccurrenceOfTypedWordInSuggestions,
             typedWordFirstOccurrenceWordInfo
         )
-        val hasAutoCorrection = correctBySentence(dictionaryAutoCorrection, fit, typedWordFirstOccurrenceWordInfo != null,
+        val bySentence = correctBySentence(dictionaryAutoCorrection, fit, typedWordFirstOccurrenceWordInfo != null,
             typedWordString, suggestionsContainer, isCorrectionEnabled, wordComposer)
+        val hasAutoCorrection = correctByHabit(bySentence, typedWordString, suggestionsContainer, capsMode,
+            isCorrectionEnabled && !resultsArePredictions && !wordComposer.isResumed)
         val typedWordInfo = SuggestedWordInfo(typedWordString, "", SuggestedWordInfo.MAX_SCORE,
             SuggestedWordInfo.KIND_TYPED, typedWordFirstOccurrenceWordInfo?.sourceDict ?: Dictionary.DICTIONARY_USER_TYPED,
             SuggestedWordInfo.NOT_AN_INDEX , SuggestedWordInfo.NOT_A_CONFIDENCE)
@@ -224,6 +226,25 @@ class Suggest(private val dictionaryFacilitator: DictionaryFacilitator) {
         // a rare word reads as unlikely whatever the sentence ("hooted" against "hosted"): that alone is no reason
         if (bestFit - maxOf(fit.typed, SENTENCE_TYPED_FLOOR) < SENTENCE_REPLACE_MARGIN || spelling < SENTENCE_REPLACE_SPELLING) return false
         promoteBest()
+        return true
+    }
+
+    /**
+     * Caret: what the person has taught the keyboard about [typedWord] goes before everything else
+     * (see [PersonalCorrections]): a word they keep taking back is left as typed, and a fix they keep
+     * making is made for them, with the word they mean at the front of [suggestions].
+     */
+    private fun correctByHabit(
+        otherwise: Boolean, typedWord: String, suggestions: ArrayList<SuggestedWordInfo>, capsMode: CapsMode, enabled: Boolean,
+    ): Boolean {
+        if (!enabled || typedWord.isEmpty() || !Settings.values.usePersonalizedDicts) return otherwise
+        val meant = PersonalCorrections.meantBy(typedWord) ?: return otherwise
+        if (meant == typedWord) return false
+        val word = capitalize(meant, capsMode, dictionaryFacilitator.getMainLocale())
+        val known = suggestions.firstOrNull { it.word == word }
+        if (known != null) suggestions.remove(known)
+        suggestions.add(0, known ?: SuggestedWordInfo(word, "", SuggestedWordInfo.MAX_SCORE, SuggestedWordInfo.KIND_WHITELIST,
+            Dictionary.DICTIONARY_USER_TYPED, SuggestedWordInfo.NOT_AN_INDEX, SuggestedWordInfo.NOT_A_CONFIDENCE))
         return true
     }
 

@@ -126,7 +126,7 @@ is visible to the user. Things that need the user's eyes or a decision are colle
 | 10b | Gboard defaults (edge margin, ?123 pill, vibration on) and nine more color themes of our own (FUTO's cannot be copied: its license is not GPL-compatible) | done (0.1.20) |
 | 11 | Typing fine-tune on simulated taps (when the base model is done), then in Caret, benchmarked against Gboard | |
 | 12 | Touch calibration from recorded corrections | |
-| 13 | Personal corrections (remember fixes, stop correcting restored words) | |
+| 13 | Personal corrections (remember fixes, stop correcting restored words) | done (0.1.21): a fix made twice is applied from then on, a word taken back twice is left alone, taking a learned fix back unlearns it (`PersonalCorrections`) |
 | 14 | Own GPL swipe models on FUTO's MIT dataset | |
 | 15 | Gboard spec: first-run setup, motion | |
 | 16 | 1.0: translations, TalkBack, tablets, public repo, F-Droid | |

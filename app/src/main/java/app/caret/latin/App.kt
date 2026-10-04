@@ -47,6 +47,7 @@ class App : Application() {
         transferOldPinnedClips(this) // todo: remove in a few months, maybe end 2026
         app = this
         TypingModel.init(this)
+        PersonalCorrections.init(this)
         FutoSwipe.init(this) // after app is set, because this loads JniUtils, which reads app once
         Defaults.initDynamicDefaults(this)
     }

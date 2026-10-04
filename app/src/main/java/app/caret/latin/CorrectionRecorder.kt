@@ -36,6 +36,8 @@ object CorrectionRecorder {
     private class Typed(
         val start: Int, val typed: String, val out: String, val before: List<String>,
         val x: IntArray, val y: IntArray, val time: Long,
+        /** An autocorrection taken back: a wish to keep the word as typed, unless it is typed anew right after. */
+        var keptAsTyped: Boolean = false,
     )
 
     private val recent = ArrayDeque<Typed>()
@@ -64,8 +66,14 @@ object CorrectionRecorder {
             pointers.xCoordinates.copyOf(size), pointers.yCoordinates.copyOf(size), System.currentTimeMillis())
         // the same place as a word a moment ago, but another word: that one was deleted and retyped
         val replaced = recent.firstOrNull { it.start == start && start >= 0 && entry.time - it.time < RETYPE_WINDOW_MILLIS }
+        // the words taken back from autocorrect before this one stayed: those were meant as typed
+        recent.filter { it.keptAsTyped && it !== replaced }.forEach {
+            it.keptAsTyped = false
+            PersonalCorrections.learn(context, it.typed, it.typed)
+        }
         if (replaced != null) {
             recent.remove(replaced)
+            if (replaced.keptAsTyped && replaced.out.equals(out, ignoreCase = true)) PersonalCorrections.learn(context, replaced.typed, replaced.typed)
             // a fix looks like what it fixes; a different word in the same spot is new text, as after clearing the field
             if (!replaced.out.equals(out, ignoreCase = true) && looksLike(replaced.typed, out))
                 write(context, keyboard, "retyped", replaced, replaced.out, out)
@@ -84,10 +92,14 @@ object CorrectionRecorder {
         val size = pointers.pointerSize
         val entry = Typed(-1, typed, out, swipeContext(textBefore),
             pointers.xCoordinates.copyOf(size), pointers.yCoordinates.copyOf(size), System.currentTimeMillis())
+        // the word stands as typed now; when it is deleted and typed anew after all, that is a fix of it
+        val start = recent.lastOrNull { it.out == out }?.start ?: -1
         recent.removeAll { it.out == out }
+        if (start >= 0) recent.addLast(Typed(start, typed, typed, entry.before, entry.x, entry.y, entry.time, keptAsTyped = true))
         // the text before the cursor still ends in the corrected word here
         val before = if (entry.before.lastOrNull() == out) entry.before.dropLast(1) else entry.before
-        write(context, keyboard, "undone", Typed(entry.start, entry.typed, entry.out, before, entry.x, entry.y, entry.time), out, typed)
+        write(context, keyboard, "undone", Typed(entry.start, entry.typed, entry.out, before, entry.x, entry.y, entry.time), out, typed,
+            learn = start < 0)
     }
 
     /** Whether [b] could be what someone meant when typing [a]: at most about half the letters differ. */
@@ -110,7 +122,8 @@ object CorrectionRecorder {
     private fun swipeContext(textBefore: String?) =
         textBefore?.let { app.caret.latin.swipe.FutoSwipe.sentenceWords(it, CONTEXT_WORDS) } ?: emptyList()
 
-    private fun write(context: Context, keyboard: Keyboard?, kind: String, entry: Typed, cameOut: String, meant: String) {
+    private fun write(context: Context, keyboard: Keyboard?, kind: String, entry: Typed, cameOut: String, meant: String, learn: Boolean = true) {
+        if (learn) PersonalCorrections.learn(context, entry.typed, meant)
         val keys = keyboard?.let { SwipeLayout.fromKeyboard(it, 64) }
         val line = StringBuilder()
         if (keys != null && writtenKeys?.sameAs(keys) != true) {
@@ -161,6 +174,7 @@ object CorrectionRecorder {
     @Synchronized
     fun clear(context: Context) {
         file(context).delete()
+        PersonalCorrections.clear(context)
         recent.clear()
         writtenKeys = null
         words = 0

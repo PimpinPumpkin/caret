@@ -1103,11 +1103,11 @@ New dictionary:
     <string name="typing_model_remove_message">Remove the typing model? Corrections go back to the dictionary and the swipe models.</string>
     <string name="settings_category_learning">Learning from you</string>
     <string name="record_corrections">Learn from my corrections</string>
-    <string name="record_corrections_summary">Keeps the words you fix, on this phone only: where you tapped, the words before and what you meant. Used to measure and improve how the keyboard reads your typing. Never in password fields or incognito mode.</string>
+    <string name="record_corrections_summary">Keeps the words you fix, on this phone only: where you tapped, the words before and what you meant. A fix you make twice is made for you from then on, and a word you keep taking back from autocorrect is left alone. Never in password fields or incognito mode.</string>
     <string name="corrections_save">Save my corrections</string>
     <string name="corrections_save_summary">%d corrections so far. Saves them as a file to look at or send on.</string>
     <string name="corrections_delete">Delete my corrections</string>
-    <string name="corrections_delete_message">Delete all recorded corrections?</string>
+    <string name="corrections_delete_message">Delete all recorded corrections and what the keyboard learned from them?</string>
     <string name="swipe_recording_category">Finding swipe mistakes</string>
     <string name="swipe_recording">Record my swipes</string>
     <string name="swipe_recording_summary">Keeps each swipe, the words in front of it and what came out in a file on this phone, to find out why words come out wrong. Never in password fields or incognito mode.</string>
