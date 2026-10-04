@@ -82,6 +82,32 @@ class InlineDictationTest {
         assertEquals("That is all. Are you there? I think so I'm sure", typed.toString())
     }
 
+    @Test fun `delete takes the last phrase back whole, once`() {
+        dictation.toggle()
+        recognizer().triggerOnResults(results("I went to the store."))
+        now += 500
+        recognizer().triggerOnResults(results("And bought milk."))
+        assertEquals("I went to the store and bought milk", typed.toString())
+        val before = { n: Int -> typed.takeLast(n) }
+        assertEquals(" and bought milk".length, dictation.phraseToTakeBack(before))
+        typed.setLength(typed.length - " and bought milk".length)
+        assertEquals(0, dictation.phraseToTakeBack(before)) // the next press deletes a letter
+        // the sentence the held-back period belonged to is gone: what comes next starts anew
+        recognizer().triggerOnResults(results("Then home."))
+        assertEquals("I went to the store Then home", typed.toString())
+    }
+
+    @Test fun `delete is a delete key again after typing or moving`() {
+        dictation.toggle()
+        recognizer().triggerOnResults(results("Hello there."))
+        typed.append("x")
+        assertEquals(0, dictation.phraseToTakeBack { n -> typed.takeLast(n) })
+        typed.setLength(typed.length - 1)
+        recognizer().triggerOnResults(results("Again."))
+        dictation.forgetPhrase()
+        assertEquals(0, dictation.phraseToTakeBack { n -> typed.takeLast(n) })
+    }
+
     @Test fun `with the setting on every pause keeps its period`() {
         pausePeriods = true
         dictation.toggle()

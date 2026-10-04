@@ -1492,6 +1492,18 @@ class LatinIME : InputMethodService(),
             if (!(settings.current.inlineDictation && inlineDictation.toggle()))
                 richImm.switchToShortcutIme(this)
         }
+        // Caret: right after dictating, delete takes the whole phrase back
+        if (KeyCode.DELETE == event.keyCode && !dictationComposing) {
+            val length = inlineDictation.phraseToTakeBack { inputLogic.connection.getTextBeforeCursor(it, 0) }
+            if (length > 0) {
+                handler.cancelResumeSuggestions()
+                inputLogic.connection.deleteTextBeforeCursor(length)
+                keyboardSwitcher.updateShiftState(getCurrentAutoCapsState(), getCurrentRecapitalizeState())
+                return
+            }
+        } else if (KeyCode.VOICE_INPUT != event.keyCode) {
+            inlineDictation.forgetPhrase()
+        }
         val completeInputTransaction =
                 inputLogic.onCodeInput(settings.current, event,
                         keyboardSwitcher.getKeyboardCapsMode(),

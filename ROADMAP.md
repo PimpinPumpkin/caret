@@ -117,7 +117,7 @@ is visible to the user. Things that need the user's eyes or a decision are colle
 | 2 | Gboard spec: all actions panel | done (0.1.13) |
 | 3 | Correction recorder | done (0.1.14) |
 | 4 | Settings backup that stays small | done (0.1.15) |
-| 5 | Dictation polish in Caret and Alyo: current word highlighted, no pause periods, smooth partial to final | done in Caret (0.1.16) and Alyo's recognizer; Alyo's own keyboard still puts a period at every pause |
+| 5 | Dictation polish in Caret and Alyo: current word highlighted, no pause periods, smooth partial to final | done in Caret (0.1.16), Alyo's recognizer and Alyo's own keyboard (2026-10-04); delete takes a dictated phrase back whole (0.1.23); not yet checked with real speech |
 | 6 | Gboard spec: long-press popups and key previews | done (0.1.17) |
 | 7 | Gboard spec: emoji panel | done (0.1.18, taller panel and section title in 0.1.22) |
 | 8 | Gboard spec: clipboard, one-handed, floating | done (0.1.18; floating keyboard as a proportional rounded card in 0.1.22; one-handed already matched) |

@@ -161,6 +161,28 @@ class InlineDictation(
         }
     }
 
+    /** What the last utterance put into the text, for taking it back whole. */
+    private var lastInserted: String? = null
+
+    /**
+     * For the delete key: how many characters before the cursor are the phrase that was just dictated,
+     * so one press takes the whole phrase back, as it put the whole phrase in. Zero when the text
+     * before the cursor ([textBefore], given a length) is no longer that phrase; asked once per phrase.
+     */
+    fun phraseToTakeBack(textBefore: (Int) -> CharSequence?): Int {
+        val phrase = lastInserted ?: return 0
+        lastInserted = null
+        if (textBefore(phrase.length)?.toString() != phrase) return 0
+        // the sentence that a held-back period belonged to is gone
+        owedPeriodSince = 0L
+        return phrase.length
+    }
+
+    /** Something else was typed: the delete key is a delete key again. */
+    fun forgetPhrase() {
+        lastInserted = null
+    }
+
     /** Finishes the current utterance and stops after it. */
     fun stop() {
         if (!isActive) return
@@ -228,7 +250,10 @@ class InlineDictation(
                 text = text.dropLast(1)
                 owedPeriodSince = clock()
             }
-            if (text.isNotEmpty()) host.insertText(before + text)
+            if (text.isNotEmpty()) {
+                host.insertText(before + text)
+                lastInserted = before + text
+            }
             else if (shown != null) host.showPartial("")
             if (stopAfterResult) {
                 end()
