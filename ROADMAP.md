@@ -17,15 +17,17 @@ as well as FUTO Keyboard, learns from the person using it, and is free software 
   false corrections), `scripts/swipe-benchmark.sh` (FUTO's swipe test set), the swipe recording and
   `scripts/swipe-replay.py` for real swipes, and `scripts/smoke.sh` on the emulator.
 
-## Where it stands (0.1.10)
+## Where it stands (0.1.14)
 
 - HeliBoard 4.1 underneath, all Kotlin, renamed to `app.caret`, signed releases.
 - Swipe: FUTO's swipe library and models; the letter-order bug that made it worse than FUTO is fixed.
-- Typing: autocorrect confidence raised and a sentence-level reranking with the swipe models'
-  context language model. Same engine as HeliBoard otherwise: 92% of sloppy taps right before,
-  about 97% now on the benchmark.
-- Look: Gboard-like keys and strip, language key, toolbar row above the suggestions, M3E settings.
+- Typing: 97.2% of sloppy taps right on the benchmark, against Gboard 97.8% and FUTO 93.2% on the
+  same taps; no correctly typed rare word changed by any of them.
+- Look: keyboard and strip measured to Gboard's; all actions panel with drag onto the toolbar;
+  toolbar row above the suggestions; M3E settings.
+- Learning: corrections are recorded on the phone (undone, picked, retyped).
 - Dictation: the microphone key streams speech through Alyo, with a chime and a pulsing circle.
+- Typing model: base model training on the Dell (run1, 1.5 billion tokens, about 3 days).
 
 ## 1. Look and feel: the Gboard spec
 
@@ -103,6 +105,36 @@ Import shows what will change before applying.
 - Public repository, F-Droid build, reproducible releases.
 - Translations of everything new, accessibility pass with TalkBack, tablets and foldables.
 - Crash-free on the smoke tests across a few emulator sizes.
+
+## Work queue
+
+Worked down in this order without waiting for a go-ahead; each item ships as its own release when it
+is visible to the user. Things that need the user's eyes or a decision are collected under "Asks".
+
+| # | Item | Status |
+| --- | --- | --- |
+| 1 | Gboard spec: keyboard and strip | done (0.1.12) |
+| 2 | Gboard spec: all actions panel | done (0.1.13) |
+| 3 | Correction recorder | done (0.1.14) |
+| 4 | Settings backup that stays small | next |
+| 5 | Dictation polish in Caret and Alyo: current word highlighted, no pause periods, smooth partial to final | |
+| 6 | Gboard spec: long-press popups and key previews | |
+| 7 | Gboard spec: emoji panel | |
+| 8 | Gboard spec: clipboard, one-handed, floating | |
+| 9 | Gboard spec: settings layout (reorder, Advanced per category, nothing removed) | |
+| 10 | Typing model runtime in Caret (llama.cpp), tested on a small stand-in model | |
+| 11 | Typing fine-tune on simulated taps (when the base model is done), then in Caret, benchmarked against Gboard | |
+| 12 | Touch calibration from recorded corrections | |
+| 13 | Personal corrections (remember fixes, stop correcting restored words) | |
+| 14 | Own GPL swipe models on FUTO's MIT dataset | |
+| 15 | Gboard spec: first-run setup, motion | |
+| 16 | 1.0: translations, TalkBack, tablets, public repo, F-Droid | |
+
+### Asks
+
+- Signal swipe-home fix (0.1.11) and the new look (0.1.12 to 0.1.14): try on the phone and say what
+  feels off.
+- Supertonic 3 vs Piper hfc for Alyo and Vela: Supertonic is archived; compare only if wanted.
 
 ## Order
 
