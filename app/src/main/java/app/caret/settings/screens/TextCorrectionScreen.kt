@@ -81,6 +81,7 @@ fun TextCorrectionScreen(
         SettingsWithoutKey.CORRECTIONS_DELETE,
         SettingsFold,
         R.string.settings_category_correction,
+        SettingsWithoutKey.TYPING_MODEL,
         if (autocorrectEnabled) Settings.PREF_MORE_AUTO_CORRECTION else null,
         if (autocorrectEnabled) Settings.PREF_AUTOCORRECT_SHORTCUTS else null,
         if (autocorrectEnabled) Settings.PREF_AUTOCORRECT_CAPITALIZED_SUGGESTION else null,
@@ -148,6 +149,9 @@ fun createCorrectionSettings(context: Context) = listOf(
     },
     Setting(context, Settings.PREF_RECORD_CORRECTIONS, R.string.record_corrections, R.string.record_corrections_summary) {
         SwitchPreference(it, Defaults.PREF_RECORD_CORRECTIONS)
+    },
+    Setting(context, SettingsWithoutKey.TYPING_MODEL, R.string.typing_model, R.string.typing_model_summary) {
+        app.caret.settings.preferences.TypingModelPreference(it)
     },
     Setting(context, SettingsWithoutKey.CORRECTIONS_SAVE, R.string.corrections_save) {
         RecordingSavePreference(it, { ctx -> app.caret.latin.CorrectionRecorder.file(ctx) },

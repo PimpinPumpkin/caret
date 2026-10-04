@@ -122,7 +122,7 @@ is visible to the user. Things that need the user's eyes or a decision are colle
 | 7 | Gboard spec: emoji panel | category circle done (0.1.18); taller panel and section titles left |
 | 8 | Gboard spec: clipboard, one-handed, floating | clipboard empty state done (0.1.18); one-handed and floating not compared yet |
 | 9 | Gboard spec: settings layout (reorder, Advanced per category, nothing removed) | done (0.1.19) |
-| 10 | Typing model runtime in Caret (llama.cpp), tested on a small stand-in model | next; the checkpoint converts to GGUF (29.6 MB at 6 bits) and runs in llama.cpp (training/export.sh) |
+| 10 | Typing model runtime in Caret (llama.cpp), tested on a small stand-in model | done: `lm/native` + `TypingModel`, a GGUF file imported under Text correction > Advanced ranks corrections and next words. With an early checkpoint (4% of training): 97.1% against 96.8% with the swipe context model, no clean rare word changed. About 30 ms per keystroke on the emulator, in the background; to measure on a phone and to speed up (quantization, ARM dot product) |
 | 11 | Typing fine-tune on simulated taps (when the base model is done), then in Caret, benchmarked against Gboard | |
 | 12 | Touch calibration from recorded corrections | |
 | 13 | Personal corrections (remember fixes, stop correcting restored words) | |

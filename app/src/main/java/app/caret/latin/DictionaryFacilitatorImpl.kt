@@ -13,6 +13,7 @@ import app.caret.keyboard.Keyboard
 import app.caret.keyboard.emoji.SupportedEmojis
 import app.caret.latin.DictionaryFacilitator.DictionaryInitializationListener
 import app.caret.latin.NgramContext.WordInfo
+import app.caret.latin.lm.TypingModel
 import app.caret.latin.swipe.FutoSwipe
 import app.caret.latin.SuggestedWords.SuggestedWordInfo
 import app.caret.latin.common.ComposedData
@@ -533,7 +534,10 @@ class DictionaryFacilitatorImpl : DictionaryFacilitator {
      */
     private fun withLanguageModelPredictions(results: SuggestionResults, ngramContext: NgramContext): SuggestionResults {
         val group = dictionaryGroups[0]
-        val modelWords = FutoSwipe.predictNext(ngramContext, group.locale, LM_PREDICTIONS) ?: return results
+        val typingModel = if (group.locale.language == "en" && !ngramContext.isBeginningOfSentenceContext
+                && !FutoSwipe.textBeforeWord.isNullOrBlank())
+            TypingModel.predictNext(FutoSwipe.textBeforeWord, LM_PREDICTIONS) else null
+        val modelWords = typingModel ?: FutoSwipe.predictNext(ngramContext, group.locale, LM_PREDICTIONS) ?: return results
         if (modelWords.isEmpty()) return results
         val sourceDict = group.getDict(Dictionary.TYPE_MAIN) ?: Dictionary.DICTIONARY_USER_TYPED
         val ordered = orderPredictions(results.toList(), modelWords.filterNot { isBlacklisted(it) }, group.locale, sourceDict)

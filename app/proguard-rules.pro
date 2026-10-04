@@ -19,3 +19,4 @@
 # optional classes that androidx.window looks up at runtime
 -dontwarn androidx.window.extensions.**
 -dontwarn androidx.window.sidecar.**
+-keep class app.caret.latin.lm.TypingModel { *; }

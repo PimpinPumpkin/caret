@@ -21,6 +21,7 @@ import app.caret.latin.dictionary.Dictionary
 import app.caret.latin.settings.Settings
 import app.caret.latin.settings.SettingsValuesForSuggestion
 import app.caret.latin.suggestions.SuggestionStripView
+import app.caret.latin.lm.TypingModel
 import app.caret.latin.swipe.FutoSwipe
 import app.caret.latin.swipe.SwipeRecorder
 import app.caret.latin.utils.AutoCorrectionUtils
@@ -167,7 +168,7 @@ class Suggest(private val dictionaryFacilitator: DictionaryFacilitator) {
 
     /**
      * Caret: scores the first suggestions by how well they fit the sentence so far, with the
-     * context language model that comes with the swipe models. The dictionary ranks by spelling
+     * typing model, or the context language model that comes with the swipe models. The dictionary ranks by spelling
      * and frequency alone, so "if" and "of" or "go" and "to" look alike to it. The typed word in
      * other capitals counts as the typed word, not as a correction.
      */
@@ -176,7 +177,11 @@ class Suggest(private val dictionaryFacilitator: DictionaryFacilitator) {
             info.word.all { it.isLetter() || it == '\'' } && !info.word.equals(typedWord, ignoreCase = true)
         }
         if (head.isEmpty()) return null
-        val lm = FutoSwipe.scoreWords(ngramContext, dictionaryFacilitator.getMainLocale(), listOf(typedWord) + head.map { it.word })
+        val words = listOf(typedWord) + head.map { it.word }
+        val locale = dictionaryFacilitator.getMainLocale()
+        // the typing model reads the whole line; without one, the smaller model of the swipe models
+        val lm = (if (locale.language == "en") TypingModel.scoreWords(FutoSwipe.textBeforeWord, words) else null)
+            ?: FutoSwipe.scoreWords(ngramContext, locale, words)
             ?: return null
         val scores = head.withIndex().associate { (i, info) -> info to lm[i + 1] }
         val weight = SENTENCE_WEIGHT
@@ -216,7 +221,8 @@ class Suggest(private val dictionaryFacilitator: DictionaryFacilitator) {
             || (wordComposer.isMostlyCaps && !wordComposer.isAllUpperCase()) || !isAllowedByAutoCorrectionWithSpaceFilter(best))
             return false
         val spelling = BinaryDictionaryUtils.calcNormalizedScore(typedWord, best.word, best.score)
-        if (bestFit - fit.typed < SENTENCE_REPLACE_MARGIN || spelling < SENTENCE_REPLACE_SPELLING) return false
+        // a rare word reads as unlikely whatever the sentence ("hooted" against "hosted"): that alone is no reason
+        if (bestFit - maxOf(fit.typed, SENTENCE_TYPED_FLOOR) < SENTENCE_REPLACE_MARGIN || spelling < SENTENCE_REPLACE_SPELLING) return false
         promoteBest()
         return true
     }
@@ -448,6 +454,7 @@ class Suggest(private val dictionaryFacilitator: DictionaryFacilitator) {
         /** ...and how close it has to be to what was typed. */
         private val SENTENCE_REPLACE_SPELLING get() = tuning("sentence_replace_spelling", 0.15f)
         /** How much better a typed word has to fit the sentence to be kept although a correction is ready. */
+        private val SENTENCE_TYPED_FLOOR get() = tuning("sentence_typed_floor", -15f)
         private val SENTENCE_KEEP_MARGIN get() = tuning("sentence_keep_margin", 4f)
 
         // Debug builds read these from tuning.properties in the app's external files folder, to tune

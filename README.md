@@ -47,6 +47,10 @@ release build as `app.caret.debug`.
 - `scripts/smoke.sh` types and swipes on an emulator and checks the result.
 - `scripts/build-swipe.sh` builds the swipe library, `scripts/swipe-models.sh` fetches the models,
   `scripts/swipe-benchmark.sh` measures swipe accuracy.
+- `scripts/build-lm.sh` builds the typing model library (`lm/native`, on llama.cpp) into the app;
+  `training/` holds the code that trains the model and `training/export.sh` writes the GGUF file
+  the settings import (Text correction, Advanced, Typing model).
+- `scripts/typing-benchmark.py` measures how sloppy taps come out.
 
 [FORK_PLAN.md](FORK_PLAN.md) holds the plan and status. [docs/UPSTREAM.md](docs/UPSTREAM.md)
 records which HeliBoard pull requests and issues were taken, and why others were not.
@@ -74,12 +78,16 @@ Some artwork inherited from HeliBoard is under
 The swipe library is GPL-3.0-or-later. Its models are under the FUTO Model Weights License and
 are not part of this repository or the app package.
 
+The typing model library is GPL-3.0 and runs the model with
+[llama.cpp](https://github.com/ggml-org/llama.cpp), which is under the MIT license.
+
 ## Credits
 
 - [HeliBoard](https://github.com/HeliBorg/HeliBoard) and its contributors
 - [OpenBoard](https://github.com/openboard-team/openboard)
 - [AOSP Keyboard](https://android.googlesource.com/platform/packages/inputmethods/LatinIME/)
 - [FUTO](https://futo.org) for the swipe library and models
+- [llama.cpp](https://github.com/ggml-org/llama.cpp)
 - [LineageOS](https://review.lineageos.org/admin/repos/LineageOS/android_packages_inputmethods_LatinIME),
   [Simple Keyboard](https://github.com/rkkr/simple-keyboard),
   [Indic Keyboard](https://gitlab.com/indicproject/indic-keyboard) and

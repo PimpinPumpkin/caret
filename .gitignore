@@ -21,3 +21,6 @@ app/src/main/jniLibs/
 swipe/library/
 swipe/models/
 swipe/data/
+lm/llama.cpp/
+lm/models/
+lm/build/

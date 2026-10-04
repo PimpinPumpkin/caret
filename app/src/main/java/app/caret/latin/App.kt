@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: Apache-2.0 AND GPL-3.0-only
 package app.caret.latin
 
+import app.caret.latin.lm.TypingModel
 import app.caret.latin.swipe.FutoSwipe
 import android.app.Application
 import android.os.Build
@@ -45,6 +46,7 @@ class App : Application() {
             upgradeToolbarPrefs(prefs())
         transferOldPinnedClips(this) // todo: remove in a few months, maybe end 2026
         app = this
+        TypingModel.init(this)
         FutoSwipe.init(this) // after app is set, because this loads JniUtils, which reads app once
         Defaults.initDynamicDefaults(this)
     }
