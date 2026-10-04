@@ -65,6 +65,16 @@ private constructor(val themeId: Int, @JvmField val styleId: Int) {
         const val THEME_PINK = "pink"
         const val THEME_SAND = "sand"
         const val THEME_VIOLETTE = "violette"
+        // Caret: more palettes of its own (Mocha is the Catppuccin Mocha palette, MIT)
+        const val THEME_MOCHA = "mocha"
+        const val THEME_EMERALD = "emerald"
+        const val THEME_DEEP_SEA = "deep_sea"
+        const val THEME_STEEL = "steel"
+        const val THEME_MIDNIGHT = "midnight"
+        const val THEME_HIGH_CONTRAST = "high_contrast"
+        const val THEME_SUNFLOWER = "sunflower"
+        const val THEME_COTTON_CANDY = "cotton_candy"
+        const val THEME_SNOW = "snow"
         fun getAvailableDefaultColors(prefs: SharedPreferences, isNight: Boolean) = listOfNotNull(
             if (!isNight) THEME_LIGHT else null, THEME_DARK,
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) THEME_DYNAMIC else null,
@@ -80,7 +90,16 @@ private constructor(val themeId: Int, @JvmField val styleId: Int) {
             if (!isNight) THEME_PINK else null,
             THEME_OCEAN,
             if (!isNight) THEME_SAND else null,
-            THEME_VIOLETTE
+            THEME_VIOLETTE,
+            THEME_MOCHA,
+            THEME_EMERALD,
+            THEME_DEEP_SEA,
+            THEME_STEEL,
+            THEME_MIDNIGHT,
+            THEME_HIGH_CONTRAST,
+            if (!isNight) THEME_SUNFLOWER else null,
+            if (!isNight) THEME_COTTON_CANDY else null,
+            if (!isNight) THEME_SNOW else null,
         )
         val STYLES = arrayOf(STYLE_MATERIAL, STYLE_HOLO, STYLE_ROUNDED)
 
@@ -340,6 +359,114 @@ private constructor(val themeId: Int, @JvmField val styleId: Int) {
                     Color.rgb(150, 150, 216),
                     Color.WHITE,
                     Color.WHITE,
+                    keyboardBackground = backgroundImage
+                )
+                THEME_MOCHA -> DefaultColors(
+                    themeStyle,
+                    hasBorders,
+                    "#cba6f7".toColorInt(),
+                    "#1e1e2e".toColorInt(),
+                    "#313244".toColorInt(),
+                    "#45475a".toColorInt(),
+                    "#313244".toColorInt(),
+                    "#cdd6f4".toColorInt(),
+                    "#a6adc8".toColorInt(),
+                    keyboardBackground = backgroundImage
+                )
+                THEME_EMERALD -> DefaultColors(
+                    themeStyle,
+                    hasBorders,
+                    "#34d399".toColorInt(),
+                    "#0b2a22".toColorInt(),
+                    "#164236".toColorInt(),
+                    "#0f352b".toColorInt(),
+                    "#164236".toColorInt(),
+                    "#e6f4ee".toColorInt(),
+                    "#9cc7b6".toColorInt(),
+                    keyboardBackground = backgroundImage
+                )
+                THEME_DEEP_SEA -> DefaultColors(
+                    themeStyle,
+                    hasBorders,
+                    "#4dd0e1".toColorInt(),
+                    "#0a1c2e".toColorInt(),
+                    "#15324d".toColorInt(),
+                    "#0f2740".toColorInt(),
+                    "#15324d".toColorInt(),
+                    "#e3f0fa".toColorInt(),
+                    "#8fb2cc".toColorInt(),
+                    keyboardBackground = backgroundImage
+                )
+                THEME_STEEL -> DefaultColors(
+                    themeStyle,
+                    hasBorders,
+                    "#90a4ae".toColorInt(),
+                    "#2b2f33".toColorInt(),
+                    "#41474d".toColorInt(),
+                    "#363b40".toColorInt(),
+                    "#41474d".toColorInt(),
+                    "#eceff1".toColorInt(),
+                    "#b0bec5".toColorInt(),
+                    keyboardBackground = backgroundImage
+                )
+                THEME_MIDNIGHT -> DefaultColors(
+                    themeStyle,
+                    hasBorders,
+                    "#b388ff".toColorInt(),
+                    "#000000".toColorInt(),
+                    "#1a1326".toColorInt(),
+                    "#120d1a".toColorInt(),
+                    "#1a1326".toColorInt(),
+                    "#ede7f6".toColorInt(),
+                    "#9e8fb5".toColorInt(),
+                    keyboardBackground = backgroundImage
+                )
+                THEME_HIGH_CONTRAST -> DefaultColors(
+                    themeStyle,
+                    hasBorders,
+                    "#ffea00".toColorInt(),
+                    "#000000".toColorInt(),
+                    "#1c1c1c".toColorInt(),
+                    "#333300".toColorInt(),
+                    "#1c1c1c".toColorInt(),
+                    "#ffea00".toColorInt(),
+                    "#ffea00".toColorInt(),
+                    keyboardBackground = backgroundImage
+                )
+                THEME_SUNFLOWER -> DefaultColors(
+                    themeStyle,
+                    hasBorders,
+                    "#f59e0b".toColorInt(),
+                    "#fff3c4".toColorInt(),
+                    "#fffdf2".toColorInt(),
+                    "#ffe08a".toColorInt(),
+                    "#fffdf2".toColorInt(),
+                    "#3b2f00".toColorInt(),
+                    "#7a6a2e".toColorInt(),
+                    keyboardBackground = backgroundImage
+                )
+                THEME_COTTON_CANDY -> DefaultColors(
+                    themeStyle,
+                    hasBorders,
+                    "#ff7eb6".toColorInt(),
+                    "#e3f0ff".toColorInt(),
+                    "#ffffff".toColorInt(),
+                    "#ffd6ea".toColorInt(),
+                    "#ffffff".toColorInt(),
+                    "#3a3350".toColorInt(),
+                    "#7b7594".toColorInt(),
+                    keyboardBackground = backgroundImage
+                )
+                THEME_SNOW -> DefaultColors(
+                    themeStyle,
+                    hasBorders,
+                    "#4a90d9".toColorInt(),
+                    "#eef3f8".toColorInt(),
+                    "#ffffff".toColorInt(),
+                    "#d9e3ee".toColorInt(),
+                    "#ffffff".toColorInt(),
+                    "#1f2933".toColorInt(),
+                    "#6b7c8f".toColorInt(),
                     keyboardBackground = backgroundImage
                 )
                 else -> { // user-defined theme

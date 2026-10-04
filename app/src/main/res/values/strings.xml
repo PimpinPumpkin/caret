@@ -804,6 +804,15 @@ New dictionary:
     <string name="theme_name_sand" tools:keep="@string/theme_name_sand">Sand</string>
     <!-- Theme name for violette theme -->
     <string name="theme_name_violette" tools:keep="@string/theme_name_violette">Violette</string>
+    <string name="theme_name_mocha" tools:keep="@string/theme_name_mocha">Mocha</string>
+    <string name="theme_name_emerald" tools:keep="@string/theme_name_emerald">Emerald</string>
+    <string name="theme_name_deep_sea" tools:keep="@string/theme_name_deep_sea">Deep Sea</string>
+    <string name="theme_name_steel" tools:keep="@string/theme_name_steel">Steel</string>
+    <string name="theme_name_midnight" tools:keep="@string/theme_name_midnight">Midnight</string>
+    <string name="theme_name_high_contrast" tools:keep="@string/theme_name_high_contrast">High Contrast</string>
+    <string name="theme_name_sunflower" tools:keep="@string/theme_name_sunflower">Sunflower</string>
+    <string name="theme_name_cotton_candy" tools:keep="@string/theme_name_cotton_candy">Cotton Candy</string>
+    <string name="theme_name_snow" tools:keep="@string/theme_name_snow">Snow</string>
     <!-- Theme name for user-defined theme -->
     <string name="theme_name_user" tools:keep="@string/theme_name_user">User-Defined</string>
     <!-- Theme name for user-defined theme night mode theme -->

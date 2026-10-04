@@ -228,12 +228,14 @@ open class KeyboardParams {
             bottomPadding = (keyboardAttr.getFraction(
                     R.styleable.Keyboard_keyboardBottomPadding, height, height, 0f)
                     * sv.bottomPaddingScale).toInt()
+            // Caret: the keys stop a little short of the screen edge, as on Gboard
+            val edgeMargin = if (attr == null) (EDGE_MARGIN_DP * context.resources.displayMetrics.density).toInt() else 0
             leftPadding = (keyboardAttr.getFraction(
                     R.styleable.Keyboard_keyboardLeftPadding, width, width, 0f)
-                    * sv.sidePaddingScale).toInt()
+                    * sv.sidePaddingScale).toInt() + edgeMargin
             rightPadding = (keyboardAttr.getFraction(
                     R.styleable.Keyboard_keyboardRightPadding, width, width, 0f)
-                    * sv.sidePaddingScale).toInt()
+                    * sv.sidePaddingScale).toInt() + edgeMargin
 
             baseWidth = occupiedWidth - leftPadding - rightPadding
             val defaultKeyWidthFactor = if (context.getResources().getInteger(R.integer.config_screen_metrics) > 2) 0.9f else 1f
@@ -284,6 +286,7 @@ open class KeyboardParams {
 
     companion object {
         private const val DEFAULT_KEYBOARD_COLUMNS = 10
+        private const val EDGE_MARGIN_DP = 2
         const val DEFAULT_KEYBOARD_ROWS = 4
 
         // Comparator to sort {@link Key}s from top-left to bottom-right order.

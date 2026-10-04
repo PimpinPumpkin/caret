@@ -727,6 +727,9 @@ open class Key : Comparable<Key> {
         return background
     }
 
+    /** The drawable state of a key of [type] that is pressed or not as this key is. */
+    fun backgroundState(type: Int): IntArray = KeyBackgroundState.STATES[type].getState(pressed || locked)
+
     fun hasActionKeyPopups(): Boolean {
         if (!hasActionKeyBackground()) return false
         // only use the special action key popups for action colored keys, and only for icon popups

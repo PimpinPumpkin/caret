@@ -53,6 +53,17 @@ open class KeyboardView @JvmOverloads constructor(context: Context, attrs: Attri
     private val keyBackground: Drawable
     private val functionalKeyBackground: Drawable
     private val actionKeyBackground: Drawable
+    // Caret: the key that switches between letters and symbols is a pill in the function key color, as on Gboard
+    private val layerKeyBackground: Drawable
+
+    private fun backgroundOf(key: Key): Drawable {
+        if ((key.code == KeyCode.SYMBOL_ALPHA || key.code == KeyCode.ALPHA) && key.hasFunctionalBackground()) {
+            // the action key state is the one the styles draw as a pill
+            layerKeyBackground.setState(key.backgroundState(Key.BACKGROUND_TYPE_ACTION))
+            return layerKeyBackground
+        }
+        return key.selectBackgroundDrawable(keyBackground, functionalKeyBackground, spacebarBackground, actionKeyBackground)
+    }
     private val spacebarBackground: Drawable
     private val spacebarIconWidthRatio: Float
     private val keyBackgroundPadding = Rect()
@@ -104,6 +115,8 @@ open class KeyboardView @JvmOverloads constructor(context: Context, attrs: Attri
         keyBackground.getPadding(keyBackgroundPadding)
         functionalKeyBackground = colors.selectAndColorDrawable(keyboardViewAttr, ColorType.FUNCTIONAL_KEY_BACKGROUND)
         spacebarBackground = colors.selectAndColorDrawable(keyboardViewAttr, ColorType.SPACE_BAR_BACKGROUND)
+        layerKeyBackground = keyboardViewAttr.getDrawable(R.styleable.KeyboardView_keyBackground)!!.mutate()
+        colors.setColor(layerKeyBackground, ColorType.FUNCTIONAL_KEY_BACKGROUND)
         if (this is PopupKeysKeyboardView)
             actionKeyBackground = colors.selectAndColorDrawable(keyboardViewAttr, ColorType.ACTION_KEY_POPUP_KEYS_BACKGROUND)
         else
@@ -295,8 +308,7 @@ open class KeyboardView @JvmOverloads constructor(context: Context, attrs: Attri
         params.animAlpha = Constants.Color.ALPHA_OPAQUE
 
         if (!key.isSpacer) {
-            val background = key.selectBackgroundDrawable(
-                    keyBackground, functionalKeyBackground, spacebarBackground, actionKeyBackground)
+            val background = backgroundOf(key)
             onDrawKeyBackground(key, canvas, background)
         }
         onDrawKeyTopVisuals(key, canvas, paint, params)
@@ -372,7 +384,7 @@ open class KeyboardView @JvmOverloads constructor(context: Context, attrs: Attri
                 val width: Int
                 if (key.needsToKeepBackgroundAspectRatio(defaultKeyLabelFlags)) {
                     // make sure the text stays inside bounds of background drawable
-                    val bg = key.selectBackgroundDrawable(keyBackground, functionalKeyBackground, spacebarBackground, actionKeyBackground)
+                    val bg = backgroundOf(key)
                     width = Math.min(bg.getBounds().bottom, bg.getBounds().right)
                 } else width = keyWidth
                 val ratio = Math.min(1.0f, (width * MAX_LABEL_RATIO) / TypefaceUtils.getStringWidth(label, paint))

@@ -36,7 +36,10 @@ press away); the enter key a tonal pill in the function key color instead of the
 delete and enter a dark tint of the secondary color at night; letter keys a little lighter at night;
 the emoji key colored like a letter key.
 
-Still open: the 2 dp side margin, ?123 as a full pill, label sizes.
+Done in 0.1.20: the 2 dp margin at the screen edges, ?123 and ABC as pills, vibration on key press
+on by default as on Gboard.
+
+Still open: label sizes.
 
 ## 2. Toolbar (features panel)
 
