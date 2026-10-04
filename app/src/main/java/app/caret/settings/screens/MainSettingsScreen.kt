@@ -43,6 +43,8 @@ fun MainSettingsScreen(
     onClickPreferences: () -> Unit,
     onClickToolbar: () -> Unit,
     onClickGestureTyping: () -> Unit,
+    onClickVoiceTyping: () -> Unit,
+    onClickClipboard: () -> Unit,
     onClickDataGathering: () -> Unit,
     onClickAdvanced: () -> Unit,
     onClickAppearance: () -> Unit,
@@ -69,21 +71,26 @@ fun MainSettingsScreen(
                 fun Entry(name: Int, icon: Int, description: String? = null, onClick: () -> Unit) =
                     Preference(name = stringResource(name), description = description, onClick = onClick, icon = icon) { NextScreenIcon() }
                 Spacer(Modifier.height(8.dp))
+                // Caret: in the order of use, as Gboard has it; nothing is gone, two pages are new
                 PreferenceGroup(
                     { Entry(R.string.language_and_layouts_title, R.drawable.ic_settings_languages,
                         enabledSubtypes.joinToString(", ") { it.displayName() }, onClickLanguage) },
                     { Entry(R.string.settings_screen_secondary_layouts, R.drawable.ic_settings_layout, onClick = onClickLayouts) },
-                    { Entry(R.string.dictionary_settings_category, R.drawable.ic_dictionary, onClick = onClickDictionaries) },
                 )
                 PreferenceGroup(
-                    { Entry(R.string.settings_screen_appearance, R.drawable.ic_settings_appearance, onClick = onClickAppearance) },
-                    { Entry(R.string.settings_screen_toolbar, R.drawable.ic_settings_toolbar, onClick = onClickToolbar) },
                     { Entry(R.string.settings_screen_preferences, R.drawable.ic_settings_preferences, onClick = onClickPreferences) },
+                    { Entry(R.string.settings_screen_appearance, R.drawable.ic_settings_appearance, onClick = onClickAppearance) },
                 )
                 PreferenceGroup(
                     { Entry(R.string.settings_screen_correction, R.drawable.ic_settings_correction, onClick = onClickTextCorrection) },
                     if (showGesture) { { Entry(R.string.settings_screen_gesture, R.drawable.ic_settings_gesture, onClick = onClickGestureTyping) } } else null,
+                    { Entry(R.string.settings_screen_voice, R.drawable.sym_keyboard_voice_rounded, onClick = onClickVoiceTyping) },
                     if (showDataGathering) { { Entry(R.string.gesture_data_screen, R.drawable.ic_settings_gesture, onClick = onClickDataGathering) } } else null,
+                )
+                PreferenceGroup(
+                    { Entry(R.string.settings_screen_clipboard, R.drawable.sym_keyboard_clipboard_rounded, onClick = onClickClipboard) },
+                    { Entry(R.string.settings_screen_toolbar, R.drawable.ic_settings_toolbar, onClick = onClickToolbar) },
+                    { Entry(R.string.dictionary_settings_category, R.drawable.ic_dictionary, onClick = onClickDictionaries) },
                 )
                 PreferenceGroup(
                     { Entry(R.string.settings_screen_advanced, R.drawable.ic_settings_advanced, onClick = onClickAdvanced) },
@@ -100,7 +107,7 @@ private fun PreviewScreen() {
     initPreview(LocalContext.current)
     Theme(previewDark) {
         Surface {
-            MainSettingsScreen({}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {})
+            MainSettingsScreen({}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {})
         }
     }
 }

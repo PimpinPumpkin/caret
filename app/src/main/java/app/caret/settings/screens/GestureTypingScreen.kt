@@ -25,6 +25,7 @@ import app.caret.settings.preferences.SwipePracticePreference
 import app.caret.settings.preferences.SwipeRecordingDeletePreference
 import app.caret.settings.preferences.SwipeRecordingSavePreference
 import app.caret.settings.SearchSettingsScreen
+import app.caret.settings.SettingsFold
 import app.caret.settings.SettingsActivity
 import app.caret.settings.preferences.SliderPreference
 import app.caret.settings.preferences.SwitchPreference
@@ -45,31 +46,27 @@ fun GestureTypingScreen(
     val gestureEnabled = prefs.getBoolean(Settings.PREF_GESTURE_INPUT, Defaults.PREF_GESTURE_INPUT)
     val ctx = LocalContext.current
     val haveGestures = JniUtils.haveGestureLib
+    val swipe = FutoSwipe.isActive(ctx)
     val items = listOf(
         if (FutoSwipe.hasLibrary()) SettingsWithoutKey.SWIPE_MODELS else null,
         if (FutoSwipe.isInstalled(ctx) && FutoSwipe.hasOtherLibrary) FutoSwipe.PREF_ENABLED else null,
-    ) + (if (!haveGestures) emptyList() else listOf(
-        Settings.PREF_GESTURE_INPUT,
-        if (gestureEnabled)
-            Settings.PREF_GESTURE_PREVIEW_TRAIL else null,
-        if (gestureEnabled)
-            Settings.PREF_GESTURE_FLOATING_PREVIEW_TEXT else null,
-        if (gestureEnabled && gestureFloatingPreviewEnabled)
+        if (haveGestures) Settings.PREF_GESTURE_INPUT else null,
+        if (haveGestures && gestureEnabled) Settings.PREF_GESTURE_PREVIEW_TRAIL else null,
+        if (haveGestures && gestureEnabled) Settings.PREF_GESTURE_FLOATING_PREVIEW_TEXT else null,
+        if (swipe) R.string.swipe_recording_category else null,
+        if (swipe) SwipeRecorder.PREF_ENABLED else null,
+        if (swipe) SettingsWithoutKey.SWIPE_PRACTICE else null,
+        if (swipe) SettingsWithoutKey.SWIPE_RECORDING_SAVE else null,
+        if (swipe) SettingsWithoutKey.SWIPE_RECORDING_DELETE else null,
+        if (haveGestures && gestureEnabled) SettingsFold else null,
+        if (haveGestures && gestureEnabled && gestureFloatingPreviewEnabled)
             Settings.PREF_GESTURE_FLOATING_PREVIEW_DYNAMIC else null,
-        if (gestureEnabled)
-            Settings.PREF_GESTURE_SPACE_AWARE else null,
-        if (gestureEnabled)
-            Settings.PREF_GESTURE_FAST_TYPING_COOLDOWN else null,
-        if (gestureEnabled &&
+        if (haveGestures && gestureEnabled) Settings.PREF_GESTURE_SPACE_AWARE else null,
+        if (haveGestures && gestureEnabled) Settings.PREF_GESTURE_FAST_TYPING_COOLDOWN else null,
+        if (haveGestures && gestureEnabled &&
             (prefs.getBoolean(Settings.PREF_GESTURE_PREVIEW_TRAIL, Defaults.PREF_GESTURE_PREVIEW_TRAIL) || gestureFloatingPreviewEnabled))
-            Settings.PREF_GESTURE_TRAIL_FADEOUT_DURATION else null
-        )) + if (!FutoSwipe.isActive(ctx)) emptyList() else listOf(
-            R.string.swipe_recording_category,
-            SwipeRecorder.PREF_ENABLED,
-            SettingsWithoutKey.SWIPE_PRACTICE,
-            SettingsWithoutKey.SWIPE_RECORDING_SAVE,
-            SettingsWithoutKey.SWIPE_RECORDING_DELETE,
-        )
+            Settings.PREF_GESTURE_TRAIL_FADEOUT_DURATION else null,
+    )
     SearchSettingsScreen(
         onClickBack = onClickBack,
         title = stringResource(R.string.settings_screen_gesture),

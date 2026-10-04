@@ -34,6 +34,7 @@ import app.caret.latin.utils.getActivity
 import app.caret.latin.utils.getStringResourceOrName
 import app.caret.latin.utils.prefs
 import app.caret.settings.SearchSettingsScreen
+import app.caret.settings.SettingsFold
 import app.caret.settings.Setting
 import app.caret.settings.SettingsActivity
 import app.caret.settings.SettingsDestination
@@ -61,22 +62,16 @@ fun ToolbarScreen(
     val items = listOf(
         Settings.PREF_TOOLBAR_MODE,
         if (toolbarMode == ToolbarMode.HIDDEN) Settings.PREF_TOOLBAR_HIDING_GLOBAL else null,
-        if (toolbarMode != ToolbarMode.HIDDEN) Settings.PREF_TOOLBAR_SWIPE_DOWN_TO_HIDE else null,
         if (toolbarMode != ToolbarMode.HIDDEN) Settings.PREF_TOOLBAR_KEYS else null,
-        KeyLabel.PREF_ACTION_KEY,
-        if (toolbarMode == ToolbarMode.EXPANDABLE || toolbarMode == ToolbarMode.SUGGESTION_STRIP) SuggestionStripView.PREF_MIC_ON_LEFT else null,
-        if (toolbarMode == ToolbarMode.EXPANDABLE || toolbarMode == ToolbarMode.SUGGESTION_STRIP) SuggestionStripView.PREF_MIC_SIZE else null,
-        Settings.PREF_INLINE_DICTATION,
-        if (prefs.getBoolean(Settings.PREF_INLINE_DICTATION, Defaults.PREF_INLINE_DICTATION)) Settings.PREF_DICTATION_SOUND else null,
-        if (prefs.getBoolean(Settings.PREF_INLINE_DICTATION, Defaults.PREF_INLINE_DICTATION)) Settings.PREF_DICTATION_PAUSE_PERIODS else null,
-        if (clipboardToolbarVisible) Settings.PREF_CLIPBOARD_TOOLBAR_KEYS else null,
-        if (clipboardToolbarVisible) Settings.PREF_TOOLBAR_CUSTOM_KEY_CODES else null,
         if (toolbarMode == ToolbarMode.EXPANDABLE) Settings.PREF_TOOLBAR_ABOVE_SUGGESTIONS else null,
         if (toolbarMode == ToolbarMode.EXPANDABLE && prefs.getBoolean(Settings.PREF_TOOLBAR_ABOVE_SUGGESTIONS, Defaults.PREF_TOOLBAR_ABOVE_SUGGESTIONS))
             Settings.PREF_TOOLBAR_OPENS_ACTIONS else null,
+        SettingsFold,
+        if (toolbarMode != ToolbarMode.HIDDEN) Settings.PREF_TOOLBAR_SWIPE_DOWN_TO_HIDE else null,
         if (toolbarMode == ToolbarMode.EXPANDABLE) Settings.PREF_QUICK_PIN_TOOLBAR_KEYS else null,
         if (toolbarMode == ToolbarMode.EXPANDABLE) Settings.PREF_AUTO_SHOW_TOOLBAR else null,
         if (toolbarMode == ToolbarMode.EXPANDABLE) Settings.PREF_AUTO_HIDE_TOOLBAR else null,
+        if (clipboardToolbarVisible) Settings.PREF_TOOLBAR_CUSTOM_KEY_CODES else null,
         if (toolbarMode != ToolbarMode.HIDDEN) Settings.PREF_SHOW_ONLY_TOOLBAR_WITH_HARDWARE_KEYBOARD else null,
         if (toolbarMode != ToolbarMode.HIDDEN) Settings.PREF_VARIABLE_TOOLBAR_DIRECTION else null,
     )

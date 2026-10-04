@@ -23,6 +23,8 @@ import app.caret.settings.screens.ColorsScreen
 import app.caret.settings.screens.DebugScreen
 import app.caret.settings.screens.DictionaryScreen
 import app.caret.settings.screens.GestureTypingScreen
+import app.caret.settings.screens.VoiceTypingScreen
+import app.caret.settings.screens.ClipboardScreen
 import app.caret.settings.screens.LanguageScreen
 import app.caret.settings.screens.MainSettingsScreen
 import app.caret.settings.screens.PersonalDictionariesScreen
@@ -73,6 +75,8 @@ fun SettingsNavHost(
                 onClickPreferences = { navController.navigate(SettingsDestination.Preferences) },
                 onClickToolbar = { navController.navigate(SettingsDestination.Toolbar) },
                 onClickGestureTyping = { navController.navigate(SettingsDestination.GestureTyping) },
+                onClickVoiceTyping = { navController.navigate(SettingsDestination.VoiceTyping) },
+                onClickClipboard = { navController.navigate(SettingsDestination.Clipboard) },
                 onClickDataGathering = { navController.navigate(SettingsDestination.DataGathering) },
                 onClickAdvanced = { navController.navigate(SettingsDestination.Advanced) },
                 onClickAppearance = { navController.navigate(SettingsDestination.Appearance) },
@@ -99,6 +103,12 @@ fun SettingsNavHost(
         }
         composable(SettingsDestination.GestureTyping) {
             GestureTypingScreen(onClickBack = ::goBack)
+        }
+        composable(SettingsDestination.VoiceTyping) {
+            VoiceTypingScreen(onClickBack = ::goBack)
+        }
+        composable(SettingsDestination.Clipboard) {
+            ClipboardScreen(onClickBack = ::goBack)
         }
         composable(SettingsDestination.DataGathering) {
             GestureDataScreen(onClickBack = ::goBack)
@@ -156,6 +166,8 @@ object SettingsDestination {
     const val Toolbar = "toolbar"
     const val ToolbarArrange = "toolbar_arrange"
     const val GestureTyping = "gesture_typing"
+    const val VoiceTyping = "voice_typing"
+    const val Clipboard = "clipboard"
     const val DataGathering = "data_gathering" // remove when data gathering phase is done (end of 2026 latest)
     const val DataReview = "data_review" // remove when data gathering phase is done (end of 2026 latest)
     const val Advanced = "advanced"

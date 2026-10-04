@@ -37,6 +37,8 @@ import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
+import app.caret.settings.preferences.Preference
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -62,6 +64,9 @@ import app.caret.settings.preferences.RowPosition
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.height
 
+/** In a settings page's list: everything after it is folded away behind an "Advanced" row. */
+object SettingsFold
+
 @Composable
 fun SearchSettingsScreen(
     onClickBack: () -> Unit,
@@ -83,13 +88,27 @@ fun SearchSettingsScreen(
                     ) {
                         Spacer(Modifier.height(8.dp))
                         // Caret: rows between two category titles form one block of cards
-                        val shown = settings.filterNotNull()
+                        val all = settings.filterNotNull().let { if (it.lastOrNull() === SettingsFold) it.dropLast(1) else it }
+                        // Caret: what comes after SettingsFold is the page's rarely used part, folded shut until asked for
+                        val foldAt = all.indexOf(SettingsFold)
+                        var unfolded by rememberSaveable { mutableStateOf(false) }
+                        val shown = if (foldAt < 0 || unfolded) all else all.subList(0, foldAt + 1)
                         shown.forEachIndexed { index, it ->
                             if (it is Int) {
                                 PreferenceCategory(stringResource(it))
+                            } else if (it === SettingsFold) {
+                                Spacer(Modifier.height(12.dp))
+                                CompositionLocalProvider(LocalRowPosition provides RowPosition.SINGLE) {
+                                    Preference(
+                                        name = stringResource(R.string.settings_screen_advanced),
+                                        description = stringResource(if (unfolded) R.string.settings_fold_hide else R.string.settings_fold_show, all.size - foldAt - 1 - all.drop(foldAt).count { it is Int }),
+                                        onClick = { unfolded = !unfolded },
+                                    )
+                                }
+                                Spacer(Modifier.height(12.dp))
                             } else {
-                                val first = index == 0 || shown[index - 1] is Int
-                                val last = index == shown.lastIndex || shown[index + 1] is Int
+                                val first = index == 0 || shown[index - 1] is Int || shown[index - 1] === SettingsFold
+                                val last = index == shown.lastIndex || shown[index + 1] is Int || shown[index + 1] === SettingsFold
                                 val position = when {
                                     first && last -> RowPosition.SINGLE
                                     first -> RowPosition.FIRST

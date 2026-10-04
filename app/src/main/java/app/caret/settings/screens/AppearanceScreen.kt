@@ -31,6 +31,7 @@ import app.caret.settings.SettingsWithoutKey
 import app.caret.settings.Setting
 import app.caret.settings.preferences.Preference
 import app.caret.settings.SearchSettingsScreen
+import app.caret.settings.SettingsFold
 import app.caret.settings.SettingsActivity
 import app.caret.settings.preferences.SliderPreference
 import app.caret.settings.preferences.SwitchPreference
@@ -66,22 +67,14 @@ fun AppearanceScreen(
             Settings.PREF_THEME_DAY_NIGHT else null,
         Settings.PREF_THEME_STYLE,
         Settings.PREF_THEME_KEY_BORDERS,
+        SettingsWithoutKey.BACKGROUND_IMAGE,
+        SettingsWithoutKey.BACKGROUND_IMAGE_LANDSCAPE,
+        SettingsFold,
         Settings.PREF_ICON_STYLE,
         Settings.PREF_CUSTOM_ICON_NAMES,
         Settings.PREF_NAVBAR_COLOR,
-        SettingsWithoutKey.BACKGROUND_IMAGE,
-        SettingsWithoutKey.BACKGROUND_IMAGE_LANDSCAPE,
-        R.string.settings_category_miscellaneous,
-        Settings.PREF_ENABLE_SPLIT_KEYBOARD,
-        if (prefs.getBoolean(Settings.PREF_ENABLE_SPLIT_KEYBOARD_LANDSCAPE, Defaults.PREF_ENABLE_SPLIT_KEYBOARD)
-            || prefs.getBoolean(Settings.PREF_ENABLE_SPLIT_KEYBOARD, Defaults.PREF_ENABLE_SPLIT_KEYBOARD)
-            || prefs.getBoolean(Settings.PREF_ENABLE_SPLIT_KEYBOARD_FOLDED, Defaults.PREF_ENABLE_SPLIT_KEYBOARD)
-            || prefs.getBoolean(Settings.PREF_ENABLE_SPLIT_KEYBOARD_FOLDED_LANDSCAPE, Defaults.PREF_ENABLE_SPLIT_KEYBOARD)
-            )
-            Settings.PREF_SPLIT_SPACER_SCALE_PREFIX else null,
         if (prefs.getBoolean(Settings.PREF_THEME_KEY_BORDERS, Defaults.PREF_THEME_KEY_BORDERS))
             Settings.PREF_KEY_GAP_SCALE_PREFIX else null,
-        Settings.PREF_KEYBOARD_HEIGHT_SCALE_PREFIX,
         Settings.PREF_BOTTOM_ROW_SCALE_PREFIX,
         Settings.PREF_BOTTOM_PADDING_SCALE_PREFIX,
         Settings.PREF_SIDE_PADDING_SCALE_PREFIX,

@@ -95,7 +95,6 @@ fun AdvancedSettingsScreen(
         if (BuildConfig.DEBUG || prefs.getBoolean(DebugSettings.PREF_SHOW_DEBUG_SETTINGS, Defaults.PREF_SHOW_DEBUG_SETTINGS))
             SettingsWithoutKey.DEBUG_SETTINGS else null,
         R.string.settings_category_experimental,
-        GestureDataGatheringSettings.PREF_CONTRIBUTION_ENABLED,
         Settings.PREF_EMOJI_MAX_SDK,
         Settings.PREF_URL_DETECTION,
         if (BuildConfig.BUILD_TYPE != "nouserlib") SettingsWithoutKey.LOAD_GESTURE_LIB else null
@@ -191,11 +190,6 @@ fun createAdvancedSettings(context: Context) = listOf(
         R.string.prefs_enable_emoji_alt_physical_key_summary)
     {
         SwitchPreference(it, Defaults.PREF_ENABLE_EMOJI_ALT_PHYSICAL_KEY)
-    },
-    Setting(context, GestureDataGatheringSettings.PREF_CONTRIBUTION_ENABLED, R.string.gesture_data_contribution,
-        R.string.gesture_data_contribution_summary)
-    {
-        SwitchPreference(it, false)
     },
     Setting(context, Settings.PREF_SHOW_SETUP_WIZARD_ICON, R.string.show_setup_wizard_icon, R.string.show_setup_wizard_icon_summary) {
         val ctx = LocalContext.current

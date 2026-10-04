@@ -24,7 +24,9 @@ import app.caret.latin.utils.prefs
 import app.caret.settings.preferences.ListPreference
 import app.caret.settings.Setting
 import app.caret.settings.preferences.ReorderSwitchPreference
+import app.caret.keyboard.internal.keyboard_parser.floris.KeyLabel
 import app.caret.settings.SearchSettingsScreen
+import app.caret.settings.SettingsFold
 import app.caret.settings.SettingsActivity
 import app.caret.settings.preferences.SliderPreference
 import app.caret.settings.preferences.SwitchPreference
@@ -43,14 +45,18 @@ fun PreferencesScreen(
         Log.v("irrelevant", "stupid way to trigger recomposition on preference change")
     val clipboardHistoryEnabled = prefs.getBoolean(Settings.PREF_ENABLE_CLIPBOARD_HISTORY, Defaults.PREF_ENABLE_CLIPBOARD_HISTORY)
     val items = listOf(
-        R.string.settings_category_input,
+        R.string.settings_category_keys,
+        Settings.PREF_SHOW_NUMBER_ROW,
+        if (SubtypeSettings.getEnabledSubtypes(true).any { it.locale().language in localesWithLocalizedNumberRow })
+            Settings.PREF_LOCALIZED_NUMBER_ROW else null,
+        if (!prefs.getBoolean(Settings.PREF_SHOW_NUMBER_ROW, Defaults.PREF_SHOW_NUMBER_ROW))
+            Settings.PREF_SHOW_NUMBER_ROW_IN_SYMBOLS else null,
+        Settings.PREF_SHOW_EMOJI_KEY,
+        KeyLabel.PREF_ACTION_KEY,
+        Settings.PREF_SHOW_LANGUAGE_SWITCH_KEY,
+        Settings.PREF_LANGUAGE_SWITCH_KEY,
         Settings.PREF_SHOW_HINTS,
-        if (prefs.getBoolean(Settings.PREF_SHOW_HINTS, Defaults.PREF_SHOW_HINTS))
-            Settings.PREF_POPUP_KEYS_HINT_ORDER else null,
-        Settings.PREF_POPUP_KEYS_ORDER,
-        Settings.PREF_SHOW_POPUP_HINTS,
-        Settings.PREF_SHOW_TLD_POPUP_KEYS,
-        Settings.PREF_URL_EMAIL_LAYOUT,
+        R.string.settings_category_key_press,
         Settings.PREF_POPUP_ON,
         if (AudioAndHapticFeedbackManager.getInstance().hasVibrator())
             Settings.PREF_VIBRATE_ON else null,
@@ -61,30 +67,29 @@ fun PreferencesScreen(
         Settings.PREF_SOUND_ON,
         if (prefs.getBoolean(Settings.PREF_SOUND_ON, Defaults.PREF_SOUND_ON))
             Settings.PREF_KEYPRESS_SOUND_VOLUME else null,
-        Settings.PREF_SAVE_SUBTYPE_PER_APP,
-        Settings.PREF_SHOW_EMOJI_DESCRIPTIONS,
-        R.string.settings_category_additional_keys,
-        Settings.PREF_SHOW_NUMBER_ROW,
-        if (SubtypeSettings.getEnabledSubtypes(true).any { it.locale().language in localesWithLocalizedNumberRow })
-            Settings.PREF_LOCALIZED_NUMBER_ROW else null,
+        R.string.settings_category_layout,
+        Settings.PREF_KEYBOARD_HEIGHT_SCALE_PREFIX,
+        Settings.PREF_ENABLE_SPLIT_KEYBOARD,
+        if (prefs.getBoolean(Settings.PREF_ENABLE_SPLIT_KEYBOARD_LANDSCAPE, Defaults.PREF_ENABLE_SPLIT_KEYBOARD)
+            || prefs.getBoolean(Settings.PREF_ENABLE_SPLIT_KEYBOARD, Defaults.PREF_ENABLE_SPLIT_KEYBOARD)
+            || prefs.getBoolean(Settings.PREF_ENABLE_SPLIT_KEYBOARD_FOLDED, Defaults.PREF_ENABLE_SPLIT_KEYBOARD)
+            || prefs.getBoolean(Settings.PREF_ENABLE_SPLIT_KEYBOARD_FOLDED_LANDSCAPE, Defaults.PREF_ENABLE_SPLIT_KEYBOARD)
+            )
+            Settings.PREF_SPLIT_SPACER_SCALE_PREFIX else null,
+        SettingsFold,
+        if (prefs.getBoolean(Settings.PREF_SHOW_HINTS, Defaults.PREF_SHOW_HINTS))
+            Settings.PREF_POPUP_KEYS_HINT_ORDER else null,
+        Settings.PREF_POPUP_KEYS_ORDER,
+        Settings.PREF_SHOW_POPUP_HINTS,
         if (prefs.getBoolean(Settings.PREF_SHOW_HINTS, Defaults.PREF_SHOW_HINTS)
             && prefs.getBoolean(Settings.PREF_SHOW_NUMBER_ROW, Defaults.PREF_SHOW_NUMBER_ROW))
             Settings.PREF_SHOW_NUMBER_ROW_HINTS else null,
-        if (!prefs.getBoolean(Settings.PREF_SHOW_NUMBER_ROW, Defaults.PREF_SHOW_NUMBER_ROW))
-            Settings.PREF_SHOW_NUMBER_ROW_IN_SYMBOLS else null,
-        Settings.PREF_SHOW_LANGUAGE_SWITCH_KEY,
-        Settings.PREF_LANGUAGE_SWITCH_KEY,
-        Settings.PREF_SHOW_EMOJI_KEY,
         Settings.PREF_SHOW_DPAD_KEY,
         Settings.PREF_REMOVE_REDUNDANT_POPUPS,
-        R.string.settings_category_clipboard_history,
-        Settings.PREF_ENABLE_CLIPBOARD_HISTORY,
-        Settings.PREF_MASK_CLIPBOARD_SECRETS,
-        if (clipboardHistoryEnabled) Settings.PREF_CLIPBOARD_HISTORY_RETENTION_TIME else null,
-        if (clipboardHistoryEnabled) Settings.PREF_CLIPBOARD_HISTORY_PINNED_FIRST else null,
-        if (clipboardHistoryEnabled) Settings.PREF_CLIPBOARD_USE_FILES else null,
-        if (clipboardHistoryEnabled && prefs.getBoolean(Settings.PREF_CLIPBOARD_USE_FILES, Defaults.PREF_CLIPBOARD_USE_FILES))
-            Settings.PREF_CLIPBOARD_FILES_SIZE_LIMIT else null,
+        Settings.PREF_SHOW_TLD_POPUP_KEYS,
+        Settings.PREF_URL_EMAIL_LAYOUT,
+        Settings.PREF_SAVE_SUBTYPE_PER_APP,
+        Settings.PREF_SHOW_EMOJI_DESCRIPTIONS,
     )
     SearchSettingsScreen(
         onClickBack = onClickBack,

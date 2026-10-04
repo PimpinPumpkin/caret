@@ -30,6 +30,7 @@ import app.caret.latin.utils.getActivity
 import app.caret.latin.utils.prefs
 import app.caret.latin.utils.NextScreenIcon
 import app.caret.settings.SearchSettingsScreen
+import app.caret.settings.SettingsFold
 import app.caret.settings.Setting
 import app.caret.settings.SettingsActivity
 import app.caret.settings.SettingsDestination
@@ -63,46 +64,48 @@ fun TextCorrectionScreen(
     val items = listOf(
         SettingsWithoutKey.EDIT_PERSONAL_DICTIONARY,
         R.string.settings_category_correction,
-        Settings.PREF_BLOCK_POTENTIALLY_OFFENSIVE,
         Settings.PREF_AUTO_CORRECTION,
+        if (autocorrectEnabled) Settings.PREF_AUTO_CORRECT_CONFIDENCE else null,
+        Settings.PREF_AUTO_CAP,
+        Settings.PREF_KEY_USE_DOUBLE_SPACE_PERIOD,
+        Settings.PREF_BLOCK_POTENTIALLY_OFFENSIVE,
+        R.string.settings_category_suggestions,
+        if (suggestionsVisible) Settings.PREF_SHOW_SUGGESTIONS else null,
+        Settings.PREF_BIGRAM_PREDICTIONS,
+        if (prefs.getBoolean(Settings.PREF_BIGRAM_PREDICTIONS, Defaults.PREF_BIGRAM_PREDICTIONS)) Settings.PREF_LM_NEXT_WORD else null,
+        if (suggestionsEnabled || autocorrectEnabled) Settings.PREF_SUGGEST_EMOJIS else null,
+        Settings.PREF_KEY_USE_PERSONALIZED_DICTS,
+        R.string.settings_category_learning,
+        Settings.PREF_RECORD_CORRECTIONS,
+        SettingsWithoutKey.CORRECTIONS_SAVE,
+        SettingsWithoutKey.CORRECTIONS_DELETE,
+        SettingsFold,
+        R.string.settings_category_correction,
         if (autocorrectEnabled) Settings.PREF_MORE_AUTO_CORRECTION else null,
         if (autocorrectEnabled) Settings.PREF_AUTOCORRECT_SHORTCUTS else null,
         if (autocorrectEnabled) Settings.PREF_AUTOCORRECT_CAPITALIZED_SUGGESTION else null,
-        if (autocorrectEnabled) Settings.PREF_AUTO_CORRECT_CONFIDENCE else null,
         if (autocorrectEnabled) Settings.PREF_BACKSPACE_REVERTS_AUTOCORRECT else null,
-        Settings.PREF_AUTO_CAP,
         R.string.settings_category_space,
-        Settings.PREF_KEY_USE_DOUBLE_SPACE_PERIOD,
         Settings.PREF_AUTOSPACE_AFTER_PUNCTUATION,
         Settings.PREF_AUTOSPACE_AFTER_SUGGESTION,
         if (gestureEnabled) Settings.PREF_AUTOSPACE_BEFORE_GESTURE_TYPING else null,
         if (gestureEnabled) Settings.PREF_AUTOSPACE_AFTER_GESTURE_TYPING else null,
         Settings.PREF_SHIFT_REMOVES_AUTOSPACE,
         R.string.settings_category_suggestions,
-        if (suggestionsVisible) Settings.PREF_SHOW_SUGGESTIONS else null,
         if (suggestionsEnabled) Settings.PREF_ALWAYS_SHOW_SUGGESTIONS else null,
         if (suggestionsEnabled && prefs.getBoolean(Settings.PREF_ALWAYS_SHOW_SUGGESTIONS, Defaults.PREF_ALWAYS_SHOW_SUGGESTIONS))
             Settings.PREF_ALWAYS_SHOW_SUGGESTIONS_EXCEPT_WEB_TEXT else null,
         if (suggestionsEnabled) Settings.PREF_CENTER_SUGGESTION_TEXT_TO_ENTER else null,
-        if (suggestionsEnabled || autocorrectEnabled) Settings.PREF_SUGGEST_EMOJIS else null,
         if (suggestionsEnabled || autocorrectEnabled) Settings.PREF_INLINE_EMOJI_SEARCH else null,
-        Settings.PREF_KEY_USE_PERSONALIZED_DICTS,
-        Settings.PREF_BIGRAM_PREDICTIONS,
-        if (prefs.getBoolean(Settings.PREF_BIGRAM_PREDICTIONS, Defaults.PREF_BIGRAM_PREDICTIONS)) Settings.PREF_LM_NEXT_WORD else null,
         Settings.PREF_SUGGEST_PUNCTUATION,
         if (prefs.getBoolean(Settings.PREF_SUGGEST_PUNCTUATION, Defaults.PREF_SUGGEST_PUNCTUATION))
             Settings.PREF_PUNCTUATION_SUGGESTIONS else null,
-        Settings.PREF_SUGGEST_CLIPBOARD_CONTENT,
         Settings.PREF_USE_CONTACTS,
         Settings.PREF_USE_APPS,
         if (prefs.getBoolean(Settings.PREF_KEY_USE_PERSONALIZED_DICTS, Defaults.PREF_KEY_USE_PERSONALIZED_DICTS))
             Settings.PREF_ADD_TO_PERSONAL_DICTIONARY else null,
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S)
             Settings.PREF_SPELLCHECK_SUGGEST else null,
-        R.string.settings_category_learning,
-        Settings.PREF_RECORD_CORRECTIONS,
-        SettingsWithoutKey.CORRECTIONS_SAVE,
-        SettingsWithoutKey.CORRECTIONS_DELETE,
     )
     SearchSettingsScreen(
         onClickBack = onClickBack,

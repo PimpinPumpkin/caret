@@ -77,7 +77,7 @@ pill; the keys dim to 40% while the panel is open.
 Still different: Caret's selection uses the accent color with dark text where Gboard uses a dark
 fill with white text; Caret lists the number and the symbol of that key in the panel too.
 
-## 5. Settings (proposal, not built yet)
+## 5. Settings
 
 Gboard's home screen: Languages, Preferences, Theme, Corrections & suggestions, Glide typing, Voice
 typing, Physical keyboard, Clipboard, Dictionary, Emojis, then sharing, privacy and about. Each
@@ -88,7 +88,11 @@ Caret today: nine home entries, but Preferences, Text correction and Toolbar are
 that mix what everyone changes with what almost nobody touches, and dictation and clipboard
 settings are spread over other pages.
 
-Proposal. Nothing is removed, every setting stays findable by search:
+Built in 0.1.19 as proposed below, with two differences: Secondary layouts stays a home entry of
+its own under Languages & Layouts, and keyboard height and split keyboard moved to Preferences >
+Layout rather than staying under Appearance. The fold is `SettingsFold` in a page's list of settings.
+
+Nothing is removed, every setting stays findable by search:
 
 1. **Home**, in this order: Languages & Layouts; Preferences; Appearance; Text correction; Gesture
    typing; Voice typing (new); Clipboard (new); Toolbar; Dictionaries; Advanced; About. Secondary
