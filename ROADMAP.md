@@ -116,8 +116,8 @@ is visible to the user. Things that need the user's eyes or a decision are colle
 | 1 | Gboard spec: keyboard and strip | done (0.1.12) |
 | 2 | Gboard spec: all actions panel | done (0.1.13) |
 | 3 | Correction recorder | done (0.1.14) |
-| 4 | Settings backup that stays small | next |
-| 5 | Dictation polish in Caret and Alyo: current word highlighted, no pause periods, smooth partial to final | |
+| 4 | Settings backup that stays small | done (0.1.15) |
+| 5 | Dictation polish in Caret and Alyo: current word highlighted, no pause periods, smooth partial to final | next |
 | 6 | Gboard spec: long-press popups and key previews | |
 | 7 | Gboard spec: emoji panel | |
 | 8 | Gboard spec: clipboard, one-handed, floating | |
@@ -135,6 +135,8 @@ is visible to the user. Things that need the user's eyes or a decision are colle
 - Signal swipe-home fix (0.1.11) and the new look (0.1.12 to 0.1.14): try on the phone and say what
   feels off.
 - Supertonic 3 vs Piper hfc for Alyo and Vela: Supertonic is archived; compare only if wanted.
+- Advanced settings still show "Contribute gesture data to HeliBoard" (upstream's data donation
+  program, of no use to Caret): hide it?
 
 ## Order
 

@@ -43,6 +43,8 @@ import app.caret.settings.preferences.SwitchPreference
 import app.caret.latin.utils.Theme
 import app.caret.settings.dialogs.TextInputDialog
 import app.caret.settings.preferences.BackupRestorePreference
+import app.caret.settings.preferences.SettingsExportPreference
+import app.caret.settings.preferences.SettingsImportPreference
 import app.caret.settings.preferences.LoadGestureLibPreference
 import app.caret.settings.preferences.TextInputPreference
 import app.caret.latin.utils.previewDark
@@ -87,6 +89,8 @@ fun AdvancedSettingsScreen(
         Settings.PREF_CUSTOM_CURRENCY_KEY,
         Settings.PREF_MORE_POPUP_KEYS,
         Settings.PREF_TIMESTAMP_FORMAT,
+        SettingsWithoutKey.SETTINGS_EXPORT,
+        SettingsWithoutKey.SETTINGS_IMPORT,
         SettingsWithoutKey.BACKUP_RESTORE,
         if (BuildConfig.DEBUG || prefs.getBoolean(DebugSettings.PREF_SHOW_DEBUG_SETTINGS, Defaults.PREF_SHOW_DEBUG_SETTINGS))
             SettingsWithoutKey.DEBUG_SETTINGS else null,
@@ -243,6 +247,12 @@ fun createAdvancedSettings(context: Context) = listOf(
             stringResource(LocaleKeyboardInfos.morePopupKeysResId(setting)) to setting
         }
         ListPreference(it, items, Defaults.PREF_MORE_POPUP_KEYS) { KeyboardLayoutSet.onSystemLocaleChanged() }
+    },
+    Setting(context, SettingsWithoutKey.SETTINGS_EXPORT, R.string.settings_export, R.string.settings_export_summary) {
+        SettingsExportPreference(it)
+    },
+    Setting(context, SettingsWithoutKey.SETTINGS_IMPORT, R.string.settings_import, R.string.settings_import_summary) {
+        SettingsImportPreference(it)
     },
     Setting(context, SettingsWithoutKey.BACKUP_RESTORE, R.string.backup_restore_title) {
         BackupRestorePreference(it)
