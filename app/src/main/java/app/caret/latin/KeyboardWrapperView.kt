@@ -67,6 +67,7 @@ class KeyboardWrapperView @JvmOverloads constructor(
             field = shown
             actionsPanel?.let { removeView(it) }
             actionsPanel = null
+            if (!shown) KeyboardSwitcher.getInstance().onActionsPanelClosed?.invoke()
             if (shown) {
                 actionsPanel = ActionsPanelView(context, onAction = { view ->
                     actionsPanelShown = false

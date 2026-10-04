@@ -46,8 +46,11 @@ Emoji, Undo, and so on, under a "Hold and drag to customize" hint. The strip tur
 quick icons (stickers, GIF, clipboard, settings, theme, voice) with a back arrow on the left, and a
 tile can be dragged up into that row; a "Drag here to replace" bubble shows where it lands.
 
-Caret changes: an "All actions" page in that style (Caret already has `ActionsPanelView`), with
-drag into the strip; keep pinned keys on the suggestion strip as Caret has now.
+Done in 0.1.13: the grid button opens the all actions panel over the keys together with the
+toolbar above the suggestions; the panel has a back arrow and "Hold and drag to customize" on top,
+Gboard-sized tiles (56 dp, icon above a one-line label), and an action held and dragged onto the
+toolbar replaces the key it lands on (or goes at the end). Pinned keys stay on the suggestion strip.
+A toolbar setting turns the panel off so the grid only opens the toolbar, as before.
 
 ## 3. Emoji panel
 

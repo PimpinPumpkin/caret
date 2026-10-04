@@ -21,6 +21,7 @@ import android.view.GestureDetector.SimpleOnGestureListener
 import android.view.LayoutInflater
 import android.view.MotionEvent
 import android.view.View
+import android.view.DragEvent
 import android.view.View.OnLongClickListener
 import android.view.ViewGroup
 import android.view.accessibility.AccessibilityEvent
@@ -54,6 +55,7 @@ import app.caret.latin.utils.dpToPx
 import app.caret.latin.utils.getEnabledToolbarKeys
 import app.caret.latin.RichInputMethodManager
 import app.caret.latin.utils.getPinnedToolbarKeys
+import app.caret.latin.utils.placeToolbarKey
 import app.caret.latin.utils.prefs
 import app.caret.latin.utils.removeFirst
 import app.caret.latin.utils.removePinnedKey
@@ -158,12 +160,9 @@ class SuggestionStripView(context: Context, attrs: AttributeSet?, defStyle: Int)
         }
 
         // toolbar keys setup (no need to hide them any more when locked, because then suggestion strip is gone anyway
-        for (key in getEnabledToolbarKeys(context.prefs())) {
-            val button = createToolbarKey(context, key)
-            button.layoutParams = toolbarKeyLayoutParams
-            setupKey(button, colors)
-            toolbar.addView(button)
-        }
+        fillToolbar(colors)
+        toolbar.setOnDragListener(::onDragOverToolbar)
+        KeyboardSwitcher.getInstance().onActionsPanelClosed = { if (Settings.values.toolbarOpensActions) setToolbarVisibility(false) }
         for (pinnedKey in getPinnedToolbarKeys(context.prefs())) {
             val button = createToolbarKey(context, pinnedKey)
             if (pinnedKey == ToolbarKey.VOICE) {
@@ -419,7 +418,18 @@ class SuggestionStripView(context: Context, attrs: AttributeSet?, defStyle: Int)
         }
         AudioAndHapticFeedbackManager.getInstance().performHapticAndAudioFeedback(KeyCode.NOT_SPECIFIED, this, HapticEvent.KEY_PRESS)
         if (view === toolbarExpandKey) {
-            setToolbarVisibility(!toolbarOpen)
+            val switcher = KeyboardSwitcher.getInstance()
+            if (Settings.values.toolbarOpensActions) {
+                // Caret: as on Gboard, the grid opens every action over the keys, with the toolbar above as the place to drag them to
+                if (toolbarOpen || switcher.isShowingActionsPanel) switcher.hideActionsPanel()
+                else {
+                    setToolbarVisibility(true)
+                    switcher.showActionsPanel()
+                }
+                if (switcher.isShowingActionsPanel != toolbarOpen) setToolbarVisibility(switcher.isShowingActionsPanel)
+            } else {
+                setToolbarVisibility(!toolbarOpen)
+            }
         }
 
         // tag for word views is set in SuggestionStripLayoutHelper (setupWordViewsTextAndColor, layoutPunctuationSuggestions)
@@ -628,6 +638,47 @@ class SuggestionStripView(context: Context, attrs: AttributeSet?, defStyle: Int)
         copy.isActivated = original.isActivated
         setupKey(copy, Settings.values.colors)
         pinnedKeys.addView(copy)
+    }
+
+    private fun fillToolbar(colors: Colors) {
+        toolbar.removeAllViews()
+        for (key in getEnabledToolbarKeys(context.prefs())) {
+            val button = createToolbarKey(context, key)
+            button.layoutParams = toolbarKeyLayoutParams
+            setupKey(button, colors)
+            toolbar.addView(button)
+        }
+    }
+
+    /** Caret: an action dragged from the all actions panel lands on the toolbar key under it, or at the end. */
+    private fun onDragOverToolbar(view: View, event: DragEvent): Boolean {
+        val dragged = event.localState as? ToolbarKey ?: return false
+        fun keyAt(x: Float): View? {
+            for (i in 0 until toolbar.childCount) {
+                val child = toolbar.getChildAt(i)
+                if (x >= child.left && x < child.right) return child
+            }
+            return null
+        }
+        fun highlight(target: View?) {
+            for (i in 0 until toolbar.childCount) {
+                val child = toolbar.getChildAt(i)
+                child.background = if (child === target) enabledToolKeyBackground.constantState?.newDrawable(resources)
+                    else defaultToolbarBackground.constantState?.newDrawable(resources)
+            }
+        }
+        when (event.action) {
+            DragEvent.ACTION_DRAG_STARTED -> return true
+            DragEvent.ACTION_DRAG_LOCATION -> highlight(keyAt(event.x))
+            DragEvent.ACTION_DRAG_EXITED, DragEvent.ACTION_DRAG_ENDED -> highlight(null)
+            DragEvent.ACTION_DROP -> {
+                placeToolbarKey(context.prefs(), dragged, keyAt(event.x)?.tag as? ToolbarKey)
+                fillToolbar(Settings.values.colors)
+                updateVoiceKey() // hides the microphone and language keys where they do not apply
+                AudioAndHapticFeedbackManager.getInstance().performHapticFeedback(this, HapticEvent.KEY_LONG_PRESS)
+            }
+        }
+        return true
     }
 
     private fun setupKey(view: ImageButton, colors: Colors) {

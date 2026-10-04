@@ -409,6 +409,10 @@
     <!-- Title of the setting to set pinned toolbar keys -->
     <string name="pinned_toolbar_keys">Select pinned toolbar keys</string>
     <!-- Title of the setting to quick-pin toolbar keys -->
+    <string name="toolbar_opens_actions">Grid button opens all actions</string>
+    <string name="toolbar_opens_actions_summary">Shows every action over the keys along with the toolbar. Hold an action and drag it onto the toolbar to put it there.</string>
+    <string name="actions_panel_hint">Hold and drag to customize</string>
+    <string name="actions_panel_back">Back to the keyboard</string>
     <string name="toolbar_above_suggestions">Open the toolbar above the suggestions</string>
     <string name="toolbar_above_suggestions_summary">The suggestions and pinned keys stay visible while the toolbar is open. Off shows the toolbar in their place.</string>
     <string name="quick_pin_toolbar_keys">Pin toolbar key on long press</string>

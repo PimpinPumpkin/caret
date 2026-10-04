@@ -200,6 +200,24 @@ fun addPinnedKey(prefs: SharedPreferences, key: ToolbarKey) {
     prefs.edit { putString(Settings.PREF_PINNED_TOOLBAR_KEYS, keys.joinToString(Separators.ENTRY)) }
 }
 
+/**
+ * Puts [key] on the toolbar in place of [replacing], which comes off it, or at the end when
+ * [replacing] is null. For dragging an action from the all actions panel onto the toolbar.
+ */
+fun placeToolbarKey(prefs: SharedPreferences, key: ToolbarKey, replacing: ToolbarKey?) {
+    if (key == replacing) return
+    val entries = prefs.getString(Settings.PREF_TOOLBAR_KEYS, defaultToolbarPref)!!.split(Separators.ENTRY).toMutableList()
+    entries.removeAll { it.startsWith(key.name + Separators.KV) }
+    val target = if (replacing == null) -1 else entries.indexOfFirst { it.startsWith(replacing.name + Separators.KV) }
+    if (target >= 0) {
+        entries[target] = replacing!!.name + Separators.KV + "false"
+        entries.add(target, key.name + Separators.KV + "true")
+    } else {
+        entries.add(entries.indexOfLast { it.endsWith("true") } + 1, key.name + Separators.KV + "true")
+    }
+    prefs.edit { putString(Settings.PREF_TOOLBAR_KEYS, entries.joinToString(Separators.ENTRY)) }
+}
+
 fun removePinnedKey(prefs: SharedPreferences, key: ToolbarKey) {
     // just set it to disabled
     val string = prefs.getString(Settings.PREF_PINNED_TOOLBAR_KEYS, defaultPinnedToolbarPref)!!

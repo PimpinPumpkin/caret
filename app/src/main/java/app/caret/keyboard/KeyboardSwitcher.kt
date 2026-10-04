@@ -348,6 +348,15 @@ class KeyboardSwitcher private constructor() {
         keyboardViewWrapper?.actionsPanelShown = true
     }
 
+    fun hideActionsPanel() {
+        keyboardViewWrapper?.actionsPanelShown = false
+    }
+
+    val isShowingActionsPanel get() = keyboardViewWrapper?.actionsPanelShown == true
+
+    /** Caret: called when the actions panel goes away, so the toolbar that came with it can close too. */
+    var onActionsPanelClosed: (() -> Unit)? = null
+
     fun reloadKeyboard() {
         if (currentInputView == null)
             return

@@ -71,6 +71,8 @@ fun ToolbarScreen(
         if (clipboardToolbarVisible) Settings.PREF_CLIPBOARD_TOOLBAR_KEYS else null,
         if (clipboardToolbarVisible) Settings.PREF_TOOLBAR_CUSTOM_KEY_CODES else null,
         if (toolbarMode == ToolbarMode.EXPANDABLE) Settings.PREF_TOOLBAR_ABOVE_SUGGESTIONS else null,
+        if (toolbarMode == ToolbarMode.EXPANDABLE && prefs.getBoolean(Settings.PREF_TOOLBAR_ABOVE_SUGGESTIONS, Defaults.PREF_TOOLBAR_ABOVE_SUGGESTIONS))
+            Settings.PREF_TOOLBAR_OPENS_ACTIONS else null,
         if (toolbarMode == ToolbarMode.EXPANDABLE) Settings.PREF_QUICK_PIN_TOOLBAR_KEYS else null,
         if (toolbarMode == ToolbarMode.EXPANDABLE) Settings.PREF_AUTO_SHOW_TOOLBAR else null,
         if (toolbarMode == ToolbarMode.EXPANDABLE) Settings.PREF_AUTO_HIDE_TOOLBAR else null,
@@ -165,6 +167,11 @@ fun createToolbarSettings(context: Context) = listOf(
                 key = it.key,
                 onDismissRequest = { showDialog = false }
             )
+    },
+    Setting(context, Settings.PREF_TOOLBAR_OPENS_ACTIONS,
+        R.string.toolbar_opens_actions, R.string.toolbar_opens_actions_summary)
+    {
+        SwitchPreference(it, Defaults.PREF_TOOLBAR_OPENS_ACTIONS)
     },
     Setting(context, Settings.PREF_TOOLBAR_ABOVE_SUGGESTIONS,
         R.string.toolbar_above_suggestions, R.string.toolbar_above_suggestions_summary)

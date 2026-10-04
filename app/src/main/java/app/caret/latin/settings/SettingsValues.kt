@@ -130,6 +130,8 @@ class SettingsValues(context: Context, prefs: SharedPreferences, res: Resources,
     @JvmField val quickPinToolbarKeys: Boolean
     /** The toolbar opens as a row of its own above the suggestions, which stay where they are. */
     @JvmField val toolbarAboveSuggestions: Boolean
+    /** The grid button opens the all actions panel over the keys along with the toolbar, as on Gboard. */
+    @JvmField val toolbarOpensActions: Boolean
     @JvmField val addToPersonalDictionary: Boolean
     @JvmField val useContactsDictionary: Boolean
     @JvmField val useAppsDictionary: Boolean
@@ -267,6 +269,7 @@ class SettingsValues(context: Context, prefs: SharedPreferences, res: Resources,
             else 0f
         quickPinToolbarKeys = toolbarMode == ToolbarMode.EXPANDABLE && prefs.getBoolean(Settings.PREF_QUICK_PIN_TOOLBAR_KEYS, Defaults.PREF_QUICK_PIN_TOOLBAR_KEYS)
         toolbarAboveSuggestions = toolbarMode == ToolbarMode.EXPANDABLE && prefs.getBoolean(Settings.PREF_TOOLBAR_ABOVE_SUGGESTIONS, Defaults.PREF_TOOLBAR_ABOVE_SUGGESTIONS)
+        toolbarOpensActions = toolbarAboveSuggestions && prefs.getBoolean(Settings.PREF_TOOLBAR_OPENS_ACTIONS, Defaults.PREF_TOOLBAR_OPENS_ACTIONS)
 
         // Compute other readable settings
         keyLongpressTimeout = prefs.getInt(Settings.PREF_KEY_LONGPRESS_TIMEOUT, Defaults.PREF_KEY_LONGPRESS_TIMEOUT)

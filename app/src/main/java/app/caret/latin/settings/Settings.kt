@@ -369,6 +369,7 @@ class Settings : SharedPreferences.OnSharedPreferenceChangeListener {
         const val PREF_DONT_SHOW_MISSING_DICTIONARY_DIALOG = "dont_show_missing_dict_dialog"
         const val PREF_QUICK_PIN_TOOLBAR_KEYS = "quick_pin_toolbar_keys"
         const val PREF_TOOLBAR_ABOVE_SUGGESTIONS = "toolbar_above_suggestions"
+        const val PREF_TOOLBAR_OPENS_ACTIONS = "toolbar_opens_actions"
         const val PREF_PINNED_TOOLBAR_KEYS = "pinned_toolbar_keys"
         const val PREF_TOOLBAR_KEYS = "toolbar_keys"
         const val PREF_AUTO_SHOW_TOOLBAR = "auto_show_toolbar"
