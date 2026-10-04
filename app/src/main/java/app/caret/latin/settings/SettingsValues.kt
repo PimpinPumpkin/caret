@@ -112,6 +112,7 @@ class SettingsValues(context: Context, prefs: SharedPreferences, res: Resources,
     @JvmField val remoteNavigation: Boolean // Caret: arrow keys of a remote move between keys
     @JvmField val maskClipboardSecrets: Boolean // Caret: hide copied secrets where the clipboard is shown
     @JvmField val dictationSound: Boolean // Caret: a short sound when dictation starts and stops listening
+    @JvmField val dictationPausePeriods: Boolean // Caret: keep the period the recognizer puts at every pause
     @JvmField val inlineDictation: Boolean // Caret: the microphone key dictates inside the keyboard
     @JvmField val lmNextWordEnabled: Boolean // Caret: let the language model of the swipe models rank those predictions
     @JvmField val suggestPunctuation: Boolean
@@ -253,6 +254,7 @@ class SettingsValues(context: Context, prefs: SharedPreferences, res: Resources,
         remoteNavigation = prefs.getBoolean(Settings.PREF_REMOTE_NAVIGATION, Settings.isTelevision(context))
         maskClipboardSecrets = prefs.getBoolean(Settings.PREF_MASK_CLIPBOARD_SECRETS, Defaults.PREF_MASK_CLIPBOARD_SECRETS)
         dictationSound = prefs.getBoolean(Settings.PREF_DICTATION_SOUND, Defaults.PREF_DICTATION_SOUND)
+        dictationPausePeriods = prefs.getBoolean(Settings.PREF_DICTATION_PAUSE_PERIODS, Defaults.PREF_DICTATION_PAUSE_PERIODS)
         inlineDictation = prefs.getBoolean(Settings.PREF_INLINE_DICTATION, Defaults.PREF_INLINE_DICTATION)
         lmNextWordEnabled = prefs.getBoolean(Settings.PREF_LM_NEXT_WORD, Defaults.PREF_LM_NEXT_WORD)
         suggestPunctuation = prefs.getBoolean(Settings.PREF_SUGGEST_PUNCTUATION, Defaults.PREF_SUGGEST_PUNCTUATION)

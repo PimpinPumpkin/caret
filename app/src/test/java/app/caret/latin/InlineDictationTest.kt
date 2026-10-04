@@ -43,7 +43,53 @@ class InlineDictationTest {
         override fun onLevel(level: Float) { this@InlineDictationTest.level = level }
         override fun soundsEnabled() = false
     }
-    private val dictation = InlineDictation(context, host)
+    private var now = 1000L
+    private var pausePeriods = false
+    private val dictation = InlineDictation(context, object : InlineDictation.Host by host {
+        override fun pausePeriods() = pausePeriods
+    }) { now }
+
+    private fun results(text: String, spokenEnd: Boolean) = results(text).apply { putBoolean("app.alyo.SPOKEN_END", spokenEnd) }
+
+    @Test fun `a pause does not end the sentence when the speaker goes on`() {
+        dictation.toggle()
+        recognizer().triggerOnResults(results("I went to the store."))
+        assertEquals("I went to the store", typed.toString())
+        now += 800
+        recognizer().triggerOnPartialResults(results("and bought"))
+        assertEquals(" and bought", partial)
+        recognizer().triggerOnResults(results("And bought some milk."))
+        assertEquals("I went to the store and bought some milk", typed.toString())
+    }
+
+    @Test fun `going on after a long pause starts a new sentence`() {
+        dictation.toggle()
+        recognizer().triggerOnResults(results("I went to the store."))
+        now += InlineDictation.LONG_PAUSE_MILLIS + 500
+        recognizer().triggerOnResults(results("It was closed."))
+        assertEquals("I went to the store. It was closed", typed.toString())
+    }
+
+    @Test fun `a period that was said stays, and so do other marks and names`() {
+        dictation.toggle()
+        recognizer().triggerOnResults(results("That is all.", spokenEnd = true))
+        now += 500
+        recognizer().triggerOnResults(results("Are you there?"))
+        now += 500
+        recognizer().triggerOnResults(results("I think so."))
+        now += 500
+        recognizer().triggerOnResults(results("I'm sure."))
+        assertEquals("That is all. Are you there? I think so I'm sure", typed.toString())
+    }
+
+    @Test fun `with the setting on every pause keeps its period`() {
+        pausePeriods = true
+        dictation.toggle()
+        recognizer().triggerOnResults(results("One."))
+        now += 500
+        recognizer().triggerOnResults(results("Two."))
+        assertEquals("One. Two.", typed.toString())
+    }
 
     private fun addService(packageName: String) {
         val info = ResolveInfo().apply {

@@ -202,7 +202,14 @@ class LatinIME : InputMethodService(),
             // a word half typed is finished first, or the spoken words would take its place
             if (!dictationComposing && inputLogic.wordComposer.isComposingWord) inputLogic.commitTyped(settings.current, "")
             dictationComposing = text.isNotEmpty()
-            inputLogic.connection.setComposingText(text, 1)
+            // the newest word stands out: it is the one still likely to change
+            val shown = android.text.SpannableString(text)
+            val lastWord = text.trimEnd().lastIndexOf(' ') + 1
+            if (lastWord < text.length) shown.setSpan(
+                android.text.style.BackgroundColorSpan(androidx.core.graphics.ColorUtils.setAlphaComponent(
+                    settings.current.colors.get(app.caret.latin.common.ColorType.GESTURE_TRAIL), 0x55)),
+                lastWord, text.length, android.text.Spanned.SPAN_EXCLUSIVE_EXCLUSIVE or android.text.Spanned.SPAN_COMPOSING)
+            inputLogic.connection.setComposingText(shown, 1)
         }
         override fun codePointBeforeCursor() = inputLogic.connection.getCodePointBeforeCursor()
         override fun locale(): Locale = richImm.currentSubtypeLocale
@@ -212,6 +219,7 @@ class LatinIME : InputMethodService(),
         }
         override fun onLevel(level: Float) { suggestionStripView?.setMicLevel(level) }
         override fun soundsEnabled() = settings.current.dictationSound
+        override fun pausePeriods() = settings.current.dictationPausePeriods
         override fun showStatus(text: String?) {
             val stripView = suggestionStripView ?: return
             if (text == null) {

@@ -68,6 +68,7 @@ fun ToolbarScreen(
         if (toolbarMode == ToolbarMode.EXPANDABLE || toolbarMode == ToolbarMode.SUGGESTION_STRIP) SuggestionStripView.PREF_MIC_SIZE else null,
         Settings.PREF_INLINE_DICTATION,
         if (prefs.getBoolean(Settings.PREF_INLINE_DICTATION, Defaults.PREF_INLINE_DICTATION)) Settings.PREF_DICTATION_SOUND else null,
+        if (prefs.getBoolean(Settings.PREF_INLINE_DICTATION, Defaults.PREF_INLINE_DICTATION)) Settings.PREF_DICTATION_PAUSE_PERIODS else null,
         if (clipboardToolbarVisible) Settings.PREF_CLIPBOARD_TOOLBAR_KEYS else null,
         if (clipboardToolbarVisible) Settings.PREF_TOOLBAR_CUSTOM_KEY_CODES else null,
         if (toolbarMode == ToolbarMode.EXPANDABLE) Settings.PREF_TOOLBAR_ABOVE_SUGGESTIONS else null,
@@ -112,6 +113,9 @@ fun createToolbarSettings(context: Context) = listOf(
             if (InlineDictation.findService(ctx) == null)
                 Toast.makeText(ctx, R.string.inline_dictation_no_service, Toast.LENGTH_LONG).show()
         }
+    },
+    Setting(context, Settings.PREF_DICTATION_PAUSE_PERIODS, R.string.dictation_pause_periods, R.string.dictation_pause_periods_summary) {
+        SwitchPreference(it, Defaults.PREF_DICTATION_PAUSE_PERIODS)
     },
     Setting(context, Settings.PREF_DICTATION_SOUND, R.string.dictation_sound, R.string.dictation_sound_summary) {
         SwitchPreference(it, Defaults.PREF_DICTATION_SOUND)

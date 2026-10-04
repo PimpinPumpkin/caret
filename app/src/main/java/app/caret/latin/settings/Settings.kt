@@ -371,6 +371,7 @@ class Settings : SharedPreferences.OnSharedPreferenceChangeListener {
         const val PREF_TOOLBAR_ABOVE_SUGGESTIONS = "toolbar_above_suggestions"
         const val PREF_TOOLBAR_OPENS_ACTIONS = "toolbar_opens_actions"
         const val PREF_RECORD_CORRECTIONS = "record_corrections"
+        const val PREF_DICTATION_PAUSE_PERIODS = "dictation_pause_periods"
         const val PREF_PINNED_TOOLBAR_KEYS = "pinned_toolbar_keys"
         const val PREF_TOOLBAR_KEYS = "toolbar_keys"
         const val PREF_AUTO_SHOW_TOOLBAR = "auto_show_toolbar"

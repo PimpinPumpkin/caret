@@ -117,8 +117,8 @@ is visible to the user. Things that need the user's eyes or a decision are colle
 | 2 | Gboard spec: all actions panel | done (0.1.13) |
 | 3 | Correction recorder | done (0.1.14) |
 | 4 | Settings backup that stays small | done (0.1.15) |
-| 5 | Dictation polish in Caret and Alyo: current word highlighted, no pause periods, smooth partial to final | next |
-| 6 | Gboard spec: long-press popups and key previews | |
+| 5 | Dictation polish in Caret and Alyo: current word highlighted, no pause periods, smooth partial to final | done in Caret (0.1.16) and Alyo's recognizer; Alyo's own keyboard still puts a period at every pause |
+| 6 | Gboard spec: long-press popups and key previews | next |
 | 7 | Gboard spec: emoji panel | |
 | 8 | Gboard spec: clipboard, one-handed, floating | |
 | 9 | Gboard spec: settings layout (reorder, Advanced per category, nothing removed) | |

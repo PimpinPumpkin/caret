@@ -23,7 +23,10 @@ import java.util.Locale
  * underlined like a word being typed, and each finished utterance replaces them for good. Listening goes on, one utterance
  * after the other, until the key is tapped again, nothing is heard, or the field goes away.
  */
-class InlineDictation(private val context: Context, private val host: Host) {
+class InlineDictation(
+    private val context: Context, private val host: Host,
+    private val clock: () -> Long = { android.os.SystemClock.elapsedRealtime() },
+) {
     /** What dictation needs from the keyboard. */
     interface Host {
         /** Types [text] at the cursor. */
@@ -42,6 +45,8 @@ class InlineDictation(private val context: Context, private val host: Host) {
         fun onLevel(level: Float)
         /** Whether to play a short sound when listening starts and stops. */
         fun soundsEnabled(): Boolean
+        /** Whether every pause ends the sentence with the period the recognizer puts there. */
+        fun pausePeriods(): Boolean = false
     }
 
     private var recognizer: SpeechRecognizer? = null
@@ -55,6 +60,34 @@ class InlineDictation(private val context: Context, private val host: Host) {
     private var listening = false
     /** What goes in front of the utterance being spoken, set once its first words are shown at the cursor. */
     private var prefix: String? = null
+    /**
+     * When the last utterance ended in a period that nobody said: the recognizer closes a sentence at
+     * every pause. The period is held back; going on soon after carries the sentence on, going on
+     * after a long pause puts it in after all. Zero when no period is owed.
+     */
+    private var owedPeriodSince = 0L
+    /** The utterance being spoken carries on the sentence before it, so it does not start with a capital. */
+    private var continuing = false
+
+    /** Decides how the utterance that is starting joins what is there, once, at its first words. */
+    private fun beginUtterance(): String {
+        val owed = owedPeriodSince
+        owedPeriodSince = 0L
+        continuing = false
+        if (owed != 0L) {
+            if (clock() - owed >= LONG_PAUSE_MILLIS) host.insertText(".")
+            else continuing = true
+        }
+        return spaceBefore()
+    }
+
+    /** [text] as it should read in its place: without a capital when it carries a sentence on. */
+    private fun shaped(text: String): String {
+        if (!continuing || text.isEmpty()) return text
+        val word = text.substringBefore(' ')
+        val keeps = word == "I" || word.startsWith("I'") || (word.length > 1 && word[1].isUpperCase())
+        return if (keeps) text else text.replaceFirstChar { it.lowercase() }
+    }
 
     /**
      * Starts listening, or stops when it is listening already. False when dictation cannot run
@@ -145,6 +178,8 @@ class InlineDictation(private val context: Context, private val host: Host) {
     }
 
     private fun end() {
+        owedPeriodSince = 0L // dictation ends without a period nobody said
+        continuing = false
         if (prefix != null) {
             prefix = null
             host.showPartial("")
@@ -176,17 +211,25 @@ class InlineDictation(private val context: Context, private val host: Host) {
             val text = firstResult(partialResults).trim()
             if (!isActive || text.isEmpty()) return
             // decided before the first words go in, since after that they are what is before the cursor
-            val before = prefix ?: spaceBefore().also { prefix = it }
-            host.showPartial(before + text)
+            val before = prefix ?: beginUtterance().also { prefix = it }
+            host.showPartial(before + shaped(text))
         }
 
         override fun onResults(results: Bundle?) {
             if (!isActive) return
-            val text = firstResult(results).trim()
-            val before = prefix
+            var text = firstResult(results).trim()
+            val shown = prefix
+            val before = shown ?: if (text.isNotEmpty()) beginUtterance() else ""
             prefix = null
-            if (text.isNotEmpty()) host.insertText((before ?: spaceBefore()) + text)
-            else if (before != null) host.showPartial("")
+            text = shaped(text)
+            // the period the recognizer puts at a pause waits to see whether the speaker goes on
+            val spokenEnd = results?.getBoolean(EXTRA_SPOKEN_END, false) == true
+            if (!host.pausePeriods() && !spokenEnd && text.endsWith(".") && !text.endsWith("..")) {
+                text = text.dropLast(1)
+                owedPeriodSince = clock()
+            }
+            if (text.isNotEmpty()) host.insertText(before + text)
+            else if (shown != null) host.showPartial("")
             if (stopAfterResult) {
                 end()
             } else {
@@ -236,6 +279,10 @@ class InlineDictation(private val context: Context, private val host: Host) {
         private const val RMS_LOUD = 10f
         private const val ERROR_MESSAGE_MILLIS = 3000L
         private const val ALYO_PACKAGE = "app.alyo"
+        /** Set by Alyo in its results when the text ends in a mark that was said out loud. */
+        private const val EXTRA_SPOKEN_END = "app.alyo.SPOKEN_END"
+        /** Going on after a silence this long (after the recognizer closed the sentence) starts a new sentence. */
+        const val LONG_PAUSE_MILLIS = 2000L
         private val NO_SPACE_AFTER = setOf('('.code, '['.code, '{'.code, '"'.code, '\''.code, '/'.code, '@'.code)
 
         fun hasPermission(context: Context) =

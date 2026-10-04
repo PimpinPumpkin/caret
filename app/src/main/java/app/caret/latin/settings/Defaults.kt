@@ -178,6 +178,7 @@ object Defaults {
     const val PREF_TOOLBAR_ABOVE_SUGGESTIONS = true
     const val PREF_TOOLBAR_OPENS_ACTIONS = true
     const val PREF_RECORD_CORRECTIONS = true
+    const val PREF_DICTATION_PAUSE_PERIODS = false
     val PREF_PINNED_TOOLBAR_KEYS = defaultPinnedToolbarPref
     val PREF_TOOLBAR_KEYS = defaultToolbarPref
     const val PREF_AUTO_SHOW_TOOLBAR = false
