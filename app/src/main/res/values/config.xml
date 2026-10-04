@@ -34,7 +34,9 @@
     <dimen name="config_popup_keys_keyboard_vertical_correction_holo">-26.4dp</dimen>
     <dimen name="config_key_preview_offset_holo">40.0dp</dimen>
     <dimen name="config_key_preview_offset_lxx">0dp</dimen>
-    <fraction name="config_key_preview_text_ratio">82%</fraction>
+    <!-- Caret: the preview bubble floats above the key instead of covering it -->
+    <dimen name="config_key_preview_offset_rounded">52dp</dimen>
+    <fraction name="config_key_preview_text_ratio">62%</fraction>
     <fraction name="config_key_letter_ratio_holo">55%</fraction>
     <fraction name="config_key_letter_ratio_lxx">55%</fraction>
     <fraction name="config_key_large_letter_ratio_holo">65%</fraction>

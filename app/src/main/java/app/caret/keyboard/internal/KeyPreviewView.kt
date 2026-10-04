@@ -31,6 +31,8 @@ class KeyPreviewView @JvmOverloads constructor(context: Context, attrs: Attribut
 
     init {
         setGravity(Gravity.CENTER)
+        // Caret: a little shadow lifts the preview bubble off the strip behind it
+        elevation = 3 * resources.displayMetrics.density
     }
 
     fun setPreviewVisual(key: Key, iconsSet: KeyboardIconsSet, drawParams: KeyDrawParams) {

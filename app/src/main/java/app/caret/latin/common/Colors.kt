@@ -279,7 +279,8 @@ class DynamicColors(context: Context, override val themeStyle: String, override 
         TOOL_BAR_KEY_ENABLED_BACKGROUND, EMOJI_CATEGORY_SELECTED,
         CLIPBOARD_PIN, SHIFT_KEY_ICON -> accent
         ACTION_KEY_BACKGROUND -> if (hasKeyBorders) functionalRest else accent
-        AUTOFILL_BACKGROUND_CHIP, GESTURE_PREVIEW, POPUP_KEYS_BACKGROUND, MORE_SUGGESTIONS_BACKGROUND, KEY_PREVIEW_BACKGROUND -> adjustedBackground
+        AUTOFILL_BACKGROUND_CHIP, GESTURE_PREVIEW, POPUP_KEYS_BACKGROUND, MORE_SUGGESTIONS_BACKGROUND -> adjustedBackground
+        KEY_PREVIEW_BACKGROUND -> keyBackground // Caret: the preview bubble looks like the key it came from
         // Caret: a quiet tonal button, as on Gboard, instead of the accent color
         TOOL_BAR_EXPAND_KEY_BACKGROUND -> functionalRest
         GESTURE_TRAIL -> gesture
@@ -334,7 +335,7 @@ class DynamicColors(context: Context, override val themeStyle: String, override 
         EMOJI_CATEGORY_SELECTED, CLIPBOARD_PIN, SHIFT_KEY_ICON -> accentColorFilter
         REMOVE_SUGGESTION_ICON, EMOJI_CATEGORY, KEY_TEXT,
             KEY_ICON, ONE_HANDED_MODE_BUTTON, TOOL_BAR_KEY, TOOL_BAR_EXPAND_KEY -> keyTextFilter
-        KEY_PREVIEW_BACKGROUND -> adjustedBackgroundFilter
+        KEY_PREVIEW_BACKGROUND -> colorFilter(keyBackground)
         ACTION_KEY_ICON -> actionKeyIconColorFilter
         else -> colorFilter(get(color))
     }
@@ -343,7 +344,7 @@ class DynamicColors(context: Context, override val themeStyle: String, override 
         if (view.background == null)
             view.setBackgroundColor(Color.WHITE) // set white to make the color filters work
         when (color) {
-            KEY_PREVIEW_BACKGROUND -> view.background.colorFilter = adjustedBackgroundFilter
+            KEY_PREVIEW_BACKGROUND -> view.background.colorFilter = colorFilter(keyBackground)
             FUNCTIONAL_KEY_BACKGROUND, KEY_BACKGROUND, MORE_SUGGESTIONS_WORD_BACKGROUND, SPACE_BAR_BACKGROUND, STRIP_BACKGROUND, CLIPBOARD_SUGGESTION_BACKGROUND -> setColor(view.background, color)
             ONE_HANDED_MODE_BUTTON -> setColor(view.background, if (keyboardBackground == null) MAIN_BACKGROUND else STRIP_BACKGROUND)
             MORE_SUGGESTIONS_BACKGROUND -> view.background.colorFilter = backgroundFilter

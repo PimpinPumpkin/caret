@@ -505,6 +505,9 @@ class MainKeyboardView @JvmOverloads constructor(context: Context, attrs: Attrib
         slidingKeyInputDrawingPreview.dismissSlidingKeyInputPreview()
         panel.showInParent(drawingPreviewPlacerView)
         popupKeysPanel = panel
+        // Caret: the keys step back while a long-press panel is open, as on Gboard
+        dimmedForPopup = true
+        invalidate()
     }
 
     val isShowingPopupKeysPanel: Boolean
@@ -519,6 +522,10 @@ class MainKeyboardView @JvmOverloads constructor(context: Context, attrs: Attrib
         if (panel != null && panel.isShowingInParent()) {
             panel.removeFromParent()
             popupKeysPanel = null
+        }
+        if (dimmedForPopup) {
+            dimmedForPopup = false
+            invalidate()
         }
     }
 
@@ -664,8 +671,15 @@ class MainKeyboardView @JvmOverloads constructor(context: Context, attrs: Attrib
         }
     private val remoteFocusPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply { style = Paint.Style.STROKE }
 
+    private var dimmedForPopup = false
+    private val dimPaint = Paint()
+
     override fun onDraw(canvas: Canvas) {
         super.onDraw(canvas)
+        if (dimmedForPopup) {
+            dimPaint.color = androidx.core.graphics.ColorUtils.setAlphaComponent(Settings.values.colors.get(ColorType.MAIN_BACKGROUND), 150)
+            canvas.drawRect(0f, 0f, width.toFloat(), height.toFloat(), dimPaint)
+        }
         val key = remoteFocusKey ?: return
         val stroke = resources.displayMetrics.density * 3
         remoteFocusPaint.strokeWidth = stroke

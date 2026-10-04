@@ -58,7 +58,21 @@ A search field at the top left, category icons across the top with the current o
 circle, a section title ("Smileys & Emotions"), 8 emoji per row, and at the bottom ABC on the left,
 then tabs for emoji, GIF, stickers and emoticons, and delete on the right.
 
+## 4. Key preview and long-press popups
+
+Gboard: pressing a key shows a white, slightly raised bubble above it with the letter (and three
+small dots when the key has more behind it). Holding opens a panel rounded all the way (a pill for
+one row, a soft rectangle for two), white, with the other keys dimmed behind it; the selected
+entry sits in a filled circle. Accents come first and the default is the most common one.
+
+Done in 0.1.17: the preview is a white raised bubble above the key instead of a tall flag over it
+(letter at 62% of the key height); the long-press panel has 26 dp corners and the selection is a
+pill; the keys dim to 40% while the panel is open.
+
+Still different: Caret's selection uses the accent color with dark text where Gboard uses a dark
+fill with white text; Caret lists the number and the symbol of that key in the panel too.
+
 ## To capture next
 
-Long-press popups and key previews, clipboard, text editing, one-handed and floating modes, the
+Clipboard, text editing, one-handed and floating modes, the
 settings screens, first-run setup, motion.

@@ -46,8 +46,8 @@
         parent="KeyboardView.Rounded_Base"
         >
         <item name="popupKeysKeyboardForActionLayout">@layout/popup_keys_keyboard_for_action_lxx</item>
-        <item name="keyPreviewBackground">@drawable/keyboard_key_feedback_lxx_light</item>
-        <item name="keyPreviewOffset">@dimen/config_key_preview_offset_lxx</item>
+        <item name="keyPreviewBackground">@drawable/keyboard_key_feedback_rounded</item>
+        <item name="keyPreviewOffset">@dimen/config_key_preview_offset_rounded</item>
         <!-- A negative value to disable text shadow layer. -->
         <item name="languageOnSpacebarTextShadowRadius">-1.0</item>
     </style>
