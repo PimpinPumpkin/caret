@@ -77,7 +77,43 @@ pill; the keys dim to 40% while the panel is open.
 Still different: Caret's selection uses the accent color with dark text where Gboard uses a dark
 fill with white text; Caret lists the number and the symbol of that key in the panel too.
 
+## 5. Settings (proposal, not built yet)
+
+Gboard's home screen: Languages, Preferences, Theme, Corrections & suggestions, Glide typing, Voice
+typing, Physical keyboard, Clipboard, Dictionary, Emojis, then sharing, privacy and about. Each
+page is short and split into titled groups (Preferences: Keys, Appearance, Layout, Shortcuts, Key
+press). There is no long list anywhere.
+
+Caret today: nine home entries, but Preferences, Text correction and Toolbar are long flat lists
+that mix what everyone changes with what almost nobody touches, and dictation and clipboard
+settings are spread over other pages.
+
+Proposal. Nothing is removed, every setting stays findable by search:
+
+1. **Home**, in this order: Languages & Layouts; Preferences; Appearance; Text correction; Gesture
+   typing; Voice typing (new); Clipboard (new); Toolbar; Dictionaries; Advanced; About. Secondary
+   layouts moves inside Languages & Layouts.
+2. **Voice typing** (new page) takes what is on the Toolbar page now: dictate inside the keyboard,
+   the sound, period at every pause, microphone on the left, microphone size.
+3. **Clipboard** (new page) takes the clipboard group from Preferences, plus "Suggest clipboard
+   content" from Text correction and "Select clipboard toolbar keys" from Toolbar.
+4. **Each page starts with what people change** and ends with an "Advanced" group that is folded
+   shut until tapped:
+   - Preferences: Keys (number row, emoji key, language switch key, key next to the spacebar), Key
+     press (popup, vibration, sound), Layout (one-handed, split, height). Advanced: hint source,
+     popup key order, functional hints, TLD popups, URL and email layout, redundant popups,
+     language per app.
+   - Text correction: auto-correction and its confidence, auto-capitalization, double-space period,
+     show suggestions, next-word suggestions, personal dictionary, learning from you. Advanced:
+     the autospace switches, more auto-correction, shortcuts, capitalized suggestions, always show
+     suggestions, middle suggestion, contacts and app names, spellchecker.
+   - Toolbar: mode, arrange the toolbar, open above the suggestions, grid opens all actions.
+     Advanced: quick pin, auto show and hide, custom key codes, physical keyboard, direction.
+   - Appearance: theme, colors, style, key borders, background image, keyboard height. Advanced:
+     the scales, fonts, icons, navigation bar.
+   - Gesture typing: models, enable, trail, preview. Advanced: phrase gesture, cooldown, trail
+     lifespan. "Finding swipe mistakes" stays as its own group.
+
 ## To capture next
 
-Clipboard, text editing, one-handed and floating modes, the
-settings screens, first-run setup, motion.
+Text editing, one-handed and floating modes, first-run setup, motion.

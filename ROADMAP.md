@@ -120,8 +120,8 @@ is visible to the user. Things that need the user's eyes or a decision are colle
 | 5 | Dictation polish in Caret and Alyo: current word highlighted, no pause periods, smooth partial to final | done in Caret (0.1.16) and Alyo's recognizer; Alyo's own keyboard still puts a period at every pause |
 | 6 | Gboard spec: long-press popups and key previews | done (0.1.17) |
 | 7 | Gboard spec: emoji panel | category circle done (0.1.18); taller panel and section titles left |
-| 8 | Gboard spec: clipboard, one-handed, floating | next |
-| 9 | Gboard spec: settings layout (reorder, Advanced per category, nothing removed) | |
+| 8 | Gboard spec: clipboard, one-handed, floating | clipboard empty state done (0.1.18); one-handed and floating not compared yet |
+| 9 | Gboard spec: settings layout (reorder, Advanced per category, nothing removed) | proposal in docs/gboard-spec.md section 5, waiting for a yes |
 | 10 | Typing model runtime in Caret (llama.cpp), tested on a small stand-in model | |
 | 11 | Typing fine-tune on simulated taps (when the base model is done), then in Caret, benchmarked against Gboard | |
 | 12 | Touch calibration from recorded corrections | |
@@ -135,6 +135,7 @@ is visible to the user. Things that need the user's eyes or a decision are colle
 - Signal swipe-home fix (0.1.11) and the new look (0.1.12 to 0.1.14): try on the phone and say what
   feels off.
 - Supertonic 3 vs Piper hfc for Alyo and Vela: Supertonic is archived; compare only if wanted.
+- The settings reorganization proposal (docs/gboard-spec.md, section 5): build it as written?
 - Advanced settings still show "Contribute gesture data to HeliBoard" (upstream's data donation
   program, of no use to Caret): hide it?
 
