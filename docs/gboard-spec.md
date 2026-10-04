@@ -30,11 +30,13 @@ Strip: the features (grid) button on the left at 42 dp square, three suggestions
 the center one a bit wider, thin vertical dividers, the voice key on the right. Suggestions use a
 regular weight; the word space would insert is not boxed, just in the center.
 
-Caret changes:
-- Strip 40 to 44 dp; rows 61 to 59 dp so the total height stays the same.
-- 2 dp side margin.
-- Check drawn key size, gaps and corner radius against the numbers above once measured.
-- Function key color: a blue-grey tint for shift, enter and ?123 instead of a darker grey.
+Done in 0.1.12: strip 44 dp; rows 59 dp apart with Gboard's taller gaps (drawn keys about 47 dp high),
+the first row at the same height; only the top row's number hints on the keys (the rest stays a long
+press away); the enter key a tonal pill in the function key color instead of the accent; shift,
+delete and enter a dark tint of the secondary color at night; letter keys a little lighter at night;
+the emoji key colored like a letter key.
+
+Still open: the 2 dp side margin, ?123 as a full pill, label sizes.
 
 ## 2. Toolbar (features panel)
 

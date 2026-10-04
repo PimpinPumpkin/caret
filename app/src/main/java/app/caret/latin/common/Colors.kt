@@ -103,10 +103,15 @@ class DynamicColors(context: Context, override val themeStyle: String, override 
         else ContextCompat.getColor(context, android.R.color.system_accent1_600)
     private fun getBackground(context: Context) = if (isNight) ContextCompat.getColor(context, android.R.color.system_neutral1_900)
         else ContextCompat.getColor(context, android.R.color.system_neutral1_50)
-    private fun getKeyBackground(context: Context) = if (isNight) ContextCompat.getColor(context, android.R.color.system_neutral1_800)
+    // Caret: at night a little lighter than neutral 800, as Gboard's keys are
+    private fun getKeyBackground(context: Context) = if (isNight) ColorUtils.blendARGB(
+            ContextCompat.getColor(context, android.R.color.system_neutral1_800),
+            ContextCompat.getColor(context, android.R.color.system_neutral1_700), 0.35f)
         else  ContextCompat.getColor(context, android.R.color.system_neutral1_0)
     private fun getFunctionalKey(context: Context) = if (isNight) ContextCompat.getColor(context, android.R.color.system_accent2_300)
         else ContextCompat.getColor(context, android.R.color.system_accent2_100)
+    /** Caret: shift, delete, enter and the like at rest; a dark tint of the secondary color at night, as on Gboard */
+    private val functionalRest = if (isNight) ContextCompat.getColor(context, android.R.color.system_accent2_700) else functionalKey
     private fun getKeyText(context: Context) = if (isNight) ContextCompat.getColor(context, android.R.color.system_neutral1_50)
         else ContextCompat.getColor(context, android.R.color.system_accent3_900)
     private fun getKeyHintText(context: Context) = if (isNight) keyText
@@ -228,11 +233,10 @@ class DynamicColors(context: Context, override val themeStyle: String, override 
 
             functionalKeyStateList =
                 if (!isNight) pressedStateList(doubleAdjustedFunctionalKey, functionalKey)
-                else pressedStateList(functionalKey, doubleAdjustedKeyBackground)
+                else pressedStateList(brighten(functionalRest), functionalRest)
 
-            actionKeyStateList =
-                if (!isNight) pressedStateList(gesture, accent)
-                else pressedStateList(doubleAdjustedAccent, accent)
+            // Caret: the enter key is a tonal pill like the other function keys, as on Gboard
+            actionKeyStateList = functionalKeyStateList
 
             spaceBarStateList =
                 if (themeStyle == STYLE_HOLO) pressedStateList(spaceBar, spaceBar)
@@ -264,7 +268,7 @@ class DynamicColors(context: Context, override val themeStyle: String, override 
         keyTextFilter = colorFilter(keyText)
 
         actionKeyIconColorFilter = when {
-            themeStyle == STYLE_HOLO -> keyTextFilter
+            themeStyle == STYLE_HOLO || hasKeyBorders -> keyTextFilter
             // the white icon may not have enough contrast, and can't be adjusted by the user
             isBrightColor(accent) -> colorFilter(Color.DKGRAY)
             else -> null
@@ -272,18 +276,19 @@ class DynamicColors(context: Context, override val themeStyle: String, override 
     }
 
     override fun get(color: ColorType): Int = when (color) {
-        TOOL_BAR_KEY_ENABLED_BACKGROUND, EMOJI_CATEGORY_SELECTED, ACTION_KEY_BACKGROUND,
+        TOOL_BAR_KEY_ENABLED_BACKGROUND, EMOJI_CATEGORY_SELECTED,
         CLIPBOARD_PIN, SHIFT_KEY_ICON -> accent
+        ACTION_KEY_BACKGROUND -> if (hasKeyBorders) functionalRest else accent
         AUTOFILL_BACKGROUND_CHIP, GESTURE_PREVIEW, POPUP_KEYS_BACKGROUND, MORE_SUGGESTIONS_BACKGROUND, KEY_PREVIEW_BACKGROUND -> adjustedBackground
         // Caret: a quiet tonal button, as on Gboard, instead of the accent color
-        TOOL_BAR_EXPAND_KEY_BACKGROUND -> if (!isNight) functionalKey else doubleAdjustedKeyBackground
+        TOOL_BAR_EXPAND_KEY_BACKGROUND -> functionalRest
         GESTURE_TRAIL -> gesture
         KEY_TEXT, SUGGESTION_AUTO_CORRECT, REMOVE_SUGGESTION_ICON, EMOJI_KEY_TEXT, KEY_PREVIEW_TEXT, POPUP_KEY_TEXT,
             KEY_ICON, POPUP_KEY_ICON, ONE_HANDED_MODE_BUTTON, EMOJI_CATEGORY, TOOL_BAR_KEY, FUNCTIONAL_KEY_TEXT,
             EMOJI_SEARCH_TEXT, CLIPBOARD_SUGGESTION_ICON -> keyText
         KEY_HINT_TEXT -> keyHintText
         SPACE_BAR_TEXT -> spaceBarText
-        FUNCTIONAL_KEY_BACKGROUND, EMOJI_SEARCH_BACKGROUND -> if (!isNight) functionalKey else doubleAdjustedKeyBackground
+        FUNCTIONAL_KEY_BACKGROUND, EMOJI_SEARCH_BACKGROUND -> functionalRest
         SPACE_BAR_BACKGROUND -> spaceBar
         MORE_SUGGESTIONS_WORD_BACKGROUND, MAIN_BACKGROUND -> background
         KEY_BACKGROUND -> keyBackground

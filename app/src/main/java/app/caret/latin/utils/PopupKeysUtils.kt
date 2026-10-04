@@ -14,9 +14,10 @@ private const val POPUP_KEYS_LANGUAGE_PRIORITY = "language_priority"
 const val POPUP_KEYS_LAYOUT = "layout"
 private const val POPUP_KEYS_SYMBOLS = "symbols"
 private const val POPUP_KEYS_LANGUAGE = "language"
+// Caret: like Gboard, only the numbers on the top row are shown on the keys; the rest is still a long press away
 const val POPUP_KEYS_LABEL_DEFAULT = POPUP_KEYS_NUMBER + Separators.KV + true + Separators.ENTRY + POPUP_KEYS_LANGUAGE_PRIORITY +
-        Separators.KV + false + Separators.ENTRY + POPUP_KEYS_LAYOUT + Separators.KV + true + Separators.ENTRY +
-        POPUP_KEYS_SYMBOLS + Separators.KV + true + Separators.ENTRY + POPUP_KEYS_LANGUAGE + Separators.KV + false
+        Separators.KV + false + Separators.ENTRY + POPUP_KEYS_LAYOUT + Separators.KV + false + Separators.ENTRY +
+        POPUP_KEYS_SYMBOLS + Separators.KV + false + Separators.ENTRY + POPUP_KEYS_LANGUAGE + Separators.KV + false
 const val POPUP_KEYS_ORDER_DEFAULT = POPUP_KEYS_LANGUAGE_PRIORITY + Separators.KV + true + Separators.ENTRY + POPUP_KEYS_NUMBER +
         Separators.KV + true + Separators.ENTRY + POPUP_KEYS_SYMBOLS + Separators.KV + true + Separators.ENTRY +
         POPUP_KEYS_LAYOUT + Separators.KV + true + Separators.ENTRY + POPUP_KEYS_LANGUAGE + Separators.KV + true
