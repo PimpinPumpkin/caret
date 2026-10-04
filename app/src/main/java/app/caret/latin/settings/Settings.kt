@@ -709,13 +709,20 @@ fun setFloatingKeyboardEnabled(context: Context, enabled: Boolean) =
 fun readFloatingHeight(context: Context): Int {
     val screenWidth = context.resources.displayMetrics.widthPixels
     val key = Settings.PREF_FLOATING_HEIGHT_PREFIX + screenWidth
-    return context.prefs().getInt(key, context.resources.displayMetrics.heightPixels / 3)
+    // Caret: the keys keep the shape they have when the keyboard is docked
+    return context.prefs().getInt(key, (defaultFloatingWidth(context) * 0.6f).toInt())
 }
 
 fun readFloatingWidth(context: Context): Int {
     val screenWidth = context.resources.displayMetrics.widthPixels
     val key = Settings.PREF_FLOATING_WIDTH_PREFIX + screenWidth
-    return context.prefs().getInt(key, screenWidth / 2)
+    return context.prefs().getInt(key, defaultFloatingWidth(context))
+}
+
+/** Caret: four fifths of the short side of the screen, about what Gboard floats at. */
+private fun defaultFloatingWidth(context: Context): Int {
+    val metrics = context.resources.displayMetrics
+    return (minOf(metrics.widthPixels, metrics.heightPixels) * 0.8f).toInt()
 }
 
 fun setFloatingSize(context: Context, width: Int, height: Int) {

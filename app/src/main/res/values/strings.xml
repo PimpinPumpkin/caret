@@ -1075,6 +1075,9 @@ New dictionary:
     <string name="inline_dictation">Dictate inside the keyboard</string>
     <string name="inline_dictation_summary">The microphone key listens right here and types what you say. Uses Alyo\'s speech service when it is switched on in Alyo, otherwise the phone\'s speech recognizer. Without either, the key switches to the voice keyboard as before.</string>
     <string name="inline_dictation_no_service">No speech recognition service found. In Alyo, switch on its use as the phone\'s speech recognizer.</string>
+    <string name="dictation_status">Speech recognizer</string>
+    <string name="dictation_status_ready">Ready. The microphone key dictates with %s.</string>
+    <string name="dictation_status_permission">Caret has no microphone access. Tap to allow it.</string>
     <string name="dictation_pause_periods">Period at every pause</string>
     <string name="dictation_pause_periods_summary">Off: pausing while you dictate does not end the sentence. A period goes in when you say it, or when you go on after a long pause.</string>
     <string name="dictation_sound">Sound when dictation starts and stops</string>

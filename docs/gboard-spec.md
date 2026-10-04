@@ -63,8 +63,18 @@ then tabs for emoji, GIF, stickers and emoticons, and delete on the right.
 
 Done in 0.1.18: the category in view sits in a filled circle. Caret keeps its own bottom row (ABC,
 a search key when an emoji dictionary is installed, the space bar, delete): the space bar there is
-more useful than GIF and sticker tabs Caret has nothing behind. Still different: Gboard's panel is
-taller than the keyboard and shows a section title above each group.
+more useful than GIF and sticker tabs Caret has nothing behind.
+
+Done in 0.1.22: upright, the panel is 124 dp taller than the keyboard (Gboard's height, two more rows)
+and the name of the category in view stands above the list. Still different: no search field in the
+tab row.
+
+## 3b. One-handed and floating
+
+One-handed: the same as Gboard's (keyboard to one side, three buttons beside it), left as it was.
+Floating, done in 0.1.22: starts at four fifths of the screen width with the keys in their docked
+proportions (it was half the width with stretched keys), centered, as a rounded card with a shadow;
+the handles take the color of the key labels.
 
 ## 4. Key preview and long-press popups
 
@@ -123,4 +133,4 @@ Nothing is removed, every setting stays findable by search:
 
 ## To capture next
 
-Text editing, one-handed and floating modes, first-run setup, motion.
+Text editing, first-run setup, motion.

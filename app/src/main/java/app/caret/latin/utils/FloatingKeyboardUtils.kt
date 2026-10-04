@@ -3,11 +3,13 @@ package app.caret.latin.utils
 import android.annotation.SuppressLint
 import android.content.Context
 import android.content.res.Resources
+import android.graphics.Outline
 import android.graphics.Rect
 import android.os.Build
 import android.view.MotionEvent
 import android.view.View
 import android.view.ViewGroup
+import android.view.ViewOutlineProvider
 import android.widget.ImageView
 import androidx.core.content.edit
 import androidx.core.view.ViewCompat
@@ -25,6 +27,8 @@ object FloatingKeyboardUtils {
     private val TAG = this::class.java.simpleName
     private val windowFrame = Rect()
     private var extraHeight = 0f
+    private const val CORNER_DP = 20
+    private const val ELEVATION_DP = 6
 
     @JvmStatic
     fun setFloating(view: View?) {
@@ -45,6 +49,16 @@ object FloatingKeyboardUtils {
         if (DebugFlags.DEBUG_ENABLED)
             Log.d(TAG, "place floating view at $x, $y, width ${Settings.values.floatingWidth}, height ${Settings.values.floatingHeight}")
         ViewLayoutUtils.placeViewAt(view, x, y, Settings.values.floatingWidth, ViewGroup.LayoutParams.WRAP_CONTENT)
+        // Caret: a rounded card that casts a shadow, so it reads as lying on top of the app
+        val density = view.resources.displayMetrics.density
+        view.outlineProvider = object : ViewOutlineProvider() {
+            override fun getOutline(v: View, outline: Outline) = outline.setRoundRect(0, 0, v.width, v.height, CORNER_DP * density)
+        }
+        view.clipToOutline = true
+        view.elevation = ELEVATION_DP * density
+        // Caret: the handles in the color of the key labels, they were white on a light keyboard
+        for (id in intArrayOf(R.id.drag_handle, R.id.resize_handle))
+            view.findViewById<ImageView>(id)?.let { Settings.values.colors.setColor(it, app.caret.latin.common.ColorType.TOOL_BAR_KEY) }
         if (view.findViewById<View>(R.id.float_handle_container)?.isVisible == true)
             return
         view.findViewById<View>(R.id.float_handle_container)?.isVisible = true
@@ -62,6 +76,9 @@ object FloatingKeyboardUtils {
         lp.height = ViewGroup.LayoutParams.MATCH_PARENT
         lp.leftMargin = 0
         lp.topMargin = 0
+        view.outlineProvider = ViewOutlineProvider.BACKGROUND
+        view.clipToOutline = false
+        view.elevation = 0f
         view.findViewById<View>(R.id.float_handle_container)?.isGone = true
     }
 
@@ -74,7 +91,9 @@ object FloatingKeyboardUtils {
         val maxX = maxX.coerceAtLeast(0)
         val maxY = maxY.coerceAtLeast(0)
         val width = context.resources.displayMetrics.widthPixels
-        val x = context.prefs().getInt(Settings.PREF_FLOATING_POS_X_PREFIX + width, width / 2)
+        // Caret: starts centered. Not from maxX and maxY: the touchable region asks without limits
+        // and has to get the same place.
+        val x = context.prefs().getInt(Settings.PREF_FLOATING_POS_X_PREFIX + width, (width - Settings.values.floatingWidth) / 2)
         val y = context.prefs().getInt(Settings.PREF_FLOATING_POS_Y_PREFIX + width, context.resources.displayMetrics.heightPixels / 2)
         if (x > maxX || y > maxY)
             savePosition(context, maxX, maxY)

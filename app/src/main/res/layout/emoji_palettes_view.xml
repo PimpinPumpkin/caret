@@ -15,6 +15,16 @@
     android:background="@android:color/transparent"
     style="?attr/emojiPalettesViewStyle"
 >
+    <!-- Caret: the name of the category in view, as on Gboard -->
+    <TextView
+        android:id="@+id/emoji_section_title"
+        android:layout_width="match_parent"
+        android:layout_height="26dp"
+        android:paddingStart="12dp"
+        android:paddingEnd="12dp"
+        android:gravity="center_vertical"
+        android:singleLine="true"
+        android:textSize="13sp" />
     <androidx.viewpager2.widget.ViewPager2
         android:id="@+id/emoji_pager"
         android:layout_width="match_parent"

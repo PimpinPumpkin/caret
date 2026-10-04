@@ -15,6 +15,7 @@ import app.caret.latin.utils.getActivity
 import app.caret.latin.utils.prefs
 import app.caret.settings.SearchSettingsScreen
 import app.caret.settings.SettingsActivity
+import app.caret.settings.SettingsWithoutKey
 
 /** Dictation: what the microphone key does and how it looks. The settings themselves are defined with the toolbar's. */
 @Composable
@@ -31,6 +32,7 @@ fun VoiceTypingScreen(onClickBack: () -> Unit) {
         title = stringResource(R.string.settings_screen_voice),
         settings = listOf(
             Settings.PREF_INLINE_DICTATION,
+            if (dictation) SettingsWithoutKey.DICTATION_STATUS else null,
             if (dictation) Settings.PREF_DICTATION_SOUND else null,
             if (dictation) Settings.PREF_DICTATION_PAUSE_PERIODS else null,
             if (micOnStrip) SuggestionStripView.PREF_MIC_ON_LEFT else null,

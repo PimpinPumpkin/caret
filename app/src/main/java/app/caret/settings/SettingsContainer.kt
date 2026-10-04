@@ -85,6 +85,7 @@ object SettingsWithoutKey {
     const val LOAD_GESTURE_LIB = "load_gesture_library"
     const val SWIPE_MODELS = "swipe_models"
     const val TYPING_MODEL = "typing_model"
+    const val DICTATION_STATUS = "dictation_status"
     const val SWIPE_PRACTICE = "swipe_practice"
     const val SWIPE_RECORDING_SAVE = "swipe_recording_save"
     const val CORRECTIONS_SAVE = "corrections_save"

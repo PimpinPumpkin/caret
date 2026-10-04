@@ -202,7 +202,7 @@ class EmojiPalettesView(context: Context, attrs: AttributeSet?, defStyle: Int) :
         // The main keyboard expands to the entire this {@link KeyboardView}.
         val width = (ResourceUtils.getKeyboardWidth(getContext(), Settings.values)
                 + paddingLeft + paddingRight)
-        val height = (ResourceUtils.getSecondaryKeyboardHeight(res, Settings.values)
+        val height = (ResourceUtils.getSecondaryKeyboardHeight(res, Settings.values) + emojiLayoutParams.extraHeight
                 + paddingTop + paddingBottom)
         emojiCategoryPageIndicatorView!!.indicatorWidth = width
         setMeasuredDimension(width, height)
@@ -418,6 +418,10 @@ class EmojiPalettesView(context: Context, attrs: AttributeSet?, defStyle: Int) :
         val oldCategory = emojiCategory.currentCategory
         if (initial || oldCategory != category) {
             emojiCategory.currentCategory = category
+            findViewById<android.widget.TextView>(R.id.emoji_section_title)?.let {
+                it.text = emojiCategory.getAccessibilityDescription(category)
+                it.setTextColor(Settings.values.colors.get(ColorType.KEY_HINT_TEXT))
+            }
 
             if (pager.getScrollState() != ViewPager2.SCROLL_STATE_DRAGGING) {
                 // Not swiping

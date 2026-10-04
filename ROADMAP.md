@@ -119,8 +119,8 @@ is visible to the user. Things that need the user's eyes or a decision are colle
 | 4 | Settings backup that stays small | done (0.1.15) |
 | 5 | Dictation polish in Caret and Alyo: current word highlighted, no pause periods, smooth partial to final | done in Caret (0.1.16) and Alyo's recognizer; Alyo's own keyboard still puts a period at every pause |
 | 6 | Gboard spec: long-press popups and key previews | done (0.1.17) |
-| 7 | Gboard spec: emoji panel | category circle done (0.1.18); taller panel and section titles left |
-| 8 | Gboard spec: clipboard, one-handed, floating | clipboard empty state done (0.1.18); one-handed and floating not compared yet |
+| 7 | Gboard spec: emoji panel | done (0.1.18, taller panel and section title in 0.1.22) |
+| 8 | Gboard spec: clipboard, one-handed, floating | done (0.1.18; floating keyboard as a proportional rounded card in 0.1.22; one-handed already matched) |
 | 9 | Gboard spec: settings layout (reorder, Advanced per category, nothing removed) | done (0.1.19) |
 | 10 | Typing model runtime in Caret (llama.cpp), tested on a small stand-in model | done: `lm/native` + `TypingModel`, a GGUF file imported under Text correction > Advanced ranks corrections and next words. With an early checkpoint (4% of training): 97.1% against 96.8% with the swipe context model, no clean rare word changed. About 30 ms per keystroke on the emulator, in the background; to measure on a phone and to speed up (quantization, ARM dot product) |
 | 10b | Gboard defaults (edge margin, ?123 pill, vibration on) and nine more color themes of our own (FUTO's cannot be copied: its license is not GPL-compatible) | done (0.1.20) |

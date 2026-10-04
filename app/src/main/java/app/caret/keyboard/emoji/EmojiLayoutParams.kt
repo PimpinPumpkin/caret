@@ -19,6 +19,8 @@ internal class EmojiLayoutParams(res: Resources) {
     val emojiKeyboardHeight: Int
     private val emojiCategoryPageIdViewHeight: Int
     val bottomRowKeyboardHeight: Int
+    /** How much taller than the keyboard the emoji panel is. */
+    val extraHeight: Int
 
     init {
         val sv = Settings.values
@@ -37,7 +39,14 @@ internal class EmojiLayoutParams(res: Resources) {
         val pageIdHeight = res.getDimension(R.dimen.config_emoji_category_page_id_height)
         emojiCategoryPageIdViewHeight = pageIdHeight.toInt()
         val offset = 1.25f * res.displayMetrics.density * sv.keyboardHeightScale // like ClipboardLayoutParams
-        val emojiListHeight = defaultKeyboardHeight - bottomRowKeyboardHeight - bottomPadding + (offset.toInt())
+        // Caret: upright, the emoji panel is taller than the keyboard and shows two more rows, as on Gboard;
+        // the section title above the list comes out of that
+        val upright = res.configuration.orientation != android.content.res.Configuration.ORIENTATION_LANDSCAPE
+            && !sv.isFloatingKeyboard
+        val taller = if (upright) (EXTRA_HEIGHT_DP * res.displayMetrics.density * sv.keyboardHeightScale).toInt() else 0
+        val title = (SECTION_TITLE_DP * res.displayMetrics.density).toInt()
+        extraHeight = taller
+        val emojiListHeight = defaultKeyboardHeight - bottomRowKeyboardHeight - bottomPadding + (offset.toInt()) + taller - title
         emojiListBottomMargin = 0
         emojiKeyboardHeight = emojiListHeight - emojiCategoryPageIdViewHeight - emojiListBottomMargin
     }
@@ -53,5 +62,10 @@ internal class EmojiLayoutParams(res: Resources) {
         val lp = v.layoutParams as LinearLayout.LayoutParams
         lp.height = emojiCategoryPageIdViewHeight
         v.layoutParams = lp
+    }
+
+    companion object {
+        private const val EXTRA_HEIGHT_DP = 124
+        private const val SECTION_TITLE_DP = 26
     }
 }

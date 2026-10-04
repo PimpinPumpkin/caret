@@ -11,7 +11,9 @@ import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.platform.LocalContext
@@ -42,6 +44,7 @@ import app.caret.latin.utils.NextScreenIcon
 import app.caret.latin.utils.Theme
 import app.caret.settings.dialogs.ToolbarKeysCustomizer
 import app.caret.settings.initPreview
+import app.caret.settings.SettingsWithoutKey
 import app.caret.settings.preferences.ListPreference
 import app.caret.settings.preferences.Preference
 import app.caret.settings.preferences.ReorderSwitchPreference
@@ -108,6 +111,34 @@ fun createToolbarSettings(context: Context) = listOf(
             if (InlineDictation.findService(ctx) == null)
                 Toast.makeText(ctx, R.string.inline_dictation_no_service, Toast.LENGTH_LONG).show()
         }
+    },
+    Setting(context, SettingsWithoutKey.DICTATION_STATUS, R.string.dictation_status) { setting ->
+        // what the microphone key will do right now, and a tap to fix what is missing
+        val ctx = LocalContext.current
+        var refresh by remember { mutableIntStateOf(0) }
+        val askForMicrophone = rememberLauncherForActivityResult(ActivityResultContracts.RequestPermission()) { refresh++ }
+        val service = remember(refresh) { InlineDictation.findService(ctx) }
+        val allowed = remember(refresh) { InlineDictation.hasPermission(ctx) }
+        val name = service?.let { found ->
+            try {
+                ctx.packageManager.getApplicationLabel(ctx.packageManager.getApplicationInfo(found.packageName, 0)).toString()
+            } catch (e: Exception) {
+                found.packageName
+            }
+        }
+        Preference(
+            name = setting.title,
+            description = when {
+                !allowed -> stringResource(R.string.dictation_status_permission)
+                name == null -> stringResource(R.string.inline_dictation_no_service)
+                else -> stringResource(R.string.dictation_status_ready, name)
+            },
+            onClick = {
+                if (!allowed) askForMicrophone.launch(android.Manifest.permission.RECORD_AUDIO)
+                else if (name == null) ctx.packageManager.getLaunchIntentForPackage("app.alyo")?.let { ctx.startActivity(it) }
+                refresh++
+            },
+        )
     },
     Setting(context, Settings.PREF_DICTATION_PAUSE_PERIODS, R.string.dictation_pause_periods, R.string.dictation_pause_periods_summary) {
         SwitchPreference(it, Defaults.PREF_DICTATION_PAUSE_PERIODS)
