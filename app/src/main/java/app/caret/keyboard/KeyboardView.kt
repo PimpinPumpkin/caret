@@ -56,6 +56,18 @@ open class KeyboardView @JvmOverloads constructor(context: Context, attrs: Attri
     // Caret: the key that switches between letters and symbols is a pill in the function key color, as on Gboard
     private val layerKeyBackground: Drawable
 
+    // Caret: the small hints are drawn heavier than the letters, as on Gboard, so they stay readable at their size
+    private var hintTypefaceBase: Typeface? = null
+    private var hintTypefaceHeavy: Typeface? = null
+    private fun hintTypeface(base: Typeface): Typeface {
+        if (android.os.Build.VERSION.SDK_INT < android.os.Build.VERSION_CODES.P) return base
+        if (hintTypefaceBase !== base) {
+            hintTypefaceBase = base
+            hintTypefaceHeavy = Typeface.create(base, 600, false)
+        }
+        return hintTypefaceHeavy ?: base
+    }
+
     private fun backgroundOf(key: Key): Drawable {
         if ((key.code == KeyCode.SYMBOL_ALPHA || key.code == KeyCode.ALPHA) && key.hasFunctionalBackground()) {
             // the action key state is the one the styles draw as a pill
@@ -433,7 +445,7 @@ open class KeyboardView @JvmOverloads constructor(context: Context, attrs: Attri
             paint.setTextSize(key.selectHintTextSize(params) * hintFontSizeMultiplier)
             paint.setColor(key.selectHintTextColor(params))
             // TODO: Should add a way to specify type face for hint letters
-            paint.setTypeface(KeyboardTypeface.resolve(hintLabel, Typeface.DEFAULT_BOLD))
+            paint.setTypeface(hintTypeface(KeyboardTypeface.resolve(hintLabel, Typeface.DEFAULT_BOLD)))
             blendAlpha(paint, params.animAlpha)
             val labelCharHeight = TypefaceUtils.getReferenceCharHeight(paint)
             val labelCharWidth = TypefaceUtils.getReferenceCharWidth(paint)

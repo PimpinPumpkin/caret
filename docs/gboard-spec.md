@@ -39,7 +39,8 @@ the emoji key colored like a letter key.
 Done in 0.1.20: the 2 dp margin at the screen edges, ?123 and ABC as pills, vibration on key press
 on by default as on Gboard.
 
-Still open: label sizes.
+Done in 0.1.25: the number hints are drawn in a heavier weight, as Gboard's are. Letter sizes measured
+the same within a pixel or two, left alone.
 
 ## 2. Toolbar (features panel)
 
@@ -131,6 +132,18 @@ Nothing is removed, every setting stays findable by search:
    - Gesture typing: models, enable, trail, preview. Advanced: phrase gesture, cooldown, trail
      lifespan. "Finding swipe mistakes" stays as its own group.
 
+## 6. Text editing
+
+Gboard's Text editing tile opens a panel with a large arrow cluster (left and right as tall keys, up,
+Select and down between them), line start and end below, and Select all, Copy, Paste and delete in a
+tinted column on the right.
+
+Done in 0.1.25: Caret's arrow layout is called Text editing and is one aligned grid: the arrow cluster
+in the letter key color (word left and right, the arrows, select word, line start and end; hold the
+last two for the start and end of the text), with undo, cut, select all, copy, paste, clipboard and
+redo around it in the function key color. Shift with an arrow selects, in place of Gboard's Select
+switch. Keys cannot span rows in Caret's layouts, so there are no tall arrows.
+
 ## To capture next
 
-Text editing, first-run setup, motion.
+First-run setup, motion (needs screen recordings to compare), a search field in the emoji tab row.

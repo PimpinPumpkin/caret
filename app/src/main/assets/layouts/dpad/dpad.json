@@ -1,21 +1,24 @@
 [
   [
-    { "label": "copy", "type": "function", "popup": { "main": { "label": "cut" } } },
-    { "label": "full_left", "width": 0.15, "popup": { "main": { "label": "page_start" } } },
-    { "label": "up", "width": 0.2 },
-    { "label": "full_right", "width": 0.15, "popup": { "main": { "label": "page_end" } } },
-    { "label": "paste", "type": "function", "popup": { "main": { "label": "clipboard" } } }
+    { "label": "undo", "type": "function", "width": 0.15 },
+    { "label": "word_left", "type": "character", "width": 0.175 },
+    { "label": "up", "type": "character", "width": 0.175 },
+    { "label": "word_right", "type": "character", "width": 0.175 },
+    { "label": "select_all", "type": "function", "width": 0.175 },
+    { "label": "redo", "type": "function", "width": 0.15 }
   ],
   [
-    { "label": "left", "width": 0.2 },
-    { "label": "select_word", "type": "function", "width": 0.2, "popup": { "main": { "label": "select_all" } } },
-    { "label": "right", "width": 0.2 }
+    { "label": "cut", "type": "function", "width": 0.15 },
+    { "label": "left", "type": "character", "width": 0.175 },
+    { "label": "select_word", "type": "character", "width": 0.175 },
+    { "label": "right", "type": "character", "width": 0.175 },
+    { "label": "copy", "type": "function", "width": 0.175 },
+    { "label": "clipboard", "type": "function", "width": 0.15 }
   ],
   [
-    { "label": "undo", "type": "function" },
-    { "label": "word_left", "width": 0.15 },
-    { "label": "down", "width": 0.2 },
-    { "label": "word_right", "width": 0.15 },
-    { "label": "redo", "type": "function" }
+    { "label": "full_left", "type": "character", "width": 0.175, "popup": { "main": { "label": "page_start" } } },
+    { "label": "down", "type": "character", "width": 0.175 },
+    { "label": "full_right", "type": "character", "width": 0.175, "popup": { "main": { "label": "page_end" } } },
+    { "label": "paste", "type": "function", "width": 0.175 }
   ]
 ]

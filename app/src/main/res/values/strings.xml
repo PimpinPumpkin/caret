@@ -600,7 +600,7 @@ language, hence "No language". -->
     <!-- Name for numpad layout in landscape mode -->
     <string name="layout_numpad_landscape" tools:keep="@string/layout_numpad_landscape">Numpad (landscape)</string>
     <!-- Name for D-pad layout -->
-    <string name="layout_dpad" tools:keep="@string/layout_dpad">D-pad</string>
+    <string name="layout_dpad" tools:keep="@string/layout_dpad">Text editing</string>
     <!-- Name for number row layout -->
     <string name="layout_number_row" tools:keep="@string/layout_number_row">Number row</string>
     <!-- Name for number row basic layout -->
