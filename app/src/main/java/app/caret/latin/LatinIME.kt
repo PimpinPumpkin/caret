@@ -1492,8 +1492,8 @@ class LatinIME : InputMethodService(),
             if (!(settings.current.inlineDictation && inlineDictation.toggle()))
                 richImm.switchToShortcutIme(this)
         }
-        // Caret: right after dictating, delete takes the whole phrase back
-        if (KeyCode.DELETE == event.keyCode && !dictationComposing) {
+        // Caret: right after dictating, delete takes the whole phrase back, for those who switched that on
+        if (KeyCode.DELETE == event.keyCode && !dictationComposing && settings.current.dictationDeletePhrase) {
             val length = inlineDictation.phraseToTakeBack { inputLogic.connection.getTextBeforeCursor(it, 0) }
             if (length > 0) {
                 handler.cancelResumeSuggestions()

@@ -35,6 +35,7 @@ fun VoiceTypingScreen(onClickBack: () -> Unit) {
             if (dictation) SettingsWithoutKey.DICTATION_STATUS else null,
             if (dictation) Settings.PREF_DICTATION_SOUND else null,
             if (dictation) Settings.PREF_DICTATION_PAUSE_PERIODS else null,
+            if (dictation) Settings.PREF_DICTATION_DELETE_PHRASE else null,
             if (micOnStrip) SuggestionStripView.PREF_MIC_ON_LEFT else null,
             if (micOnStrip) SuggestionStripView.PREF_MIC_SIZE else null,
         )

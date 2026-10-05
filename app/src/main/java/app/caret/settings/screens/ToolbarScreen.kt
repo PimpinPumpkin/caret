@@ -140,6 +140,9 @@ fun createToolbarSettings(context: Context) = listOf(
             },
         )
     },
+    Setting(context, Settings.PREF_DICTATION_DELETE_PHRASE, R.string.dictation_delete_phrase, R.string.dictation_delete_phrase_summary) {
+        SwitchPreference(it, Defaults.PREF_DICTATION_DELETE_PHRASE)
+    },
     Setting(context, Settings.PREF_DICTATION_PAUSE_PERIODS, R.string.dictation_pause_periods, R.string.dictation_pause_periods_summary) {
         SwitchPreference(it, Defaults.PREF_DICTATION_PAUSE_PERIODS)
     },

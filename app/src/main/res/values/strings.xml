@@ -1075,6 +1075,8 @@ New dictionary:
     <string name="inline_dictation">Dictate inside the keyboard</string>
     <string name="inline_dictation_summary">The microphone key listens right here and types what you say. Uses Alyo\'s speech service when it is switched on in Alyo, otherwise the phone\'s speech recognizer. Without either, the key switches to the voice keyboard as before.</string>
     <string name="inline_dictation_no_service">No speech recognition service found. In Alyo, switch on its use as the phone\'s speech recognizer.</string>
+    <string name="dictation_delete_phrase">Delete takes back the whole phrase</string>
+    <string name="dictation_delete_phrase_summary">Right after you dictate, one press of delete removes everything you just said. Off: delete removes one letter, as always.</string>
     <string name="dictation_status">Speech recognizer</string>
     <string name="dictation_status_ready">Ready. The microphone key dictates with %s.</string>
     <string name="dictation_status_permission">Caret has no microphone access. Tap to allow it.</string>
