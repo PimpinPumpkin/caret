@@ -128,7 +128,7 @@ is visible to the user. Things that need the user's eyes or a decision are colle
 | 12 | Touch calibration from recorded corrections | |
 | 13 | Personal corrections (remember fixes, stop correcting restored words) | done (0.1.21): a fix made twice is applied from then on, a word taken back twice is left alone, taking a learned fix back unlearns it (`PersonalCorrections`) |
 | 14 | Own GPL swipe models on FUTO's MIT dataset | |
-| 15 | Gboard spec: first-run setup, motion | |
+| 15 | Gboard spec: first-run setup, motion | first-run done (voice typing step in 0.1.26), text editing layout and hint weight in 0.1.25; motion left (needs screen recordings) |
 | 16 | 1.0: translations, TalkBack, tablets, public repo, F-Droid | |
 
 ### Asks

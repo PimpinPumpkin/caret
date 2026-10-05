@@ -1077,6 +1077,9 @@ New dictionary:
     <string name="inline_dictation_no_service">No speech recognition service found. In Alyo, switch on its use as the phone\'s speech recognizer.</string>
     <string name="dictation_delete_phrase">Delete takes back the whole phrase</string>
     <string name="dictation_delete_phrase_summary">Right after you dictate, one press of delete removes everything you just said. Off: delete removes one letter, as always.</string>
+    <string name="setup_voice_title">Voice typing</string>
+    <string name="setup_voice_instruction">The microphone key can listen right in the keyboard and type what you say, using the speech recognizer on this phone. Caret needs the microphone for that.</string>
+    <string name="setup_voice_action">Turn on</string>
     <string name="dictation_status">Speech recognizer</string>
     <string name="dictation_status_ready">Ready. The microphone key dictates with %s.</string>
     <string name="dictation_status_permission">Caret has no microphone access. Tap to allow it.</string>

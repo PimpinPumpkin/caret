@@ -146,4 +146,8 @@ switch. Keys cannot span rows in Caret's layouts, so there are no tall arrows.
 
 ## To capture next
 
-First-run setup, motion (needs screen recordings to compare), a search field in the emoji tab row.
+Motion (needs screen recordings to compare), a search field in the emoji tab row.
+
+First-run setup is Caret's own (one screen, enable, switch, swipe models) and already reads better
+than Gboard's three bare steps; 0.1.26 adds an optional Voice typing step when the phone has a speech
+recognizer: it asks for the microphone and turns dictation in the keyboard on.

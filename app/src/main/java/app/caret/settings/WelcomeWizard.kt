@@ -59,7 +59,13 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import app.caret.latin.R
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
+import androidx.core.content.edit
+import app.caret.latin.settings.Defaults
 import app.caret.latin.swipe.FutoSwipe
+import app.caret.latin.utils.prefs
+import app.caret.latin.voice.InlineDictation
 import app.caret.latin.swipe.SwipeModels
 import app.caret.latin.utils.Log
 import app.caret.latin.utils.Theme
@@ -88,6 +94,19 @@ fun WelcomeWizard(
     var swipeProgress: Float? by remember { mutableStateOf(null) }
     var swipeError: String? by remember { mutableStateOf(null) }
     val scope = rememberCoroutineScope()
+    // dictation inside the keyboard is offered when the phone has a speech recognizer (Alyo, for one)
+    val prefs = ctx.prefs()
+    val canDictate = remember { InlineDictation.findService(ctx) != null }
+    var voiceOn by remember {
+        mutableStateOf(prefs.getBoolean(app.caret.latin.settings.Settings.PREF_INLINE_DICTATION, Defaults.PREF_INLINE_DICTATION) && InlineDictation.hasPermission(ctx))
+    }
+    var voiceSkipped by rememberSaveable { mutableStateOf(false) }
+    val askForMicrophone = rememberLauncherForActivityResult(ActivityResultContracts.RequestPermission()) { granted ->
+        if (granted) {
+            prefs.edit { putBoolean(app.caret.latin.settings.Settings.PREF_INLINE_DICTATION, true) }
+            voiceOn = true
+        }
+    }
 
     // the system does not tell us when the user enables or picks the keyboard, so ask
     LaunchedEffect(Unit) {
@@ -108,6 +127,7 @@ fun WelcomeWizard(
         !enabled -> 1
         !current -> 2
         !swipeDone -> 3
+        canDictate && !voiceOn && !voiceSkipped -> 4
         else -> 0
     }
 
@@ -192,6 +212,20 @@ fun WelcomeWizard(
                         }) { Text(stringResource(R.string.setup_swipe_download)) }
                         TextButton(onClick = { swipeSkipped = true }) { Text(stringResource(R.string.setup_swipe_skip)) }
                     }
+                }
+            }
+            if (canDictate) StepCard(
+                number = 4,
+                title = stringResource(R.string.setup_voice_title),
+                instruction = stringResource(R.string.setup_voice_instruction),
+                done = voiceOn,
+                active = activeStep == 4,
+            ) {
+                Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                    Button(onClick = { askForMicrophone.launch(android.Manifest.permission.RECORD_AUDIO) }) {
+                        Text(stringResource(R.string.setup_voice_action))
+                    }
+                    TextButton(onClick = { voiceSkipped = true }) { Text(stringResource(R.string.setup_swipe_skip)) }
                 }
             }
             AnimatedVisibility(activeStep == 0) {
