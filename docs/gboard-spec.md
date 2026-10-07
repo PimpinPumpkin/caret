@@ -67,8 +67,10 @@ a search key when an emoji dictionary is installed, the space bar, delete): the 
 more useful than GIF and sticker tabs Caret has nothing behind.
 
 Done in 0.1.22: upright, the panel is 124 dp taller than the keyboard (Gboard's height, two more rows)
-and the name of the category in view stands above the list. Still different: no search field in the
-tab row.
+and the name of the category in view stands above the list. Done in 0.1.27: a Search field at the
+start of the tab row with the tabs scrolling beside it, in place of the search key in the bottom row.
+It is there when an emoji dictionary is installed for a language in use; without one there is
+nothing to search.
 
 ## 3b. One-handed and floating
 
@@ -146,7 +148,7 @@ switch. Keys cannot span rows in Caret's layouts, so there are no tall arrows.
 
 ## To capture next
 
-Motion (needs screen recordings to compare), a search field in the emoji tab row.
+Motion (needs screen recordings to compare).
 
 First-run setup is Caret's own (one screen, enable, switch, swipe models) and already reads better
 than Gboard's three bare steps; 0.1.26 adds an optional Voice typing step when the phone has a speech

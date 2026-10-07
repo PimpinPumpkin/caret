@@ -217,7 +217,10 @@ class EmojiPalettesView(context: Context, attrs: AttributeSet?, defStyle: Int) :
         iconView.setContentDescription(emojiCategory.getAccessibilityDescription(category))
         iconView.setTag(category)
         host!!.addView(iconView)
-        iconView.setLayoutParams(LinearLayout.LayoutParams(0, ViewGroup.LayoutParams.MATCH_PARENT, 1f))
+        // beside the search field the tabs keep their width and scroll, otherwise they share the row
+        iconView.setLayoutParams(
+            if (tabScroll != null) LinearLayout.LayoutParams((TAB_WIDTH_DP * resources.displayMetrics.density).toInt(), ViewGroup.LayoutParams.MATCH_PARENT)
+            else LinearLayout.LayoutParams(0, ViewGroup.LayoutParams.MATCH_PARENT, 1f))
         iconView.setOnClickListener(this)
         if (category == EmojiCategory.Category.RECENTS) {
             iconView.setOnLongClickListener { v ->
@@ -229,14 +232,64 @@ class EmojiPalettesView(context: Context, attrs: AttributeSet?, defStyle: Int) :
         }
     }
 
+    /** The row the category tabs scroll in, when the search field stands beside them. */
+    private var tabScroll: android.widget.HorizontalScrollView? = null
+
+    /**
+     * Caret: a search field at the start of the tab row, as on Gboard, with the tabs scrolling beside it.
+     * Returns the row the tabs go into.
+     */
+    private fun addSearchField(strip: LinearLayout): LinearLayout {
+        val density = resources.displayMetrics.density
+        val field = android.widget.TextView(context).apply {
+            text = context.getString(R.string.emoji_search_field)
+            contentDescription = context.getString(R.string.emoji_search_field)
+            gravity = android.view.Gravity.CENTER_VERTICAL
+            textSize = 14f
+            maxLines = 1
+            setTextColor(Settings.values.colors.get(ColorType.KEY_HINT_TEXT))
+            val icon = androidx.core.content.ContextCompat.getDrawable(context, R.drawable.sym_keyboard_search_rounded)?.mutate()
+            val iconSize = (18 * density).toInt()
+            icon?.setBounds(0, 0, iconSize, iconSize)
+            icon?.setTint(Settings.values.colors.get(ColorType.EMOJI_CATEGORY))
+            setCompoundDrawablesRelative(icon, null, null, null)
+            compoundDrawablePadding = (6 * density).toInt()
+            setPaddingRelative((10 * density).toInt(), 0, (14 * density).toInt(), 0)
+            background = android.graphics.drawable.GradientDrawable().apply {
+                cornerRadius = 100 * density
+                setColor(Settings.values.colors.get(ColorType.FUNCTIONAL_KEY_BACKGROUND))
+            }
+            setOnClickListener {
+                keyboardActionListener.onPressKey(KeyCode.EMOJI_SEARCH, 0, 1, HapticEvent.KEY_PRESS)
+                keyboardActionListener.onCodeInput(KeyCode.EMOJI_SEARCH, NOT_A_COORDINATE, NOT_A_COORDINATE, false)
+                keyboardActionListener.onReleaseKey(KeyCode.EMOJI_SEARCH, false)
+            }
+        }
+        strip.addView(field, LinearLayout.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, (32 * density).toInt()).apply {
+            gravity = android.view.Gravity.CENTER_VERTICAL
+            marginStart = (8 * density).toInt()
+            marginEnd = (4 * density).toInt()
+        })
+        val row = LinearLayout(context).apply { orientation = LinearLayout.HORIZONTAL }
+        val scroll = android.widget.HorizontalScrollView(context).apply {
+            isHorizontalScrollBarEnabled = false
+            isFillViewport = true
+            addView(row, ViewGroup.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.MATCH_PARENT))
+        }
+        strip.addView(scroll, LinearLayout.LayoutParams(0, ViewGroup.LayoutParams.MATCH_PARENT, 1f))
+        tabScroll = scroll
+        return row
+    }
+
     @SuppressLint("ClickableViewAccessibility")
     fun initialize() { // needs to be delayed for access to EmojiTabStrip, which is not a child of this view
         if (initialized) return
         emojiCategory.initialize()
         tabStrip = KeyboardSwitcher.getInstance().emojiTabStrip as LinearLayout?
         if (Settings.values.isSecondaryStripVisible) {
+            val tabs = if (searchInTabRow(context)) addSearchField(tabStrip!!) else tabStrip
             for (properties in emojiCategory.shownCategories) {
-                addTab(tabStrip, properties.category)
+                addTab(tabs, properties.category)
             }
         }
 
@@ -446,6 +499,8 @@ class EmojiPalettesView(context: Context, attrs: AttributeSet?, defStyle: Int) :
                         shape = android.graphics.drawable.GradientDrawable.OVAL
                         setColor(Settings.values.colors.get(ColorType.FUNCTIONAL_KEY_BACKGROUND))
                     }
+                    // keep the tab of the category in view when the tabs scroll
+                    tabScroll?.let { scroll -> scroll.post { scroll.smoothScrollTo((current.left - (scroll.width - current.width) / 2).coerceAtLeast(0), 0) } }
                     val size = (36 * resources.displayMetrics.density).toInt()
                     val insetX = ((current.width - size) / 2).coerceAtLeast(0)
                     val insetY = ((current.height - size) / 2).coerceAtLeast(0)
@@ -495,5 +550,11 @@ class EmojiPalettesView(context: Context, attrs: AttributeSet?, defStyle: Int) :
                 dictionaryFacilitator = null
             }
         }
+
+        private const val TAB_WIDTH_DP = 42
+
+        /** Whether emoji search is reached from the tab row: when there is one, and something to search. */
+        fun searchInTabRow(context: Context) =
+            Settings.values.isSecondaryStripVisible && app.caret.latin.utils.DictionaryInfoUtils.getLocalesWithEmojiDicts(context).isNotEmpty()
     }
 }

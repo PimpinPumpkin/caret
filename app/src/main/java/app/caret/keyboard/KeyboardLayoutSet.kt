@@ -174,7 +174,9 @@ class KeyboardLayoutSet internal constructor(private val context: Context, priva
             fun buildEmojiClipBottomRow(context: Context, ei: EditorInfo?): KeyboardLayoutSet {
                 val builder = Builder(context, ei, null)
                 builder.params.mode = KeyboardMode.TEXT
+                // Caret: with the search field in the emoji tab row the bottom row needs no search key
                 builder.params.emojiSearchAvailable = getLocalesWithEmojiDicts(context).isNotEmpty()
+                    && !app.caret.keyboard.emoji.EmojiPalettesView.searchInTabRow(context)
                 val width = ResourceUtils.getKeyboardWidth(context, Settings.values)
                 // actually the keyboard does not have full height, but at this point we use it to get correct key heights
                 val height = ResourceUtils.getKeyboardHeight(context.resources, Settings.values)
