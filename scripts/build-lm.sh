@@ -13,6 +13,13 @@ NDK=${ANDROID_NDK_HOME:-$(ls -d "$SDK"/ndk/* | sort -V | tail -1)}
 SRC=${LLAMA_SRC:-$ROOT/lm/llama.cpp}
 [ -d "$SRC" ] || git clone -q --depth 1 --branch "$TAG" https://github.com/ggml-org/llama.cpp.git "$SRC"
 
+# the model that ships in the app, when there is one: lm/models/caret-typing.gguf (see training/export.sh)
+if [ -f lm/models/caret-typing.gguf ]; then
+    mkdir -p app/src/main/assets/typing_model
+    cp lm/models/caret-typing.gguf app/src/main/assets/typing_model/model.gguf
+    echo "typing model for the app: $(wc -c < lm/models/caret-typing.gguf) bytes"
+fi
+
 for abi in $ABIS; do
     if [ "$abi" = host ]; then
         cmake -S lm/native -B lm/build/host -DLLAMA_SRC="$SRC" >/dev/null

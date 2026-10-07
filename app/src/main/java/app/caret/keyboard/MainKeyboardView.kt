@@ -274,6 +274,7 @@ class MainKeyboardView @JvmOverloads constructor(context: Context, attrs: Attrib
         timerHandler.cancelLongPressTimers()
         super.setKeyboard(keyboard)
         app.caret.latin.swipe.FutoSwipe.warmUp(keyboard)
+        if (keyboard.id.element.isAlphabet) LikelyKeys.prepare(context, keyboard.id.locale)
         keyDetector.setKeyboard(
                 keyboard, (-getPaddingLeft()).toFloat(), -getPaddingTop() + this.verticalCorrection)
         PointerTracker.setKeyDetector(keyDetector)

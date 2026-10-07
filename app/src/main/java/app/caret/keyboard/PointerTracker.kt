@@ -278,8 +278,23 @@ class PointerTracker private constructor(id: Int) : PointerTrackerQueue.Element,
         return key != null && key.isModifier()
     }
 
+    // Caret: a tap near the edge of a key that was taken for a much likelier neighbor (see LikelyKeys);
+    // while the finger stays on the key it landed on, it keeps counting as that neighbor
+    private var landedOn: Key? = null
+    private var takenFor: Key? = null
+
     fun getKeyOn(x: Int, y: Int): Key? {
-        return keyDetector.detectHitKey(x, y)
+        val key = keyDetector.detectHitKey(x, y)
+        landedOn = null
+        takenFor = null
+        val kb = keyboard
+        if (key == null || kb == null || inGesture) return key
+        val likely = LikelyKeys.adjust(kb, key, keyDetector.getTouchX(x), keyDetector.getTouchY(y))
+        if (likely !== key) {
+            landedOn = key
+            takenFor = likely
+        }
+        return likely
     }
 
     private fun setReleasedKeyGraphics(key: Key?, withAnimation: Boolean) {
@@ -374,7 +389,8 @@ class PointerTracker private constructor(id: Int) : PointerTrackerQueue.Element,
         bogusMoveEventDetector.onMoveKey(getDistance(x, y, lastX, lastY))
         lastX = x
         lastY = y
-        return keyDetector.detectHitKey(x, y)
+        val key = keyDetector.detectHitKey(x, y)
+        return if (key != null && key === landedOn) takenFor else key
     }
 
     private fun onMoveKey(x: Int, y: Int): Key? {

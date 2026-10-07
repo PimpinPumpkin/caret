@@ -4,6 +4,12 @@ token files from build_data.py. Saves a checkpoint every few thousand steps and 
 off when started again.
 
     python train.py RUN_DIR [--tokens 1.5e9] [--batch 32] [--context 128]
+
+Fine-tuning for typing (see typing_data.py) starts from a trained model and reads other token files:
+
+    python train.py RUN_DIR --name typing --init RUN_DIR/model --tokens 2e8 --lr 3e-4
+
+which trains on typing_train.bin, keeps its own checkpoint and saves to RUN_DIR/typing_model.
 """
 import argparse, math, os, time
 import numpy as np
@@ -17,6 +23,8 @@ p.add_argument("--batch", type=int, default=32)
 p.add_argument("--context", type=int, default=128)
 p.add_argument("--lr", type=float, default=1e-3)
 p.add_argument("--every", type=int, default=2000)
+p.add_argument("--name", default="", help="prefix of the token files, the checkpoint and the saved model")
+p.add_argument("--init", default="", help="a saved model to start from")
 args = p.parse_args()
 torch.backends.cuda.matmul.allow_tf32 = True
 device = "cuda"
@@ -26,8 +34,9 @@ config = LlamaConfig(
     num_attention_heads=8, num_key_value_heads=8, max_position_embeddings=512,
     rms_norm_eps=1e-5, tie_word_embeddings=True, bos_token_id=1, eos_token_id=2,
 )
-train = np.memmap(os.path.join(args.run, "train.bin"), dtype=np.uint16, mode="r")
-val = np.memmap(os.path.join(args.run, "val.bin"), dtype=np.uint16, mode="r")
+prefix = args.name + "_" if args.name else ""
+train = np.memmap(os.path.join(args.run, prefix + "train.bin"), dtype=np.uint16, mode="r")
+val = np.memmap(os.path.join(args.run, prefix + "val.bin"), dtype=np.uint16, mode="r")
 steps = int(args.tokens / (args.batch * args.context))
 warmup = 1000
 
@@ -46,9 +55,9 @@ def lr_at(step):
     return args.lr * (0.1 + 0.9 * 0.5 * (1 + math.cos(math.pi * min(1.0, progress))))
 
 
-model = LlamaForCausalLM(config).to(device)
+model = (LlamaForCausalLM.from_pretrained(args.init) if args.init else LlamaForCausalLM(config)).to(device)
 optimizer = torch.optim.AdamW(model.parameters(), lr=args.lr, betas=(0.9, 0.95), weight_decay=0.1, fused=True)
-checkpoint = os.path.join(args.run, "checkpoint.pt")
+checkpoint = os.path.join(args.run, prefix + "checkpoint.pt")
 step = 0
 if os.path.exists(checkpoint):
     state = torch.load(checkpoint, map_location=device)
@@ -91,5 +100,5 @@ while step < steps:
         model.train()
         torch.save({"model": model.state_dict(), "optimizer": optimizer.state_dict(), "step": step}, checkpoint + ".tmp")
         os.replace(checkpoint + ".tmp", checkpoint)
-        model.save_pretrained(os.path.join(args.run, "model"))
+        model.save_pretrained(os.path.join(args.run, prefix + "model"))
 print("done", flush=True)

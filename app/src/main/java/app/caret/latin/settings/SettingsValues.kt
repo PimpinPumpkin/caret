@@ -113,6 +113,7 @@ class SettingsValues(context: Context, prefs: SharedPreferences, res: Resources,
     @JvmField val maskClipboardSecrets: Boolean // Caret: hide copied secrets where the clipboard is shown
     @JvmField val dictationSound: Boolean // Caret: a short sound when dictation starts and stops listening
     @JvmField val dictationDeletePhrase: Boolean // Caret: delete right after dictating takes the whole phrase back
+    @JvmField val likelyKeyTargets: Boolean // Caret: taps near a key edge go to a much likelier neighbor
     @JvmField val dictationPausePeriods: Boolean // Caret: keep the period the recognizer puts at every pause
     @JvmField val inlineDictation: Boolean // Caret: the microphone key dictates inside the keyboard
     @JvmField val lmNextWordEnabled: Boolean // Caret: let the language model of the swipe models rank those predictions
@@ -256,6 +257,7 @@ class SettingsValues(context: Context, prefs: SharedPreferences, res: Resources,
         maskClipboardSecrets = prefs.getBoolean(Settings.PREF_MASK_CLIPBOARD_SECRETS, Defaults.PREF_MASK_CLIPBOARD_SECRETS)
         dictationSound = prefs.getBoolean(Settings.PREF_DICTATION_SOUND, Defaults.PREF_DICTATION_SOUND)
         dictationDeletePhrase = prefs.getBoolean(Settings.PREF_DICTATION_DELETE_PHRASE, Defaults.PREF_DICTATION_DELETE_PHRASE)
+        likelyKeyTargets = prefs.getBoolean(Settings.PREF_LIKELY_KEY_TARGETS, Defaults.PREF_LIKELY_KEY_TARGETS)
         dictationPausePeriods = prefs.getBoolean(Settings.PREF_DICTATION_PAUSE_PERIODS, Defaults.PREF_DICTATION_PAUSE_PERIODS)
         inlineDictation = prefs.getBoolean(Settings.PREF_INLINE_DICTATION, Defaults.PREF_INLINE_DICTATION)
         lmNextWordEnabled = prefs.getBoolean(Settings.PREF_LM_NEXT_WORD, Defaults.PREF_LM_NEXT_WORD)

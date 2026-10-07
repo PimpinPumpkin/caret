@@ -16,6 +16,8 @@ tools/*.txt
 *.diff
 *.sh
 !scripts/*.sh
+!scripts/dev/*.sh
+app/src/main/assets/typing_model/
 !swipe/*.patch
 app/src/main/jniLibs/
 swipe/library/

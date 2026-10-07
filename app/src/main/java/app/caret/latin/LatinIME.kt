@@ -608,6 +608,16 @@ class LatinIME : InputMethodService(),
     }
 
     override fun onCreate() {
+        app.caret.keyboard.LikelyKeys.typedSoFar = {
+            val composer = inputLogic.wordComposer
+            when {
+                composer.isBatchMode || dictationComposing -> null
+                composer.isComposingWord -> composer.typedWord.takeUnless { composer.isCursorFrontOrMiddleOfComposingWord() }
+                // nothing in the making: a word starts here, unless the cursor stands right behind letters
+                Character.isLetterOrDigit(inputLogic.connection.getCodePointBeforeCursor()) -> null
+                else -> ""
+            }
+        }
         settings.startListener()
         KeyboardIconsSet.instance.loadIcons(this)
         richImm = RichInputMethodManager.getInstance()

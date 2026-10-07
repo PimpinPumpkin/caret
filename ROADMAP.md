@@ -12,6 +12,7 @@ as well as FUTO Keyboard, learns from the person using it, and is free software 
 - **Nothing leaves the phone** unless the user saves a file and sends it on.
 - **No setting is removed** to look simpler. Settings get reordered: the common ones first, the rare
   ones lower down or under "Advanced" in the same category, and all of them findable by search.
+- **Measured from a clean start.** The benchmark sentences repeat, and a keyboard that has typed them before has learned them: `scripts/dev/typing-benchmark-3.sh` wipes what was learned first. Numbers from before 2026-10-07 (Caret 97.2%, Gboard 97.8%, FUTO 93.2%) were not measured that way; Caret from a clean start is at 95.4%, the other two are to be measured again.
 - **Measured, not guessed.** Every change to typing, swipe or prediction is checked with the
   benchmarks before it ships: `scripts/typing-benchmark.py` (sloppy taps, plus clean rare words for
   false corrections), `scripts/swipe-benchmark.sh` (FUTO's swipe test set), the swipe recording and
@@ -126,6 +127,7 @@ is visible to the user. Things that need the user's eyes or a decision are colle
 | 10b | Gboard defaults (edge margin, ?123 pill, vibration on) and nine more color themes of our own (FUTO's cannot be copied: its license is not GPL-compatible) | done (0.1.20) |
 | 11 | Typing fine-tune on simulated taps (when the base model is done), then in Caret, benchmarked against Gboard | |
 | 12 | Touch calibration from recorded corrections | |
+| 12b | Likely letters get a larger touch target while typing (as the iPhone keyboard does): only taps near a key's edge move, with a switch | done (0.1.29, `LikelyKeys`): with autocorrect off, words that come out letter for letter went from 57% to 69% on the sloppy taps; cleanly tapped rare words unchanged |
 | 13 | Personal corrections (remember fixes, stop correcting restored words) | done (0.1.21): a fix made twice is applied from then on, a word taken back twice is left alone, taking a learned fix back unlearns it (`PersonalCorrections`) |
 | 14 | Own GPL swipe models on FUTO's MIT dataset | |
 | 15 | Gboard spec: first-run setup, motion | first-run done (voice typing step in 0.1.26), text editing layout and hint weight in 0.1.25; motion left (needs screen recordings) |

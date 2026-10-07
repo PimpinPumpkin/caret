@@ -548,6 +548,9 @@ class WordList private constructor(val file: File) {
         return primary to alternates
     }
 
+    /** Every word with its frequency (0 to 255, a log scale). */
+    fun words(action: (String, Int) -> Unit) = forEachWord { word, frequency -> action(word, frequency) }
+
     private inline fun forEachWord(crossinline action: (String, Int) -> Unit) {
         file.forEachLine { line ->
             if (!line.startsWith(" word=")) return@forEachLine

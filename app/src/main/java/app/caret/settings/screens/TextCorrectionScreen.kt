@@ -65,6 +65,7 @@ fun TextCorrectionScreen(
         SettingsWithoutKey.EDIT_PERSONAL_DICTIONARY,
         R.string.settings_category_correction,
         Settings.PREF_AUTO_CORRECTION,
+        Settings.PREF_LIKELY_KEY_TARGETS,
         if (autocorrectEnabled) Settings.PREF_AUTO_CORRECT_CONFIDENCE else null,
         Settings.PREF_AUTO_CAP,
         Settings.PREF_KEY_USE_DOUBLE_SPACE_PERIOD,
@@ -149,6 +150,9 @@ fun createCorrectionSettings(context: Context) = listOf(
     },
     Setting(context, Settings.PREF_RECORD_CORRECTIONS, R.string.record_corrections, R.string.record_corrections_summary) {
         SwitchPreference(it, Defaults.PREF_RECORD_CORRECTIONS)
+    },
+    Setting(context, Settings.PREF_LIKELY_KEY_TARGETS, R.string.likely_key_targets, R.string.likely_key_targets_summary) {
+        SwitchPreference(it, Defaults.PREF_LIKELY_KEY_TARGETS)
     },
     Setting(context, SettingsWithoutKey.TYPING_MODEL, R.string.typing_model, R.string.typing_model_summary) {
         app.caret.settings.preferences.TypingModelPreference(it)

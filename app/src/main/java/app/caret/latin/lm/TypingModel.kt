@@ -24,6 +24,11 @@ object TypingModel {
     /** The model was trained on single lines; only so much of the current line is worth reading. */
     private const val CONTEXT_CHARS = 320
     private const val THREADS = 2
+    private const val BUNDLED_DIR = "typing_model"
+    private const val BUNDLED_NAME = "model.gguf"
+    private const val MAX_TYPED_KEYS = 24
+    /** ln 0.2: a model taught to read keys gives "the" for the keys t h e far more than this. */
+    private const val TYPING_PROBE_LOG_PROBABILITY = -1.6f
 
     private var appContext: Context? = null
     private var handle = 0L
@@ -32,7 +37,36 @@ object TypingModel {
 
     fun modelFile(context: Context) = File(context.filesDir, "typing_model/model.gguf")
 
+    /** A model of the user's own was imported, which then takes the place of the one that comes with the app. */
     fun isInstalled(context: Context) = modelFile(context).isFile
+
+    /** Whether this build comes with a model (scripts/build-lm.sh puts one into the assets when it has one). */
+    fun hasBundled(context: Context) = try {
+        context.assets.list(BUNDLED_DIR)?.contains(BUNDLED_NAME) == true
+    } catch (e: Exception) {
+        false
+    }
+
+    /**
+     * The model that comes with the app, as a file: llama.cpp reads files, so it is copied out of the
+     * package once per version of the app. Null when the build has none or it cannot be copied.
+     */
+    private fun bundledFile(context: Context): File? {
+        if (!hasBundled(context)) return null
+        val directory = File(context.filesDir, "typing_model")
+        val file = File(directory, "bundled-${BuildConfig.VERSION_CODE}.gguf")
+        if (file.isFile) return file
+        return try {
+            directory.mkdirs()
+            directory.listFiles { f -> f.name.startsWith("bundled-") }?.forEach { it.delete() }
+            val partial = File(directory, "bundled.part")
+            context.assets.open("$BUNDLED_DIR/$BUNDLED_NAME").use { input -> partial.outputStream().use { input.copyTo(it, 256 * 1024) } }
+            if (partial.renameTo(file)) file else null
+        } catch (e: Exception) {
+            Log.w(TAG, "could not unpack the typing model", e)
+            null
+        }
+    }
 
     /** Called once at app start. Loads the model in the background when there is one. */
     fun init(context: Context) {
@@ -55,12 +89,14 @@ object TypingModel {
     @Synchronized
     private fun load() {
         val context = appContext ?: return
-        if (handle != 0L || loading || !isInstalled(context) || !hasLibrary()) return
+        if (handle != 0L || loading || !(isInstalled(context) || hasBundled(context)) || !hasLibrary()) return
         loading = true
         thread(name = "typing-model-load") {
             val start = System.currentTimeMillis()
+            val imported = isInstalled(context)
             val loaded = try {
-                nativeLoad(modelFile(context).path, THREADS)
+                val file = if (imported) modelFile(context) else bundledFile(context)
+                if (file != null) nativeLoad(file.path, THREADS) else 0L
             } catch (e: Throwable) {
                 Log.w(TAG, "could not load the typing model", e)
                 0L
@@ -68,9 +104,12 @@ object TypingModel {
             synchronized(this) {
                 loading = false
                 // removed or replaced while loading
-                if (handle == 0L && isInstalled(context)) handle = loaded else if (loaded != 0L) nativeFree(loaded)
+                if (handle == 0L && isInstalled(context) == imported) {
+                    handle = loaded
+                    readsTyping = loaded != 0L && probeTyping(loaded)
+                } else if (loaded != 0L) nativeFree(loaded)
             }
-            Log.i(TAG, "typing model ${if (loaded != 0L) "loaded" else "not loaded"} in ${System.currentTimeMillis() - start} ms")
+            Log.i(TAG, "typing model ${if (loaded != 0L) "loaded" else "not loaded"} in ${System.currentTimeMillis() - start} ms, reads typing: $readsTyping")
         }
     }
 
@@ -78,6 +117,7 @@ object TypingModel {
     private fun unload() {
         if (handle != 0L) nativeFree(handle)
         handle = 0L
+        readsTyping = false
     }
 
     /**
@@ -97,6 +137,46 @@ object TypingModel {
             null
         }
     }
+
+    /**
+     * Whether the loaded model was taught to read typed keys (training/typing_data.py): after the text
+     * it takes the keys that were hit between two bars and says which word was meant by them. A model
+     * that only knows text has no idea what follows such a line; one that was taught is sure of an easy one.
+     */
+    @get:Synchronized
+    var readsTyping = false
+        private set
+
+    private fun probeTyping(model: Long): Boolean = try {
+        val scores = nativeScore(model, typingPrompt("see you at", "the"), arrayOf("the"))
+        scores != null && scores.size == 1 && scores[0] > TYPING_PROBE_LOG_PROBABILITY
+    } catch (e: Throwable) {
+        false
+    }
+
+    /**
+     * The log probability that each of [words] was meant by the keys [typed] (the letters as they came
+     * out, wrong ones included) after [textBefore]. Null when no model that reads typing is loaded.
+     */
+    @Synchronized
+    fun scoreTyped(textBefore: String?, typed: String, words: List<String>): FloatArray? {
+        if (handle == 0L || !readsTyping || words.isEmpty()) return null
+        val keys = typed.lowercase().filter { it in 'a'..'z' }
+        if (keys.isEmpty() || keys.length > MAX_TYPED_KEYS) return null
+        return try {
+            val start = System.nanoTime()
+            val scores = nativeScore(handle, typingPrompt(context(textBefore), keys), words.toTypedArray())?.takeIf { it.size == words.size }
+            if (BuildConfig.DEBUG) Log.d(TAG, "read ${keys.length} keys for ${words.size} words in ${(System.nanoTime() - start) / 1000} us")
+            scores
+        } catch (e: Throwable) {
+            Log.w(TAG, "reading typed keys failed", e)
+            null
+        }
+    }
+
+    /** The line the model was taught on: the text, then the keys between bars, and the word meant comes next. */
+    fun typingPrompt(context: String, keys: String) =
+        (if (context.isEmpty()) "" else "$context ") + "| " + keys.toCharArray().joinToString(" ") + " |"
 
     /** The words most likely to come next after [textBefore], best first. Null when no model is loaded. */
     @Synchronized
@@ -156,7 +236,8 @@ object TypingModel {
 
     fun remove(context: Context) {
         unload()
-        modelFile(context).parentFile?.deleteRecursively()
+        modelFile(context).delete()
+        load() // back to the one that comes with the app
     }
 
     fun isGguf(file: File): Boolean = try {

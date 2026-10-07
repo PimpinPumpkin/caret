@@ -1084,6 +1084,8 @@ New dictionary:
     <string name="emoji_search_download">Tap to download search, %s</string>
     <string name="emoji_search_downloading">Downloading…</string>
     <string name="emoji_search_download_failed">Could not download</string>
+    <string name="likely_key_targets">Larger targets for likely letters</string>
+    <string name="likely_key_targets_summary">A tap near the edge of a key goes to the neighboring letter when that one is much more likely there: thw becomes the. A tap near the middle of a key always gives that key.</string>
     <string name="dictation_status">Speech recognizer</string>
     <string name="dictation_status_ready">Ready. The microphone key dictates with %s.</string>
     <string name="dictation_status_permission">Caret has no microphone access. Tap to allow it.</string>
@@ -1109,6 +1111,7 @@ New dictionary:
     <string name="typing_model">Typing model</string>
     <string name="typing_model_summary">Not installed. Import a GGUF language model to rank corrections and next words by the whole sentence.</string>
     <string name="typing_model_installed">Installed (%s). Corrections and next words are ranked by the whole sentence. Tap to remove.</string>
+    <string name="typing_model_bundled">Using the model that comes with Caret. Tap to import another GGUF model in its place.</string>
     <string name="typing_model_working">Importing the model</string>
     <string name="typing_model_failed">Could not import the model: %s</string>
     <string name="typing_model_no_library">This build has no typing model library for the processor of this phone.</string>

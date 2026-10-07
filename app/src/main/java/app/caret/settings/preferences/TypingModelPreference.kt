@@ -58,6 +58,7 @@ fun TypingModelPreference(setting: Setting) {
             !TypingModel.hasLibrary() -> stringResource(R.string.typing_model_no_library)
             installed -> stringResource(R.string.typing_model_installed,
                 Formatter.formatShortFileSize(ctx, TypingModel.modelFile(ctx).length()))
+            TypingModel.hasBundled(ctx) -> stringResource(R.string.typing_model_bundled)
             else -> stringResource(R.string.typing_model_summary)
         },
         onClick = {
