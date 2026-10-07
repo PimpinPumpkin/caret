@@ -259,11 +259,7 @@ class EmojiPalettesView(context: Context, attrs: AttributeSet?, defStyle: Int) :
                 cornerRadius = 100 * density
                 setColor(Settings.values.colors.get(ColorType.FUNCTIONAL_KEY_BACKGROUND))
             }
-            setOnClickListener {
-                keyboardActionListener.onPressKey(KeyCode.EMOJI_SEARCH, 0, 1, HapticEvent.KEY_PRESS)
-                keyboardActionListener.onCodeInput(KeyCode.EMOJI_SEARCH, NOT_A_COORDINATE, NOT_A_COORDINATE, false)
-                keyboardActionListener.onReleaseKey(KeyCode.EMOJI_SEARCH, false)
-            }
+            setOnClickListener { onSearchField(this) }
         }
         strip.addView(field, LinearLayout.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, (32 * density).toInt()).apply {
             gravity = android.view.Gravity.CENTER_VERTICAL
@@ -279,6 +275,53 @@ class EmojiPalettesView(context: Context, attrs: AttributeSet?, defStyle: Int) :
         strip.addView(scroll, LinearLayout.LayoutParams(0, ViewGroup.LayoutParams.MATCH_PARENT, 1f))
         tabScroll = scroll
         return row
+    }
+
+    private var searchDownloadOffered = false
+    private var searchDownloading = false
+
+    /**
+     * Opens emoji search. Without an emoji dictionary there is nothing to search: the first tap then
+     * says what it would fetch, the second fetches it and opens the search.
+     */
+    private fun onSearchField(field: android.widget.TextView) {
+        val context = context
+        fun search() {
+            keyboardActionListener.onPressKey(KeyCode.EMOJI_SEARCH, 0, 1, HapticEvent.KEY_PRESS)
+            keyboardActionListener.onCodeInput(KeyCode.EMOJI_SEARCH, NOT_A_COORDINATE, NOT_A_COORDINATE, false)
+            keyboardActionListener.onReleaseKey(KeyCode.EMOJI_SEARCH, false)
+        }
+        if (DictionaryInfoUtils.getLocalesWithEmojiDicts(context).isNotEmpty()) return search()
+        if (searchDownloading) return
+        if (!searchDownloadOffered) {
+            searchDownloadOffered = true
+            field.text = context.getString(R.string.emoji_search_download,
+                android.text.format.Formatter.formatShortFileSize(context, EmojiDictionaryDownload.TYPICAL_SIZE))
+            return
+        }
+        searchDownloading = true
+        field.text = context.getString(R.string.emoji_search_downloading)
+        val locale = RichInputMethodManager.getInstance().currentSubtype.locale
+        Thread {
+            val failure = try {
+                EmojiDictionaryDownload.download(context, locale)
+                null
+            } catch (e: Exception) {
+                app.caret.latin.utils.Log.w("EmojiPalettesView", "could not get the emoji dictionary", e)
+                e
+            }
+            post {
+                searchDownloading = false
+                searchDownloadOffered = false
+                if (failure != null) {
+                    field.text = context.getString(R.string.emoji_search_download_failed)
+                } else {
+                    field.text = context.getString(R.string.emoji_search_field)
+                    initDictionaryFacilitator()
+                    search()
+                }
+            }
+        }.start()
     }
 
     @SuppressLint("ClickableViewAccessibility")
@@ -555,6 +598,7 @@ class EmojiPalettesView(context: Context, attrs: AttributeSet?, defStyle: Int) :
 
         /** Whether emoji search is reached from the tab row: when there is one, and something to search. */
         fun searchInTabRow(context: Context) =
-            Settings.values.isSecondaryStripVisible && app.caret.latin.utils.DictionaryInfoUtils.getLocalesWithEmojiDicts(context).isNotEmpty()
+            Settings.values.isSecondaryStripVisible && (DictionaryInfoUtils.getLocalesWithEmojiDicts(context).isNotEmpty()
+                || EmojiDictionaryDownload.nameFor(RichInputMethodManager.getInstance().currentSubtype.locale) != null)
     }
 }

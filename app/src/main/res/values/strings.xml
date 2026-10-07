@@ -1081,6 +1081,9 @@ New dictionary:
     <string name="setup_voice_instruction">The microphone key can listen right in the keyboard and type what you say, using the speech recognizer on this phone. Caret needs the microphone for that.</string>
     <string name="setup_voice_action">Turn on</string>
     <string name="emoji_search_field">Search</string>
+    <string name="emoji_search_download">Tap to download search, %s</string>
+    <string name="emoji_search_downloading">Downloading…</string>
+    <string name="emoji_search_download_failed">Could not download</string>
     <string name="dictation_status">Speech recognizer</string>
     <string name="dictation_status_ready">Ready. The microphone key dictates with %s.</string>
     <string name="dictation_status_permission">Caret has no microphone access. Tap to allow it.</string>

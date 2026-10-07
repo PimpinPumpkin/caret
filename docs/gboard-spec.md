@@ -69,8 +69,9 @@ more useful than GIF and sticker tabs Caret has nothing behind.
 Done in 0.1.22: upright, the panel is 124 dp taller than the keyboard (Gboard's height, two more rows)
 and the name of the category in view stands above the list. Done in 0.1.27: a Search field at the
 start of the tab row with the tabs scrolling beside it, in place of the search key in the bottom row.
-It is there when an emoji dictionary is installed for a language in use; without one there is
-nothing to search.
+Without an emoji dictionary there is nothing to search: the field then offers to download the one
+for the language in use (0.1.28; a first tap says so and how large, a second fetches it from
+HeliBoard's dictionaries on Codeberg).
 
 ## 3b. One-handed and floating
 
