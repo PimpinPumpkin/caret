@@ -6,11 +6,13 @@
 Half the lines stay as they are, so the model keeps predicting the next word. In the other half one
 word is cut out and written as the keys a sloppy typist would have hit, then the word that was meant:
 
-    see you at | t e h | the
+    see you at | t eh h | the
 
 The keys come from simulated taps on a QWERTY keyboard: each tap lands on the key's center plus
 Gaussian noise, and the key under it is what gets written; now and then a letter is skipped, doubled
-or swapped with its neighbor, as fingers do. A share of the words is typed cleanly, rare ones
+or swapped with its neighbor, as fingers do. A tap that lands near the border to another key is
+written as both letters, the one it landed on first ("eh": on the e, close to the h), so the model can
+tell a tap in the middle of a key, which means that key, from one that could be either. A share of the words is typed cleanly, rare ones
 included, so the model also learns to leave a word alone. Apostrophes are never typed and capitals
 never held, as on a phone: the word that was meant has both.
 
@@ -30,6 +32,9 @@ ROW_PITCH = 1.44               # a row is this many key widths high (59 dp over 
 KEYS = {c: (ROW_OFFSET[r] + i + 0.5, (r + 0.5) * ROW_PITCH) for r, row in enumerate(ROWS) for i, c in enumerate(row)}
 CENTERS = np.array([KEYS[c] for c in sorted(KEYS)])
 LETTERS = sorted(KEYS)
+# a tap counts as near the border when the next key's center is less than this much further away than
+# the center of the key it landed on (in key widths); the keyboard writes its taps by the same rule
+NEAR = 0.4
 
 
 def typed(word, rng):
@@ -37,7 +42,7 @@ def typed(word, rng):
     letters = [c for c in word.lower() if c != "'" and c != "’"]
     if not letters or any(c not in KEYS for c in letters):
         return None
-    sigma = 0.0 if rng.random() < 0.25 else rng.uniform(0.15, 0.45)
+    sigma = 0.0 if rng.random() < 0.35 else rng.uniform(0.12, 0.42)
     slips = sigma > 0 and len(letters) > 2
     out = []
     i = 0
@@ -58,8 +63,9 @@ def typed(word, rng):
             if sigma:
                 x += rng.gauss(0, sigma)
                 y += rng.gauss(0, sigma)
-            d = (CENTERS[:, 0] - x) ** 2 + (CENTERS[:, 1] - y) ** 2
-            out.append(LETTERS[int(d.argmin())])
+            d = np.sqrt((CENTERS[:, 0] - x) ** 2 + (CENTERS[:, 1] - y) ** 2)
+            first, second = np.argsort(d)[:2]
+            out.append(LETTERS[first] + (LETTERS[second] if d[second] - d[first] < NEAR else ""))
     return out or None
 
 

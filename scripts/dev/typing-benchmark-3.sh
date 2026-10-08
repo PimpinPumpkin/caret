@@ -12,6 +12,7 @@ adb shell "run-as app.caret.debug sh -c 'rm -rf files/UserHistoryDictionary.* fi
 # the system falls back to another keyboard when ours is stopped; pick it again, twice to be sure
 adb shell ime enable $IME >/dev/null; adb shell ime set $IME >/dev/null; sleep 1; adb shell ime set $IME >/dev/null
 python3 scripts/dev/focus-message.py >/dev/null; sleep 8; adb logcat -c
+echo "build under test: $(adb shell dumpsys package app.caret.debug | grep -m1 lastUpdateTime)"
 for seed in 7 11 23; do
     python3 scripts/typing-benchmark.py app.caret.debug --seed $seed > "$out/b3-$tag-$seed.txt" 2>&1
     echo "$tag seed $seed: $(head -1 "$out/b3-$tag-$seed.txt")"

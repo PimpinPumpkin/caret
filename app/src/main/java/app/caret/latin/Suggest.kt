@@ -21,6 +21,7 @@ import app.caret.latin.dictionary.Dictionary
 import app.caret.latin.settings.Settings
 import app.caret.latin.settings.SettingsValuesForSuggestion
 import app.caret.latin.suggestions.SuggestionStripView
+import app.caret.latin.lm.TapEvidence
 import app.caret.latin.lm.TypingModel
 import app.caret.latin.swipe.FutoSwipe
 import app.caret.latin.swipe.SwipeRecorder
@@ -96,7 +97,8 @@ class Suggest(private val dictionaryFacilitator: DictionaryFacilitator) {
         val firstOccurrenceOfTypedWordInSuggestions = SuggestedWordInfo.removeDupsAndTypedWord(capitalizedTypedWord, suggestionsContainer)
         makeFirstTwoSuggestionsNonEmoji(suggestionsContainer)
         val fit = if (isCorrectionEnabled && !resultsArePredictions && typedWordString.isNotEmpty())
-                fitToSentence(typedWordString, suggestionsContainer, ngramContext)
+                fitToKeys(typedWordString, suggestionsContainer, wordComposer, keyboard)
+                    ?: fitToSentence(typedWordString, suggestionsContainer, ngramContext)
             else null
 
         val (allowsToBeAutoCorrected, dictionaryAutoCorrection) = shouldBeAutoCorrected(
@@ -116,8 +118,11 @@ class Suggest(private val dictionaryFacilitator: DictionaryFacilitator) {
             firstOccurrenceOfTypedWordInSuggestions,
             typedWordFirstOccurrenceWordInfo
         )
-        val bySentence = correctBySentence(dictionaryAutoCorrection, fit, typedWordFirstOccurrenceWordInfo != null,
-            typedWordString, suggestionsContainer, isCorrectionEnabled, wordComposer)
+        val bySentence = if (fit?.readFromKeys == true)
+                correctByKeys(dictionaryAutoCorrection, fit, typedWordFirstOccurrenceWordInfo != null,
+                    typedWordString, suggestionsContainer, isCorrectionEnabled, wordComposer)
+            else correctBySentence(dictionaryAutoCorrection, fit, typedWordFirstOccurrenceWordInfo != null,
+                typedWordString, suggestionsContainer, isCorrectionEnabled, wordComposer)
         val hasAutoCorrection = correctByHabit(bySentence, typedWordString, suggestionsContainer, capsMode,
             isCorrectionEnabled && !resultsArePredictions && !wordComposer.isResumed)
         val typedWordInfo = SuggestedWordInfo(typedWordString, "", SuggestedWordInfo.MAX_SCORE,
@@ -166,7 +171,67 @@ class Suggest(private val dictionaryFacilitator: DictionaryFacilitator) {
     }
 
     /** What the language model says about the typed word and the first suggestions. */
-    class SentenceFit(val typed: Float, val scores: Map<SuggestedWordInfo, Float>, val best: SuggestedWordInfo?)
+    class SentenceFit(
+        val typed: Float, val scores: Map<SuggestedWordInfo, Float>, val best: SuggestedWordInfo?,
+        /** The scores are what the typing model reads from the keys that were hit, not only how a word fits the sentence. */
+        val readFromKeys: Boolean = false,
+    )
+
+    /**
+     * Caret: asks the typing model which word was meant by the keys that were hit, given the text before:
+     * the typed letters themselves or one of the first suggestions. Null without a model that reads keys.
+     */
+    private fun fitToKeys(
+        typedWord: String, suggestions: List<SuggestedWordInfo>, wordComposer: WordComposer, keyboard: Keyboard,
+    ): SentenceFit? {
+        if (!TypingModel.readsTyping || dictionaryFacilitator.getMainLocale().language != "en") return null
+        val head = suggestions.take(KEYS_RANKED_SUGGESTIONS).filter { info ->
+            info.word.all { it.isLetter() || it == '\'' } && !info.word.equals(typedWord, ignoreCase = true)
+        }
+        if (head.isEmpty()) return null
+        // every key tapped once, in order, nothing deleted in between: otherwise the taps do not tell the word
+        val pointers = wordComposer.getInputPointers() ?: return null
+        if (pointers.pointerSize != typedWord.length || !typedWord.all { it.isLetter() }) return null
+        val centers = ('a'..'z').mapNotNull { letter ->
+            keyboard.getKey(letter.code)?.let { letter to ((it.getX() + it.width / 2f) to (it.getY() + it.height / 2f)) }
+        }.toMap()
+        val keys = TapEvidence.written(pointers.xCoordinates.copyOf(typedWord.length), pointers.yCoordinates.copyOf(typedWord.length),
+            centers, keyboard.mostCommonKeyWidth.toFloat())
+        val read = TypingModel.scoreTyped(FutoSwipe.textBeforeWord, keys, listOf(typedWord) + head.map { it.word }) ?: return null
+        val scores = head.withIndex().associate { (i, info) -> info to read[i + 1] }
+        if (BuildConfig.DEBUG) Log.d(TAG, "keys ${keys.joinToString(" ")} for $typedWord (${read[0]}): " + head.joinToString { "${it.word} ${scores[it]}" })
+        return SentenceFit(read[0], scores, head.maxByOrNull { scores.getValue(it) }, readFromKeys = true)
+    }
+
+    /**
+     * Caret: autocorrecting by what the typing model read from the keys. The word it is surest of goes
+     * to the front of [suggestions] when it is to replace what was typed:
+     * - typed letters that are no word are replaced by the model's word when the dictionary would
+     *   correct them too, or when the model is sure of its word by itself;
+     * - a typed word that is a word stays unless the model finds another one far likelier, and a
+     *   correction the dictionary wants is dropped when the model finds the typed word likelier.
+     */
+    private fun correctByKeys(
+        dictionarySays: Boolean, fit: SentenceFit, typedIsWord: Boolean, typedWord: String,
+        suggestions: ArrayList<SuggestedWordInfo>, isCorrectionEnabled: Boolean, wordComposer: WordComposer,
+    ): Boolean {
+        val best = fit.best ?: return dictionarySays
+        val first = suggestions.firstOrNull() ?: return dictionarySays
+        if (dictionarySays && first.word.equals(typedWord, ignoreCase = true)) return true // a change of capitals only
+        if (!isCorrectionEnabled || wordComposer.hasDigits() || wordComposer.isResumed
+            || (wordComposer.isMostlyCaps && !wordComposer.isAllUpperCase()) || !isAllowedByAutoCorrectionWithSpaceFilter(best))
+            return dictionarySays
+        val lead = fit.scores.getValue(best) - fit.typed
+        val replace = when {
+            typedIsWord -> lead >= KEYS_REPLACE_WORD_MARGIN
+            dictionarySays -> lead >= KEYS_KEEP_MARGIN
+            else -> lead >= KEYS_REPLACE_MARGIN && fit.scores.getValue(best) >= KEYS_SURE
+        }
+        if (!replace) return false
+        suggestions.remove(best)
+        suggestions.add(0, best)
+        return true
+    }
 
     /**
      * Caret: scores the first suggestions by how well they fit the sentence so far, with the
@@ -475,6 +540,16 @@ class Suggest(private val dictionaryFacilitator: DictionaryFacilitator) {
         /** ...and how close it has to be to what was typed. */
         private val SENTENCE_REPLACE_SPELLING get() = tuning("sentence_replace_spelling", 0.15f)
         /** How much better a typed word has to fit the sentence to be kept although a correction is ready. */
+        /** How many of the first suggestions the typing model reads the keys against. */
+        private const val KEYS_RANKED_SUGGESTIONS = 8
+        /** How much likelier (in log probability) another word has to be than a typed word that is a word itself. */
+        private val KEYS_REPLACE_WORD_MARGIN get() = tuning("keys_replace_word_margin", 2.5f)
+        /** The same for typed letters that are no word, when the dictionary does not want to correct them. */
+        private val KEYS_REPLACE_MARGIN get() = tuning("keys_replace_margin", 1.5f)
+        /** ... and how sure the model has to be of its word then (log probability). */
+        private val KEYS_SURE get() = tuning("keys_sure", -1.2f)
+        /** A correction the dictionary wants happens unless the model finds what was typed likelier by this much. */
+        private val KEYS_KEEP_MARGIN get() = tuning("keys_keep_margin", -2.0f)
         private val SENTENCE_TYPED_FLOOR get() = tuning("sentence_typed_floor", -15f)
         private val SENTENCE_KEEP_MARGIN get() = tuning("sentence_keep_margin", 4f)
 

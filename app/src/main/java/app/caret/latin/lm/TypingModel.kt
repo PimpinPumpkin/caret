@@ -148,25 +148,24 @@ object TypingModel {
         private set
 
     private fun probeTyping(model: Long): Boolean = try {
-        val scores = nativeScore(model, typingPrompt("see you at", "the"), arrayOf("the"))
+        val scores = nativeScore(model, typingPrompt("see you at", listOf("t", "h", "e")), arrayOf("the"))
         scores != null && scores.size == 1 && scores[0] > TYPING_PROBE_LOG_PROBABILITY
     } catch (e: Throwable) {
         false
     }
 
     /**
-     * The log probability that each of [words] was meant by the keys [typed] (the letters as they came
-     * out, wrong ones included) after [textBefore]. Null when no model that reads typing is loaded.
+     * The log probability that each of [words] was meant by the taps written as [keys] (see
+     * [TapEvidence.written]) after [textBefore]. Null when no model that reads typing is loaded.
      */
     @Synchronized
-    fun scoreTyped(textBefore: String?, typed: String, words: List<String>): FloatArray? {
+    fun scoreTyped(textBefore: String?, keys: List<String>, words: List<String>): FloatArray? {
         if (handle == 0L || !readsTyping || words.isEmpty()) return null
-        val keys = typed.lowercase().filter { it in 'a'..'z' }
-        if (keys.isEmpty() || keys.length > MAX_TYPED_KEYS) return null
+        if (keys.isEmpty() || keys.size > MAX_TYPED_KEYS || keys.any { key -> key.isEmpty() || key.any { it !in 'a'..'z' } }) return null
         return try {
             val start = System.nanoTime()
             val scores = nativeScore(handle, typingPrompt(context(textBefore), keys), words.toTypedArray())?.takeIf { it.size == words.size }
-            if (BuildConfig.DEBUG) Log.d(TAG, "read ${keys.length} keys for ${words.size} words in ${(System.nanoTime() - start) / 1000} us")
+            if (BuildConfig.DEBUG) Log.d(TAG, "read ${keys.size} keys for ${words.size} words in ${(System.nanoTime() - start) / 1000} us")
             scores
         } catch (e: Throwable) {
             Log.w(TAG, "reading typed keys failed", e)
@@ -175,8 +174,8 @@ object TypingModel {
     }
 
     /** The line the model was taught on: the text, then the keys between bars, and the word meant comes next. */
-    fun typingPrompt(context: String, keys: String) =
-        (if (context.isEmpty()) "" else "$context ") + "| " + keys.toCharArray().joinToString(" ") + " |"
+    fun typingPrompt(context: String, keys: List<String>) =
+        (if (context.isEmpty()) "" else "$context ") + "| " + keys.joinToString(" ") + " |"
 
     /** The words most likely to come next after [textBefore], best first. Null when no model is loaded. */
     @Synchronized

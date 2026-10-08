@@ -41,9 +41,9 @@ class TypingModelTest {
     }
 
     @Test fun typedKeysGoBetweenBarsAfterTheText() {
-        assertEquals("see you at | t e h |", TypingModel.typingPrompt("see you at", "teh"))
-        assertEquals("| h i |", TypingModel.typingPrompt("", "hi"))
-        assertEquals(null, TypingModel.scoreTyped("see you at", "teh", listOf("the")))
+        assertEquals("see you at | t eh h |", TypingModel.typingPrompt("see you at", listOf("t", "eh", "h")))
+        assertEquals("| h i |", TypingModel.typingPrompt("", listOf("h", "i")))
+        assertEquals(null, TypingModel.scoreTyped("see you at", listOf("t", "e", "h"), listOf("the")))
     }
 
     @Test fun answersNullWithoutAModel() {
