@@ -19,8 +19,11 @@ object TapEvidence {
      *
      * @param centers the middle of every letter key (a to z) of the keyboard
      * @param keyWidth the width of a letter key, in the units of the taps and centers
+     * @param typed the letters the taps came out as, when known
      */
-    fun written(tapX: IntArray, tapY: IntArray, centers: Map<Char, Pair<Float, Float>>, keyWidth: Float): List<String> {
+    fun written(
+        tapX: IntArray, tapY: IntArray, centers: Map<Char, Pair<Float, Float>>, keyWidth: Float, typed: String? = null,
+    ): List<String> {
         if (keyWidth <= 0f || centers.size < 2) return emptyList()
         return tapX.indices.map { i ->
             var first = ' '
@@ -41,7 +44,11 @@ object TapEvidence {
                     secondDistance = distance
                 }
             }
-            if (secondDistance - firstDistance < NEAR) "$first$second" else "$first"
+            // The keyboard may have taken a tap near an edge for a likelier neighbor already (LikelyKeys):
+            // then that letter is what was typed, with the key the tap was on as the other reading.
+            val letter = typed?.getOrNull(i)?.lowercaseChar()
+            if (letter != null && letter != first && letter in centers) "$letter$first"
+            else if (secondDistance - firstDistance < NEAR) "$first$second" else "$first"
         }
     }
 }

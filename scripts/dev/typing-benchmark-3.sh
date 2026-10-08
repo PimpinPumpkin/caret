@@ -19,5 +19,8 @@ for seed in 7 11 23; do
 done
 python3 scripts/typing-benchmark.py app.caret.debug --rare --sigma 0 > "$out/b3-$tag-rare.txt" 2>&1
 echo "$tag rare: $(head -1 "$out/b3-$tag-rare.txt")"
+# and rare words tapped a little sloppily: what a keyboard that leans on common words gets wrong
+python3 scripts/typing-benchmark.py app.caret.debug --rare --sigma 0.25 --seed 7 > "$out/b3-$tag-rare25.txt" 2>&1
+echo "$tag rare, sigma 0.25: $(head -1 "$out/b3-$tag-rare25.txt")"
 adb logcat -d | grep -E "TypingModel: (typing model|scored|read)" | awk '/us$/ {print $(NF-1)}' | sort -n | awk '{a[NR]=$1} END {if (NR) print "score calls", NR, "median us", a[int(NR/2)], "p95 us", a[int(NR*0.95)]}'
 adb logcat -d | grep -m1 "TypingModel: typing model"

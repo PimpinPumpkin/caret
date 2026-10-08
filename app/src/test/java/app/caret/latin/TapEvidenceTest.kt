@@ -21,6 +21,12 @@ class TapEvidenceTest {
         assertEquals(listOf("op"), written(885))
     }
 
+    @Test fun aLetterTheKeyboardAlreadyMovedIsWrittenFirst() {
+        // the tap was on the i, the keyboard made it an o
+        assertEquals(listOf("oi"), TapEvidence.written(intArrayOf(770), intArrayOf(50), centers, 100f, "o"))
+        assertEquals(listOf("i"), TapEvidence.written(intArrayOf(750), intArrayOf(50), centers, 100f, "I"))
+    }
+
     @Test fun nothingWithoutKeys() {
         assertEquals(emptyList(), TapEvidence.written(intArrayOf(10), intArrayOf(10), emptyMap(), 100f))
     }

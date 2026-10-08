@@ -97,7 +97,7 @@ class Suggest(private val dictionaryFacilitator: DictionaryFacilitator) {
         val firstOccurrenceOfTypedWordInSuggestions = SuggestedWordInfo.removeDupsAndTypedWord(capitalizedTypedWord, suggestionsContainer)
         makeFirstTwoSuggestionsNonEmoji(suggestionsContainer)
         val fit = if (isCorrectionEnabled && !resultsArePredictions && typedWordString.isNotEmpty())
-                fitToKeys(typedWordString, suggestionsContainer, wordComposer, keyboard)
+                fitToKeys(typedWordString, typedWordFirstOccurrenceWordInfo != null, suggestionsContainer, wordComposer, keyboard)
                     ?: fitToSentence(typedWordString, suggestionsContainer, ngramContext)
             else null
 
@@ -182,7 +182,7 @@ class Suggest(private val dictionaryFacilitator: DictionaryFacilitator) {
      * the typed letters themselves or one of the first suggestions. Null without a model that reads keys.
      */
     private fun fitToKeys(
-        typedWord: String, suggestions: List<SuggestedWordInfo>, wordComposer: WordComposer, keyboard: Keyboard,
+        typedWord: String, typedIsWord: Boolean, suggestions: List<SuggestedWordInfo>, wordComposer: WordComposer, keyboard: Keyboard,
     ): SentenceFit? {
         if (!TypingModel.readsTyping || dictionaryFacilitator.getMainLocale().language != "en") return null
         val head = suggestions.take(KEYS_RANKED_SUGGESTIONS).filter { info ->
@@ -196,7 +196,10 @@ class Suggest(private val dictionaryFacilitator: DictionaryFacilitator) {
             keyboard.getKey(letter.code)?.let { letter to ((it.getX() + it.width / 2f) to (it.getY() + it.height / 2f)) }
         }.toMap()
         val keys = TapEvidence.written(pointers.xCoordinates.copyOf(typedWord.length), pointers.yCoordinates.copyOf(typedWord.length),
-            centers, keyboard.mostCommonKeyWidth.toFloat())
+            centers, keyboard.mostCommonKeyWidth.toFloat(), typedWord)
+        // A word, and every tap of it in the middle of its key: that is what was meant. Only the sentence
+        // can still speak against it (see fitToSentence), not a guess at slips that the taps do not show.
+        if (typedIsWord && keys.all { it.length == 1 }) return null
         val read = TypingModel.scoreTyped(FutoSwipe.textBeforeWord, keys, listOf(typedWord) + head.map { it.word }) ?: return null
         val scores = head.withIndex().associate { (i, info) -> info to read[i + 1] }
         if (BuildConfig.DEBUG) Log.d(TAG, "keys ${keys.joinToString(" ")} for $typedWord (${read[0]}): " + head.joinToString { "${it.word} ${scores[it]}" })

@@ -4,9 +4,9 @@
     python typing_data.py DATA_DIR RUN_DIR [--tokens 2.5e8]
 
 Half the lines stay as they are, so the model keeps predicting the next word. In the other half one
-word is cut out and written as the keys a sloppy typist would have hit, then the word that was meant:
+the words from some point on are each written as the keys a sloppy typist would have hit, then the word that was meant:
 
-    see you at | t eh h | the
+    see you at | t eh h | the | c o f r e | coffee | s h o p | shop
 
 The keys come from simulated taps on a QWERTY keyboard: each tap lands on the key's center plus
 Gaussian noise, and the key under it is what gets written; now and then a letter is skipped, doubled
@@ -69,23 +69,34 @@ def typed(word, rng):
     return out or None
 
 
+RUN = 8  # words typed in a row
+
+
 def with_typing(line, rng):
-    """[line] cut after one of its words, that word written as typed keys and then as meant."""
+    """[line] up to one of its words as it is, and from there each word as typed keys and then as meant.
+
+    The keyboard asks about one word after plain text, which is what the first typed word of a line is;
+    the ones after it are there so that a line teaches reading keys eight times and not once.
+    """
     words = line.split(" ")
     if len(words) > 40:
         start = rng.randrange(len(words) - 40)
         words = words[start:start + 40]
-    for _ in range(4):
-        i = rng.randrange(len(words))
-        word = words[i].strip(".,!?;:\"()[]")
-        if not word or len(word) > 20:
-            continue
-        keys = typed(word, rng)
+    i = rng.randrange(len(words))
+    out = words[:i]
+    done = 0
+    while i < len(words) and done < RUN:
+        word = words[i]
+        core = word.rstrip(".,!?;:)\"")
+        if not core or len(core) > 20:
+            break
+        keys = typed(core, rng)
         if keys is None:
-            continue
-        before = " ".join(words[:i])
-        return (before + " " if before else "") + OPEN + " " + " ".join(keys) + " " + CLOSE + " " + word
-    return line
+            break
+        out += [OPEN, " ".join(keys), CLOSE, word]
+        i += 1
+        done += 1
+    return " ".join(out) if done else line
 
 
 _sp = None
