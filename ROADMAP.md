@@ -13,6 +13,7 @@ as well as FUTO Keyboard, learns from the person using it, and is free software 
 - **No setting is removed** to look simpler. Settings get reordered: the common ones first, the rare
   ones lower down or under "Advanced" in the same category, and all of them findable by search.
 - **Measured from a clean start.** The benchmark sentences repeat, and a keyboard that has typed them before has learned them: `scripts/dev/typing-benchmark-3.sh` wipes what was learned first. Numbers from before 2026-10-07 (Caret 97.2%, Gboard 97.8%, FUTO 93.2%) were not measured that way; Caret from a clean start is at 95.4%, the other two are to be measured again.
+- **Aimed at the keys as drawn.** Since 2026-10-09 the benchmark taps the middle of each key as it is drawn, not of its touch area (larger at the edges of the keyboard); numbers from before that day do not compare with later ones.
 - **Measured, not guessed.** Every change to typing, swipe or prediction is checked with the
   benchmarks before it ships: `scripts/typing-benchmark.py` (sloppy taps, plus clean rare words for
   false corrections), `scripts/swipe-benchmark.sh` (FUTO's swipe test set), the swipe recording and
