@@ -97,7 +97,7 @@ class Suggest(private val dictionaryFacilitator: DictionaryFacilitator) {
         val firstOccurrenceOfTypedWordInSuggestions = SuggestedWordInfo.removeDupsAndTypedWord(capitalizedTypedWord, suggestionsContainer)
         makeFirstTwoSuggestionsNonEmoji(suggestionsContainer)
         val fit = if (isCorrectionEnabled && !resultsArePredictions && typedWordString.isNotEmpty())
-                fitToKeys(typedWordString, typedWordFirstOccurrenceWordInfo != null, suggestionsContainer, wordComposer, keyboard)
+                fitToTaps(typedWordString, suggestionsContainer, wordComposer, keyboard)
                     ?: fitToSentence(typedWordString, suggestionsContainer, ngramContext)
             else null
 
@@ -119,7 +119,7 @@ class Suggest(private val dictionaryFacilitator: DictionaryFacilitator) {
             typedWordFirstOccurrenceWordInfo
         )
         val bySentence = if (fit?.readFromKeys == true)
-                correctByKeys(dictionaryAutoCorrection, fit, typedWordFirstOccurrenceWordInfo != null,
+                correctByTaps(dictionaryAutoCorrection, fit, typedWordFirstOccurrenceWordInfo != null,
                     typedWordString, suggestionsContainer, isCorrectionEnabled, wordComposer)
             else correctBySentence(dictionaryAutoCorrection, fit, typedWordFirstOccurrenceWordInfo != null,
                 typedWordString, suggestionsContainer, isCorrectionEnabled, wordComposer)
@@ -173,19 +173,23 @@ class Suggest(private val dictionaryFacilitator: DictionaryFacilitator) {
     /** What the language model says about the typed word and the first suggestions. */
     class SentenceFit(
         val typed: Float, val scores: Map<SuggestedWordInfo, Float>, val best: SuggestedWordInfo?,
-        /** The scores are what the typing model reads from the keys that were hit, not only how a word fits the sentence. */
+        /** The scores are sentence and taps together (see fitToTaps), not only how a word fits the sentence. */
         val readFromKeys: Boolean = false,
+        /** Debug builds: what went into the scores, for scripts/dev/taps-replay.py to try other settings on. */
+        val trace: String? = null,
     )
 
     /**
-     * Caret: asks the typing model which word was meant by the keys that were hit, given the text before:
-     * the typed letters themselves or one of the first suggestions. Null without a model that reads keys.
+     * Caret: which word was meant, from two things that do not depend on each other: how well each word
+     * fits the sentence (the typing model's language model) and how well the taps fit its letters
+     * ([TapEvidence.fit]). A rare word tapped cleanly beats a common one a key away; a tap on the border
+     * between two keys leaves it to the sentence. Null without a typing model or without the taps.
      */
-    private fun fitToKeys(
-        typedWord: String, typedIsWord: Boolean, suggestions: List<SuggestedWordInfo>, wordComposer: WordComposer, keyboard: Keyboard,
+    private fun fitToTaps(
+        typedWord: String, suggestions: List<SuggestedWordInfo>, wordComposer: WordComposer, keyboard: Keyboard,
     ): SentenceFit? {
-        if (!TypingModel.readsTyping || dictionaryFacilitator.getMainLocale().language != "en") return null
-        val head = suggestions.take(KEYS_RANKED_SUGGESTIONS).filter { info ->
+        if (dictionaryFacilitator.getMainLocale().language != "en") return null
+        val head = suggestions.take(TAPS_RANKED_SUGGESTIONS).filter { info ->
             info.word.all { it.isLetter() || it == '\'' } && !info.word.equals(typedWord, ignoreCase = true)
         }
         if (head.isEmpty()) return null
@@ -193,42 +197,57 @@ class Suggest(private val dictionaryFacilitator: DictionaryFacilitator) {
         val pointers = wordComposer.getInputPointers() ?: return null
         if (pointers.pointerSize != typedWord.length || !typedWord.all { it.isLetter() }) return null
         val centers = ('a'..'z').mapNotNull { letter ->
-            keyboard.getKey(letter.code)?.let { letter to ((it.getX() + it.width / 2f) to (it.getY() + it.height / 2f)) }
+            keyboard.getKey(letter.code)?.let { letter to ((it.getDrawX() + it.getDrawWidth() / 2f) to (it.getY() + it.height / 2f)) }
         }.toMap()
-        val keys = TapEvidence.written(pointers.xCoordinates.copyOf(typedWord.length), pointers.yCoordinates.copyOf(typedWord.length),
-            centers, keyboard.mostCommonKeyWidth.toFloat(), typedWord)
-        // A word, and every tap of it in the middle of its key: that is what was meant. Only the sentence
-        // can still speak against it (see fitToSentence), not a guess at slips that the taps do not show.
-        if (typedIsWord && keys.all { it.length == 1 }) return null
-        val read = TypingModel.scoreTyped(FutoSwipe.textBeforeWord, keys, listOf(typedWord) + head.map { it.word }) ?: return null
-        val scores = head.withIndex().associate { (i, info) -> info to read[i + 1] }
-        if (BuildConfig.DEBUG) Log.d(TAG, "keys ${keys.joinToString(" ")} for $typedWord (${read[0]}): " + head.joinToString { "${it.word} ${scores[it]}" })
-        return SentenceFit(read[0], scores, head.maxByOrNull { scores.getValue(it) }, readFromKeys = true)
+        if (centers.size < 26) return null
+        val words = listOf(typedWord) + head.map { it.word }
+        val sentence = TypingModel.scoreWords(FutoSwipe.textBeforeWord, words) ?: return null
+        val tapX = pointers.xCoordinates.copyOf(typedWord.length)
+        val tapY = pointers.yCoordinates.copyOf(typedWord.length)
+        val width = keyboard.mostCommonKeyWidth.toFloat()
+        val total = words.indices.map { i ->
+            maxOf(sentence[i], TAPS_SENTENCE_FLOOR) + TapEvidence.fit(words[i], tapX, tapY, centers, width, TAPS_SHARPNESS, TAPS_SLIP)
+        }
+        val scores = head.withIndex().associate { (i, info) -> info to total[i + 1] }
+        if (BuildConfig.DEBUG) Log.d(TAG, "taps $typedWord (${sentence[0]} -> ${total[0]}): " +
+            head.withIndex().joinToString { (i, it) -> "${it.word} ${sentence[i + 1]} -> ${total[i + 1]}" })
+        val trace = if (!BuildConfig.DEBUG) null else {
+            if (tracedCenters !== keyboard) {
+                tracedCenters = keyboard
+                Log.d(TAG, "tapskeys $width " + centers.entries.joinToString(" ") { "${it.key}:${it.value.first},${it.value.second}" })
+            }
+            "$typedWord|${sentence[0]}|${tapX.joinToString(",")}|${tapY.joinToString(",")}|" +
+                head.withIndex().joinToString(";") { (i, it) -> "${it.word}:${sentence[i + 1]}:${isAllowedByAutoCorrectionWithSpaceFilter(it)}" }
+        }
+        return SentenceFit(total[0], scores, head.maxByOrNull { scores.getValue(it) }, readFromKeys = true, trace = trace)
     }
 
+    private var tracedCenters: Keyboard? = null
+
     /**
-     * Caret: autocorrecting by what the typing model read from the keys. The word it is surest of goes
-     * to the front of [suggestions] when it is to replace what was typed:
-     * - typed letters that are no word are replaced by the model's word when the dictionary would
-     *   correct them too, or when the model is sure of its word by itself;
-     * - a typed word that is a word stays unless the model finds another one far likelier, and a
-     *   correction the dictionary wants is dropped when the model finds the typed word likelier.
+     * Caret: autocorrecting by sentence and taps together (see [fitToTaps]). The likeliest word goes to
+     * the front of [suggestions] when it is to replace what was typed:
+     * - a typed word that is a word stays unless another one is likelier by a clear margin;
+     * - typed letters that are no word are replaced by the likeliest word when the dictionary would
+     *   correct them too, or when that word is far likelier than the letters as they stand.
      */
-    private fun correctByKeys(
+    private fun correctByTaps(
         dictionarySays: Boolean, fit: SentenceFit, typedIsWord: Boolean, typedWord: String,
         suggestions: ArrayList<SuggestedWordInfo>, isCorrectionEnabled: Boolean, wordComposer: WordComposer,
     ): Boolean {
         val best = fit.best ?: return dictionarySays
         val first = suggestions.firstOrNull() ?: return dictionarySays
+        if (fit.trace != null) Log.d(TAG, "tapsdecide $dictionarySays|$typedIsWord|${first.word}|" +
+            "${isCorrectionEnabled && !wordComposer.hasDigits() && !wordComposer.isResumed && !(wordComposer.isMostlyCaps && !wordComposer.isAllUpperCase())}|${fit.trace}")
         if (dictionarySays && first.word.equals(typedWord, ignoreCase = true)) return true // a change of capitals only
         if (!isCorrectionEnabled || wordComposer.hasDigits() || wordComposer.isResumed
             || (wordComposer.isMostlyCaps && !wordComposer.isAllUpperCase()) || !isAllowedByAutoCorrectionWithSpaceFilter(best))
             return dictionarySays
         val lead = fit.scores.getValue(best) - fit.typed
         val replace = when {
-            typedIsWord -> lead >= KEYS_REPLACE_WORD_MARGIN
-            dictionarySays -> lead >= KEYS_KEEP_MARGIN
-            else -> lead >= KEYS_REPLACE_MARGIN && fit.scores.getValue(best) >= KEYS_SURE
+            typedIsWord -> lead >= TAPS_WORD_MARGIN
+            // letters that are no word: corrected when the dictionary would, or when another word is far likelier
+            else -> dictionarySays || lead >= TAPS_UNKNOWN_MARGIN
         }
         if (!replace) return false
         suggestions.remove(best)
@@ -543,16 +562,21 @@ class Suggest(private val dictionaryFacilitator: DictionaryFacilitator) {
         /** ...and how close it has to be to what was typed. */
         private val SENTENCE_REPLACE_SPELLING get() = tuning("sentence_replace_spelling", 0.15f)
         /** How much better a typed word has to fit the sentence to be kept although a correction is ready. */
-        /** How many of the first suggestions the typing model reads the keys against. */
-        private const val KEYS_RANKED_SUGGESTIONS = 8
-        /** How much likelier (in log probability) another word has to be than a typed word that is a word itself. */
-        private val KEYS_REPLACE_WORD_MARGIN get() = tuning("keys_replace_word_margin", 2.5f)
-        /** The same for typed letters that are no word, when the dictionary does not want to correct them. */
-        private val KEYS_REPLACE_MARGIN get() = tuning("keys_replace_margin", 1.5f)
-        /** ... and how sure the model has to be of its word then (log probability). */
-        private val KEYS_SURE get() = tuning("keys_sure", -1.2f)
-        /** A correction the dictionary wants happens unless the model finds what was typed likelier by this much. */
-        private val KEYS_KEEP_MARGIN get() = tuning("keys_keep_margin", -2.0f)
+        /** How much likelier (sentence and taps together, log probability) another word has to be than a typed word. */
+        private val TAPS_WORD_MARGIN get() = tuning("taps_word_margin", 4.5f)
+        /** The same for typed letters that are no word, when the dictionary would leave them. */
+        private val TAPS_UNKNOWN_MARGIN get() = tuning("taps_unknown_margin", 5f)
+        // These numbers were chosen with scripts/dev/taps-replay.py on logged benchmark decisions: the best on
+        // sloppy sentences among the settings that changed no cleanly tapped rare word and no more of the rare
+        // words tapped a little off than the dictionary alone does.
+        /** How tightly taps are taken to land around the middle of a key: 1 / (2 * s * s) for a spread of s = 0.35 key widths. */
+        private val TAPS_SHARPNESS get() = tuning("taps_sharpness", 4f)
+        /** The price of a skipped, doubled or swapped letter: about one in four hundred letters. */
+        private val TAPS_SLIP get() = tuning("taps_slip", 6f)
+        /** No word is taken to fit the sentence worse than this: the model's odds for very rare words are not that exact. */
+        private val TAPS_SENTENCE_FLOOR get() = tuning("taps_sentence_floor", -16f)
+        /** How many of the first suggestions are weighed by sentence and taps. */
+        private const val TAPS_RANKED_SUGGESTIONS = 8
         private val SENTENCE_TYPED_FLOOR get() = tuning("sentence_typed_floor", -15f)
         private val SENTENCE_KEEP_MARGIN get() = tuning("sentence_keep_margin", 4f)
 

@@ -1,54 +1,45 @@
 // SPDX-License-Identifier: GPL-3.0-only
 package app.caret.latin.lm
 
-import kotlin.math.sqrt
-
-/**
- * How the taps of a word are written for the typing model, the same way training/typing_data.py
- * writes its simulated ones: each tap as the letter of the key whose middle it is nearest to, and a
- * tap near the border to another key as both letters, the nearer first ("oi": on the o, close to the
- * i). So the model can tell a tap in the middle of a key, which means that key, from one that could
- * be either, and a rare word tapped cleanly is not taken for a slip toward a common one.
- */
+/** What the places of the taps of a word say about which word was meant. */
 object TapEvidence {
-    /** Near the border: the next key's middle is less than this much further away, in key widths. */
-    const val NEAR = 0.4f
-
     /**
-     * The taps at [tapX], [tapY] as the model reads them, one entry per tap.
-     *
-     * @param centers the middle of every letter key (a to z) of the keyboard
-     * @param keyWidth the width of a letter key, in the units of the taps and centers
-     * @param typed the letters the taps came out as, when known
+     * How well the taps fit [word], as a log probability up to a constant: each tap is taken to be
+     * aimed at a letter of the word and to land around the middle of its key (a bell curve, [sharpness]
+     * being one over twice its squared spread in key widths), and now and then a letter is skipped,
+     * tapped twice or swapped with the next, each of which costs [slip]. The best way of lining the taps
+     * up with the letters counts. Letters that are no key (an apostrophe) cost nothing and need no tap.
      */
-    fun written(
-        tapX: IntArray, tapY: IntArray, centers: Map<Char, Pair<Float, Float>>, keyWidth: Float, typed: String? = null,
-    ): List<String> {
-        if (keyWidth <= 0f || centers.size < 2) return emptyList()
-        return tapX.indices.map { i ->
-            var first = ' '
-            var second = ' '
-            var firstDistance = Float.MAX_VALUE
-            var secondDistance = Float.MAX_VALUE
-            for ((letter, center) in centers) {
-                val dx = (tapX[i] - center.first) / keyWidth
-                val dy = (tapY[i] - center.second) / keyWidth
-                val distance = sqrt(dx * dx + dy * dy)
-                if (distance < firstDistance) {
-                    second = first
-                    secondDistance = firstDistance
-                    first = letter
-                    firstDistance = distance
-                } else if (distance < secondDistance) {
-                    second = letter
-                    secondDistance = distance
-                }
-            }
-            // The keyboard may have taken a tap near an edge for a likelier neighbor already (LikelyKeys):
-            // then that letter is what was typed, with the key the tap was on as the other reading.
-            val letter = typed?.getOrNull(i)?.lowercaseChar()
-            if (letter != null && letter != first && letter in centers) "$letter$first"
-            else if (secondDistance - firstDistance < NEAR) "$first$second" else "$first"
+    fun fit(
+        word: String, tapX: IntArray, tapY: IntArray, centers: Map<Char, Pair<Float, Float>>,
+        keyWidth: Float, sharpness: Float, slip: Float,
+    ): Float {
+        val letters = word.lowercase().filter { it in centers }
+        val taps = tapX.size
+        if (keyWidth <= 0f) return 0f
+        // off[i][j]: what it costs to take tap j for letter i, never more than two slips
+        fun off(i: Int, j: Int): Float {
+            val center = centers.getValue(letters[i])
+            val dx = (tapX[j] - center.first) / keyWidth
+            val dy = (tapY[j] - center.second) / keyWidth
+            return minOf(sharpness * (dx * dx + dy * dy), 2 * slip)
         }
+        var twoBack = FloatArray(taps + 1)
+        var previous = FloatArray(taps + 1) { -it * slip } // no letters yet: every tap is one too many
+        for (i in 1..letters.length) {
+            val row = FloatArray(taps + 1)
+            row[0] = -i * slip // no taps yet: every letter was skipped
+            for (j in 1..taps) {
+                var best = previous[j - 1] - off(i - 1, j - 1)          // this tap is this letter
+                best = maxOf(best, previous[j] - slip)                    // the letter was skipped
+                best = maxOf(best, row[j - 1] - slip)                     // a tap too many
+                if (i > 1 && j > 1)                                       // two letters in the wrong order
+                    best = maxOf(best, twoBack[j - 2] - slip - off(i - 1, j - 2) - off(i - 2, j - 1))
+                row[j] = best
+            }
+            twoBack = previous
+            previous = row
+        }
+        return previous[taps]
     }
 }

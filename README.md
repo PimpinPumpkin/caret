@@ -50,7 +50,11 @@ release build as `app.caret.debug`.
 - `scripts/build-lm.sh` builds the typing model library (`lm/native`, on llama.cpp) into the app;
   `training/` holds the code that trains the model and `training/export.sh` writes the GGUF file
   the settings import (Text correction, Advanced, Typing model).
-- `scripts/typing-benchmark.py` measures how sloppy taps come out.
+- `scripts/typing-benchmark.py` measures how sloppy taps come out; `scripts/dev/typing-benchmark-3.sh` runs it
+  from a keyboard that has learned nothing, on three sets of taps and on rare words, and
+  `scripts/dev/taps-replay.py` tries other autocorrect settings on the decisions a debug build logged.
+- The app ships with the typing model when `lm/models/caret-typing.gguf` exists at build time
+  (`scripts/build-lm.sh` copies it into the assets); without it, one can be imported in the settings.
 
 [FORK_PLAN.md](FORK_PLAN.md) holds the plan and status. [docs/UPSTREAM.md](docs/UPSTREAM.md)
 records which HeliBoard pull requests and issues were taken, and why others were not.

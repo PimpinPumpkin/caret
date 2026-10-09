@@ -26,9 +26,6 @@ object TypingModel {
     private const val THREADS = 2
     private const val BUNDLED_DIR = "typing_model"
     private const val BUNDLED_NAME = "model.gguf"
-    private const val MAX_TYPED_KEYS = 24
-    /** ln 0.2: a model taught to read keys gives "the" for the keys t h e far more than this. */
-    private const val TYPING_PROBE_LOG_PROBABILITY = -1.6f
 
     private var appContext: Context? = null
     private var handle = 0L
@@ -104,12 +101,9 @@ object TypingModel {
             synchronized(this) {
                 loading = false
                 // removed or replaced while loading
-                if (handle == 0L && isInstalled(context) == imported) {
-                    handle = loaded
-                    readsTyping = loaded != 0L && probeTyping(loaded)
-                } else if (loaded != 0L) nativeFree(loaded)
+                if (handle == 0L && isInstalled(context) == imported) handle = loaded else if (loaded != 0L) nativeFree(loaded)
             }
-            Log.i(TAG, "typing model ${if (loaded != 0L) "loaded" else "not loaded"} in ${System.currentTimeMillis() - start} ms, reads typing: $readsTyping")
+            Log.i(TAG, "typing model ${if (loaded != 0L) "loaded" else "not loaded"} in ${System.currentTimeMillis() - start} ms")
         }
     }
 
@@ -117,7 +111,6 @@ object TypingModel {
     private fun unload() {
         if (handle != 0L) nativeFree(handle)
         handle = 0L
-        readsTyping = false
     }
 
     /**
@@ -137,45 +130,6 @@ object TypingModel {
             null
         }
     }
-
-    /**
-     * Whether the loaded model was taught to read typed keys (training/typing_data.py): after the text
-     * it takes the keys that were hit between two bars and says which word was meant by them. A model
-     * that only knows text has no idea what follows such a line; one that was taught is sure of an easy one.
-     */
-    @get:Synchronized
-    var readsTyping = false
-        private set
-
-    private fun probeTyping(model: Long): Boolean = try {
-        val scores = nativeScore(model, typingPrompt("see you at", listOf("t", "h", "e")), arrayOf("the"))
-        scores != null && scores.size == 1 && scores[0] > TYPING_PROBE_LOG_PROBABILITY
-    } catch (e: Throwable) {
-        false
-    }
-
-    /**
-     * The log probability that each of [words] was meant by the taps written as [keys] (see
-     * [TapEvidence.written]) after [textBefore]. Null when no model that reads typing is loaded.
-     */
-    @Synchronized
-    fun scoreTyped(textBefore: String?, keys: List<String>, words: List<String>): FloatArray? {
-        if (handle == 0L || !readsTyping || words.isEmpty()) return null
-        if (keys.isEmpty() || keys.size > MAX_TYPED_KEYS || keys.any { key -> key.isEmpty() || key.any { it !in 'a'..'z' } }) return null
-        return try {
-            val start = System.nanoTime()
-            val scores = nativeScore(handle, typingPrompt(context(textBefore), keys), words.toTypedArray())?.takeIf { it.size == words.size }
-            if (BuildConfig.DEBUG) Log.d(TAG, "read ${keys.size} keys for ${words.size} words in ${(System.nanoTime() - start) / 1000} us")
-            scores
-        } catch (e: Throwable) {
-            Log.w(TAG, "reading typed keys failed", e)
-            null
-        }
-    }
-
-    /** The line the model was taught on: the text, then the keys between bars, and the word meant comes next. */
-    fun typingPrompt(context: String, keys: List<String>) =
-        (if (context.isEmpty()) "" else "$context ") + "| " + keys.joinToString(" ") + " |"
 
     /** The words most likely to come next after [textBefore], best first. Null when no model is loaded. */
     @Synchronized

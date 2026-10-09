@@ -5,6 +5,7 @@
     scripts/typing-benchmark.py [package] --rare --sigma 0    rarer words typed cleanly: what corrections break
     --save-keys FILE / --keys FILE    reuse key positions for a keyboard that does not report them
     --pause SECONDS                   wait after each word, for keyboards that correct in the background
+    --words FILE                      append every word: wanted, tapped, right or not (for scripts/dev/taps-replay.py)
 
 Focus a text field with the keyboard showing first (a messaging app works; a search field gets no
 corrections). Every letter is tapped at its key center plus random noise, sigma times the key size,
@@ -112,9 +113,33 @@ def keys(package):
         # the bottom row, as Caret's does.
         offset = screen - max(b[3] for b in found.values()) - 8
         found = {k: (a, b + offset, c, d + offset) for k, (a, b, c, d) in found.items()}
+    found = drawn_keys(found)
     if found and found.get(" ", (0, 0, 0, 0))[1] < screen * 0.75:
         sys.exit("the key positions do not look like the bottom of the screen: stopped before tapping")
     return found
+
+
+def drawn_keys(found):
+    """The letter keys as they are drawn, for a QWERTY layout.
+
+    What a keyboard reports is the touch area of a key, and at the edges of the keyboard that reaches
+    further than the key that is drawn: the top row's up to the suggestions, the first and last key of a
+    row out to the side. A person aims at the middle of what is drawn. Keys are evenly spaced, so the
+    middles follow from the keys that are not at an edge.
+    """
+    rows = ["qwertyuiop", "asdfghjkl", "zxcvbnm"]
+    if any(c not in found for row in rows for c in row):
+        return found
+    pitch = (center(found["o"])[0] - center(found["w"])[0]) / 7
+    middle, lower = center(found["s"])[1], center(found["x"])[1]
+    row_pitch = lower - middle
+    out = dict(found)
+    for row, cy in zip(rows, (middle - row_pitch, middle, lower)):
+        first = center(found[row[1]])[0] - pitch
+        for i, c in enumerate(row):
+            cx = first + i * pitch
+            out[c] = (cx - pitch / 2, cy - row_pitch / 2, cx + pitch / 2, cy + row_pitch / 2)
+    return out
 
 
 def center(box):
@@ -172,6 +197,8 @@ def main():
     rng = random.Random(int(args[args.index("--seed") + 1]) if "--seed" in args else 7)
     words = right = clean = 0
     misses = []
+    # --words FILE: every word as wanted, as tapped, and whether it came out right, for replaying decisions
+    words_file = open(args[args.index("--words") + 1], "a") if "--words" in args else None
     for number, sentence in enumerate(sentences[:count]):
         # a stray tap can leave the text field (send a message, start a call): stop rather than tap on
         if 'mInputShown=true' not in sh("dumpsys input_method"):
@@ -213,6 +240,8 @@ def main():
             clean += tapped[n] == w
             if n not in matched:
                 misses.append(f"{w} (tapped {tapped[n]})")
+            if words_file:
+                words_file.write(f"{w}\t{tapped[n]}\t{int(n in matched)}\n")
         if len(got) != len(want):
             misses.append(f"  (came out as: {' '.join(got)})")
     print(f"{package}: words right {100 * right / words:.1f}% of {words}, taps on the right key {100 * clean / words:.1f}%")
