@@ -125,7 +125,7 @@
     <!-- Option to override app flag to not show suggestions -->
     <string name="prefs_always_show_suggestions">Always show suggestions</string>
     <!-- Description for override app flag to not show suggestions -->
-    <string name="prefs_always_show_suggestions_summary">Ignore other apps’ request to disable suggestions (may cause issues)</string>
+    <string name="prefs_always_show_suggestions_summary">Also where an app asks for none. Autocorrect stays off there, and password fields never get suggestions.</string>
     <!-- Option to not override the above flags for InputType.WEB_EDIT_TEXT -->
     <string name="prefs_always_show_suggestions_except_web_text">Don’t always show suggestions for web edit fields</string>
     <!-- Description for prefs_always_show_suggestions_except_web_text -->

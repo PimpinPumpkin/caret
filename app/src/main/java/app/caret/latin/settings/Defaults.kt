@@ -70,7 +70,9 @@ object Defaults {
     const val PREF_AUTOCORRECT_CAPITALIZED_SUGGESTION = true
     const val PREF_CENTER_SUGGESTION_TEXT_TO_ENTER = false
     const val PREF_SHOW_SUGGESTIONS = true
-    const val PREF_ALWAYS_SHOW_SUGGESTIONS = false
+    // Caret: on. Many apps ask for no suggestions on fields where words are typed all the same; autocorrect
+    // stays off there, and passwords never get suggestions whatever this says.
+    const val PREF_ALWAYS_SHOW_SUGGESTIONS = true
     const val PREF_ALWAYS_SHOW_SUGGESTIONS_EXCEPT_WEB_TEXT = true
     const val PREF_KEY_USE_PERSONALIZED_DICTS = true
     const val PREF_KEY_USE_DOUBLE_SPACE_PERIOD = true

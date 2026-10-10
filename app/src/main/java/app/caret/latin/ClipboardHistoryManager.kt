@@ -61,10 +61,11 @@ class ClipboardHistoryManager(
 
     override fun onPrimaryClipChanged() {
         // Make sure we read clipboard content only if history settings is set
-        if (latinIME.settings.current.clipboardHistoryEnabled) {
-            fetchPrimaryClip()
-            dontShowCurrentSuggestion = false
-        }
+        if (latinIME.settings.current.clipboardHistoryEnabled) fetchPrimaryClip()
+        // Caret: something new was copied, so it is offered again, also with the history switched off
+        // (the suggestion reads the clipboard itself; it stayed away for good after one paste then)
+        dontShowCurrentSuggestion = false
+        pastedInto = null
     }
 
     // todo for later
@@ -173,10 +174,14 @@ class ClipboardHistoryManager(
         clipboardDao?.listener = listener
     }
 
-    private fun isClipSensitive(inputType: Int): Boolean {
-        ClipboardManagerCompat.getClipSensitivity(clipboardManager.primaryClip?.description)?.let { return it }
-        return InputTypeUtils.isPasswordInputType(inputType)
-    }
+    // Caret: hidden when the app that copied it says it is sensitive, and always in a password field,
+    // where nothing is shown in the clear (the copying app not saying so used to be taken as "show it")
+    private fun isClipSensitive(inputType: Int): Boolean =
+        ClipboardManagerCompat.getClipSensitivity(clipboardManager.primaryClip?.description) == true
+            || InputTypeUtils.isPasswordInputType(inputType)
+
+    /** The field a suggestion was pasted into: package, id and kind of field. */
+    private fun fieldOf(editorInfo: EditorInfo?) = editorInfo?.let { "${it.packageName}/${it.fieldId}/${it.inputType}" }
 
     fun getClipboardSuggestionView(editorInfo: EditorInfo?, parent: ViewGroup?): View? {
         // maybe no need to create a new view
@@ -186,6 +191,9 @@ class ClipboardHistoryManager(
         // get the content, or return null
         if (!latinIME.settings.current.suggestClipboardContent) return null
         if (dontShowCurrentSuggestion) return null
+        // Caret: pasted once, it is not offered again in the same field, but it is in the next one:
+        // a password and its confirmation, a code in two apps
+        if (pastedInto != null && pastedInto == fieldOf(editorInfo)) return null
         if (parent == null) return null
         val clipData = clipboardManager.primaryClip ?: return null
         if (clipData.itemCount == 0) return null
@@ -216,7 +224,7 @@ class ClipboardHistoryManager(
             }
         }
         val onClickListener = View.OnClickListener {
-            dontShowCurrentSuggestion = true
+            pastedInto = fieldOf(editorInfo)
             if (hasText) latinIME.onTextInput(content.toString())
             else latinIME.onEvent(Event.createSoftwareKeypressEvent(KeyCode.CLIPBOARD_PASTE, 0,
                 Constants.NOT_A_COORDINATE, Constants.NOT_A_COORDINATE, false))
@@ -270,8 +278,10 @@ class ClipboardHistoryManager(
 
         // avoid showing the current suggestion because it has been dismissed or pasted
         private var dontShowCurrentSuggestion: Boolean = false
+        private var pastedInto: String? = null
 
-        const val RECENT_TIME_MILLIS = 3 * 60 * 1000L // 3 minutes (for clipboard suggestions)
+        // Caret: 10 minutes, it was 3: finding the other app and the right field takes a while
+        const val RECENT_TIME_MILLIS = 10 * 60 * 1000L // (for clipboard suggestions)
 
         private fun maySaveFromUri(uri: Uri?, context: Context): Boolean {
             val maxSize = context.prefs().getInt(Settings.PREF_CLIPBOARD_FILES_SIZE_LIMIT, Defaults.PREF_CLIPBOARD_FILES_SIZE_LIMIT)
