@@ -1,7 +1,7 @@
 #!/bin/sh
 # End-to-end check on the caret_phone emulator (1080x2340, default keyboard size, English QWERTY):
 # installs the debug build, types by tapping and by swiping, and compares what lands in a text field.
-# Needs the swipe models (scripts/swipe-models.sh install) for the swipe part.
+# The swipe part needs a build with Caret's swipe model in it, or FUTO's models on the device.
 #   ANDROID_SERIAL=emulator-5570 scripts/smoke.sh
 # For the release build: CARET_PKG=app.caret CARET_APK=app/build/outputs/apk/release/Caret_<version>-release.apk
 set -e
@@ -42,12 +42,6 @@ check() { # name expected actual
     if [ "$2" = "$3" ]; then echo "ok   $1: $3"; else echo "FAIL $1: expected '$2', got '$3'"; fail=1; fi
 }
 
-# the emulator sometimes comes back from an older snapshot without the models
-if [ -d swipe/models ] && ! adb shell "run-as $PKG ls files/swipe_models/honorable_sturgeon/model_fp32.pte" >/dev/null 2>&1; then
-    scripts/swipe-models.sh install >/dev/null
-    adb shell ime set $IME >/dev/null
-fi
-
 show_keyboard
 sleep 6 # swipe models load in the background when the keyboard first shows
 
@@ -55,7 +49,9 @@ clear_field
 python3 scripts/keys.py tap caret
 check "tap typing" "caret" "$(field_text | tr 'A-Z' 'a-z')"
 
-if adb shell "run-as $PKG ls files/swipe_models/honorable_sturgeon/model_fp32.pte" >/dev/null 2>&1; then
+# Caret's own swipe model is in the app (scripts/build-swipe.sh); FUTO's models are not needed
+if unzip -l app/build/outputs/apk/debug/*.apk 2>/dev/null | grep -q swipe_models/caret_swipe_encoder/model_fp32.pte \
+    || adb shell "run-as $PKG ls files/swipe_models/honorable_sturgeon/model_fp32.pte" >/dev/null 2>&1; then
     clear_field
     # Straight-line swipes with uneven timing, yet the engine reads them. When the letters were
     # once handed to it in the wrong order, the first four words still passed and the last four

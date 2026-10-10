@@ -1,0 +1,12 @@
+aten::_log_softmax.out
+aten::bitwise_not.out
+aten::expand_copy.out
+aten::full_like.out
+aten::native_group_norm.out
+aten::pow.Tensor_Scalar_out
+aten::scalar_tensor.out
+aten::slice_copy.Tensor_out
+aten::sum.IntList_out
+aten::unsqueeze_copy.out
+aten::where.self_out
+dim_order_ops::_to_dim_order_copy.out

@@ -18,6 +18,7 @@ tools/*.txt
 !scripts/*.sh
 !scripts/dev/*.sh
 app/src/main/assets/typing_model/
+app/src/main/assets/swipe_models/
 !swipe/*.patch
 app/src/main/jniLibs/
 swipe/library/

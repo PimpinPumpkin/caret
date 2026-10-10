@@ -30,7 +30,7 @@ import kotlinx.coroutines.withContext
 fun SwipeModelsPreference(onChanged: () -> Unit) {
     val ctx = LocalContext.current
     val scope = rememberCoroutineScope()
-    var installed by remember { mutableStateOf(FutoSwipe.isInstalled(ctx)) }
+    var installed by remember { mutableStateOf(FutoSwipe.hasFutoModels(ctx)) }
     var progress: Float? by remember { mutableStateOf(null) }
     var error: String? by remember { mutableStateOf(null) }
     var confirmRemove by remember { mutableStateOf(false) }
@@ -51,17 +51,22 @@ fun SwipeModelsPreference(onChanged: () -> Unit) {
             }
             progress = null
             error = failure
-            installed = FutoSwipe.isInstalled(ctx)
+            installed = FutoSwipe.hasFutoModels(ctx)
             onChanged()
         }
     }
 
+    // Caret reads swipes with its own model when the build has it: FUTO's are then not used, and all
+    // that is left to offer is taking them off the phone
+    val own = FutoSwipe.hasOwnEncoder(ctx)
+    if (own && !installed) return
     val picker = filePicker { uri -> run { SwipeModels.importZip(ctx, uri) } }
     val size = Formatter.formatShortFileSize(ctx, SwipeModels.totalSize)
     val currentProgress = progress
     val status = when {
         currentProgress != null -> stringResource(R.string.swipe_models_working, (currentProgress * 100).toInt())
         error != null -> stringResource(R.string.swipe_models_failed, error ?: "")
+        installed && FutoSwipe.hasOwnEncoder(ctx) -> stringResource(R.string.swipe_models_installed_extra)
         installed -> stringResource(R.string.swipe_models_installed)
         else -> stringResource(R.string.swipe_models_download_summary, size)
     }
@@ -69,7 +74,11 @@ fun SwipeModelsPreference(onChanged: () -> Unit) {
     Column {
         CompositionLocalProvider(LocalRowPosition provides upper) {
         Preference(
-            name = stringResource(if (installed) R.string.swipe_models_title_installed else R.string.swipe_models_download),
+            name = stringResource(when {
+                FutoSwipe.hasOwnEncoder(ctx) -> R.string.swipe_models_title_extra
+                installed -> R.string.swipe_models_title_installed
+                else -> R.string.swipe_models_download
+            }),
             description = status,
             onClick = {
                 if (installed) confirmRemove = true
@@ -77,7 +86,7 @@ fun SwipeModelsPreference(onChanged: () -> Unit) {
             },
         )
         }
-        CompositionLocalProvider(LocalRowPosition provides lower) {
+        if (!own) CompositionLocalProvider(LocalRowPosition provides lower) {
         Preference(
             name = stringResource(R.string.swipe_models_import),
             description = stringResource(R.string.swipe_models_import_summary),
@@ -100,7 +109,7 @@ fun SwipeModelsPreference(onChanged: () -> Unit) {
             },
             confirmButtonText = stringResource(R.string.swipe_models_remove),
             title = { Text(stringResource(R.string.swipe_models_title_installed)) },
-            content = { Text(stringResource(R.string.swipe_models_remove_message)) },
+            content = { Text(stringResource(if (own) R.string.swipe_models_remove_message_extra else R.string.swipe_models_remove_message)) },
         )
     }
 }

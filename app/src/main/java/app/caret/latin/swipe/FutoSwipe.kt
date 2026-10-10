@@ -4,6 +4,7 @@ package app.caret.latin.swipe
 import android.content.Context
 import com.android.inputmethod.latin.BinaryDictionary
 import app.caret.keyboard.Keyboard
+import app.caret.latin.BuildConfig
 import app.caret.latin.NgramContext
 import app.caret.latin.define.DebugFlags
 import app.caret.latin.SuggestedWords.SuggestedWordInfo
@@ -31,6 +32,9 @@ object FutoSwipe {
     const val PREF_ENABLED = "futo_swipe_enabled"
     private const val PREF_MODELS_CHANGED = "futo_swipe_models_changed"
     const val ENCODER = "honorable_sturgeon"
+    /** Caret's own encoder (training/swipe_model.py), which comes with the app when the build has it. */
+    const val OWN_ENCODER = "caret_swipe_encoder"
+    private const val OWN_ASSETS = "swipe_models/$OWN_ENCODER"
     const val DECODER_EN_QWERTY = "magic_macaw"
     const val CONTEXT_LM_EN = "hungry_jellyfish"
     private const val MAX_LETTERS = 48 // limit of the library's trie
@@ -105,11 +109,51 @@ object FutoSwipe {
 
     fun modelDir(context: Context) = File(context.filesDir, "swipe_models")
 
-    private fun encoderFile(context: Context) = File(modelDir(context), "$ENCODER/model_fp32.pte")
+    private fun futoEncoderFile(context: Context) = File(modelDir(context), "$ENCODER/model_fp32.pte")
 
-    /** True when the native library is in the app and the encoder model is installed. */
+    /** Whether this build comes with Caret's own encoder (scripts/build-swipe.sh puts it into the assets). */
+    fun hasOwnEncoder(context: Context): Boolean = ownEncoder ?: try {
+        context.assets.list(OWN_ASSETS)?.contains("model_fp32.pte") == true
+    } catch (e: Exception) {
+        false
+    }.also { ownEncoder = it }
+
+    private var ownEncoder: Boolean? = null
+
+    /**
+     * Caret's own encoder as a file, which is what the library loads: copied out of the package once
+     * per version of the app, with the metadata the library reads next to it. Null when the build has none.
+     */
+    @Synchronized
+    private fun ownEncoderFile(context: Context): File? {
+        if (!hasOwnEncoder(context)) return null
+        val directory = File(context.filesDir, "swipe_own/${BuildConfig.VERSION_CODE}/$OWN_ENCODER")
+        val model = File(directory, "model_fp32.pte")
+        if (model.isFile && File(directory, "metadata.json").isFile) return model
+        return try {
+            File(context.filesDir, "swipe_own").deleteRecursively()
+            directory.mkdirs()
+            for (name in listOf("metadata.json", "model_fp32.pte")) {
+                val part = File(directory, "$name.part")
+                context.assets.open("$OWN_ASSETS/$name").use { input -> part.outputStream().use { input.copyTo(it) } }
+                part.renameTo(File(directory, name))
+            }
+            model.takeIf { it.isFile }
+        } catch (e: Exception) {
+            Log.w(TAG, "could not unpack the swipe encoder", e)
+            null
+        }
+    }
+
+    /** Caret's own encoder when the app has it, else FUTO's when that was downloaded. */
+    private fun encoderFile(context: Context): File = ownEncoderFile(context) ?: futoEncoderFile(context)
+
+    /** Whether FUTO's models are on the phone (they are an extra since Caret has its own encoder). */
+    fun hasFutoModels(context: Context): Boolean = futoEncoderFile(context).isFile
+
+    /** True when the native library is in the app and there is an encoder model to run. */
     @JvmStatic
-    fun isInstalled(context: Context): Boolean = hasLibrary() && encoderFile(context).isFile
+    fun isInstalled(context: Context): Boolean = hasLibrary() && (hasOwnEncoder(context) || futoEncoderFile(context).isFile)
 
     /** True when swipe input should go to this engine instead of a gesture typing library. */
     @JvmStatic
@@ -320,10 +364,14 @@ object FutoSwipe {
         val models = modelDir(context)
         val english = locale.language == "en"
         val decoderFile = File(models, "$DECODER_EN_QWERTY/model_fp32.pte")
-        val decoderPath = if (english && swipeLayout.isQwerty && decoderFile.isFile) decoderFile.path else ""
+        // FUTO's second model reads what FUTO's encoder puts out, so it only goes with that one
+        val futoEncoder = !hasOwnEncoder(context)
+        val decoderPath = if (futoEncoder && english && swipeLayout.isQwerty && decoderFile.isFile) decoderFile.path else ""
         val lmFile = File(models, "$CONTEXT_LM_EN/context_lm.pte")
         val lmVocab = File(models, "$CONTEXT_LM_EN/vocab.txt")
-        val useLm = english && lmFile.isFile && lmVocab.isFile
+        // nor does FUTO's context model: its weights against the encoder were set for FUTO's, and with
+        // Caret's it made the benchmark worse (90.3% against 91.7% without it)
+        val useLm = futoEncoder && english && lmFile.isFile && lmVocab.isFile
 
         val engine = decoder ?: try {
             SwipeDecoder(encoderFile(context).path)

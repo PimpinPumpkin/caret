@@ -56,12 +56,25 @@ adb shell "rm -rf $DEV && mkdir -p $DEV"
 adb push "$LIB/build-android-$ABI/infer_jsonl" app/src/main/jniLibs/"$ABI"/libc++_shared.so \
     "$DATA/caret-en-US.combined" "$DATA/bench.jsonl" "$DEV/" >/dev/null 2>&1
 adb push "$LAYOUT" "$DEV/layout.json" >/dev/null 2>&1
-adb push swipe/models/honorable_sturgeon swipe/models/magic_macaw swipe/models/hungry_jellyfish "$DEV/" >/dev/null 2>&1
-adb shell "cd $DEV && chmod +x infer_jsonl && LD_LIBRARY_PATH=. ./infer_jsonl \
-    --encoder honorable_sturgeon/model_fp32.pte --decoder magic_macaw/model_fp32.pte \
-    --lm-model hungry_jellyfish/context_lm.pte --lm-vocab hungry_jellyfish/vocab.txt \
-    --vocab caret-en-US.combined --layout layout.json --jsonl bench.jsonl --top-k 4 2>/dev/null" \
+# which models: ENCODER=<folder under swipe/models>, DECODER and LM the same or "none" (both are optional
+# to the library); the default is FUTO's three
+ENCODER=${ENCODER:-honorable_sturgeon}
+DECODER=${DECODER:-magic_macaw}
+LM=${LM:-hungry_jellyfish}
+MODELS="--encoder $ENCODER/model_fp32.pte"
+adb push "swipe/models/$ENCODER" "$DEV/" >/dev/null 2>&1
+if [ "$DECODER" != none ]; then
+    adb push "swipe/models/$DECODER" "$DEV/" >/dev/null 2>&1
+    MODELS="$MODELS --decoder $DECODER/model_fp32.pte"
+fi
+if [ "$LM" != none ]; then
+    adb push "swipe/models/$LM" "$DEV/" >/dev/null 2>&1
+    MODELS="$MODELS --lm-model $LM/context_lm.pte --lm-vocab $LM/vocab.txt"
+fi
+adb shell "cd $DEV && chmod +x infer_jsonl && LD_LIBRARY_PATH=. ./infer_jsonl $MODELS \
+    --vocab caret-en-US.combined --layout layout.json --jsonl bench.jsonl --top-k 4 2>$DEV/errors.txt" \
     | tr -d '\r' > "$DATA/bench-result.txt"
+adb shell "head -5 $DEV/errors.txt" 2>/dev/null | grep -iE "error|fail|missing|not" | head -3 || true
 
 awk -v base="$(cat swipe/benchmark-baseline.txt 2>/dev/null || echo 0)" '
     $1 == "good" { good++ } $1 == "ok" { ok++ } $1 == "bad" { bad++ } $1 == "oov" { oov++ }
@@ -70,7 +83,7 @@ awk -v base="$(cat swipe/benchmark-baseline.txt 2>/dev/null || echo 0)" '
         if (n == 0) { print "no results"; exit 1 }
         top1 = 100 * good / n; top4 = 100 * (good + ok) / n
         printf "swipes %d  top-1 %.1f%%  top-4 %.1f%%  not in dictionary %d\n", n, top1, top4, oov
-        if (ENVIRON["SWIPES_FILE"] != "") exit 0
+        if (ENVIRON["SWIPES_FILE"] != "" || ENVIRON["ENCODER"] != "" || ENVIRON["DECODER"] != "" || ENVIRON["LM"] != "") exit 0
         printf "%.1f\n", top1 > "swipe/data/bench-top1.txt"
         if (top1 < base - 1) { printf "top-1 fell below the baseline of %.1f%%\n", base; exit 1 }
     }' "$DATA/bench-result.txt"

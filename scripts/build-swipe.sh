@@ -21,6 +21,15 @@ if ! grep -q nativeScoreWords "$LIB/jni/swipe_jni.cpp"; then
     git -C "$LIB" apply "$ROOT/swipe/caret.patch"
 fi
 
+# The library is built with only the operators its models use, read from models/*/ops.txt. Caret's own
+# swipe encoder (training/swipe_model.py) needs a few more: its list goes in next to FUTO's.
+mkdir -p "$LIB/models/caret_swipe_encoder"
+if ! cmp -s "$ROOT/swipe/caret-encoder-ops.txt" "$LIB/models/caret_swipe_encoder/ops.built"; then
+    # the list changed: ExecuTorch is only built anew when its library is missing
+    rm -f "$LIB"/third_party/executorch/cmake-out-*/libexecutorch.a
+fi
+cp "$ROOT/swipe/caret-encoder-ops.txt" "$LIB/models/caret_swipe_encoder/ops.txt"
+
 case "$(uname -s)" in Darwin) HOST=darwin-x86_64 ;; *) HOST=linux-x86_64 ;; esac
 for abi in $ABIS; do
     ANDROID_NDK_HOME="$NDK" make -C "$LIB" "android-$abi"
@@ -36,3 +45,12 @@ for abi in $ABIS; do
     cp "$NDK/toolchains/llvm/prebuilt/$HOST/sysroot/usr/lib/$triple/libc++_shared.so" "$out/"
     echo "copied swipe library for $abi"
 done
+cp "$ROOT/swipe/caret-encoder-ops.txt" "$LIB/models/caret_swipe_encoder/ops.built"
+
+# Caret's own encoder ships in the app when it is there (training/swipe_export.py writes it)
+if [ -f "$ROOT/swipe/models/caret_swipe_encoder/model_fp32.pte" ]; then
+    mkdir -p "$ROOT/app/src/main/assets/swipe_models/caret_swipe_encoder"
+    cp "$ROOT/swipe/models/caret_swipe_encoder/model_fp32.pte" "$ROOT/swipe/models/caret_swipe_encoder/metadata.json" \
+        "$ROOT/app/src/main/assets/swipe_models/caret_swipe_encoder/"
+    echo "swipe encoder for the app: $(wc -c < "$ROOT/swipe/models/caret_swipe_encoder/model_fp32.pte") bytes"
+fi

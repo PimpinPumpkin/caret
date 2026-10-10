@@ -130,7 +130,7 @@ is visible to the user. Things that need the user's eyes or a decision are colle
 | 12 | Touch calibration from recorded corrections | |
 | 12b | Likely letters get a larger touch target while typing (as the iPhone keyboard does): only taps near a key's edge move, with a switch | done (0.1.29, `LikelyKeys`): with autocorrect off, words that come out letter for letter went from 57% to 69% on the sloppy taps; cleanly tapped rare words unchanged |
 | 13 | Personal corrections (remember fixes, stop correcting restored words) | done (0.1.21): a fix made twice is applied from then on, a word taken back twice is left alone, taking a learned fix back unlearns it (`PersonalCorrections`) |
-| 14 | Own GPL swipe models on FUTO's MIT dataset | |
+| 14 | Own GPL swipe models on FUTO's MIT dataset | done (0.1.33): one encoder of our own (1.7M parameters, `training/swipe_*.py`) in the app. On 1,936 test swipes: 91.7% top-1 and 95.0% top-4, against FUTO's encoder alone 91.0% / 94.6% and FUTO's three models 92.4% / 95.1%. FUTO's models are no longer downloaded or used. Left: tune the library's scoring weights for our encoder, a context step of our own (FUTO's context model made ours worse: 90.3%) |
 | 15 | Gboard spec: first-run setup, motion | first-run done (voice typing step in 0.1.26), text editing layout and hint weight in 0.1.25; motion left (needs screen recordings) |
 | 16 | 1.0: translations, TalkBack, tablets, public repo, F-Droid | |
 

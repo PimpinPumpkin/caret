@@ -1102,6 +1102,9 @@ New dictionary:
     <string name="swipe_models_download_summary">Not installed. %s from huggingface.co. Swipe typing needs them.</string>
     <string name="swipe_models_title_installed">Swipe typing models</string>
     <string name="swipe_models_installed">Installed. Swipe typing uses FUTO Swipe (FUTO Model Weights License 1.0). Tap to remove.</string>
+    <string name="swipe_models_title_extra">FUTO swipe models</string>
+    <string name="swipe_models_installed_extra">On this phone but no longer used: Caret reads swipes with its own model. Tap to remove them.</string>
+    <string name="swipe_models_remove_message_extra">Remove the FUTO swipe models from this phone? Caret does not use them.</string>
     <string name="swipe_models_working">Getting models: %d%%</string>
     <string name="swipe_models_failed">Could not get the models: %s</string>
     <string name="swipe_models_import">Import swipe typing models</string>

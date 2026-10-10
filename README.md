@@ -79,8 +79,10 @@ Some artwork inherited from HeliBoard is under
 [Creative Commons BY-SA 4.0](LICENSE-CC-BY-SA-4.0). Google Sans Flex is under the
 [SIL Open Font License](licenses/GoogleSansFlex-OFL.txt).
 
-The swipe library is GPL-3.0-or-later. Its models are under the FUTO Model Weights License and
-are not part of this repository or the app package.
+The swipe library is FUTO's, GPL-3.0-or-later. The model that reads the swipes is Caret's own
+(`training/swipe_model.py`, GPL-3.0), trained on FUTO's swipe dataset (MIT) and shipped in the app.
+FUTO's own models (FUTO Model Weights License) are not used, shipped or downloaded; a build without
+Caret's model can still load them from the phone.
 
 The typing model library is GPL-3.0 and runs the model with
 [llama.cpp](https://github.com/ggml-org/llama.cpp), which is under the MIT license.
