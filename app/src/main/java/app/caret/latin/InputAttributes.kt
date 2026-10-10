@@ -109,12 +109,21 @@ class InputAttributes {
         // autocorrect if explicitly wanted, but also for most multi-line input types (like AOSP keyboard)
         // originally, URI and email were always excluded from autocorrect (in Suggest.java), but this is
         //  and unexpected place, and if the input field explicitly requests autocorrect we should follow the flag
+        // Caret: also for fields of one line that do not say (a search bar, a title, a name of a list), as on
+        // Gboard: left out are only fields that ask for no suggestions and the kinds where words are not
+        // meant, addresses of mail and web, passwords, names of people. Web pages mark every field alike, so
+        // there the page has to ask (browsers do, for ordinary text).
+        // A search field is corrected even when it asks for no suggestions: launchers and many apps set that
+        // on their search bars so that nothing is underlined, and a misspelled search finds nothing.
+        val isSearch = ((editorInfo?.imeOptions ?: 0) and EditorInfo.IME_MASK_ACTION) == EditorInfo.IME_ACTION_SEARCH
         inputTypeShouldAutoCorrect = flagAutoCorrect || (
-                flagMultiLine
-                && variation != InputType.TYPE_TEXT_VARIATION_WEB_EDIT_TEXT
+                variation != InputType.TYPE_TEXT_VARIATION_WEB_EDIT_TEXT
                 && variation != InputType.TYPE_TEXT_VARIATION_URI
+                && variation != InputType.TYPE_TEXT_VARIATION_PERSON_NAME
+                && variation != InputType.TYPE_TEXT_VARIATION_VISIBLE_PASSWORD
+                && !isPasswordField
                 && !InputTypeUtils.isEmailVariation(variation)
-                && !flagNoSuggestions
+                && (!flagNoSuggestions || isSearch)
         )
 
         applicationSpecifiedCompletionOn = flagAutoComplete && isFullscreenMode

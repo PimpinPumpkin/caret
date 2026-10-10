@@ -141,7 +141,7 @@
     <!-- Option to enable auto correction for many fields that do not request auto correction -->
     <string name="more_autocorrect">More auto-correction</string>
     <!-- Description for more_autocorrect -->
-    <string name="more_autocorrect_summary">Auto-correct even when not explicitly requested by the input field</string>
+    <string name="more_autocorrect_summary">Also in fields that ask for no suggestions and in fields for mail and web addresses and names</string>
     <!-- Option to change the confidence level of the auto correction -->
     <string name="auto_correction_confidence">Auto-correction confidence</string>
     <!-- Option to enable auto correction for shortcuts (will correct shortcut to the actual word) -->

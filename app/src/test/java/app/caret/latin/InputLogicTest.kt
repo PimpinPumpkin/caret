@@ -858,8 +858,9 @@ class InputLogicTest {
         assertEquals("don't", composingText)
     }
 
-    @Test fun `with suggestions off nothing is composed`() {
-        latinIME.prefs().edit { putBoolean(Settings.PREF_SHOW_SUGGESTIONS, false) }
+    @Test fun `with suggestions and autocorrect off nothing is composed`() {
+        // autocorrect needs the word in the making, and applies to a plain field of one line too
+        latinIME.prefs().edit { putBoolean(Settings.PREF_SHOW_SUGGESTIONS, false).putBoolean(Settings.PREF_AUTO_CORRECTION, false) }
         setText("")
         chainInput("hi there")
         assertEquals("hi there", text)
