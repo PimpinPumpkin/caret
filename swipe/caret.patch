@@ -176,3 +176,18 @@ index e02e532..c705496 100644
  const ScoringParams &SwipeEngine::scoring() const {
      return impl_->scoring;
  }
+diff --git a/targets/infer_jsonl.cpp b/targets/infer_jsonl.cpp
+index f03db4d..de6f9ba 100644
+--- a/targets/infer_jsonl.cpp
++++ b/targets/infer_jsonl.cpp
+@@ -295,6 +295,10 @@ int main(int argc, char* argv[]) {
+                 std::cout << "]";
+             }
+             std::cout << "\n";
++            // Caret: every candidate with its score, for trying other ways of ordering them
++            std::cout << "cands " << j["id"].get<int>();
++            for (const auto& word : results) std::cout << " " << normalize_word(word.word) << " " << word.final_score;
++            std::cout << "\n";
+         } catch (const json::parse_error& e) {
+             std::cerr << "Line " << line_num << ": JSON parse error: " << e.what() << "\n";
+         } catch (const std::exception& e) {

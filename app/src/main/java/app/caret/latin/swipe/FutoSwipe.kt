@@ -16,6 +16,7 @@ import app.caret.latin.settings.Settings
 import app.caret.latin.utils.JniUtils
 import app.caret.latin.utils.Log
 import app.caret.latin.utils.prefs
+import app.caret.latin.lm.TypingModel
 import org.futo.ml.inference.SwipeDecoder
 import java.io.File
 import java.util.Locale
@@ -38,6 +39,12 @@ object FutoSwipe {
     const val DECODER_EN_QWERTY = "magic_macaw"
     const val CONTEXT_LM_EN = "hungry_jellyfish"
     private const val MAX_LETTERS = 48 // limit of the library's trie
+    /**
+     * How much the typing model's log probability of a word counts next to the swipe engine's score.
+     * Chosen with scripts/dev/swipe-rerank.py: on 2,916 swipes set aside for this, the first word was
+     * right 92.5% of the time against 90.6% without it, and on the 1,936 test swipes 92.4% against 91.7%.
+     */
+    const val SENTENCE_WEIGHT = 0.3f
     private const val MAX_CONTEXT_WORDS = 16
     private const val CONTEXT_CHARS = 240
     private const val TOP_SCORE = 1_000_000
@@ -213,6 +220,27 @@ object FutoSwipe {
             return emptyList()
         }
         SwipeRecorder.onRecognized(context, swipeLayout, locale, xs, ys, times, size, before, results)
+        val spelled = results.map { surfaceForms[it.word] ?: userSurfaceForms[it.word] ?: it.word }
+        // Caret: the words before the swipe have a say in which candidate comes first, through the typing
+        // model (FUTO's context model did that for FUTO's encoder). Not at the start of a line, where
+        // there is nothing to go by.
+        val fit = if (locale.language == "en" && !textBeforeWord.isNullOrBlank() && hasOwnEncoder(context))
+            TypingModel.scoreWords(textBeforeWord, spelled) else null
+        val order = bySentence(results.map { it.score }, fit)
+        val ranked = order.map { results[it].copy(score = results[it].score + (fit?.get(it)?.times(SENTENCE_WEIGHT) ?: 0f)) }
+        return suggestionsOf(ranked, order.map { spelled[it] }, sourceDict)
+    }
+
+    /**
+     * The order of swipe candidates once how well each fits the sentence ([fit], log probabilities
+     * from the typing model, or null without one) is added to the engine's [scores]: indexes, best first.
+     */
+    fun bySentence(scores: List<Float>, fit: FloatArray?): List<Int> {
+        if (fit == null || fit.size != scores.size) return scores.indices.toList()
+        return scores.indices.sortedByDescending { scores[it] + SENTENCE_WEIGHT * fit[it] }
+    }
+
+    private fun suggestionsOf(results: List<SwipeDecoder.Result>, spelled: List<String>, sourceDict: Dictionary): List<SuggestedWordInfo> {
         // Scores keep the engine's gaps. Suggest prefers a candidate that was typed before in this
         // context when it is within 7% of the best score, so a clearly worse candidate must also
         // be clearly lower here, or one bad swipe keeps coming back.
@@ -221,7 +249,7 @@ object FutoSwipe {
         results.forEachIndexed { index, result ->
             val gap = ((best - result.score) * SCORE_PER_UNIT).toInt().coerceIn(0, TOP_SCORE - 1000)
             val score = TOP_SCORE - gap - index * 10
-            val word = surfaceForms[result.word] ?: userSurfaceForms[result.word] ?: result.word
+            val word = spelled[index]
             suggestions.add(SuggestedWordInfo(word, "", score, SuggestedWordInfo.KIND_CORRECTION, sourceDict,
                 SuggestedWordInfo.NOT_AN_INDEX, SuggestedWordInfo.NOT_A_CONFIDENCE))
             // other words that are swiped over the same keys ("schon" and "schön"), right behind it

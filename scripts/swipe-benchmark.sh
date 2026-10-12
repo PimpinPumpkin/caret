@@ -71,8 +71,9 @@ if [ "$LM" != none ]; then
     adb push "swipe/models/$LM" "$DEV/" >/dev/null 2>&1
     MODELS="$MODELS --lm-model $LM/context_lm.pte --lm-vocab $LM/vocab.txt"
 fi
-adb shell "cd $DEV && chmod +x infer_jsonl && LD_LIBRARY_PATH=. ./infer_jsonl $MODELS \
-    --vocab caret-en-US.combined --layout layout.json --jsonl bench.jsonl --top-k 4 2>$DEV/errors.txt" \
+# INFER_ARGS passes more options to the library's test tool, such as "--gamma 0.4 --lambda 0.02 --beta 1"
+adb shell "cd $DEV && chmod +x infer_jsonl && LD_LIBRARY_PATH=. ./infer_jsonl $MODELS $INFER_ARGS \
+    --vocab caret-en-US.combined --layout layout.json --jsonl bench.jsonl --top-k ${TOP_K:-4} 2>$DEV/errors.txt" \
     | tr -d '\r' > "$DATA/bench-result.txt"
 adb shell "head -5 $DEV/errors.txt" 2>/dev/null | grep -iE "error|fail|missing|not" | head -3 || true
 
@@ -83,7 +84,7 @@ awk -v base="$(cat swipe/benchmark-baseline.txt 2>/dev/null || echo 0)" '
         if (n == 0) { print "no results"; exit 1 }
         top1 = 100 * good / n; top4 = 100 * (good + ok) / n
         printf "swipes %d  top-1 %.1f%%  top-4 %.1f%%  not in dictionary %d\n", n, top1, top4, oov
-        if (ENVIRON["SWIPES_FILE"] != "" || ENVIRON["ENCODER"] != "" || ENVIRON["DECODER"] != "" || ENVIRON["LM"] != "") exit 0
+        if (ENVIRON["SWIPES_FILE"] != "" || ENVIRON["ENCODER"] != "" || ENVIRON["DECODER"] != "" || ENVIRON["LM"] != "" || ENVIRON["INFER_ARGS"] != "") exit 0
         printf "%.1f\n", top1 > "swipe/data/bench-top1.txt"
         if (top1 < base - 1) { printf "top-1 fell below the baseline of %.1f%%\n", base; exit 1 }
     }' "$DATA/bench-result.txt"
